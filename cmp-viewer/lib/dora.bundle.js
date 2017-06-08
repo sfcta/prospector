@@ -3570,7 +3570,7 @@ function clickedOnSegment(e) {
   if (chart) chart.parentNode.removeChild(chart);
 
   // fetch the CMP details
-  var finalUrl = api_server + 'auto_speeds?cmp_id=eq.' + cmp_id;
+  var finalUrl = api_server + 'cmp_auto_speeds?cmp_id=eq.' + cmp_id;
   fetch(finalUrl).then(function (resp) {
     return resp.json();
   }).then(function (jsonData) {
@@ -3594,7 +3594,7 @@ function clickedOnSegment(e) {
 var esc = encodeURIComponent;
 
 function queryServer() {
-  var segmentUrl = api_server + 'json_segments?';
+  var segmentUrl = api_server + 'cmp_segments?';
 
   // convert option list into a url parameter string
   var params = [];
@@ -3630,7 +3630,7 @@ function colorByLOS(personJson, year) {
     period: 'eq.' + chosenPeriod,
     select: 'cmp_id,name_HCM1985,from,to,dir,avg_speed,year,period,los_HCM1985'
   };
-  var speedUrl = api_server + 'auto_speeds?';
+  var speedUrl = api_server + 'cmp_auto_speeds?';
   var params = [];
   for (var key in options) {
     params.push(esc(key) + '=' + esc(options[key]));
