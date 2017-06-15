@@ -258,3 +258,10 @@ a.sidebar-nav-item:focus {
 .theme-base-01 .related-posts li a:hover {
   color: #6666ff;
 }
+
+.dataset-thumbnail {
+  background:#eee;
+  width: 250px;
+  padding:5px;
+  margin: 20px 0px;
+}

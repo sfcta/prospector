@@ -3381,7 +3381,7 @@ var _vueSliderComponent2 = _interopRequireDefault(_vueSliderComponent);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var theme = "dark";
+var theme = "light";
 
 var api_server = 'http://api.sfcta.org/api/';
 
