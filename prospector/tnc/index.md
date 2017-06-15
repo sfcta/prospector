@@ -1,0 +1,121 @@
+---
+layout: page
+title: Transportation Network Companies
+thumbnail: scrnshot.png
+---
+<div id="container">
+
+  <div id="panel">
+      <div id="header">
+        <hr/>
+        <h3 class="apptitle">TNCs TODAY &raquo; DATA EXPLORER</h3>
+          <div id="helpbar">
+            <button class="ui mini right labeled icon violet button"
+                    v-on:click="clickToggleHelp">
+                    <i class="icon info"></i>
+                    What is this?
+            </button>
+            &nbsp;
+            <button class="ui mini right labeled icon violet button"
+                    v-on:click="this.window.open('http://www.sfcta.org/tncstoday','_blank')">
+                    <i class="icon right arrow"></i>
+                    Learn More
+            </button>
+            <hr/>
+          </div>
+        <div id="picker">
+            <h5>CHOOSE DIRECTION:</h5>
+            <button v-on:click="pickPickup" v-bind:class="{ active: isPickupActive }"
+                     class="mini ui inverted blue icon button">
+                     <i class="icon arrow circle up"></i>
+                     Pick-ups</button>
+            <button v-on:click="pickDropoff" v-bind:class="{ active: isDropoffActive }"
+                     class="mini ui inverted red icon button">
+                     <i class="icon arrow circle down"></i>
+                     Drop-offs</button>
+            <br/>
+            <h5 style="margin-top:10px">CHOOSE DAY OF WEEK:</h5>
+            <button v-for="(item, index) in days"
+                    v-on:click="clickDay(index)"
+                    class="mini ui inverted button"
+                    v-bind:class="{ active: index==day, green: index <5, yellow: index >= 5 }">
+                    {{item}}
+            </button>
+        </div>
+      </div>
+
+      <div id="stats-panel" style="position:relative">
+        <hr/>
+        <h5>SUMMARY STATISTICS:</h5>
+        <h1>{{details1}}<br/>
+            {{details2}}</h1>
+        <h5 style="margin-left:12px">
+        TIME OF DAY:
+        </h5>
+        <div id="btn-all-day">
+        <transition name="fade">
+            <button v-on:click="clickAllDay"
+                    v-if="!isAllDay"
+                    class="mini ui basic compact button"
+                    v-bind:class="day < 5 ? 'green' : 'yellow'">
+                    &laquo; Back to Daily
+            </button>
+        </transition>
+        </div>
+        <div id="daily-chart">
+          <div id="stats-loader" class="ui text loader" v-bind:class="{active: nowMoloading}">Thinking&hellip;</div>
+        </div>
+        <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
+      </div>
+
+      <div class="logo">
+        <hr/>
+        <table id="table-logo"><tr>
+          <td class="td-logo"><h4 class="agency"><b><a target="_blank" href="http://www.sfcta.org/tncstoday">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4></td>
+          <td><a class="agency-link" target="_blank" href="http://www.sfcta.org/tncstoday"><img src="/images/sfcta-logo.png" width=60 height=60 ></img></a></td></tr>
+        </table>
+      </div>
+    </div>
+    <div id="sfmap">
+    </div>
+  <div id="helpbox" v-show="showHelp" class="ui segment">
+        <h2 style="margin-bottom:0px;">
+        Uber and Lyft in San Francisco</h2>
+        <hr style="margin-bottom:5px"/>
+        This is an estimate of the number of TNC (Uber and Lyft) pickups and dropoffs
+        in San Francisco&mdash;by location and by time of day.
+        <ul>
+        <li>Uber and Lyft trips are combined.</li>
+        <li>Only rides that are <b><i>entirely within the city limits</i></b> are counted.
+        <li>Data is averaged from several weeks in <b><i>fall 2016</i></b>.</li>
+        <li>Darker colors &amp; taller bars mean more trips to/from an area.</li>
+        <li>The map is divided into "Transportation Analysis Zones" (TAZs), which are individual blocks
+        in the downtown core and groups of blocks farther out.</li>
+        </ul>
+        <h2 style="margin-top:10px; margin-bottom:0px;">
+        How to use this map</h2>
+        <hr style="margin-bottom:5px"/>
+        Click any block to see the pickups and dropoffs for that area.
+        You can pick different days of the week and times of day on the right panel.
+        <table><tr>
+          <td class="help"><img height=96 src="/images/mouse-left.png"></td>
+          <td class="help"><img height=96 src="/images/mouse-wheel.png"></td>
+          <td class="help"><img height=96 src="/images/mouse-right.png"></td>
+        </tr><tr>
+          <td width="33%" class="help">Left-click and drag to pan the map</td>
+          <td width="33%"class="help">Mouse wheel changes zoom</td>
+          <td width="33%"class="help">Switch to 3D mode! Right-click and drag to change 3D view.</td>
+        </tr></table>
+
+        <div style="margin-top:20px;">
+          <button v-on:click="clickToggleHelp" class="small ui right floated violet button">OK, GOT IT</button>
+          &nbsp;&nbsp;
+          <button v-on:click="this.window.open('http://www.sfcta.org/tncstoday','_blank')"
+                  class="small ui right floated basic violet button"
+                  style="margin-right:5px">
+                  Learn more about TNCs&hellip;
+          </button>
+        </div>
+  </div>
+</div>
+<!--<script type="application/javascript" src="lib/main.bundle.js"></script>-->

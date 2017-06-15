@@ -12,7 +12,8 @@ You've found the SFCTA "Prospector" data visualization website. Pick a dataset t
 <div class="posts">
   <!-- Counter so we have rows of  three thumbnails -->
   {% assign i = -1 %}
-  {% for node in site.pages %}
+  {% assign items = site.pages | sort: 'title' %}
+  {% for node in items %}
     {% if node.title != null %}
       {% if node.layout == "page" %}
 
@@ -21,7 +22,7 @@ You've found the SFCTA "Prospector" data visualization website. Pick a dataset t
         {% if i == 0 %}<div class="posts-row">{% endif %}
               <div class="dataset-thumbnail">
                 <a href="{{ node.url }}">
-                  {% if node.thumbnail %}<img class="thumbnail-image" src="{{node.folder}}/{{node.thumbnail}}" />
+                  {% if node.thumbnail %}<img class="thumbnail-image" src="{{node.url}}{{node.thumbnail}}" />
                   {% else %} <img class="thumbnail-image" src="{{site.baseurl}}public/Wat.png" />{% endif %}
                   <h5 class="thumbnail-title">{{ node.title }}</h5>
                 </a>
@@ -31,7 +32,6 @@ You've found the SFCTA "Prospector" data visualization website. Pick a dataset t
     {% endif %}
   {% endfor %}
   {% if i != 2 %}</div>{% endif %} <!-- close last row -->
-
 </div>
 
 ### ABOUT THIS SITE
