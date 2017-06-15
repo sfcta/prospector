@@ -259,9 +259,31 @@ a.sidebar-nav-item:focus {
   color: #6666ff;
 }
 
+.thumbnail-image {
+  margin-bottom:5px;
+}
+
+.thumbnail-title {
+  margin-top:0px;
+  padding-bottom:10px;
+}
+
 .dataset-thumbnail {
   background:#eee;
   width: 250px;
   padding:5px;
   margin: 20px 0px;
+  border-radius: 5px;
+}
+
+.dataset-thumbnail:hover {
+  background-color:#f0f0ff;
+  opacity:0.9;
+  box-shadow: 5px 5px 10px rgba(0,0,0, 0.2);
+}
+
+.dataset-thumbnail:active {
+  background-color:#8af;
+  opacity:0.8;
+  box-shadow: 5px 5px 10px rgba(0,0,0, 0.5);
 }

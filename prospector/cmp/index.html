@@ -11,9 +11,9 @@ thumbnail: "scrnshot.png"
         <div class="dashboard">
           <div id="picker">
             <div class="column1">
-              <button v-on:click="pickAM" v-bind:class="{ active: isAMactive }"
+              <button @click="pickAM" v-bind:class="{ active: isAMactive }"
                        class="small ui inverted red button">AM</button>
-              <button v-on:click="pickPM" v-bind:class="{ active: isPMactive }"
+              <button @click="pickPM" v-bind:class="{ active: isPMactive }"
                        class="small ui inverted blue button">PM</button>
             </div>
             <div class="column2">
