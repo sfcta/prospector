@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Transportation Network Companies
-thumbnail: "scrnshot.png"
+title: "Transportation Network Companies"
+thumbnail: scrnshot.png
 folder: tnc
 ---
 

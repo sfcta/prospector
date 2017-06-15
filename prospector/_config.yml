@@ -5,7 +5,7 @@ relative_permalinks: false
 # Setup
 title:            SFCTA Prospector
 tagline:          'so.much.data.'
-description:      'so.much.data.'
+description:      'Data visualization from the<br/>San Francisco County Transportation Authority.'
 url:              http://prospector.sfcta.org
 baseurl:          /
 
@@ -13,12 +13,10 @@ author:
   name:           'SFCTA Staff'
   url:            http://www.sfcta.org
 
-paginate:         5
-
 # Custom vars
 version:          0.0.1
 
 github:
   repo:           https://github.com/sfcta/prospector
 
-gems: [jekyll-paginate]
+gems: []
