@@ -5,7 +5,7 @@ relative_permalinks: false
 # Setup
 title:            SFCTA Prospector
 tagline:          'so.much.data.'
-description:      'Data visualization from the<br/>San Francisco County Transportation Authority.'
+description:      '"Just add data."'
 url:              http://prospector.sfcta.org
 baseurl:          /
 

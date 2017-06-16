@@ -3,7 +3,7 @@ layout: default
 title: Home
 ---
 
-# Welcome to Prospector
+### &raquo; WELCOME TO PROSPECTOR.
 
 You've found the SFCTA "Prospector" data visualization website. Pick a dataset to explore from those below. More to come!
 
