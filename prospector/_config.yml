@@ -1,22 +1,25 @@
-# Permalinks
-permalink:        pretty
-relative_permalinks: false
-
-# Setup
+# --- Setup
 title:            SFCTA Prospector
 tagline:          'so.much.data.'
 description:      '"Just add data."'
 url:              http://prospector.sfcta.org
 baseurl:          /
+version:          0.0.1
 
 author:
   name:           'SFCTA Staff'
   url:            http://www.sfcta.org
 
-# Custom vars
-version:          0.0.1
+# --- Permalinks
+permalink:        pretty
+relative_permalinks: false
 
 github:
   repo:           https://github.com/sfcta/prospector
 
+# --- Build settings
+source: src
+destination: build
+exclude: ['node_modules']
 gems: []
+

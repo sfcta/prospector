@@ -98,9 +98,9 @@ thumbnail: scrnshot.png
         Click any block to see the pickups and dropoffs for that area.
         You can pick different days of the week and times of day on the right panel.
         <table><tr>
-          <td class="help"><img height=96 src="/images/mouse-left.png"></td>
-          <td class="help"><img height=96 src="/images/mouse-wheel.png"></td>
-          <td class="help"><img height=96 src="/images/mouse-right.png"></td>
+          <td class="help"><img height=96 src="images/mouse-left.png"></td>
+          <td class="help"><img height=96 src="images/mouse-wheel.png"></td>
+          <td class="help"><img height=96 src="images/mouse-right.png"></td>
         </tr><tr>
           <td width="33%" class="help">Left-click and drag to pan the map</td>
           <td width="33%"class="help">Mouse wheel changes zoom</td>
@@ -118,4 +118,4 @@ thumbnail: scrnshot.png
         </div>
   </div>
 </div>
-<!--<script type="application/javascript" src="lib/main.bundle.js"></script>-->
+<script type="application/javascript" src="/bundles/tnc.js"></script>

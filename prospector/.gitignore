@@ -1,8 +1,7 @@
 # Ignore docs files
 _gh_pages
-_site
+build
 .ruby-version
-Gemfile.lock
 
 # Numerous always-ignore extensions
 *.diff
@@ -12,7 +11,6 @@ Gemfile.lock
 *.rej
 *.swo
 *.swp
-*.zip
 *.vi
 *~
 
@@ -40,3 +38,5 @@ validation-report.json
 
 # Folders to ignore
 node_modules
+bundles
+

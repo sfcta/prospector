@@ -5,7 +5,7 @@ import 'babel-polyfill';
 import 'isomorphic-fetch';
 import vueSlider from 'vue-slider-component';
 
-let theme = "dark";
+let theme = "light";
 
 let api_server = 'http://api.sfcta.org/api/';
 
@@ -72,7 +72,7 @@ function styleByLosColor(segment) {
   let cmp_id = segment.segnum2013;
   let los = segmentLos[cmp_id];
   let color = losColor[los];
-  if (!color) color = "#446";
+  if (!color) color = "#ccc";
   return {color: color, weight: 4, opacity: 1.0};
 }
 
