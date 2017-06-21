@@ -320,7 +320,7 @@ let isCurrentLegendDaily = true;
 // See https://github.com/vuejs/vue/issues/1646
 function addLegend() {
   isCurrentLegendDaily = app.isAllDay;
-  let imgSrc = (isCurrentLegendDaily ? '/images/legend-daily.png' : '/images/legend-hourly.png');
+  let imgSrc = (isCurrentLegendDaily ? 'images/legend-daily.png' : 'images/legend-hourly.png');
 
   let legend = document.createElement('img');
   legend.setAttribute('id', 'legend');
@@ -869,6 +869,7 @@ let cookieShowHelp = Cookies.get('showHelp');
 
 let app = new Vue({
   el: '#panel',
+  delimiters: ['${', '}'],
   data: {
     isPickupActive: true,
     isDropoffActive: false,

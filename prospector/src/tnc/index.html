@@ -2,6 +2,7 @@
 layout: page
 title: Transportation Network Companies
 thumbnail: scrnshot.png
+css: main.css
 ---
 <div id="container">
 
@@ -39,7 +40,7 @@ thumbnail: scrnshot.png
                     v-on:click="clickDay(index)"
                     class="mini ui inverted button"
                     v-bind:class="{ active: index==day, green: index <5, yellow: index >= 5 }">
-                    {{item}}
+                    ${item}
             </button>
         </div>
       </div>
@@ -47,11 +48,15 @@ thumbnail: scrnshot.png
       <div id="stats-panel" style="position:relative">
         <hr/>
         <h5>SUMMARY STATISTICS:</h5>
-        <h1>{{details1}}<br/>
-            {{details2}}</h1>
+        <h1>${details1}<br/>
+            ${details2}</h1>
         <h5 style="margin-left:12px">
         TIME OF DAY:
         </h5>
+        <div id="daily-chart">
+          <div id="stats-loader" class="ui text loader" v-bind:class="{active: nowMoloading}">Thinking&hellip;</div>
+        </div>
+        <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
         <div id="btn-all-day">
         <transition name="fade">
             <button v-on:click="clickAllDay"
@@ -62,22 +67,11 @@ thumbnail: scrnshot.png
             </button>
         </transition>
         </div>
-        <div id="daily-chart">
-          <div id="stats-loader" class="ui text loader" v-bind:class="{active: nowMoloading}">Thinking&hellip;</div>
-        </div>
-        <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
       </div>
+    </div>
 
-      <div class="logo">
-        <hr/>
-        <table id="table-logo"><tr>
-          <td class="td-logo"><h4 class="agency"><b><a target="_blank" href="http://www.sfcta.org/tncstoday">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4></td>
-          <td><a class="agency-link" target="_blank" href="http://www.sfcta.org/tncstoday"><img src="/images/sfcta-logo.png" width=60 height=60 ></img></a></td></tr>
-        </table>
-      </div>
-    </div>
-    <div id="sfmap">
-    </div>
+  <div id="sfmap"></div>
+
   <div id="helpbox" v-show="showHelp" class="ui segment">
         <h2 style="margin-bottom:0px;">
         Uber and Lyft in San Francisco</h2>

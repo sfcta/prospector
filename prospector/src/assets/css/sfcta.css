@@ -149,14 +149,6 @@ a.sidebar-nav-item:focus {
   }
 }
 
-@media (min-width: 64em) {
-  .content {
-    margin-left: 22rem;
-    margin-right: 4rem;
-  }
-}
-
-
 /*
  * Reverse layout
  *
@@ -335,6 +327,7 @@ h2,h3 {
 
 .lead {
   text-align:center;
+  color:#666;
   font-family: "Oleo Script Swash Caps", cursive;
 }
 
