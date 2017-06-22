@@ -9,7 +9,8 @@
       <p class="lead">{{ site.description }}</p>
     </div>
 
-    <hr/>
+    <br/>
+    <br/>
 
     <nav class="sidebar-nav">
       <a class="sidebar-nav-item{% if page.url == site.baseurl %} active{% endif %}" href="{{ site.baseurl }}">Home</a>
@@ -19,8 +20,6 @@
         `layout: page` in the front-matter. See readme for usage.
       {% endcomment %}
 
-      <br/>
-
       {% assign pages_list = site.pages | sort: 'title' %}
       {% for node in pages_list %}
         {% if node.title != null %}
@@ -29,11 +28,5 @@
           {% endif %}
         {% endif %}
       {% endfor %}
-
-      <br/>
-      <br/>
-<!--
-      <span class="sidebar-nav-item">Site v{{ site.version }}</span>
--->
     </nav>
 </div>
