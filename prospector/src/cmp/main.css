@@ -1,0 +1,34 @@
+
+p {color:#ccc;}
+
+h3 {color: white; padding-top:5px;}
+h4 {color: white; }
+
+#container {
+  height:100%;
+  width:100%;
+}
+
+#panel {
+}
+
+#sfmap {
+  background-color:#eee;
+  height: 700px;
+  width: 100%;
+}
+
+.dashboard { width:100%; height:100%; padding:10px;}
+
+#panel label {
+  color:white;
+}
+
+#sliderpanel {
+  width:300px;
+}
+
+#picker { width:100%; margin-right:20px;}
+
+.column1 {width:60%; float: left; margin-top:20px; margin-bottom:30px;}
+.column2 {width:40%; float: right; }

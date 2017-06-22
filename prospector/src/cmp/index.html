@@ -2,34 +2,33 @@
 layout: page
 title: Congestion Management Program
 thumbnail: scrnshot.png
+css: main.css
 ---
-<body>
-  <div id="container">
 
-    <div id="panel">
-        <div class="dashboard">
-          <div id="picker">
-            <div class="column1">
-              <button @click="pickAM" v-bind:class="{ active: isAMactive }"
-                       class="small ui inverted red button">AM</button>
-              <button @click="pickPM" v-bind:class="{ active: isPMactive }"
-                       class="small ui inverted blue button">PM</button>
-            </div>
-            <div class="column2">
-                <h4>Year:
-                <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
-                </h4>
-            </div>
-          </div>
-          <h3 />
+<h2>Roadway Speeds</h2>
+
+<div id="panel">
+    <div class="dashboard">
+      <div id="picker">
+        <div class="column1">
+          <button @click="pickAM" v-bind:class="{ active: isAMactive }"
+                   class="small ui inverted red button">AM</button>
+          <button @click="pickPM" v-bind:class="{ active: isPMactive }"
+                   class="small ui inverted blue button">PM</button>
         </div>
+        <div class="column2">
+            <h4>Year:
+            <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
+            </h4>
+        </div>
+      </div>
+      <h3 />
     </div>
-    <br/>
+</div>
 
-    <div id="sfmap" style="height:500px">
-    </div>
+<br/>
 
-  </div>
 
-  <script type="application/javascript" src="/bundles/cmp.js"></script>
-</body>
+<div id="sfmap"></div>
+
+<script type="application/javascript" src="/bundles/cmp.js"></script>
