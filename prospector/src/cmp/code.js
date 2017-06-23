@@ -25,10 +25,6 @@ let selectedSegment, popupSegment, hoverColor, popupColor;
 
 let speedCache = {};
 
-var options = {
-  select: 'geometry,segnum2013,cmp_name,cmp_from,cmp_to,cmp_dir,cmp_len',
-};
-
 let dark_styles = { normal  : {"color": "#ff7800", "weight":4,  "opacity": 1.0, },
                     selected: {"color": "#39f",    "weight":10, "opacity": 1.0, },
                     popup   : {"color": "#33f",    "weight":10, "opacity": 1.0, },
@@ -40,6 +36,7 @@ let light_styles = {normal  : {"color": "#3c6", "weight": 4, "opacity": 1.0 },
 };
 
 let losColor = {'A':'#060', 'B':'#9f0', 'C':'#ff3', 'D':'#f90', 'E':'#f60', 'F':'#c00'};
+let missingColor = '#ccc';
 
 let styles = (theme==='dark' ? dark_styles : light_styles);
 
@@ -72,7 +69,7 @@ function styleByLosColor(segment) {
   let cmp_id = segment.segnum2013;
   let los = segmentLos[cmp_id];
   let color = losColor[los];
-  if (!color) color = "#ccc";
+  if (!color) color = missingColor;
   return {color: color, weight: 4, opacity: 1.0};
 }
 
@@ -89,6 +86,7 @@ function hoverOnSegment(e) {
         if (selectedSegment) {
           let cmp_id = selectedSegment.feature.segnum2013;
           let color = losColor[segmentLos[cmp_id]];
+          if (!color) color = missingColor;
           selectedSegment.setStyle({color:color, weight:4, opacity:1.0});
         }
       }
@@ -178,15 +176,11 @@ function clickedOnSegment(e) {
 let esc = encodeURIComponent;
 
 function queryServer() {
-  const segmentUrl = api_server + 'cmp_segments?';
-
-  // convert option list into a url parameter string
-  var params = [];
-  for (let key in options) params.push(esc(key) + '=' + esc(options[key]));
-  let finalUrl = segmentUrl + params.join('&');
+  const url = api_server + 'cmp_segments?' +
+                           'select=geometry,segnum2013,cmp_name,cmp_from,cmp_to,cmp_dir,cmp_len';
 
   // Fetch the segments
-  fetch(finalUrl)
+  fetch(url)
     .then((resp) => resp.json())
     .then(function(jsonData) {
       let personJson = jsonData;
@@ -200,33 +194,32 @@ function queryServer() {
 let segmentLos = {};
 
 function colorByLOS(personJson, year) {
+  let lookup = chosenPeriod + year;
 
   // Don't re-fetch if we already have the color data
-  if (year in speedCache) {
-    segmentLos = speedCache[year];
+  if (lookup in speedCache) {
+    segmentLos = speedCache[lookup];
     segmentLayer.clearLayers();
     addSegmentLayer(personJson);
     return;
   }
 
-  let options = {
-    year: 'eq.'+ year,
-    period: 'eq.' + chosenPeriod,
-    select: 'cmp_id,name_HCM1985,from,to,dir,avg_speed,year,period,los_HCM1985',
-  };
-  const speedUrl = api_server + 'cmp_auto_speeds?';
-  var params = [];
-  for (let key in options) params.push(esc(key) + '=' + esc(options[key]));
-  let finalUrl = speedUrl + params.join('&');
+  let url = api_server + 'cmp_auto_speeds?';
+  let params = 'year=eq.'+year +
+               '&period=eq.'+chosenPeriod +
+               '&select=cmp_id,name_HCM1985,from,to,dir,avg_speed,year,period,los_HCM1985';
+
+  let finalUrl = url + params;
 
   fetch(finalUrl).then((resp) => resp.json()).then(function(data) {
+    console.log(data);
     let losData = {};
     for (let segment in data) {
       let thing = data[segment];
       losData[thing.cmp_id] = thing.los_HCM1985;
     }
     // save it for later
-    speedCache[year] = losData;
+    speedCache[chosenPeriod+year] = losData;
     segmentLos = losData;
 
     // add it to the map
@@ -284,7 +277,6 @@ let timeSlider = {
 // ------
 
 function sliderChanged(thing) {
-  console.log(thing);
   queryServer();
 }
 
