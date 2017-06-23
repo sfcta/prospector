@@ -12,8 +12,8 @@
   "repository": "https://github.com/sfcta/prospector.git",
   "scripts": {
     "packit": "webpack --watch",
-    "cleanbuild": "jekyll build",
-    "prospector": "concurrently \"webpack --watch\" \"jekyll serve --incremental\""
+    "cleanbuild": "bundle exec jekyll build",
+    "prospector": "concurrently \"webpack --watch\" \"bundle exec jekyll serve --incremental\""
   },
   "devDependencies": {
     "babel-cli": "^6.0.0",
