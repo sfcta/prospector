@@ -3,6 +3,7 @@ const path = require('path');
 const sfcta_components = [
      'cmp',
      'tnc',
+     'viz-template',
 ];
 
 module.exports = {
