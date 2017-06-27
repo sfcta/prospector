@@ -23,7 +23,7 @@ You've found the SFCTA "Prospector" data visualization website. Pick a dataset t
               <div class="dataset-thumbnail">
                 <a href="{{ node.url }}">
                   {% if node.thumbnail %}<img class="thumbnail-image" src="{{node.url}}{{node.thumbnail}}" />
-                  {% else %} <img class="thumbnail-image" src="{{site.baseurl}}public/Wat.png" />{% endif %}
+                  {% else %} <img class="thumbnail-image" src="{{site.baseurl}}assets/Wat.png" />{% endif %}
                   <h5 class="thumbnail-title">{{ node.title }}</h5>
                 </a>
               </div>
