@@ -38,6 +38,9 @@ function addCmpSegmentLayer(segments) {
     style: styleByLosColor,
     onEachFeature: function(feature, layer) {
       // add stuff here!
+      layer.on({ mouseover: hoverOnSegment,
+                 click : clickedOnSegment,
+      });
     },
   });
 
@@ -68,12 +71,20 @@ function getCmpSegments() {
   fetch(url).then((resp) => resp.json()).then(function(jsonData) {
 
     // do stuff here!
-    // addCmpSegmentLayer(jsonData);
-    // getCmpData(jsonData, 2015);
+    addCmpSegmentLayer(jsonData);
+    //getCmpData(jsonData, 2015);
   })
   .catch(function(error) {
     console.log("err: "+error);
   });
+}
+
+function hoverOnSegment(e) {
+  console.log("Hover!", e);
+}
+
+function clickedOnSegment(e) {
+  console.log("Click!", e);
 }
 
 
@@ -97,7 +108,6 @@ function getCmpData(json, year) {
     segmentLos = losData;
 
     if (segmentLayer) segmentLayer.clearLayers();
-    addCmpSegmentLayer(personJson);
 
   }).catch(function(error) {
     console.log(error);
@@ -121,34 +131,6 @@ function pickPM(thing) {
   getCmpData();
 }
 
-// SLIDER ----
-let timeSlider = {
-          data: [ 1991, "1992/3", 1995, 1997, 1999, 2001, 2004, 2006, 2007, 2009, 2011, 2013, 2015 ],
-          sliderValue: 2015,
-					width: 'auto',
-					height: 6,
-					direction: 'horizontal',
-					dotSize: 16,
-					eventType: 'auto',
-					disabled: false,
-					show: true,
-					realTime: false,
-					tooltip: 'always',
-					clickable: true,
-					tooltipDir: 'bottom',
-					piecewise: true,
-          piecewiseLabel: false,
-					lazy: false,
-					reverse: false,
-          labelActiveStyle: {  "color": "#fff"},
-          piecewiseStyle: {
-            "backgroundColor": "#888",
-            "visibility": "visible",
-            "width": "14px",
-            "height": "14px"
-          },
-};
-// ------
 
 let app = new Vue({
   el: '#panel',
