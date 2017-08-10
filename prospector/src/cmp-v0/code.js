@@ -66,7 +66,7 @@ function addSegmentLayer(segments, options={}) {
 }
 
 function styleByLosColor(segment) {
-  let cmp_id = segment.cmp_segid;
+  let cmp_id = segment.segnum2013;
   let los = segmentLos[cmp_id];
   let color = losColor[los];
   if (!color) color = missingColor;
@@ -79,12 +79,12 @@ function hoverOnSegment(e) {
       if (e.target == popupSegment) return;
 
       let segment = e.target.feature;
-      let cmp_id = segment.cmp_segid;
+      let cmp_id = segment.segnum2013;
 
       // return previously-hovered segment to its original color
       if (selectedSegment != popupSegment) {
         if (selectedSegment) {
-          let cmp_id = selectedSegment.feature.cmp_segid;
+          let cmp_id = selectedSegment.feature.segnum2013;
           let color = losColor[segmentLos[cmp_id]];
           if (!color) color = missingColor;
           selectedSegment.setStyle({color:color, weight:4, opacity:1.0});
@@ -132,11 +132,11 @@ function buildChartHtmlFromCmpData(json) {
 
 function clickedOnSegment(e) {
       let segment = e.target.feature;
-      let cmp_id = segment.cmp_segid;
+      let cmp_id = segment.segnum2013;
 
       // highlight it
       if (popupSegment) {
-        let cmp_id = popupSegment.feature.cmp_segid;
+        let cmp_id = popupSegment.feature.segnum2013;
         let color = losColor[segmentLos[cmp_id]];
         popupSegment.setStyle({color:color, weight:4, opacity:1.0});
       }
@@ -148,9 +148,9 @@ function clickedOnSegment(e) {
       if (chart) chart.parentNode.removeChild(chart);
 
       // fetch the CMP details
-      let finalUrl = api_server + 'cmp_auto?cmp_segid=eq.' + cmp_id;
+      let finalUrl = api_server + 'cmp_auto_speeds_v0?cmp_id=eq.' + cmp_id;
       fetch(finalUrl).then((resp) => resp.json()).then(function(jsonData) {
-          let popupText = "<b>"+segment.cmp_name+" "+segment.direction+"-bound</b><br/>" +
+          let popupText = "<b>"+segment.cmp_name+" "+segment.cmp_dir+"-bound</b><br/>" +
                           segment.cmp_from + " to " + segment.cmp_to +
                           "<hr/>" +
                           "<div id=\"chart\" style=\"width: 300px; height:250px;\"></div>";
@@ -161,7 +161,7 @@ function clickedOnSegment(e) {
               .openOn(mymap);
 
           popup.on("remove", function(e) {
-            let cmp_id = popupSegment.feature.cmp_segid;
+            let cmp_id = popupSegment.feature.segnum2013;
             let color = losColor[segmentLos[cmp_id]];
             popupSegment.setStyle({color:color, weight:4, opacity:1.0});
             popupSegment = null;
@@ -176,8 +176,8 @@ function clickedOnSegment(e) {
 let esc = encodeURIComponent;
 
 function queryServer() {
-  const url = api_server + 'cmp_segments_master?' +
-                           'select=geometry,cmp_segid,cmp_name,cmp_from,cmp_to,direction,length';
+  const url = api_server + 'cmp_segments_v0?' +
+                           'select=geometry,segnum2013,cmp_name,cmp_from,cmp_to,cmp_dir,cmp_len';
 
   // Fetch the segments
   fetch(url)
@@ -204,10 +204,10 @@ function colorByLOS(personJson, year) {
     return;
   }
 
-  let url = api_server + 'cmp_auto?';
+  let url = api_server + 'cmp_auto_speeds_v0?';
   let params = 'year=eq.'+year +
                '&period=eq.'+chosenPeriod +
-               '&select=cmp_segid,avg_speed,year,period,los_hcm85';
+               '&select=cmp_id,name_HCM1985,from,to,dir,avg_speed,year,period,los_HCM1985';
 
   let finalUrl = url + params;
 
@@ -216,7 +216,7 @@ function colorByLOS(personJson, year) {
     let losData = {};
     for (let segment in data) {
       let thing = data[segment];
-      losData[thing.cmp_segid] = thing.los_hcm85;
+      losData[thing.cmp_id] = thing.los_HCM1985;
     }
     // save it for later
     speedCache[chosenPeriod+year] = losData;
@@ -249,7 +249,7 @@ function pickPM(thing) {
 
 // SLIDER ----
 let timeSlider = {
-          data: [ 1991, 1993, 1995, 1997, 1999, 2001, 2004, 2006, 2007, 2009, 2011, 2013, 2015 ],
+          data: [ 1991, "1992/3", 1995, 1997, 1999, 2001, 2004, 2006, 2007, 2009, 2011, 2013, 2015 ],
           sliderValue: 2015,
 					width: 'auto',
 					height: 6,

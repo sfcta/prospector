@@ -2,6 +2,7 @@ const path = require('path');
 
 const sfcta_components = [
      'cmp',
+     'cmp-v0',
      'tnc',
      'viz-template',
 ];

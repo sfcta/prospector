@@ -1,0 +1,36 @@
+---
+layout: page
+title: Congestion Management Program - Backup
+thumbnail: scrnshot.png
+css: main.css
+---
+
+<h2>Roadway Speeds</h2>
+
+This is the original CMP visualization at the end of the project in June 2017. This has been backed-up for future reference.
+
+<div id="panel">
+    <div class="dashboard">
+      <div id="picker">
+        <div class="column1">
+          <button @click="pickAM" v-bind:class="{ active: isAMactive }"
+                   class="small ui inverted red button">AM</button>
+          <button @click="pickPM" v-bind:class="{ active: isPMactive }"
+                   class="small ui inverted blue button">PM</button>
+        </div>
+        <div class="column2">
+            <h4>Year:
+            <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
+            </h4>
+        </div>
+      </div>
+      <h3 />
+    </div>
+</div>
+
+<br/>
+
+
+<div id="sfmap"></div>
+
+<script type="application/javascript" src="/bundles/cmp-v0.js"></script>
