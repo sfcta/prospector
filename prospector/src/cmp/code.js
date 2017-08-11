@@ -8,6 +8,7 @@ import vueSlider from 'vue-slider-component';
 let theme = "light";
 
 let api_server = 'http://api.sfcta.org/api/';
+let data_view = 'cmp_auto';
 
 var mymap = L.map('sfmap').setView([37.79, -122.44], 14);
 var url = 'https://api.mapbox.com/styles/v1/mapbox/'+theme+'-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
@@ -178,7 +179,6 @@ let esc = encodeURIComponent;
 function queryServer() {
   const url = api_server + 'cmp_segments_master?' +
                            'select=geometry,cmp_segid,cmp_name,cmp_from,cmp_to,direction,length';
-
   // Fetch the segments
   fetch(url)
     .then((resp) => resp.json())
@@ -248,9 +248,22 @@ function pickPM(thing) {
 }
 
 // SLIDER ----
+// fetch the year details in data
+function updateSliderData() {
+  let yearlist = [];
+  fetch(api_server + data_view + '?select=year').then((resp) => resp.json()).then(function(jsonData) {
+  for (let entry of jsonData) {
+    if (!yearlist.includes(entry.year)) yearlist.push(entry.year); 
+  }
+  yearlist = yearlist.sort();
+  app.timeSlider.data = yearlist;
+  app.sliderValue = yearlist[yearlist.length-1];
+  });
+}
+
 let timeSlider = {
-          data: [ 1991, 1993, 1995, 1997, 1999, 2001, 2004, 2006, 2007, 2009, 2011, 2013, 2015 ],
-          sliderValue: 2015,
+          data: [0],
+          sliderValue: 0,
 					width: 'auto',
 					height: 6,
 					direction: 'horizontal',
@@ -285,7 +298,7 @@ let app = new Vue({
   data: {
     isAMactive: true,
     isPMactive: false,
-    sliderValue: 2015,
+    sliderValue: 0,
     timeSlider: timeSlider,
   },
   methods: {
@@ -299,5 +312,5 @@ let app = new Vue({
     vueSlider,
   }
 });
-
+updateSliderData()
 queryServer();
