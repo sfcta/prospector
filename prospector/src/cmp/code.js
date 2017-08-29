@@ -5,41 +5,19 @@ import 'babel-polyfill';
 import 'isomorphic-fetch';
 import vueSlider from 'vue-slider-component';
 
-let theme = "light";
 
 let api_server = 'http://api.sfcta.org/api/';
 let data_view = 'cmp_auto';
 
-var mymap = L.map('sfmap').setView([37.79, -122.44], 14);
-var url = 'https://api.mapbox.com/styles/v1/mapbox/'+theme+'-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
-var token = 'pk.eyJ1IjoicHNyYyIsImEiOiJjaXFmc2UxanMwM3F6ZnJtMWp3MjBvZHNrIn0._Dmske9er0ounTbBmdRrRQ';
-var attribution ='<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
-                 '<a href="http://mapbox.com">Mapbox</a>';
-L.tileLayer(url, {
-  attribution:attribution,
-  maxZoom: 18,
-  accessToken:token,
-}).addTo(mymap);
-
 let segmentLayer;
 let selectedSegment, popupSegment, hoverColor, popupColor;
-
 let speedCache = {};
 
-let dark_styles = { normal  : {"color": "#ff7800", "weight":4,  "opacity": 1.0, },
-                    selected: {"color": "#39f",    "weight":10, "opacity": 1.0, },
-                    popup   : {"color": "#33f",    "weight":10, "opacity": 1.0, },
-};
-
-let light_styles = {normal  : {"color": "#3c6", "weight": 4, "opacity": 1.0 },
-                    selected: {"color": "#39f", "weight": 10, "opacity": 1.0 },
-                    popup   : {"color": "#33f", "weight": 10, "opacity": 1.0 }
-};
-
+var maplib = require('../jslib/maplib');
+var mymap = maplib.sfmap;
+let styles = maplib.styles;
 let losColor = {'A':'#060', 'B':'#9f0', 'C':'#ff3', 'D':'#f90', 'E':'#f60', 'F':'#c00'};
 let missingColor = '#ccc';
-
-let styles = (theme==='dark' ? dark_styles : light_styles);
 
 
 function addSegmentLayer(segments, options={}) {
@@ -212,7 +190,7 @@ function colorByLOS(personJson, year) {
   let finalUrl = url + params;
 
   fetch(finalUrl).then((resp) => resp.json()).then(function(data) {
-    console.log(data);
+    //console.log(data);
     let losData = {};
     for (let segment in data) {
       let thing = data[segment];

@@ -2,9 +2,10 @@ const path = require('path');
 
 const sfcta_components = [
      'cmp',
-     'cmp-v0',
+     'walkskims',
      'tnc',
-     'viz-template',
+     //'viz-template',
+	 //'cmp-v0', 
 ];
 
 module.exports = {
