@@ -53,6 +53,25 @@ function getColorByBin(x, bins, colors){
   return colors[i];
 }
 
+function getLegHTML(vals, colors, bins=true){
+  let ret = '';
+  if(bins){
+    // loop through our bin intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < vals.length; i++) {
+      ret +=
+          '<i style="background:' + colors[i+1] + '"></i> ' +
+          vals[i] + (vals[i + 1] ? ' &ndash; ' + vals[i + 1] + '<br>' : '+');
+    }
+  } else{
+    for (var i = 0; i < vals.length; i++) {
+      ret +=
+          '<i style="background:' + colors[i] + '"></i> ' +
+          vals[i] + (vals[i + 1] ? '<br>' : '');
+    }
+  }
+  return ret;
+}
+
 let colorFunc = {
   'distance': getDistColor,
 };
@@ -64,4 +83,5 @@ module.exports = {
   styles: styles,
   colorFunc: colorFunc,
   getColorByBin: getColorByBin,
+  getLegHTML: getLegHTML,
 };

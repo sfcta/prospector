@@ -13,11 +13,15 @@ let segmentLayer;
 let selectedSegment, popupSegment, hoverColor, popupColor;
 let speedCache = {};
 
+let losColor = {'A':'#060', 'B':'#9f0', 'C':'#ff3', 'D':'#f90', 'E':'#f60', 'F':'#c00'};
+const MISSING_COLOR = '#ccc';
+const LOS_VALS = ['A', 'B', 'C', 'D', 'E', 'F']
+const LOS_COLORS = ['#060', '#9f0', '#ff3', '#f90', '#f60', '#c00']
+
 var maplib = require('../jslib/maplib');
 var mymap = maplib.sfmap;
 let styles = maplib.styles;
-let losColor = {'A':'#060', 'B':'#9f0', 'C':'#ff3', 'D':'#f90', 'E':'#f60', 'F':'#c00'};
-let missingColor = '#ccc';
+let getLegHTML = maplib.getLegHTML;
 
 
 function addSegmentLayer(segments, options={}) {
@@ -42,13 +46,15 @@ function addSegmentLayer(segments, options={}) {
     segmentLayer = null;
   }
   segmentLayer.addTo(mymap);
+  
+  
 }
 
 function styleByLosColor(segment) {
   let cmp_id = segment.cmp_segid;
   let los = segmentLos[cmp_id];
   let color = losColor[los];
-  if (!color) color = missingColor;
+  if (!color) color = MISSING_COLOR;
   return {color: color, weight: 4, opacity: 1.0};
 }
 
@@ -65,7 +71,7 @@ function hoverOnSegment(e) {
         if (selectedSegment) {
           let cmp_id = selectedSegment.feature.cmp_segid;
           let color = losColor[segmentLos[cmp_id]];
-          if (!color) color = missingColor;
+          if (!color) color = MISSING_COLOR;
           selectedSegment.setStyle({color:color, weight:4, opacity:1.0});
         }
       }
@@ -225,6 +231,16 @@ function pickPM(thing) {
   queryServer();
 }
 
+function updateLegend(){
+  let legend = L.control({position: 'bottomright'});
+  legend.onAdd = function (map) {
+    let div = L.DomUtil.create('div', 'info legend')
+    div.innerHTML = getLegHTML(LOS_VALS, LOS_COLORS, false);
+    return div;
+  };
+  legend.addTo(mymap);
+}
+
 // SLIDER ----
 // fetch the year details in data
 function updateSliderData() {
@@ -290,5 +306,6 @@ let app = new Vue({
     vueSlider,
   }
 });
-updateSliderData()
+updateSliderData();
+updateLegend();
 queryServer();

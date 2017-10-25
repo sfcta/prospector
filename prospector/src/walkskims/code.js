@@ -24,6 +24,7 @@ let mymap = maplib.sfmap;
 let iconOrig = maplib.iconOrig;
 let iconDest = maplib.iconDest;
 let styles = maplib.styles;
+let getLegHTML = maplib.getLegHTML;
 let geoColorFunc = maplib.colorFunc.distance;
 let geoLayer;
 let selTAZProps;
@@ -71,13 +72,8 @@ info.addTo(mymap);
 let legend = L.control({position: 'bottomright'});
 legend.onAdd = function (map) {
   let div = L.DomUtil.create('div', 'info legend')
-    // loop through our bin intervals and generate a label with a colored square for each interval
-    for (var i = 0; i < DISTANCE_BINS.length; i++) {
-        div.innerHTML +=
-            '<i style="background:' + DISTANCE_COLORS[i+1] + '"></i> ' +
-            DISTANCE_BINS[i] + (DISTANCE_BINS[i + 1] ? ' &ndash; ' + DISTANCE_BINS[i + 1] + '<br>' : '+');
-    }
-    return div;
+  div.innerHTML = getLegHTML(DISTANCE_BINS, DISTANCE_COLORS);
+  return div;
 };
 legend.addTo(mymap);
 
