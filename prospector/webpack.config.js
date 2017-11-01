@@ -4,6 +4,7 @@ const sfcta_components = [
      'cmp',
      'walkskims',
      'tnc',
+     'autolos',
      //'viz-template',
 	 //'cmp-v0', 
 ];

@@ -53,6 +53,19 @@ function getColorByBin(x, bins, colors){
   return colors[i];
 }
 
+function getColorFromVal(x, vals, colors, bins=true){
+  if (x==null) return null;
+  
+  if(bins){
+    for (var i=0; i < vals.length; i++){
+      if (x <= vals[i]) return colors[i];
+    }
+    return colors[i];
+  } else{
+    return colors[vals.indexOf(x)]; 
+  }
+}
+
 function getLegHTML(vals, colors, bins=true){
   let ret = '';
   if(bins){
@@ -83,5 +96,6 @@ module.exports = {
   styles: styles,
   colorFunc: colorFunc,
   getColorByBin: getColorByBin,
+  getColorFromVal: getColorFromVal,
   getLegHTML: getLegHTML,
 };
