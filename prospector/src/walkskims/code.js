@@ -72,7 +72,7 @@ info.addTo(mymap);
 let legend = L.control({position: 'bottomright'});
 legend.onAdd = function (map) {
   let div = L.DomUtil.create('div', 'info legend')
-  div.innerHTML = getLegHTML(DISTANCE_BINS, DISTANCE_COLORS);
+  div.innerHTML = '<h4>Distance (miles)</h4>' + getLegHTML(DISTANCE_BINS, DISTANCE_COLORS);
   return div;
 };
 legend.addTo(mymap);
