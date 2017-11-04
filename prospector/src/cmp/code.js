@@ -27,6 +27,7 @@ const VIZ_INFO = {
             'COLORVALS': ['A', 'B', 'C', 'D', 'E', 'F'],
             'COLORS': ['#060', '#9f0', '#ff3', '#f90', '#f60', '#c00'],
             'CHARTINFO': 'AUTO SPEED TREND (MPH):',
+            'CHART_PREC': 1,
   },
   
   'TSPD':{  'TXT': 'Transit Speed',
@@ -34,9 +35,10 @@ const VIZ_INFO = {
             'METRIC': 'transit_speed',
             'METRIC_DESC': 'Transit Speed (mph)',
             'COLOR_BY_BINS': true,
-            'COLORVALS': [0, 5, 10, 15, 20, 25],
+            'COLORVALS': [0, 5, 7.5, 10, 12.5, 15],
             'COLORS': ['#ccc', '#c00', '#f60', '#f90', '#ff3', '#9f0', '#060'],
             'CHARTINFO': 'TRANSIT SPEED TREND (MPH):',
+            'CHART_PREC': 1,
   },
   
   'TRLB':{  'TXT': 'Transit Reliability',
@@ -47,6 +49,7 @@ const VIZ_INFO = {
             'COLORVALS': [0, .05, .1, .2, .3, .4],
             'COLORS': ['#ccc', '#060', '#9f0', '#ff3', '#f90', '#f60', '#c00'],
             'CHARTINFO': 'TRANSIT RELIABILITY TREND (CV):',
+            'CHART_PREC': 2,
   },
   
   'ATRAT':{ 'TXT': 'Auto-Transit Speed Ratio',
@@ -57,6 +60,7 @@ const VIZ_INFO = {
             'COLORVALS': [0, 1, 1.5, 2, 2.5, 3],
             'COLORS': ['#ccc', '#060', '#9f0', '#ff3', '#f90', '#f60', '#c00'],
             'CHARTINFO': 'AUTO-to-TRASIT SPEED RATIO TREND:',
+            'CHART_PREC': 1,
   },
   
 };
@@ -111,7 +115,7 @@ function queryServer() {
       let byYearAM = {};
       let byYearPM = {};
       for (let entry of jsonData) {
-        let val = Number(entry.metric).toFixed(1);
+        let val = Number(entry.metric).toFixed(VIZ_INFO[app.selectedViz]['CHART_PREC']);
         if (val === 'NaN') continue;
         if (entry.period=='AM'){
           if (!byYearAM[entry.year]) byYearAM[entry.year] = {};
@@ -262,7 +266,7 @@ function buildChartHtmlFromCmpData(json=null) {
     for (let entry of json) {
       let metric_col = selviz_metric;
       if (selviz_metric==VIZ_INFO['ALOS']['METRIC']) metric_col = 'auto_speed';
-      let val = Number(entry[metric_col]).toFixed(1);
+      let val = Number(entry[metric_col]).toFixed(VIZ_INFO[app.selectedViz]['CHART_PREC']);
       if (val === 'NaN') continue;
       if (!byYear[entry.year]) byYear[entry.year] = {};
       byYear[entry.year][entry.period] = val;
