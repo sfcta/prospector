@@ -56,7 +56,9 @@
 
   <!-- Page CSS -->
   {% if page.css %}
-    <link rel="stylesheet" href="{{ page.css }}">
+    {% for css in page.css %}
+      <link rel="stylesheet" href="{{ css }}">
+    {% endfor %}
   {% endif %}
 
   <!-- Google fonts -->
