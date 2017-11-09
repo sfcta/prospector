@@ -342,7 +342,7 @@ function clickViz(chosenviz) {
 // fetch the year details in data
 function updateSliderData() {
   let yearlist = [];
-  fetch(API_SERVER + aggdata_view + '?viz=eq.' + init_selectedViz)
+  fetch(API_SERVER + data_view + '?select=year')
   .then((resp) => resp.json()).then(function(jsonData) {
     for (let entry of jsonData) {
       if (!yearlist.includes(entry.year)) yearlist.push(entry.year); 
