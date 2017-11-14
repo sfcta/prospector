@@ -7,25 +7,53 @@ css: main.css
 
 <h2>SF Collisions Data from SWITRS</h2>
 
-<div id="panel">
-    <div class="dashboard">
-      <div id="picker">
-        <div>
-          <h4>Select Walk Skim Table</h4>
-          <v-select v-model="tableSelVal" :options="tableSelOptions"></v-select>
+<div id="container">
+	<div id="panel">
+		
+		<div class="dashboard">
+		<div id="picker">
+			<hr/>
+			<div>
+			<h4>Select Period of Day:</h4>
+			<button v-on:click="pickAM" v-bind:class="{ active: isAMactive }"
+                     class="mini ui inverted blue icon button">
+                     AM</button>
+			<button v-on:click="pickPM" v-bind:class="{ active: isPMactive }"
+                     class="mini ui inverted red icon button">
+                     PM</button>		  
+			</div>
+			<br/>
+			<div>
+			<h4>Select What Incidents:</h4>
+			<button v-on:click="pickBike" v-bind:class="{ active: isBikeactive }"
+                     class="mini ui inverted green icon button">
+                     Bike</button>
+			<button v-on:click="pickPed" v-bind:class="{ active: isPedactive }"
+                     class="mini ui inverted green icon button">
+                     Pedestrian</button>
+			<button v-on:click="pickBoth" v-bind:class="{ active: isBothactive }"
+                     class="mini ui inverted green icon button">
+                     Both</button>
+			</div>
+			<hr/>
+			<h2>Summary Statistics</h32>
+			<h4>Select What Year:</h4>
+			<br/>
+			<vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
+        <div id="btn-all-year">
+        <transition name="fade">
+            <button v-on:click="clickAllYears"
+                    v-if="!isAllYear"
+                    class="mini ui basic compact button"
+                    >
+                    &laquo; Back to All Years
+            </button>
+        </transition>
         </div>
-        <div class="column1">
-          <input type="radio" v-model="dirSel" v-bind:value="dirOrig">From Origin <br>
-          <input type="radio" v-model="dirSel" v-bind:value="dirDest">To Destination
-        </div>
-        <div class="column2">
-            <h4>Select TAZ</h4>
-            <v-select v-model="tazSelVal" :options="tazSelOptions"></v-select>
-        </div>
-      </div>
-    </div>
+		</div>
+		</div>
+	</div>
 </div>
-
 <br/>
 
 

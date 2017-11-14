@@ -2,19 +2,34 @@
 p {color:#ccc;}
 
 h3 {color: white; padding-top:5px;}
+h4 {color: white;}
 
 #container {
+  position: relative;
   height:100%;
   width:100%;
+  background-color:#888;
 }
 
 #panel {
+	display:table;
+  position: absolute;
+  top:0;
+  right:0;
+  bottom:0;
+  width:380px;
+  height:800px;
+  padding:0px 20px 0px 30px;
+  z-index:10;
+  background-color:#444;
+  float: right;
 }
 
 #sfmap {
   background-color:#eee;
-  height: 700px;
-  width: 100%;
+  height: 800px;
+  margin-right: 380px;
+  margin-top: -19px;
 }
 
 .dashboard { width:100%; height:100%; padding:10px;}
@@ -43,6 +58,10 @@ h3 {color: white; padding-top:5px;}
 .info h4 {
     margin: 0 0 5px;
     color: #777;
+}
+
+#btn-all-year {
+  position:absolute;right:0;margin-right:42px;margin-top:-22px;z-index:100;
 }
 
 .legend {
