@@ -29,7 +29,7 @@ const VIZ_INFO = {
             'CHARTINFO': 'AUTO SPEED TREND (MPH):',
             'CHART_PREC': 1,
   },
-  
+
   'TSPD':{  'TXT': 'Transit Speed',
             'VIEW': 'cmp_autotransit',
             'METRIC': 'transit_speed',
@@ -40,7 +40,7 @@ const VIZ_INFO = {
             'CHARTINFO': 'TRANSIT SPEED TREND (MPH):',
             'CHART_PREC': 1,
   },
-  
+
   'TRLB':{  'TXT': 'Transit Reliability',
             'VIEW': 'cmp_autotransit',
             'METRIC': 'transit_cv',
@@ -51,7 +51,7 @@ const VIZ_INFO = {
             'CHARTINFO': 'TRANSIT RELIABILITY TREND (CV):',
             'CHART_PREC': 2,
   },
-  
+
   'ATRAT':{ 'TXT': 'Auto-Transit Speed Ratio',
             'VIEW': 'cmp_autotransit',
             'METRIC': 'atspd_ratio',
@@ -62,7 +62,7 @@ const VIZ_INFO = {
             'CHARTINFO': 'AUTO-to-TRASIT SPEED RATIO TREND:',
             'CHART_PREC': 1,
   },
-  
+
 };
 const MISSING_COLOR = '#ccc';
 
@@ -86,9 +86,9 @@ function queryServer() {
                '&period=eq.'+selPeriod +
                '&select=cmp_segid,' + selviz_metric;
   let data_url = url + params;
-  
+
   const geo_url = API_SERVER + GEO_VIEW + '?' + 'select=geometry,cmp_segid,cmp_name,cmp_from,cmp_to,direction,length';
-  
+
   selMetricData = {};
   // Fetch map data
   fetch(data_url).then((resp) => resp.json()).then(function(mapdata) {
@@ -109,7 +109,7 @@ function queryServer() {
   // Fetch aggregate longitudinal cmp data
   if(!longDataCache[app.selectedViz]) {
     longDataCache[app.selectedViz] = {};
-    fetch(API_SERVER + aggdata_view + '?viz=eq.' + app.selectedViz + 
+    fetch(API_SERVER + aggdata_view + '?viz=eq.' + app.selectedViz +
                                     '&select=fac_typ,period,year,metric')
     .then((resp) => resp.json()).then(function(jsonData) {
       let byYearAM = {};
@@ -119,11 +119,11 @@ function queryServer() {
         if (val === 'NaN') continue;
         if (entry.period=='AM'){
           if (!byYearAM[entry.year]) byYearAM[entry.year] = {};
-          byYearAM[entry.year][entry.fac_typ] = val; 
+          byYearAM[entry.year][entry.fac_typ] = val;
         } else {
           if (!byYearPM[entry.year]) byYearPM[entry.year] = {};
-          byYearPM[entry.year][entry.fac_typ] = val; 
-        }  
+          byYearPM[entry.year][entry.fac_typ] = val;
+        }
       }
       let data = [];
       for (let year in byYearAM) {
@@ -159,7 +159,7 @@ function mapSegments(cmpsegJson) {
   if (geoLayer) mymap.removeLayer(geoLayer);
   if (mapLegend) mymap.removeControl(mapLegend);
   if (popSelSegment) popSelSegment.remove();
-  
+
   geoLayer = L.geoJSON(cmpsegJson, {
     style: styleByMetricColor,
     onEachFeature: function(feature, layer) {
@@ -170,12 +170,12 @@ function mapSegments(cmpsegJson) {
     },
   });
   geoLayer.addTo(mymap);
-  
+
   mapLegend = L.control({position: 'bottomright'});
   mapLegend.onAdd = function (map) {
     let div = L.DomUtil.create('div', 'info legend')
-    div.innerHTML = '<h4>' + VIZ_INFO[app.selectedViz]['METRIC_DESC'] + '</h4>' + 
-                    getLegHTML(VIZ_INFO[app.selectedViz]['COLORVALS'], 
+    div.innerHTML = '<h4>' + VIZ_INFO[app.selectedViz]['METRIC_DESC'] + '</h4>' +
+                    getLegHTML(VIZ_INFO[app.selectedViz]['COLORVALS'],
                     VIZ_INFO[app.selectedViz]['COLORS'],
                     VIZ_INFO[app.selectedViz]['COLOR_BY_BINS']);
     return div;
@@ -192,27 +192,41 @@ function styleByMetricColor(segment) {
   if (!color) color = MISSING_COLOR;
   return {color: color, weight: 4, opacity: 1.0};
 }
+
+var popupTimeout;
+
 function highlightFeature(e) {
+
+  clearTimeout(popupTimeout);
+
   let highlightedGeo = e.target;
   highlightedGeo.bringToFront();
+
   if(highlightedGeo.feature.cmp_segid != selGeoId){
     highlightedGeo.setStyle(styles.selected);
     let geo = e.target.feature;
     let popupText = "<b>"+geo.cmp_name+" "+geo.direction+"-bound</b><br/>" +
                   geo.cmp_from + " to " + geo.cmp_to;
+
     popHoverSegment = L.popup()
-                    .setLatLng(e.latlng)
-                    .setContent(popupText)
-                    .openOn(mymap);
+                      .setLatLng(e.latlng)
+                      .setContent(popupText);
+
+    popupTimeout = setTimeout( function () {
+      popHoverSegment.openOn(mymap);
+    }, 300);
   }
 }
+
+
 function resetHighlight(e) {
   popHoverSegment.remove();
   if (e.target.feature.cmp_segid != selGeoId) geoLayer.resetStyle(e.target);
 }
+
 function clickedOnFeature(e) {
   e.target.setStyle(styles.popup);
-  
+
   let geo = e.target.feature;
   selGeoId = geo.cmp_segid;
   if(selectedSegment){
@@ -220,15 +234,15 @@ function clickedOnFeature(e) {
       prevselectedSegment = selectedSegment;
       geoLayer.resetStyle(prevselectedSegment);
       selectedSegment = e.target;
-    }  
+    }
   } else {
     selectedSegment = e.target;
   }
-  
+
   let tmptxt = geo.cmp_name+" "+geo.direction+"-bound";
-  document.getElementById("geoinfo").innerHTML = "<h5>" + tmptxt + " [" + 
+  document.getElementById("geoinfo").innerHTML = "<h5>" + tmptxt + " [" +
                                     geo.cmp_from + " to " + geo.cmp_to + "]</h5>";
-  
+
   // fetch longitudinal data for selected cmp segment
   let url = API_SERVER + data_view + '?';
   let metric_col = selviz_metric;
@@ -237,9 +251,9 @@ function clickedOnFeature(e) {
                '&select=period,year,' + metric_col;
   let data_url = url + params;
   fetch(data_url).then((resp) => resp.json()).then(function(jsonData) {
-    
+
     let popupText = "<b>"+geo.cmp_name+" "+geo.direction+"-bound</b><br/>" +
-                  geo.cmp_from + " to " + geo.cmp_to; 
+                  geo.cmp_from + " to " + geo.cmp_to;
     popSelSegment = L.popup()
                   .setLatLng(e.latlng)
                   .setContent(popupText)
@@ -249,9 +263,9 @@ function clickedOnFeature(e) {
     document.getElementById("geoinfo").innerHTML = "<h5>All Segments Combined</h5>";
     prevselectedSegment = selectedSegment = selGeoId = null;
     buildChartHtmlFromCmpData();
-    }); 
-    
-    buildChartHtmlFromCmpData(jsonData);   
+    });
+
+    buildChartHtmlFromCmpData(jsonData);
   }).catch(function(error) {
       console.log("longitudinal data err: "+error);
   });
@@ -259,7 +273,7 @@ function clickedOnFeature(e) {
 
 function buildChartHtmlFromCmpData(json=null) {
   document.getElementById("longchart").innerHTML = "";
-  
+
   if(json) {
     let byYear = {};
     let data = [];
@@ -292,7 +306,7 @@ function buildChartHtmlFromCmpData(json=null) {
       xLabels: "year",
       xLabelAngle: 45,
     });
-    
+
   } else {
     new Morris.Line({
       // ID of the element in which to draw the chart.
@@ -311,7 +325,7 @@ function buildChartHtmlFromCmpData(json=null) {
       xLabels: "year",
       xLabelAngle: 45,
     });
-  } 
+  }
 }
 
 function pickAM(thing) {
@@ -345,7 +359,7 @@ function updateSliderData() {
   fetch(API_SERVER + data_view + '?select=year')
   .then((resp) => resp.json()).then(function(jsonData) {
     for (let entry of jsonData) {
-      if (!yearlist.includes(entry.year)) yearlist.push(entry.year); 
+      if (!yearlist.includes(entry.year)) yearlist.push(entry.year);
     }
     yearlist = yearlist.sort();
     app.timeSlider.data = yearlist;
