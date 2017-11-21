@@ -59,7 +59,7 @@ const VIZ_INFO = {
             'COLOR_BY_BINS': true,
             'COLORVALS': [0, 1, 1.5, 2, 2.5, 3],
             'COLORS': ['#ccc', '#060', '#9f0', '#ff3', '#f90', '#f60', '#c00'],
-            'CHARTINFO': 'AUTO-to-TRASIT SPEED RATIO TREND:',
+            'CHARTINFO': 'AUTO-to-TRANSIT SPEED RATIO TREND:',
             'CHART_PREC': 1,
   },
 
