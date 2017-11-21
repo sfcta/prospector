@@ -77,10 +77,13 @@ let geoLayer, mapLegend;
 let selMetricData;
 let yearData = {};
 let longDataCache = {};
+let cacheMetricData;
 let popHoverSegment, popSelSegment;
 let selectedSegment, prevselectedSegment;
 
 function queryServer() {
+  cacheMetricData = null;
+
   let url = API_SERVER + data_view + '?';
   let params = 'year=eq.'+app.sliderValue +
                '&period=eq.'+selPeriod +
@@ -243,32 +246,49 @@ function clickedOnFeature(e) {
   document.getElementById("geoinfo").innerHTML = "<h5>" + tmptxt + " [" +
                                     geo.cmp_from + " to " + geo.cmp_to + "]</h5>";
 
-  // fetch longitudinal data for selected cmp segment
-  let url = API_SERVER + data_view + '?';
-  let metric_col = selviz_metric;
-  if (selviz_metric==VIZ_INFO['ALOS']['METRIC']) metric_col = 'auto_speed';
-  let params = 'cmp_segid=eq.'+ geo.cmp_segid +
-               '&select=period,year,' + metric_col;
-  let data_url = url + params;
-  fetch(data_url).then((resp) => resp.json()).then(function(jsonData) {
+  if (!cacheMetricData) {
+    // fetch longitudinal data for selected cmp segment
+    let metric_col = selviz_metric;
+    if (selviz_metric==VIZ_INFO['ALOS']['METRIC']) metric_col = 'auto_speed';
 
-    let popupText = "<b>"+geo.cmp_name+" "+geo.direction+"-bound</b><br/>" +
-                  geo.cmp_from + " to " + geo.cmp_to;
-    popSelSegment = L.popup()
-                  .setLatLng(e.latlng)
-                  .setContent(popupText)
-                  .addTo(mymap);
-    popSelSegment.on("remove", function(e) {
-    geoLayer.resetStyle(selectedSegment);
-    document.getElementById("geoinfo").innerHTML = "<h5>All Segments Combined</h5>";
-    prevselectedSegment = selectedSegment = selGeoId = null;
-    buildChartHtmlFromCmpData();
+    let url = API_SERVER + data_view + '?';
+    let params = 'select=cmp_segid,period,year,' + metric_col;
+    let data_url = url + params;
+
+    fetch(data_url).then((resp) => resp.json()).then(function(jsonData) {
+      cacheMetricData = jsonData;
+      showSegmentDetails(geo, e.latlng);
+
+    }).catch(function(error) {
+        console.log("longitudinal data err: "+error);
     });
 
-    buildChartHtmlFromCmpData(jsonData);
-  }).catch(function(error) {
-      console.log("longitudinal data err: "+error);
-  });
+  } else {
+    showSegmentDetails(geo, e.latlng);
+  }
+}
+
+function showSegmentDetails(geo, latlng) {
+    // Show popup
+    let popupText = "<b>"+geo.cmp_name+" "+geo.direction+"-bound</b><br/>" +
+                  geo.cmp_from + " to " + geo.cmp_to;
+
+    popSelSegment = L.popup()
+                  .setLatLng(latlng)
+                  .setContent(popupText)
+                  .addTo(mymap);
+
+    // Show chart (filter json results for just the selected segment)
+    let segmentData = cacheMetricData.filter(segment => segment['cmp_segid'] === geo.cmp_segid);
+    buildChartHtmlFromCmpData(segmentData);
+
+    // Revert to overall chart when no segment selected
+    popSelSegment.on("remove", function(e) {
+      geoLayer.resetStyle(selectedSegment);
+      document.getElementById("geoinfo").innerHTML = "<h5>All Segments Combined</h5>";
+      prevselectedSegment = selectedSegment = selGeoId = null;
+      buildChartHtmlFromCmpData();
+    });
 }
 
 function buildChartHtmlFromCmpData(json=null) {
