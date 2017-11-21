@@ -5,7 +5,7 @@ import 'babel-polyfill';
 import 'isomorphic-fetch';
 import vueSlider from 'vue-slider-component';
 
-let api_server = 'http://api.sfcta.org/';
+let api_server = 'http://api.sfcta.org/api';
 
 // add the SF Map using Leafleft and MapBox
 let mymap = L.map('sfmap').setView([37.78, -122.415], 14);
@@ -27,25 +27,25 @@ let segmentLayer;
 let segmentLos = {};
 
 // add CMP segment layer
-function addCmpSegmentLayer(segments) {
+//function addCmpSegmentLayer(segments) {
   // TODO: figure out why PostGIS geojson isn't in exactly the right format.
-  for (let segment of segments) {
-    segment["type"] = "Feature";
-    segment["geometry"] = JSON.parse(segment.geometry);
-  }
+  //for (let segment of segments) {
+    //segment["type"] = "Feature";
+    //segment["geometry"] = JSON.parse(segment.geometry);
+  //}
 
-  segmentLayer = L.geoJSON(segments, {
-    style: styleByLosColor,
-    onEachFeature: function(feature, layer) {
+  //segmentLayer = L.geoJSON(segments, {
+    //style: styleByLosColor,
+    //onEachFeature: function(feature, layer) {
       // add stuff here!
-      layer.on({ mouseover: hoverOnSegment,
-                 click : clickedOnSegment,
-      });
-    },
-  });
+      //layer.on({ mouseover: hoverOnSegment,
+                 //click : clickedOnSegment,
+      //});
+    //},
+  //});
 
-  segmentLayer.addTo(mymap);
-}
+  //segmentLayer.addTo(mymap);
+//}
 
 function styleByLosColor(segment) {
   let cmp_id = segment.segnum2013;
@@ -64,16 +64,41 @@ function styleByLosColor(segment) {
 
 const yearLabels = ['2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014'];
 
-function getCmpSegments() {
-  const url = api_server + 'api/cmp_segments?' +
-                           'select=geometry,segnum2013,cmp_name,cmp_from,cmp_to,cmp_dir,cmp_len';
+function addSWITRScollisions(collisions) {
+	let entryuno = collisions[0];
+	
+	for (var i = 0; i < collisions.length; i++) {
+		
+		//let lon = entry['longitude'];
+		//let lat = entry['latitude'];
+		if (collisions[i]['pedkill'] > 0) {
+			L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#ff0000",fillColor: "#ff0000",fillOpacity: 0.5,weight: 0.5}).addTo(mymap);
+			//let colorcheck = "#ff0000";
+			//let intensity = entry['pedkill'] * 0.1;
+		} else if (collisions[i]['bickill'] > 0) {
+			//let color = '#00ff00';
+			//let intensity = entry['bickill'] * 0.1;
+			L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#00ff00",fillColor: "#00ff00",fillOpacity: 0.5,weight: 0.5}).addTo(mymap);
+		} else if (collisions[i]['pedinj'] > 0) {
+			//let color = '#0000ff';
+			//let intensity = entry['pedinj'] * 0.05;
+			L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#0000ff",fillColor: "#0000ff",fillOpacity: 0.1,weight: 0.1}).addTo(mymap);
+		} else {
+			//let color = '#ffff00';
+			//let intensity = entry['bincinj'] * 0.05;
+			L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#ffff00",fillColor: "#ffff00",fillOpacity: 0.1,weight: 0.1}).addTo(mymap);
+		}
+	//L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#0000ff",fillColor: "#0000ff",fillOpacity: 0.05,weight: 0.5}).addTo(mymap);
+
+	};
+};
+
+function getSWITRSinfo() {
+  const url = api_server + '/switrs_viz?';
 
   // Fetch the segments
   fetch(url).then((resp) => resp.json()).then(function(jsonData) {
-
-    // do stuff here!
-    addCmpSegmentLayer(jsonData);
-    //getCmpData(jsonData, 2015);
+    addSWITRScollisions(jsonData);
   })
   .catch(function(error) {
     console.log("err: "+error);
@@ -153,8 +178,9 @@ function getSWITRSData(json, year) {
 
 }
 
-// L.marker([37.77, -122.42]).addTo(mymap);
-// L.marker([37.79, -122.416723]).addTo(mymap);
+//L.circle([37.80307388, -122.4114332], 50, {color: "#0000ff",fillColor: "#0000ff",fillOpacity: 0.1}).addTo(mymap);
+//L.marker([37.79, -122.416723]).addTo(mymap);
+
 
 let chosenPeriod = 'AM';
 let chosenIncidents = 'Both';
@@ -292,4 +318,4 @@ let app = new Vue({
 });
 
 // Ready to go! Read some data.
-getCmpSegments();
+getSWITRSinfo();
