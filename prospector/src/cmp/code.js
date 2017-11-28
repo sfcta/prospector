@@ -328,6 +328,14 @@ function buildChartHtmlFromCmpData(json=null) {
     });
 
   } else {
+    let ykey_tmp,lab_tmp;
+    if(app.selectedViz=='ALOS'){
+      ykey_tmp = ['art', 'fwy'];
+      lab_tmp = ['Arterial', 'Freeway'];
+    } else{
+      ykey_tmp = ['art',];
+      lab_tmp = ['Arterial',];
+    }
     new Morris.Line({
       // ID of the element in which to draw the chart.
       element: 'longchart',
@@ -337,10 +345,10 @@ function buildChartHtmlFromCmpData(json=null) {
       // The name of the data record attribute that contains x-values.
       xkey: 'year',
       // A list of names of data record attributes that contain y-values.
-      ykeys: ['art', 'fwy'],
+      ykeys: ykey_tmp,
       // Labels for the ykeys -- will be displayed when you hover over the
       // chart.
-      labels: ['Arterial', 'Freeway'],
+      labels: lab_tmp,
       lineColors: ["#f66","#44f"],
       xLabels: "year",
       xLabelAngle: 45,
