@@ -23,23 +23,53 @@ css: main.css
                      PM</button>		  
 			</div>
 			<br/>
-			<div>
+			<div style="height:70px;font-size:1px;">
 			<h4>Select What Incidents:</h4>
-			<button v-on:click="pickBike" v-bind:class="{ active: isBikeactive }"
-                     class="mini ui inverted green icon button">
-                     Bike</button>
-			<button v-on:click="pickPed" v-bind:class="{ active: isPedactive }"
-                     class="mini ui inverted green icon button">
-                     Pedestrian</button>
-			<button v-on:click="pickBoth" v-bind:class="{ active: isBothactive }"
-                     class="mini ui inverted green icon button">
-                     Both</button>
+			<button 
+                    v-on:click="pickBike"
+                    class="mini ui inverted green icon button"
+                    v-bind:class="{ active: isBikeactive}">
+                    Bike
+            </button>
+			<button 
+                    v-on:click="pickPed"
+                    class="mini ui inverted green icon button"
+                    v-bind:class="{ active: isPedactive}">
+                    Pedestrian
+            </button>
+			<button 
+                    v-on:click="pickBoth"
+                    class="mini ui inverted green icon button"
+                    v-bind:class="{ active: isBothactive}">
+                    Both
+            </button>
+			</div>
+			<div>
+			<h5>Severity:</h5>
+			<button 
+                    v-on:click="pickFatal"
+                    class="mini ui inverted yellow icon button"
+                    v-bind:class="{ active: isFatalactive}">
+                    Fatal
+            </button>
+			<button 
+                    v-on:click="pickNonf"
+                    class="mini ui inverted yellow icon button"
+                    v-bind:class="{ active: isNonfactive}">
+                    Non-Fatal
+            </button>
+			<button 
+                    v-on:click="pickAll"
+                    class="mini ui inverted yellow icon button"
+                    v-bind:class="{ active: isAllactive}">
+                    All
+            </button>
 			</div>
 			<hr/>
 			<h2>Summary Statistics</h32>
 			<h4>Select What Year:</h4>
 			<br/>
-			<vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
+			<!--<vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
         <div id="btn-all-year">
         <transition name="fade">
             <button v-on:click="clickAllYears"
@@ -49,7 +79,7 @@ css: main.css
                     &laquo; Back to All Years
             </button>
         </transition>
-        </div>
+        </div>-->
 		</div>
 		</div>
 	</div>

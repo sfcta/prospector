@@ -20,73 +20,106 @@ L.tileLayer(url, {
 }).addTo(mymap);
 
 
-let losColor = {'A':'#060', 'B':'#9f0', 'C':'#ff3', 'D':'#f90', 'E':'#f60', 'F':'#c00'};
+let incColor = {'PK':"#280f34", 'BK':"#cb0101", 'PI':"#11cbd7", 'BI':"#ff5200"};
+let incOpacity = {'PK':0.5, 'BK':0.5, 'PI':0.15, 'BI':0.15};
 let missingColor = '#ccc';
 
-let segmentLayer;
+let collisionLayer;
 let segmentLos = {};
 
 // add CMP segment layer
-//function addCmpSegmentLayer(segments) {
-  // TODO: figure out why PostGIS geojson isn't in exactly the right format.
-  //for (let segment of segments) {
-    //segment["type"] = "Feature";
-    //segment["geometry"] = JSON.parse(segment.geometry);
-  //}
+function addSWITRSLayer(collisions) {
+   //TODO: figure out why PostGIS geojson isn't in exactly the right format.
+   
+  for (let collision of collisions) {
+    collision["type"] = "Feature";
+    collision["geometry"] = JSON.parse(collision.st_asgeojson);
+  }
+  
 
-  //segmentLayer = L.geoJSON(segments, {
-    //style: styleByLosColor,
-    //onEachFeature: function(feature, layer) {
-      // add stuff here!
-      //layer.on({ mouseover: hoverOnSegment,
-                 //click : clickedOnSegment,
-      //});
-    //},
-  //});
-
-  //segmentLayer.addTo(mymap);
-//}
-
-function styleByLosColor(segment) {
-  let cmp_id = segment.segnum2013;
-  let los = segmentLos[cmp_id];
-  let color = losColor[los];
-  if (!color) color = missingColor;
-
-  let style = {
-      color: color,
-      weight: 4,
-      opacity: 1.0
+  var myStyle = {
+	  "color": "#ff7800",
+      "weight": 5,
+      "opacity": 0.65
   };
-
-  return style;
+  
+  //L.geoJSON(collisions, {
+	  //style: styleByIncidentColor,
+	  //pointToLayer: function(feature, latlng) {
+		//return new L.CircleMarker(latlng, {radius: 5, fillOpacity: 0.1});
+	  //}
+  //}).addTo(mymap);
+  if (collisionLayer) mymap.removeLayer(collisionLayer);
+  collisionLayer = L.geoJSON(collisions, {
+    style: styleByIncidentColor,
+	pointToLayer: function(feature, latlng) {
+		if (feature['pedkill'] > 0 || feature['bickill'] > 0) { 
+			return new L.CircleMarker(latlng, {radius: 5, fillOpacity: 0.5});
+		} else if (feature['pedinj'] > 0 || feature['bicinj'] > 0){
+			return new L.CircleMarker(latlng, {radius: 5, fillOpacity: 0.1});
+		} else {
+			return new L.CircleMarker(latlng, {radius: 5, fillOpacity: 0.5});
+		}
+	  },
+    onEachFeature: function(feature, layer) {
+      layer.on({
+                 click : clickedOnSegment,
+      });
+    },
+  });
+  collisionLayer.addTo(mymap);
+  
+  
 }
 
-const yearLabels = ['2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014'];
+
+function styleByIncidentColor(collision) {
+  if (collision['pedkill'] > 0) {
+	  return {"color": incColor['PK'],"weight": 0.1,"opacity": incOpacity['PK']};
+  } else if (collision['bickill'] > 0){
+	  return {"color": incColor['BK'],"weight": 0.1,"opacity": incOpacity['BK']}; 
+  } else if (collision['pedinj'] > 0){
+	  return {"color": incColor['PI'],"weight": 0.1,"opacity": incOpacity['PI']};
+  } else if (collision['bicinj'] > 0) {
+	  return {"color": incColor['BI'],"weight": 0.1,"opacity": incOpacity['BI']};
+  } else if (collision['pedcol'] == 'Y'){
+	  return {"color": "#ff0099", "weight": 0.1, "opacity": 0.5};
+  } else {
+	  return {"color": "#1bc644", "weight": 0.1, "opacity": 0.5};
+  }
+
+
+  let color = incColor[incType];
+  let opac = incOpacity[incType];
+
+  return {"color": color,"weight": 0.1,"opacity": opac};
+
+}
+
+const yearLabels = ['2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016'];
 
 function addSWITRScollisions(collisions) {
-	let entryuno = collisions[0];
-	
+
 	for (var i = 0; i < collisions.length; i++) {
-		
+
 		//let lon = entry['longitude'];
 		//let lat = entry['latitude'];
 		if (collisions[i]['pedkill'] > 0) {
-			L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#ff0000",fillColor: "#ff0000",fillOpacity: 0.5,weight: 0.5}).addTo(mymap);
+			L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#280f34",fillColor: "#280f34",fillOpacity: 0.5,weight: 0.5}).addTo(mymap);
 			//let colorcheck = "#ff0000";
 			//let intensity = entry['pedkill'] * 0.1;
 		} else if (collisions[i]['bickill'] > 0) {
 			//let color = '#00ff00';
 			//let intensity = entry['bickill'] * 0.1;
-			L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#00ff00",fillColor: "#00ff00",fillOpacity: 0.5,weight: 0.5}).addTo(mymap);
+			L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#cb0101",fillColor: "#cb0101",fillOpacity: 0.5,weight: 0.5}).addTo(mymap);
 		} else if (collisions[i]['pedinj'] > 0) {
 			//let color = '#0000ff';
 			//let intensity = entry['pedinj'] * 0.05;
-			L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#0000ff",fillColor: "#0000ff",fillOpacity: 0.1,weight: 0.1}).addTo(mymap);
+			L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#11cbd7",fillColor: "#11cbd7",fillOpacity: 0.1,weight: 0.1}).addTo(mymap);
 		} else {
 			//let color = '#ffff00';
 			//let intensity = entry['bincinj'] * 0.05;
-			L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#ffff00",fillColor: "#ffff00",fillOpacity: 0.1,weight: 0.1}).addTo(mymap);
+			L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#ff5200",fillColor: "#ff5200",fillOpacity: 0.1,weight: 0.1}).addTo(mymap);
 		}
 	//L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#0000ff",fillColor: "#0000ff",fillOpacity: 0.05,weight: 0.5}).addTo(mymap);
 
@@ -94,11 +127,20 @@ function addSWITRScollisions(collisions) {
 };
 
 function getSWITRSinfo() {
-  const url = api_server + '/switrs_viz?';
-
+  
+  
+  const url = api_server + '/switrs_viz?select=st_asgeojson,pedcol,biccol,year,time_,pedkill,pedinj,bickill,bicinj';
+  if (chosenIncidents == 'Both') var chosenCollisions = '';
+  else if (chosenIncidents == 'Bike') var chosenCollisions = '&pedcol=eq.N';
+  else if (chosenIncidents == 'Ped') var chosenCollisions = '&biccol=eq.N';
+  if (chosenSeverity == 'All') var chosenInjuries = '';
+  else if (chosenSeverity == 'Fatal') var chosenInjuries = '&pedinj=eq.0&bicinj=eq.0'
+  else if (chosenSeverity == 'Nonf') var chosenInjuries = '&pedkill=eq.0&bickill=eq.0'
+  let queryurl = url + '&period=eq.' + chosenPeriod + chosenCollisions + chosenInjuries;
+  
   // Fetch the segments
-  fetch(url).then((resp) => resp.json()).then(function(jsonData) {
-    addSWITRScollisions(jsonData);
+  fetch(queryurl).then((resp) => resp.json()).then(function(jsonData) {
+    addSWITRSLayer(jsonData);
   })
   .catch(function(error) {
     console.log("err: "+error);
@@ -113,33 +155,6 @@ function clickedOnSegment(e) {
   console.log("Click!", e);
 }
 
-
-function getCmpData(json, year) {
-  let url = api_server + 'api/cmp_auto_speeds?';
-  let params = 'year=eq.'+year +
-               '&period=eq.'+chosenPeriod +
-               '&select=cmp_id,name_HCM1985,from,to,dir,avg_speed,year,period,los_HCM1985';
-
-  let finalUrl = url + params;
-
-  fetch(finalUrl).then((resp) => resp.json()).then(function(data) {
-
-    let losData = {};
-    for (let segment in data) {
-      let thing = data[segment];
-      losData[thing.cmp_id] = thing.los_HCM1985;
-    }
-
-    // add it to the map
-    segmentLos = losData;
-
-    if (segmentLayer) segmentLayer.clearLayers();
-
-  }).catch(function(error) {
-    console.log(error);
-  });
-
-}
 
 function getSWITRSData(json, year) {
   let url = api_server + 'api/switrs_viz?';
@@ -184,19 +199,27 @@ function getSWITRSData(json, year) {
 
 let chosenPeriod = 'AM';
 let chosenIncidents = 'Both';
+let chosenSeverity = 'All';
 
 function pickAM(thing) {
   app.isAMactive = true;
   app.isPMactive = false;
   chosenPeriod = 'AM';
-  getSWITRSData();
+  getSWITRSinfo();
 }
 
 function pickPM(thing) {
   app.isAMactive = false;
   app.isPMactive = true;
   chosenPeriod = 'PM';
-  getSWITRSData();
+  getSWITRSinfo();
+}
+
+function clickIncident(chosenIncident) {
+  incident = parseInt(chosenIncident);
+  app.incident = incident;
+
+  //getSWITRSinfo();
 }
 
 function pickBoth(thing) {
@@ -204,23 +227,47 @@ function pickBoth(thing) {
 	app.isPedactive = false;
 	app.isBothactive = true;
 	chosenIncidents = 'Both'
-	getSWITRSData();
+	getSWITRSinfo();
 }
 
 function pickBike(thing) {
 	app.isBikeactive = true;
 	app.isPedactive = false;
 	app.isBothactive = false;
-	chosenIncidents = 'Bikes'
-	getSWITRSData();
+	chosenIncidents = 'Bike'
+	getSWITRSinfo();
 }
 
 function pickPed(thing) {
 	app.isBikeactive = false;
 	app.isPedactive = true;
 	app.isBothactive = false;
-	chosenIncidents = 'Peds'
-	getSWITRSData();
+	chosenIncidents = 'Ped'
+	getSWITRSinfo();
+}
+
+function pickFatal(thing) {
+	app.isFatalactive = true;
+	app.isNonfactive = false;
+	app.isAllactive = false;
+	chosenSeverity = 'Fatal'
+	getSWITRSinfo();
+}
+
+function pickNonf(thing) {
+	app.isFatalactive = false;
+	app.isNonfactive = true;
+	app.isAllactive = false;
+	chosenSeverity = 'Nonf'
+	getSWITRSinfo();
+}
+
+function pickAll(thing) {
+	app.isFatalactive = false;
+	app.isNonfactive = false;
+	app.isAllactive = true;
+	chosenSeverity = 'All'
+	getSWITRSinfo();
 }
 
 function clickAllYears(e) {
@@ -235,47 +282,47 @@ function clickYear(chosenYear) {
   updateColors();
 }
 
-let timeSlider = {
-          min: 0,
-          max: 10,
-          disabled: true,
-					width: 'auto',
-					height: 3,
-					direction: 'horizontal',
-					dotSize: 16,
-					eventType: 'auto',
-					show: true,
-					realTime: false,
-					tooltip: 'always',
-					clickable: true,
-					tooltipDir: 'bottom',
-					piecewise: true,
-          piecewiseLabel: false,
-					lazy: false,
-					reverse: false,
-          speed: 0.25,
-          piecewiseStyle: {
-            "backgroundColor": "#ccc",
-            "visibility": "visible",
-            "width": "6px",
-            "height": "6px"
-          },
-          piecewiseActiveStyle: {
-            "backgroundColor": "#ccc",
-            "visibility": "visible",
-            "width": "6px",
-            "height": "6px"
-          },
-          labelStyle: {  "color": "#ccc"},
-          labelActiveStyle: {  "color": "#ccc"},
-          processStyle: {
-            "backgroundColor": "#ffc"
-          },
-          formatter: function(index) {
-            return (index==0 ? 'All Years >>' : yearLabels[index-1]);
-          },
-          style: {"marginTop":"-25px","marginBottom":"30px","marginLeft":"46px","marginRight":"18px"},
-};
+//let timeSlider = {
+//          min: 0,
+//          max: 10,
+//          disabled: true,
+//					width: 'auto',
+//					height: 3,
+//					direction: 'horizontal',
+//					dotSize: 16,
+//					eventType: 'auto',
+//					show: true,
+//					realTime: false,
+//					tooltip: 'always',
+//					clickable: true,
+//					tooltipDir: 'bottom',
+//					piecewise: true,
+ //         piecewiseLabel: false,
+//					lazy: false,
+//					reverse: false,
+ //         speed: 0.25,
+  //        piecewiseStyle: {
+    //        "backgroundColor": "#ccc",
+   //         "visibility": "visible",
+//            "width": "6px",
+//            "height": "6px"
+//          },
+//          piecewiseActiveStyle: {
+//            "backgroundColor": "#ccc",
+ //           "visibility": "visible",
+ //           "width": "6px",
+//           "height": "6px"
+//         },
+ //         labelStyle: {  "color": "#ccc"},
+ //         labelActiveStyle: {  "color": "#ccc"},
+//          processStyle: {
+ //           "backgroundColor": "#ffc"
+//          },
+ //         formatter: function(index) {
+ //           return (index==0 ? 'All Years >>' : yearLabels[index-1]);
+//          },
+//          style: {"marginTop":"-25px","marginBottom":"30px","marginLeft":"46px","marginRight":"18px"},
+//};
 
 function sliderChanged(index) {
   app.isAllYear  = (index==0);
@@ -292,28 +339,35 @@ function switchToYearlyView(index) {
 
 let app = new Vue({
   el: '#panel',
+  delimiters: ['${', '}'],
   data: {
     isAMactive: true,
     isPMactive: false,
 	isBikeactive: false,
 	isPedactive: false,
 	isBothactive: true,
-	timeSlider: timeSlider
+	isFatalactive: false,
+	isNonfactive: false,
+	isAllactive: true
+	//timeSlider: timeSlider
   },
   methods: {
     pickAM: pickAM,
     pickPM: pickPM,
 	pickBike: pickBike,
+	pickPed: pickPed,
 	pickBoth: pickBoth,
-	pickPed: pickPed
+	pickFatal: pickFatal,
+	pickNonf: pickNonf,
+	pickAll: pickAll
   },
   watch: {
-    sliderValue: function(value) {
-      this.getSliderValue();
-    }
+    //sliderValue: function(value) {
+      //this.getSliderValue();
+    //}
   },
   components: {
-    vueSlider,
+    //vueSlider,
   }
 });
 
