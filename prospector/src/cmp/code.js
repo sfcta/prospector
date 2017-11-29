@@ -252,7 +252,7 @@ function clickedOnFeature(e) {
     if (selviz_metric==VIZ_INFO['ALOS']['METRIC']) metric_col = 'auto_speed';
 
     let url = API_SERVER + data_view + '?';
-    let params = 'select=cmp_segid,period,year,' + metric_col;
+    let params = metric_col + '=not.is.null&' + 'select=cmp_segid,period,year,' + metric_col;
     let data_url = url + params;
 
     fetch(data_url).then((resp) => resp.json()).then(function(jsonData) {
