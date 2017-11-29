@@ -5,7 +5,7 @@ import 'babel-polyfill';
 import 'isomorphic-fetch';
 import vueSlider from 'vue-slider-component';
 
-let api_server = 'http://api.sfcta.org/api';
+let api_server = 'http://api.sfcta.org/api/switrs_viz';
 
 // add the SF Map using Leafleft and MapBox
 let mymap = L.map('sfmap').setView([37.78, -122.415], 14);
@@ -20,11 +20,15 @@ L.tileLayer(url, {
 }).addTo(mymap);
 
 
-let incColor = {'PK':"#280f34", 'BK':"#cb0101", 'PI':"#11cbd7", 'BI':"#ff5200"};
-let incOpacity = {'PK':0.5, 'BK':0.5, 'PI':0.15, 'BI':0.15};
+let incColor = {'Killed Pedestrian':"#280f34", 'Killed Bicyclist':"#cb0101", 
+'Injured Pedestrian':"#11cbd7", 'Injured Bicyclist':"#ff5200", 'Uninjured Pedestrian':"#ff0099", 
+'Uninjured Bicyclist':"#1bc644"};
+let incOpacity = {'Killed Pedestrian':0.5, 'Killed Bicyclist':0.5, 'Injured Pedestrian':0.15, 
+'Injured Bicyclist':0.15, 'Uninjured Pedestrian':0.5, 'Uninjured Bicyclist':0.5};
 let missingColor = '#ccc';
 
 let collisionLayer;
+let mapLegend;
 let segmentLos = {};
 
 // add CMP segment layer
@@ -36,20 +40,9 @@ function addSWITRSLayer(collisions) {
     collision["geometry"] = JSON.parse(collision.st_asgeojson);
   }
   
-
-  var myStyle = {
-	  "color": "#ff7800",
-      "weight": 5,
-      "opacity": 0.65
-  };
-  
-  //L.geoJSON(collisions, {
-	  //style: styleByIncidentColor,
-	  //pointToLayer: function(feature, latlng) {
-		//return new L.CircleMarker(latlng, {radius: 5, fillOpacity: 0.1});
-	  //}
-  //}).addTo(mymap);
+  if (mapLegend) mymap.removeControl(mapLegend);
   if (collisionLayer) mymap.removeLayer(collisionLayer);
+  
   collisionLayer = L.geoJSON(collisions, {
     style: styleByIncidentColor,
 	pointToLayer: function(feature, latlng) {
@@ -57,7 +50,7 @@ function addSWITRSLayer(collisions) {
 			return new L.CircleMarker(latlng, {radius: 5, fillOpacity: 0.5});
 		} else if (feature['pedinj'] > 0 || feature['bicinj'] > 0){
 			return new L.CircleMarker(latlng, {radius: 5, fillOpacity: 0.1});
-		} else {
+		} else if (chosenSeverity != 'Fatal'){
 			return new L.CircleMarker(latlng, {radius: 5, fillOpacity: 0.5});
 		}
 	  },
@@ -69,23 +62,45 @@ function addSWITRSLayer(collisions) {
   });
   collisionLayer.addTo(mymap);
   
+
+  mapLegend = L.control({position: 'bottomright'});
+ 
+  mapLegend.onAdd = function (map) {
+	  
+	  var div = L.DomUtil.create('div', 'info legend'),
+		  grades = ['Killed Pedestrian', 'Killed Bicyclist', 'Injured Pedestrian', 'Injured Bicyclist', 'Uninjured Pedestrian',
+		  'Uninjured Bicyclist'],
+		  labels = [];
+	  
+      for (var i = 0; i < grades.length; i++) div.innerHTML += '<i style="background:' + incColor[grades[i]] + '"></i>' + grades[i] + '<br>';
+	  
+	  return div;
+	  
+  };
   
-}
+  mapLegend.addTo(mymap);
+};
 
 
 function styleByIncidentColor(collision) {
   if (collision['pedkill'] > 0) {
-	  return {"color": incColor['PK'],"weight": 0.1,"opacity": incOpacity['PK']};
+	  return {"color": incColor['Killed Pedestrian'],"weight": 0.1,
+	  "opacity": incOpacity['Killed Pedestrian']};
   } else if (collision['bickill'] > 0){
-	  return {"color": incColor['BK'],"weight": 0.1,"opacity": incOpacity['BK']}; 
+	  return {"color": incColor['Killed Bicyclist'],"weight": 0.1,
+	  "opacity": incOpacity['Killed Bicyclist']}; 
   } else if (collision['pedinj'] > 0){
-	  return {"color": incColor['PI'],"weight": 0.1,"opacity": incOpacity['PI']};
+	  return {"color": incColor['Injured Pedestrian'],"weight": 0.1,
+	  "opacity": incOpacity['Injured Pedestrian']};
   } else if (collision['bicinj'] > 0) {
-	  return {"color": incColor['BI'],"weight": 0.1,"opacity": incOpacity['BI']};
+	  return {"color": incColor['Injured Bicyclist'],"weight": 0.1,
+	  "opacity": incOpacity['Injured Bicyclist']};
   } else if (collision['pedcol'] == 'Y'){
-	  return {"color": "#ff0099", "weight": 0.1, "opacity": 0.5};
+	  return {"color": incColor['Uninjured Pedestrian'],"weight": 0.1,
+	  "opacity": incOpacity['Uninjured Pedestrian']};
   } else {
-	  return {"color": "#1bc644", "weight": 0.1, "opacity": 0.5};
+	  return {"color": incColor['Uninjured Bicyclist'],"weight": 0.1,
+	  "opacity": incOpacity['Uninjured Bicyclist']};
   }
 
 
@@ -98,38 +113,11 @@ function styleByIncidentColor(collision) {
 
 const yearLabels = ['2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016'];
 
-function addSWITRScollisions(collisions) {
-
-	for (var i = 0; i < collisions.length; i++) {
-
-		//let lon = entry['longitude'];
-		//let lat = entry['latitude'];
-		if (collisions[i]['pedkill'] > 0) {
-			L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#280f34",fillColor: "#280f34",fillOpacity: 0.5,weight: 0.5}).addTo(mymap);
-			//let colorcheck = "#ff0000";
-			//let intensity = entry['pedkill'] * 0.1;
-		} else if (collisions[i]['bickill'] > 0) {
-			//let color = '#00ff00';
-			//let intensity = entry['bickill'] * 0.1;
-			L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#cb0101",fillColor: "#cb0101",fillOpacity: 0.5,weight: 0.5}).addTo(mymap);
-		} else if (collisions[i]['pedinj'] > 0) {
-			//let color = '#0000ff';
-			//let intensity = entry['pedinj'] * 0.05;
-			L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#11cbd7",fillColor: "#11cbd7",fillOpacity: 0.1,weight: 0.1}).addTo(mymap);
-		} else {
-			//let color = '#ffff00';
-			//let intensity = entry['bincinj'] * 0.05;
-			L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#ff5200",fillColor: "#ff5200",fillOpacity: 0.1,weight: 0.1}).addTo(mymap);
-		}
-	//L.circle([collisions[i]['latitude'], collisions[i]['longitude']], 50, {color: "#0000ff",fillColor: "#0000ff",fillOpacity: 0.05,weight: 0.5}).addTo(mymap);
-
-	};
-};
 
 function getSWITRSinfo() {
   
   
-  const url = api_server + '/switrs_viz?select=st_asgeojson,pedcol,biccol,year,time_,pedkill,pedinj,bickill,bicinj';
+  const url = api_server + '?select=st_asgeojson,pedcol,biccol,year,time_,pedkill,pedinj,bickill,bicinj';
   if (chosenIncidents == 'Both') var chosenCollisions = '';
   else if (chosenIncidents == 'Bike') var chosenCollisions = '&pedcol=eq.N';
   else if (chosenIncidents == 'Ped') var chosenCollisions = '&biccol=eq.N';
@@ -145,6 +133,8 @@ function getSWITRSinfo() {
   .catch(function(error) {
     console.log("err: "+error);
   });
+  
+
 }
 
 function hoverOnSegment(e) {
@@ -270,72 +260,64 @@ function pickAll(thing) {
 	getSWITRSinfo();
 }
 
-function clickAllYears(e) {
-  app.sliderValue = 0;
+function sliderChanged(thing) {
+  getSWITRSinfo();
 }
 
-function clickYear(chosenYear) {
-  year = parseInt(chosenYear);
-  app.year = year;
-
-  displayDetails();
-  updateColors();
+function updateSliderData() {
+  let yearlist = [];
+  fetch(api_server + '?select=year')
+  .then((resp) => resp.json()).then(function(jsonData) {
+    for (let entry of jsonData) {
+      if (!yearlist.includes(entry.year)) yearlist.push(entry.year);
+    }
+    yearlist = yearlist.sort();
+    app.timeSlider.data = yearlist;
+    app.sliderValue = yearlist[yearlist.length-1];
+  });
 }
 
-//let timeSlider = {
-//          min: 0,
-//          max: 10,
-//          disabled: true,
-//					width: 'auto',
-//					height: 3,
-//					direction: 'horizontal',
-//					dotSize: 16,
-//					eventType: 'auto',
-//					show: true,
-//					realTime: false,
-//					tooltip: 'always',
-//					clickable: true,
-//					tooltipDir: 'bottom',
-//					piecewise: true,
- //         piecewiseLabel: false,
-//					lazy: false,
-//					reverse: false,
- //         speed: 0.25,
-  //        piecewiseStyle: {
-    //        "backgroundColor": "#ccc",
-   //         "visibility": "visible",
-//            "width": "6px",
-//            "height": "6px"
-//          },
-//          piecewiseActiveStyle: {
-//            "backgroundColor": "#ccc",
- //           "visibility": "visible",
- //           "width": "6px",
-//           "height": "6px"
-//         },
- //         labelStyle: {  "color": "#ccc"},
- //         labelActiveStyle: {  "color": "#ccc"},
-//          processStyle: {
- //           "backgroundColor": "#ffc"
-//          },
- //         formatter: function(index) {
- //           return (index==0 ? 'All Years >>' : yearLabels[index-1]);
-//          },
-//          style: {"marginTop":"-25px","marginBottom":"30px","marginLeft":"46px","marginRight":"18px"},
-//};
-
-function sliderChanged(index) {
-  app.isAllYear  = (index==0);
+let timeSlider = {
+          data: [0],
+          sliderValue: 0,
+          disabled: false,
+					width: 'auto',
+					height: 3,
+					direction: 'horizontal',
+					dotSize: 16,
+					eventType: 'auto',
+					show: true,
+					realTime: false,
+					tooltip: 'always',
+					clickable: true,
+					tooltipDir: 'bottom',
+					piecewise: true,
+          piecewiseLabel: false,
+					lazy: false,
+					reverse: false,
+          speed: 0.25,
+          piecewiseStyle: {
+            "backgroundColor": "#ccc",
+            "visibility": "visible",
+            "width": "6px",
+            "height": "6px"
+          },
+          piecewiseActiveStyle: {
+            "backgroundColor": "#ccc",
+            "visibility": "visible",
+            "width": "6px",
+            "height": "6px"
+          },
+          labelStyle: {  "color": "#ccc"},
+          labelActiveStyle: {  "color": "#ccc"},
+          processStyle: {
+            "backgroundColor": "#ffc"
+          },
+          style: {"marginTop":"0px","marginBottom":"40px"},
+};
 
 
-  displayDetails();
-  updateLegend();
-}
 
-function switchToYearlyView(index) {
-  let YearData = loadYearlyData(index);
-  mymap.getSource('taz-source').setData(hourData);
-}
 
 let app = new Vue({
   el: '#panel',
@@ -362,9 +344,7 @@ let app = new Vue({
 	pickAll: pickAll
   },
   watch: {
-    //sliderValue: function(value) {
-      //this.getSliderValue();
-    //}
+    //sliderValue: sliderChanged,
   },
   components: {
     //vueSlider,
