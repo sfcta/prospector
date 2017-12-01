@@ -152,7 +152,7 @@ function queryServer() {
   } else buildChartHtmlFromCmpData();
 
   document.getElementById("chartinfo").innerHTML =
-    "<h3>" + VIZ_INFO[app.selectedViz]['CHARTINFO'] + "</h3>";
+    "<h3 style=\"font-size: 22px;\">" + VIZ_INFO[app.selectedViz]['CHARTINFO'] + "</h3>";
 }
 
 // hover panel -------------------
