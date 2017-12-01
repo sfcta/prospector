@@ -7,13 +7,13 @@
         <div id="helpbar">
             <button class="ui mini right labeled icon violet button"
                     v-on:click="clickToggleHelp">
-                    <i class="icon info"></i>
+                    <i class="help circle icon"></i>
                     What is this?
             </button>
             &nbsp;
             <button class="ui mini right labeled icon violet button"
-                    v-on:click="this.window.open('http://www.sfcta.org/congestion-management-program','_blank')">
-                    <i class="icon right arrow"></i>
+                    v-on:click="this.window.open('http://www.sfcta.org/cmp','_blank')">
+                    <i class="arrow right icon"></i>
                     Learn More
             </button>
             <hr/>
@@ -23,8 +23,8 @@
             <div id="vizbuttons" class="ui vertical buttons">
               <button v-for="item in vizlist"
                     v-on:click="clickViz(item)"
-                    class="ui inverted blue button"
-                    v-bind:class="{ active: item==selectedViz }">
+                    class="ui grey button"
+                    v-bind:class="{ active: item==selectedViz, yellow: item==selectedViz }">
                     ${vizinfo[item]['TXT']}
               </button>
             </div>
