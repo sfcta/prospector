@@ -330,6 +330,7 @@ function buildChartHtmlFromCmpData(json=null) {
       lineColors: ["#f66","#44f"],
       xLabels: "year",
       xLabelAngle: 45,
+      hideHover: true,
       postUnits: VIZ_INFO[app.selectedViz]['POST_UNITS'],
     });
 
@@ -358,6 +359,7 @@ function buildChartHtmlFromCmpData(json=null) {
       lineColors: ["#f66","#44f"],
       xLabels: "year",
       xLabelAngle: 45,
+      hideHover: true,
       postUnits: VIZ_INFO[app.selectedViz]['POST_UNITS'],
     });
   }
