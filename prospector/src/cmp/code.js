@@ -149,8 +149,36 @@ function queryServer() {
       console.log("longdata fetch error: "+error);
     });
   } else buildChartHtmlFromCmpData();
-  document.getElementById("chartinfo").innerHTML = "<h5>" + VIZ_INFO[app.selectedViz]['CHARTINFO'] + "</h5>";
+  document.getElementById("chartinfo").innerHTML = "<h3>" + VIZ_INFO[app.selectedViz]['CHARTINFO'] + "</h3>";
 }
+
+// hover panel -------------------
+let infoPanel = L.control();
+
+infoPanel.onAdd = function (map) {
+  // create a div with a class "info"
+  this._div = L.DomUtil.create('div', 'info-panel');
+  this.update();
+  return this._div;
+};
+
+infoPanel.update = function (geo) {
+
+  this._div.innerHTML = "";
+
+  if (geo) {
+    this._div.innerHTML = "<b>"+geo.cmp_name+" "
+       + geo.direction + "-bound</b><br/>"
+       + geo.cmp_from + " to " + geo.cmp_to;
+  }
+
+  infoPanelTimeout = setTimeout( function () {
+    infoPanel._div.innerHTML = "";
+}, 2000);
+
+};
+
+infoPanel.addTo(mymap);
 
 function mapSegments(cmpsegJson) {
 
@@ -170,7 +198,7 @@ function mapSegments(cmpsegJson) {
   geoLayer = L.geoJSON(cmpsegJson, {
     style: styleByMetricColor,
     onEachFeature: function(feature, layer) {
-      layer.on({ mouseover: highlightFeature,
+      layer.on({ mouseover: hoverFeature,
                  mouseout: resetHighlight,
                  click : clickedOnFeature,
       });
@@ -202,11 +230,13 @@ function styleByMetricColor(segment) {
   return {color: color, weight: 4, opacity: 1.0};
 }
 
-var popupTimeout;
+var infoPanelTimeout;
 
-function highlightFeature(e) {
+function hoverFeature(e) {
 
-  clearTimeout(popupTimeout);
+  clearTimeout(infoPanelTimeout);
+
+  infoPanel.update(e.target.feature);
 
   let highlightedGeo = e.target;
   highlightedGeo.bringToFront();
@@ -216,20 +246,11 @@ function highlightFeature(e) {
     let geo = e.target.feature;
     let popupText = "<b>"+geo.cmp_name+" "+geo.direction+"-bound</b><br/>" +
                   geo.cmp_from + " to " + geo.cmp_to;
-
-    popHoverSegment = L.popup()
-                      .setLatLng(e.latlng)
-                      .setContent(popupText);
-
-    popupTimeout = setTimeout( function () {
-      popHoverSegment.openOn(mymap);
-    }, 300);
   }
 }
 
 
 function resetHighlight(e) {
-  popHoverSegment.remove();
   if (e.target.feature.cmp_segid != selGeoId) geoLayer.resetStyle(e.target);
 }
 
@@ -299,7 +320,7 @@ function showSegmentDetails(geo, latlng) {
 
 function buildChartHtmlFromCmpData(json=null) {
   document.getElementById("longchart").innerHTML = "";
-  
+
   if(json) {
     let byYear = {};
     let data = [];
