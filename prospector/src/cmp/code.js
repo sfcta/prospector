@@ -28,6 +28,7 @@ const VIZ_INFO = {
             'COLORS': ['#060', '#9f0', '#ff3', '#f90', '#f60', '#c00'],
             'CHARTINFO': 'AUTO SPEED TREND (MPH):',
             'CHART_PREC': 1,
+            'POST_UNITS': '',
   },
 
   'TSPD':{  'TXT': 'Transit Speed',
@@ -39,6 +40,7 @@ const VIZ_INFO = {
             'COLORS': ['#ccc', '#c00', '#f60', '#f90', '#ff3', '#9f0', '#060'],
             'CHARTINFO': 'TRANSIT SPEED TREND (MPH):',
             'CHART_PREC': 1,
+            'POST_UNITS': '',
   },
 
   'TRLB':{  'TXT': 'Transit Variability (Reliability)',
@@ -46,10 +48,11 @@ const VIZ_INFO = {
             'METRIC': 'transit_cv',
             'METRIC_DESC': 'Transit Variability',
             'COLOR_BY_BINS': true,
-            'COLORVALS': [0, .05, .1, .2, .3, .4],
+            'COLORVALS': [0, 5, 10, 20, 30, 40],
             'COLORS': ['#ccc', '#060', '#9f0', '#ff3', '#f90', '#f60', '#c00'],
             'CHARTINFO': 'TRANSIT VARIABILITY TREND:',
-            'CHART_PREC': 2,
+            'CHART_PREC': 1,
+            'POST_UNITS': '%',
   },
 
   'ATRAT':{ 'TXT': 'Auto-Transit Speed Ratio',
@@ -61,6 +64,7 @@ const VIZ_INFO = {
             'COLORS': ['#ccc', '#060', '#9f0', '#ff3', '#f90', '#f60', '#c00'],
             'CHARTINFO': 'AUTO/TRANSIT SPEED TREND:',
             'CHART_PREC': 1,
+            'POST_UNITS': '',
   },
 
 };
@@ -180,7 +184,8 @@ function mapSegments(cmpsegJson) {
     div.innerHTML = '<h4>' + VIZ_INFO[app.selectedViz]['METRIC_DESC'] + '</h4>' +
                     getLegHTML(VIZ_INFO[app.selectedViz]['COLORVALS'],
                     VIZ_INFO[app.selectedViz]['COLORS'],
-                    VIZ_INFO[app.selectedViz]['COLOR_BY_BINS']);
+                    VIZ_INFO[app.selectedViz]['COLOR_BY_BINS'],
+                    VIZ_INFO[app.selectedViz]['POST_UNITS']);
     return div;
   };
   mapLegend.addTo(mymap);
@@ -293,7 +298,7 @@ function showSegmentDetails(geo, latlng) {
 
 function buildChartHtmlFromCmpData(json=null) {
   document.getElementById("longchart").innerHTML = "";
-
+  
   if(json) {
     let byYear = {};
     let data = [];
@@ -325,6 +330,7 @@ function buildChartHtmlFromCmpData(json=null) {
       lineColors: ["#f66","#44f"],
       xLabels: "year",
       xLabelAngle: 45,
+      postUnits: VIZ_INFO[app.selectedViz]['POST_UNITS'],
     });
 
   } else {
@@ -352,6 +358,7 @@ function buildChartHtmlFromCmpData(json=null) {
       lineColors: ["#f66","#44f"],
       xLabels: "year",
       xLabelAngle: 45,
+      postUnits: VIZ_INFO[app.selectedViz]['POST_UNITS'],
     });
   }
 }
