@@ -73,8 +73,8 @@
   <div id="helpbox" v-show="showHelp" class="ui segment">
         <h2 style="margin-bottom:0px;">Congestion in San Francisco</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
-        This shows performance metrics for both automobiles and transit (buses) on San Francisco roadways.
-        These are monitored every two years in accordance with state law for Congestion Management Program (CMP).
+        Use this tool to explore performance metrics for both automobiles and transit (buses) on San Francisco roadways.
+        These are monitored every two years, in accordance with state law for Congestion Management Program (CMP).
 
         <ul>
         <li><b>Auto Level-of-Service (LOS)</b> grades road segments by vehicle delay with "A" describing free flow,
@@ -82,25 +82,18 @@
         <li><b>Transit Speed</b> for segments is calculated from GPS time-stamp data from Muni buses.</li>
         <li><b>Transit Variability</b> represents reliability as the percent of average bus speed that is equal to standard deviation
         with higher variability indicating lower reliability.</li>
-        <li><b>Auto-Transit Speed Ratio</b> represents relative transit competitiveness as the ratio of auto to transit speed
+        <li><b>Auto-Transit Speed Ratio</b> represents relative transit competitiveness as the ratio of auto to transit speed, 
         with higher values indicating lower transit competitiveness.</li>
         </ul>
 
         <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
         <ul>
-        <li>Select metric to display it on map for all segments for latest year (2017)</li>
-        <li>Move year slide to map historic metric data</li>
+        <li>Select a metric to display it on the map for all segments, for the latest year (2017)</li>
+        <li>Move the year slider to map historic metric data</li>
         <li>Choose time period to display metric for AM or PM peak</li>
-        <li>Click on a segment on map to update trend chart</li>
+        <li>Click on a colored roadway segment on the map to update trend chart</li>
         </ul>
-        <table style="width:65%"><tr>
-          <td class="help"><img src="../cmp/images/mouse-left.png" style="height:96px;margin:0px;display:center"></td>
-          <td class="help"><img src="../cmp/images/mouse-wheel.png" style="height:96px;margin:0px;display:center"></td>
-        </tr><tr>
-          <td class="help">Left-click and drag to pan the map</td>
-          <td class="help">Mouse wheel changes zoom</td>
-        </tr></table>
 
         <div style="margin-top:20px;">
           <button v-on:click="clickToggleHelp" class="small ui right floated violet button">OK, GOT IT</button>
