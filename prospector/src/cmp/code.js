@@ -328,7 +328,7 @@ function buildChartHtmlFromCmpData(json=null) {
       // Labels for the ykeys -- will be displayed when you hover over the
       // chart.
       labels: ['AM', 'PM'],
-      lineColors: ["#f66","#44f"],
+      lineColors: ["#f99","#99f"],
       xLabels: "year",
       xLabelAngle: 45,
       hideHover: true,
@@ -357,7 +357,7 @@ function buildChartHtmlFromCmpData(json=null) {
       // Labels for the ykeys -- will be displayed when you hover over the
       // chart.
       labels: lab_tmp,
-      lineColors: ["#f66","#44f"],
+      lineColors: ["#f99","#99f"],
       xLabels: "year",
       xLabelAngle: 45,
       hideHover: true,
