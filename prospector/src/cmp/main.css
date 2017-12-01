@@ -70,7 +70,7 @@ h5 {margin-top:4px; margin-bottom: 4px;}
 }
 
 #table-logo {
-  margin-top:2px;  
+  margin-top:2px;
   margin-bottom: 2px;
 }
 
@@ -210,6 +210,7 @@ td {text-align:center; vertical-align:top; }
 
 p.legend-row {
   margin-bottom: 3px;
+  color: #666;
 }
 
 hr {
@@ -266,7 +267,7 @@ table { border: 0px; }
     background: rgba(255,255,255,0.8);
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
     border-radius: 5px;
-    
+
     visibility: hidden;
     opacity: 0;
     transition: visibility 0s 0.5s, opacity 0.5s linear;
