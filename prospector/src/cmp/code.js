@@ -158,13 +158,14 @@ let infoPanel = L.control();
 infoPanel.onAdd = function (map) {
   // create a div with a class "info"
   this._div = L.DomUtil.create('div', 'info-panel');
-  this.update();
+  //this.update();
   return this._div;
 };
 
 infoPanel.update = function (geo) {
 
-  this._div.innerHTML = "";
+  infoPanel._div.innerHTML = "";
+  infoPanel._div.className = 'info-panel';
 
   if (geo) {
     this._div.innerHTML = "<b>"+geo.cmp_name+" "
@@ -173,8 +174,8 @@ infoPanel.update = function (geo) {
   }
 
   infoPanelTimeout = setTimeout( function () {
-    infoPanel._div.innerHTML = "";
-}, 2000);
+    infoPanel._div.className = 'info-panel-hide';
+  }, 2000);
 
 };
 

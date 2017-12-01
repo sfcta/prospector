@@ -249,6 +249,7 @@ table { border: 0px; }
 
 .info-panel {
     padding: 6px 8px;
+    margin: 6px 8px;
     background: white;
     background: rgba(255,255,255,0.8);
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
@@ -257,4 +258,17 @@ table { border: 0px; }
 .info-panel h4 {
     margin: 0 0 5px;
     color: #777;
+}
+
+.info-panel-hide {
+    padding: 6px 8px;
+    margin: 6px 8px;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+    
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s 0.5s, opacity 0.5s linear;
 }
