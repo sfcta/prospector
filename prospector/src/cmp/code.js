@@ -465,6 +465,7 @@ let timeSlider = {
             "backgroundColor": "#ffc"
           },
           style: {"marginTop":"0px","marginBottom":"40px"},
+          tooltipStyle: {backgroundColor: "#eaae00", borderColor: "#eaae00"},
 };
 
 
