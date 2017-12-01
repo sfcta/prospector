@@ -210,3 +210,7 @@ td {text-align:center; vertical-align:top; }
     margin-right: 8px;
     opacity: 1;
 }
+
+p.legend-row {
+  margin-bottom: 3px;
+}

@@ -180,12 +180,13 @@ function mapSegments(cmpsegJson) {
 
   mapLegend = L.control({position: 'bottomright'});
   mapLegend.onAdd = function (map) {
-    let div = L.DomUtil.create('div', 'info legend')
-    div.innerHTML = '<h4>' + VIZ_INFO[app.selectedViz]['METRIC_DESC'] + '</h4>' +
-                    getLegHTML(VIZ_INFO[app.selectedViz]['COLORVALS'],
+    let div = L.DomUtil.create('div', 'info legend');
+    let legHTML = getLegHTML(VIZ_INFO[app.selectedViz]['COLORVALS'],
                     VIZ_INFO[app.selectedViz]['COLORS'],
                     VIZ_INFO[app.selectedViz]['COLOR_BY_BINS'],
                     VIZ_INFO[app.selectedViz]['POST_UNITS']);
+    div.innerHTML = '<h4>' + VIZ_INFO[app.selectedViz]['METRIC_DESC'] + '</h4>' + legHTML;
+
     return div;
   };
   mapLegend.addTo(mymap);

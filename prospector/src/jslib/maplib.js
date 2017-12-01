@@ -78,8 +78,10 @@ function getLegHTML(vals, colors, bins=true, postunits=''){
   } else{
     for (var i = 0; i < vals.length; i++) {
       ret +=
-          '<i style="background:' + colors[i] + '"></i> ' +
-          vals[i] + postunits + (vals[i + 1] ? '<br>' : '');
+          '<p class="legend-row"><i style="background:'
+          + colors[i] + '"></i> '
+          + vals[i] + postunits + (vals[i + 1] ? '<br>' : '')
+          + '</p>';
     }
   }
   return ret;
