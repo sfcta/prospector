@@ -32,7 +32,8 @@
       </div>
       <div id="header">
           <div id="stats-panel">
-            <div id="chartinfo"><h5>AUTO SPEED TREND (MPH):</h5></div>
+            <hr style="margin-bottom:-5px;" />
+            <div id="chartinfo"><h3>AUTO SPEED TREND (MPH):</h3></div>
             <div id="geoinfo"><h5>All Segments Combined</h5></div>
             <div id="longchart"></div>
           </div>
@@ -99,7 +100,7 @@
 
         <div style="margin-top:20px;">
           <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
-            OK, GOT IT
+            &nbsp;OK&nbsp;
           </button>
 
           <button v-on:click="this.window.open('/assets/cmp_data_all.csv')"
@@ -112,7 +113,7 @@
           <button v-on:click="this.window.open('http://www.sfcta.org/congestion-management-program','_blank')"
                   class="small ui right floated basic violet button"
                   style="margin-right:5px">
-                  Learn more about CMP&hellip;
+                  Learn more&hellip;
           </button>
 
         </div>

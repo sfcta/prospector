@@ -97,6 +97,7 @@ function queryServer() {
   const geo_url = API_SERVER + GEO_VIEW + '?' + 'select=geometry,cmp_segid,cmp_name,cmp_from,cmp_to,direction,length';
 
   selMetricData = {};
+
   // Fetch map data
   fetch(data_url).then((resp) => resp.json()).then(function(mapdata) {
       for (let seg in mapdata) {
@@ -149,7 +150,9 @@ function queryServer() {
       console.log("longdata fetch error: "+error);
     });
   } else buildChartHtmlFromCmpData();
-  document.getElementById("chartinfo").innerHTML = "<h3>" + VIZ_INFO[app.selectedViz]['CHARTINFO'] + "</h3>";
+
+  document.getElementById("chartinfo").innerHTML =
+    "<h3>" + VIZ_INFO[app.selectedViz]['CHARTINFO'] + "</h3>";
 }
 
 // hover panel -------------------
@@ -350,7 +353,7 @@ function buildChartHtmlFromCmpData(json=null) {
       // Labels for the ykeys -- will be displayed when you hover over the
       // chart.
       labels: ['AM', 'PM'],
-      lineColors: ["#f99","#99f"],
+      lineColors: ["#f66","#99f"],
       xLabels: "year",
       xLabelAngle: 45,
       hideHover: true,
@@ -379,10 +382,11 @@ function buildChartHtmlFromCmpData(json=null) {
       // Labels for the ykeys -- will be displayed when you hover over the
       // chart.
       labels: lab_tmp,
-      lineColors: ["#f99","#99f"],
+      lineColors: ["#f66","#99f"],
       xLabels: "year",
       xLabelAngle: 45,
       hideHover: true,
+      gridTextColor: "#aaa",
       postUnits: VIZ_INFO[app.selectedViz]['POST_UNITS'],
     });
   }
