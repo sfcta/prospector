@@ -82,7 +82,7 @@
         <li><b>Transit Speed</b> for segments is calculated from GPS time-stamp data from Muni buses.</li>
         <li><b>Transit Variability</b> represents reliability as the percent of average bus speed that is equal to standard deviation
         with higher variability indicating lower reliability.</li>
-        <li><b>Auto-Transit Speed Ratio</b> represents relative transit competitiveness as the ratio of auto to transit speed, 
+        <li><b>Auto-Transit Speed Ratio</b> represents relative transit competitiveness as the ratio of auto to transit speed,
         with higher values indicating lower transit competitiveness.</li>
         </ul>
 
@@ -96,13 +96,23 @@
         </ul>
 
         <div style="margin-top:20px;">
-          <button v-on:click="clickToggleHelp" class="small ui right floated violet button">OK, GOT IT</button>
-          &nbsp;&nbsp;
+          <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
+            OK, GOT IT
+          </button>
+
+          <button v-on:click="this.window.open('/assets/cmp_data_all.csv')"
+                  class="small ui right labeled icon floated yellow button"
+                  style="margin-right:5px">
+                  <i class="icon download"></i>
+                  Download data (.csv)
+          </button>
+
           <button v-on:click="this.window.open('http://www.sfcta.org/congestion-management-program','_blank')"
                   class="small ui right floated basic violet button"
                   style="margin-right:5px">
                   Learn more about CMP&hellip;
           </button>
+
         </div>
   </div>
 
