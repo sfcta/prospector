@@ -22,7 +22,7 @@ h5 {margin-top:4px; margin-bottom: 4px;}
   top:0;
   right:0;
   bottom:0;
-  width:400px;
+  width:320px;
   height:800px;
   padding:0px 20px 0px 20px;
   z-index:10;
@@ -42,23 +42,13 @@ h5 {margin-top:4px; margin-bottom: 4px;}
 }
 
 #stats-panel {
-  display:table-row;
+  position:center;
   vertical-align:top;
-  margin-left:auto;
-  margin-right: auto;
+  width: 100%;
+  margin-top: 50px;
 }
 
 #stats-panel h1 {font-size:28px;}
-
-.logo {
-  display:table-row;
-  text-align:right;
-  vertical-align:bottom;
-  margin-left:10px;
-  margin-right:10px;
-  margin-bottom:0px;
-  height:80px;
-}
 
 
 .apptitle {
@@ -80,8 +70,10 @@ h5 {margin-top:4px; margin-bottom: 4px;}
   color:#fff;
 }
 
-#table-logo {margin-top:5px;}
-
+#table-logo {
+  margin-top:2px;  
+  margin-bottom: 2px;
+}
 
 p.hint {color:#777; text-align:right; margin-right:24px; margin-top:-20px;}
 
@@ -94,7 +86,7 @@ p.hint {color:#777; text-align:right; margin-right:24px; margin-top:-20px;}
 
 #sfmap {
   height:800px;
-  margin-right: 400px;
+  margin-right: 320px;
   z-index:0;
 }
 
@@ -159,7 +151,12 @@ ul {margin-top:5px;}
 
 table {text-align:center; vertical-align:top; }
 td {text-align:center; vertical-align:top; }
-.td-logo {text-align:right; vertical-align:middle; }
+
+.td-logo {
+  text-align:right;
+  vertical-align:middle;
+  padding-right: 0px;
+}
 
 .fade-enter-active, .fade-leave-active {
   transition: opacity 1.0s
@@ -183,6 +180,7 @@ td {text-align:center; vertical-align:top; }
 }
 
 #vizbuttons {
+  margin-top:5px;
   width:100%;
 }
 
@@ -214,3 +212,38 @@ td {text-align:center; vertical-align:top; }
 p.legend-row {
   margin-bottom: 3px;
 }
+
+hr {
+  margin: 5px 0px;
+}
+
+.logo {
+  display:table-row;
+  text-align:right;
+  vertical-align:bottom;
+  margin-left:10px;
+  margin-right:10px;
+  margin-bottom:0px;
+  height:80px;
+}
+
+tbody tr:nth-child(odd) td, tbody th {
+    background-color: #444;
+    border: 0px;
+}
+
+table { border: 0px; }
+
+.img-logo {
+  vertical-align: center;
+  margin-bottom: 0px;
+}
+
+.agency {
+  margin-right: 0px;
+}
+
+.pickers {
+  text-align:left;
+}
+
