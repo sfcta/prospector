@@ -238,22 +238,25 @@ let oldHoverTarget;
 function hoverFeature(e) {
 
   clearTimeout(infoPanelTimeout);
+  infoPanel.update(e.target.feature);
+
+  // don't do anything else if the feature is already clicked
+  console.log(selGeoId);
+  console.log(e.target.feature);
+
+  if (selGeoId === e.target.feature.cmp_segid) return;
 
   // return previously-hovered segment to its original color
   if (oldHoverTarget && e.target.feature.cmp_segid != selGeoId) {
-    geoLayer.resetStyle(oldHoverTarget);
+    if (oldHoverTarget.feature.cmp_segid != selGeoId) geoLayer.resetStyle(oldHoverTarget);
   }
 
-  infoPanel.update(e.target.feature);
-
-  let highlightedGeo = oldHoverTarget = e.target;
+  let highlightedGeo = e.target;
   highlightedGeo.bringToFront();
 
-  if(highlightedGeo.feature.cmp_segid != selGeoId){
+  if(highlightedGeo.feature.cmp_segid != selGeoId) {
     highlightedGeo.setStyle(styles.selected);
-    let geo = e.target.feature;
-    let popupText = "<b>"+geo.cmp_name+" "+geo.direction+"-bound</b><br/>" +
-                  geo.cmp_from + " to " + geo.cmp_to;
+    oldHoverTarget = e.target;
   }
 }
 
