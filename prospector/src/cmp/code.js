@@ -241,9 +241,6 @@ function hoverFeature(e) {
   infoPanel.update(e.target.feature);
 
   // don't do anything else if the feature is already clicked
-  console.log(selGeoId);
-  console.log(e.target.feature);
-
   if (selGeoId === e.target.feature.cmp_segid) return;
 
   // return previously-hovered segment to its original color
@@ -331,6 +328,8 @@ function buildChartHtmlFromCmpData(json=null) {
   if(json) {
     let byYear = {};
     let data = [];
+    let maxHeight = 0;
+
     for (let entry of json) {
       let metric_col = selviz_metric;
       if (selviz_metric==VIZ_INFO['ALOS']['METRIC']) metric_col = 'auto_speed';
@@ -341,7 +340,16 @@ function buildChartHtmlFromCmpData(json=null) {
     }
     for (let year in byYear) {
       data.push({year:year, am: byYear[year]['AM'], pm: byYear[year]['PM']});
+      if (byYear[year]['AM']) maxHeight = Math.max(maxHeight, byYear[year]['AM'])
+      if (byYear[year]['PM']) maxHeight = Math.max(maxHeight, byYear[year]['PM'])
     }
+
+    // scale ymax to either 20 or 60:
+    maxHeight = (maxHeight <= 20 ? 20 : 60);
+
+    // use maxHeight for ALOS and TSPD; use auto for other metrics
+    let scale = 'auto';
+    if (app.selectedViz == 'ALOS' || app.selectedViz == 'TSPD') scale = maxHeight;
 
     new Morris.Line({
       // ID of the element in which to draw the chart.
@@ -356,6 +364,7 @@ function buildChartHtmlFromCmpData(json=null) {
       // Labels for the ykeys -- will be displayed when you hover over the
       // chart.
       labels: ['AM', 'PM'],
+      ymax: scale,
       lineColors: ["#f66","#99f"],
       xLabels: "year",
       xLabelAngle: 45,
@@ -391,6 +400,7 @@ function buildChartHtmlFromCmpData(json=null) {
       hideHover: true,
       gridTextColor: "#aaa",
       postUnits: VIZ_INFO[app.selectedViz]['POST_UNITS'],
+      ymax: (app.selectedViz=='TSPD' ? 60 : 'auto'),
     });
   }
 }
