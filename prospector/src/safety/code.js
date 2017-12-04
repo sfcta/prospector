@@ -49,7 +49,7 @@ function addSWITRSLayer(collisions) {
 		if (feature['pedkill'] > 0 || feature['bickill'] > 0) { 
 			return new L.CircleMarker(latlng, {radius: 5, fillOpacity: 0.5});
 		} else if (feature['pedinj'] > 0 || feature['bicinj'] > 0){
-			return new L.CircleMarker(latlng, {radius: 5, fillOpacity: 0.1});
+			return new L.CircleMarker(latlng, {radius: 5, fillOpacity: 0.2});
 		} else if (chosenSeverity != 'Fatal'){
 			return new L.CircleMarker(latlng, {radius: 5, fillOpacity: 0.5});
 		}
@@ -72,6 +72,7 @@ function addSWITRSLayer(collisions) {
 		  'Uninjured Bicyclist'],
 		  labels = [];
 	  
+	  div.innerHTML = '<h4>Incident Category</h4>';
       for (var i = 0; i < grades.length; i++) div.innerHTML += '<i style="background:' + incColor[grades[i]] + '"></i>' + grades[i] + '<br>';
 	  
 	  return div;
@@ -116,15 +117,14 @@ const yearLabels = ['2006', '2007', '2008', '2009', '2010', '2011', '2012', '201
 
 function getSWITRSinfo() {
   
-  
   const url = api_server + '?select=st_asgeojson,pedcol,biccol,year,time_,pedkill,pedinj,bickill,bicinj';
   if (chosenIncidents == 'Both') var chosenCollisions = '';
   else if (chosenIncidents == 'Bike') var chosenCollisions = '&pedcol=eq.N';
   else if (chosenIncidents == 'Ped') var chosenCollisions = '&biccol=eq.N';
   if (chosenSeverity == 'All') var chosenInjuries = '';
-  else if (chosenSeverity == 'Fatal') var chosenInjuries = '&pedinj=eq.0&bicinj=eq.0'
-  else if (chosenSeverity == 'Nonf') var chosenInjuries = '&pedkill=eq.0&bickill=eq.0'
-  let queryurl = url + '&period=eq.' + chosenPeriod + chosenCollisions + chosenInjuries;
+  else if (chosenSeverity == 'Fatal') var chosenInjuries = '&pedinj=eq.0&bicinj=eq.0';
+  else if (chosenSeverity == 'Nonf') var chosenInjuries = '&pedkill=eq.0&bickill=eq.0';
+  let queryurl = url + '&period=eq.' + chosenPeriod + chosenCollisions + chosenInjuries + '&year=eq.' + app.sliderValue;
   
   // Fetch the segments
   fetch(queryurl).then((resp) => resp.json()).then(function(jsonData) {
@@ -183,8 +183,6 @@ function getSWITRSData(json, year) {
 
 }
 
-//L.circle([37.80307388, -122.4114332], 50, {color: "#0000ff",fillColor: "#0000ff",fillOpacity: 0.1}).addTo(mymap);
-//L.marker([37.79, -122.416723]).addTo(mymap);
 
 
 let chosenPeriod = 'AM';
@@ -205,12 +203,6 @@ function pickPM(thing) {
   getSWITRSinfo();
 }
 
-function clickIncident(chosenIncident) {
-  incident = parseInt(chosenIncident);
-  app.incident = incident;
-
-  //getSWITRSinfo();
-}
 
 function pickBoth(thing) {
 	app.isBikeactive = false;
@@ -330,8 +322,9 @@ let app = new Vue({
 	isBothactive: true,
 	isFatalactive: false,
 	isNonfactive: false,
-	isAllactive: true
-	//timeSlider: timeSlider
+	isAllactive: true,
+	sliderValue: 0,
+	timeSlider: timeSlider
   },
   methods: {
     pickAM: pickAM,
@@ -344,12 +337,13 @@ let app = new Vue({
 	pickAll: pickAll
   },
   watch: {
-    //sliderValue: sliderChanged,
+    sliderValue: sliderChanged,
   },
   components: {
-    //vueSlider,
+    vueSlider,
   }
 });
 
+
 // Ready to go! Read some data.
-getSWITRSinfo();
+updateSliderData();
