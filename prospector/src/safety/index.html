@@ -5,11 +5,24 @@ thumbnail: scrnshot.png
 css: main.css
 ---
 
-<h2>SF Collisions Data from SWITRS</h2>
-
 <div id="container">
 	<div id="panel">
-		
+		<div>
+		<hr/>
+        <h3 class="apptitle">SF Collisions Data from SWITRS</h3>
+          <div id="helpbar">
+            <button class="ui mini right labeled icon violet button"
+                    v-on:click="clickToggleHelp">
+                    <i class="icon info"></i>
+                    What is this?
+            </button>
+            &nbsp;
+            <button class="ui mini right labeled icon violet button"
+                    v-on:click="this.window.open('http://www.sfcta.org/CMP-home','_blank')">
+                    <i class="icon right arrow"></i>
+                    Learn More
+            </button>
+          </div>
 		<div class="dashboard">
 		<div id="picker">
 			<hr/>
@@ -75,6 +88,7 @@ css: main.css
         </div>
 		</div>
 		</div>
+		</div>
 </div>
 <br/>
 
@@ -85,7 +99,7 @@ css: main.css
 
 <div id="helpbox" v-show="showHelp" class="ui segment">
         <h2 style="margin-bottom:0px;">
-        Uber and Lyft in San Francisco</h2>
+        Bicycle and Pedestrian Collision Data</h2>
         <hr style="margin-bottom:5px"/>
         This data is the observed collisions in San Francisco thanks to the SWITRS database.
         <ul>
@@ -102,20 +116,18 @@ css: main.css
         <table><tr>
           <td class="help"><img height=96 src="images/mouse-left.png"></td>
           <td class="help"><img height=96 src="images/mouse-wheel.png"></td>
-          <td class="help"><img height=96 src="images/mouse-right.png"></td>
         </tr><tr>
           <td width="33%" class="help">Left-click and drag to pan the map</td>
           <td width="33%"class="help">Mouse wheel changes zoom</td>
-          <td width="33%"class="help">Switch to 3D mode! Right-click and drag to change 3D view.</td>
         </tr></table>
 
         <div style="margin-top:20px;">
           <button v-on:click="clickToggleHelp" class="small ui right floated violet button">OK, GOT IT</button>
           &nbsp;&nbsp;
-          <button v-on:click="this.window.open('http://www.sfcta.org/tncstoday','_blank')"
+          <button v-on:click="this.window.open('http://www.sfcta.org/CMP-home','_blank')"
                   class="small ui right floated basic violet button"
                   style="margin-right:5px">
-                  Learn more about TNCs&hellip;
+                  Learn more about safety and congestion&hellip;
           </button>
         </div>
   </div>

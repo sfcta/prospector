@@ -20,7 +20,6 @@ L.tileLayer(url, {
   accessToken:token,
 }).addTo(mymap);
 
-
 let incColor = {'Killed Pedestrian':"#280f34", 'Killed Bicyclist':"#cb0101", 
 'Injured Pedestrian':"#11cbd7", 'Injured Bicyclist':"#ff5200", 'Uninjured Pedestrian':"#ff0099", 
 'Uninjured Bicyclist':"#1bc644"};
@@ -82,7 +81,6 @@ function addSWITRSLayer(collisions) {
   mapLegend.addTo(mymap);
 };
 
-
 function styleByIncidentColor(collision) {
   if (collision['pedkill'] > 0) {
 	  return {"color": incColor['Killed Pedestrian'],"weight": 0.1,
@@ -103,7 +101,6 @@ function styleByIncidentColor(collision) {
 	  return {"color": incColor['Uninjured Bicyclist'],"weight": 0.1,
 	  "opacity": incOpacity['Uninjured Bicyclist']};
   }
-
 
   let color = incColor[incType];
   let opac = incOpacity[incType];
@@ -130,7 +127,6 @@ function getSWITRSinfo() {
   .catch(function(error) {
     console.log("err: "+error);
   });
-  
 }
 
 function hoverOnSegment(e) {
@@ -263,7 +259,6 @@ let timeSlider = {
           style: {"marginTop":"0px","marginBottom":"40px"},
 };
 
-
 let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
@@ -297,6 +292,7 @@ let app = new Vue({
     vueSlider,
   }
 });
+
 let cookieShowHelp = Cookies.get('showHelp');
 function clickToggleHelp() {
   helpPanel.showHelp = !helpPanel.showHelp;
@@ -308,6 +304,7 @@ function clickToggleHelp() {
     Cookies.set('showHelp','false', {expires:365});
   }
 }
+
 let helpPanel = new Vue({
   el: '#helpbox',
   data: {
