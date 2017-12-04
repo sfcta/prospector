@@ -4,6 +4,7 @@
 import 'babel-polyfill';
 import 'isomorphic-fetch';
 import vueSlider from 'vue-slider-component';
+import Cookies from 'js-cookie';
 
 let api_server = 'http://api.sfcta.org/api/switrs_viz';
 
@@ -31,7 +32,7 @@ let collisionLayer;
 let mapLegend;
 let segmentLos = {};
 
-// add CMP segment layer
+// add SWITRS layer
 function addSWITRSLayer(collisions) {
    //TODO: figure out why PostGIS geojson isn't in exactly the right format.
    
@@ -61,7 +62,6 @@ function addSWITRSLayer(collisions) {
     },
   });
   collisionLayer.addTo(mymap);
-  
 
   mapLegend = L.control({position: 'bottomright'});
  
@@ -112,9 +112,6 @@ function styleByIncidentColor(collision) {
 
 }
 
-const yearLabels = ['2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016'];
-
-
 function getSWITRSinfo() {
   
   const url = api_server + '?select=st_asgeojson,pedcol,biccol,year,time_,pedkill,pedinj,bickill,bicinj';
@@ -134,7 +131,6 @@ function getSWITRSinfo() {
     console.log("err: "+error);
   });
   
-
 }
 
 function hoverOnSegment(e) {
@@ -144,46 +140,6 @@ function hoverOnSegment(e) {
 function clickedOnSegment(e) {
   console.log("Click!", e);
 }
-
-
-function getSWITRSData(json, year) {
-  let url = api_server + 'api/switrs_viz?';
-  if (chosenIncidents = 'Both'){
-	  let params = 'year=eq.'+year +
-               '&period=eq.'+chosenPeriod +
-               '&select=bickill,bicinj,pedkill,pedinj';
-  } else if (chosenIncidents = 'Bikes'){
-	  let params = 'year=eq.'+year +
-               '&period=eq.'+chosenPeriod +
-               '&select=bickill,bicinj';
-  } else {
-	  let params = 'year=eq.'+year +
-               '&period=eq.'+chosenPeriod +
-               '&select=pedkill,pedinj';
-  }
-
-  let finalUrl = url + params;
-
-  fetch(finalUrl).then((resp) => resp.json()).then(function(data) {
-
-    let losData = {};
-    for (let segment in data) {
-      let thing = data[segment];
-      losData[thing.cmp_id] = thing.los_HCM1985;
-    }
-
-    // add it to the map
-    segmentLos = losData;
-
-    if (segmentLayer) segmentLayer.clearLayers();
-
-  }).catch(function(error) {
-    console.log(error);
-  });
-
-}
-
-
 
 let chosenPeriod = 'AM';
 let chosenIncidents = 'Both';
@@ -202,7 +158,6 @@ function pickPM(thing) {
   chosenPeriod = 'PM';
   getSWITRSinfo();
 }
-
 
 function pickBoth(thing) {
 	app.isBikeactive = false;
@@ -309,8 +264,6 @@ let timeSlider = {
 };
 
 
-
-
 let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
@@ -327,6 +280,7 @@ let app = new Vue({
 	timeSlider: timeSlider
   },
   methods: {
+	clickToggleHelp: clickToggleHelp,
     pickAM: pickAM,
     pickPM: pickPM,
 	pickBike: pickBike,
@@ -343,7 +297,32 @@ let app = new Vue({
     vueSlider,
   }
 });
+let cookieShowHelp = Cookies.get('showHelp');
+function clickToggleHelp() {
+  helpPanel.showHelp = !helpPanel.showHelp;
 
-
+  // and save it for next time
+  if (helpPanel.showHelp) {
+    Cookies.remove('showHelp');
+  } else {
+    Cookies.set('showHelp','false', {expires:365});
+  }
+}
+let helpPanel = new Vue({
+  el: '#helpbox',
+  data: {
+    showHelp: (cookieShowHelp==undefined),
+  },
+  methods: {
+    clickToggleHelp: clickToggleHelp,
+  },
+  mounted: function () {
+    document.addEventListener("keydown", (e) => {
+      if (this.showHelp && e.keyCode == 27) {
+        clickToggleHelp();
+      }
+    });
+  }}
+);
 // Ready to go! Read some data.
 updateSliderData();

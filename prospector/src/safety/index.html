@@ -83,4 +83,41 @@ css: main.css
 
 <div id="sfmap"></div>
 
+<div id="helpbox" v-show="showHelp" class="ui segment">
+        <h2 style="margin-bottom:0px;">
+        Uber and Lyft in San Francisco</h2>
+        <hr style="margin-bottom:5px"/>
+        This data is the observed collisions in San Francisco thanks to the SWITRS database.
+        <ul>
+        <li>Currently, the points are the exact location in which the collision occurred.</li>
+        <li>Only collisions under the San Francisco area.
+        <li>Data is complete for years 2006-2014.</li>
+        <li>Data is not entirely complete according to SWITRS information for years 2015-2016.</li>
+        </ul>
+        <h2 style="margin-top:10px; margin-bottom:0px;">
+        How to use this map</h2>
+        <hr style="margin-bottom:5px"/>
+        Click any block to see the pickups and dropoffs for that area.
+        You can pick different days of the week and times of day on the right panel.
+        <table><tr>
+          <td class="help"><img height=96 src="images/mouse-left.png"></td>
+          <td class="help"><img height=96 src="images/mouse-wheel.png"></td>
+          <td class="help"><img height=96 src="images/mouse-right.png"></td>
+        </tr><tr>
+          <td width="33%" class="help">Left-click and drag to pan the map</td>
+          <td width="33%"class="help">Mouse wheel changes zoom</td>
+          <td width="33%"class="help">Switch to 3D mode! Right-click and drag to change 3D view.</td>
+        </tr></table>
+
+        <div style="margin-top:20px;">
+          <button v-on:click="clickToggleHelp" class="small ui right floated violet button">OK, GOT IT</button>
+          &nbsp;&nbsp;
+          <button v-on:click="this.window.open('http://www.sfcta.org/tncstoday','_blank')"
+                  class="small ui right floated basic violet button"
+                  style="margin-right:5px">
+                  Learn more about TNCs&hellip;
+          </button>
+        </div>
+  </div>
+
 <script type="application/javascript" src="/bundles/safety.js"></script>
