@@ -3,7 +3,6 @@
 // Must use npm and babel to support IE11/Safari
 import 'babel-polyfill';
 import 'isomorphic-fetch';
-import 'lodash';
 import vueSlider from 'vue-slider-component';
 import Cookies from 'js-cookie';
 
@@ -203,7 +202,6 @@ function mapSegments(cmpsegJson) {
     style: styleByMetricColor,
     onEachFeature: function(feature, layer) {
       layer.on({ mouseover: hoverFeature,
-                 mouseout: resetHighlight,
                  click : clickedOnFeature,
       });
     },
@@ -234,15 +232,21 @@ function styleByMetricColor(segment) {
   return {color: color, weight: 4, opacity: 1.0};
 }
 
-var infoPanelTimeout;
+let infoPanelTimeout;
+let oldHoverTarget;
 
 function hoverFeature(e) {
 
   clearTimeout(infoPanelTimeout);
 
+  // return previously-hovered segment to its original color
+  if (oldHoverTarget && e.target.feature.cmp_segid != selGeoId) {
+    geoLayer.resetStyle(oldHoverTarget);
+  }
+
   infoPanel.update(e.target.feature);
 
-  let highlightedGeo = e.target;
+  let highlightedGeo = oldHoverTarget = e.target;
   highlightedGeo.bringToFront();
 
   if(highlightedGeo.feature.cmp_segid != selGeoId){
@@ -253,10 +257,6 @@ function hoverFeature(e) {
   }
 }
 
-
-function resetHighlight(e) {
-  if (e.target.feature.cmp_segid != selGeoId) geoLayer.resetStyle(e.target);
-}
 
 function clickedOnFeature(e) {
   e.target.setStyle(styles.popup);
