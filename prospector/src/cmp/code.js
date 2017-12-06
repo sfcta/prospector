@@ -194,6 +194,7 @@ function mapSegments(cmpsegJson) {
     segment["metric"] = selMetricData[segment.cmp_segid]
   }
 
+
   if (geoLayer) mymap.removeLayer(geoLayer);
   if (mapLegend) mymap.removeControl(mapLegend);
   if (popSelSegment) popSelSegment.remove();

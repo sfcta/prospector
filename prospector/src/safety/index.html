@@ -1,0 +1,135 @@
+---
+layout: page
+title: Safety
+thumbnail: scrnshot.png
+css: main.css
+---
+
+<div id="container">
+	<div id="panel">
+		<div>
+		<hr/>
+        <h3 class="apptitle">SF Collisions Data from SWITRS</h3>
+          <div id="helpbar">
+            <button class="ui mini right labeled icon violet button"
+                    v-on:click="clickToggleHelp">
+                    <i class="icon info"></i>
+                    What is this?
+            </button>
+            &nbsp;
+            <button class="ui mini right labeled icon violet button"
+                    v-on:click="this.window.open('http://www.sfcta.org/CMP-home','_blank')">
+                    <i class="icon right arrow"></i>
+                    Learn More
+            </button>
+          </div>
+		<div class="dashboard">
+		<div id="picker">
+			<hr/>
+			<div>
+			<h4>Select Period of Day:</h4>
+			<button v-on:click="pickAM" v-bind:class="{ active: isAMactive }"
+                     class="mini ui inverted blue icon button">
+                     AM</button>
+			<button v-on:click="pickPM" v-bind:class="{ active: isPMactive }"
+                     class="mini ui inverted red icon button">
+                     PM</button>		  
+			</div>
+			<br/>
+			<div style="height:70px;font-size:1px;">
+			<h4>Select What Incidents:</h4>
+			<button 
+                    v-on:click="pickBike"
+                    class="mini ui inverted green icon button"
+                    v-bind:class="{ active: isBikeactive}">
+                    Bike
+            </button>
+			<button 
+                    v-on:click="pickPed"
+                    class="mini ui inverted green icon button"
+                    v-bind:class="{ active: isPedactive}">
+                    Pedestrian
+            </button>
+			<button 
+                    v-on:click="pickBoth"
+                    class="mini ui inverted green icon button"
+                    v-bind:class="{ active: isBothactive}">
+                    Both
+            </button>
+			</div>
+			<div>
+			<h5>Severity:</h5>
+			<button 
+                    v-on:click="pickFatal"
+                    class="mini ui inverted yellow icon button"
+                    v-bind:class="{ active: isFatalactive}">
+                    Fatal
+            </button>
+			<button 
+                    v-on:click="pickNonf"
+                    class="mini ui inverted yellow icon button"
+                    v-bind:class="{ active: isNonfactive}">
+                    Non-Fatal
+            </button>
+			<button 
+                    v-on:click="pickAll"
+                    class="mini ui inverted yellow icon button"
+                    v-bind:class="{ active: isAllactive}">
+                    All
+            </button>
+			</div>
+			<hr/>
+			<h2>Summary Statistics</h32>
+			<h4>Select What Year:</h4>
+			<br/>
+			<vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
+        <transition name="fade">
+        </transition>
+        </div>
+		</div>
+		</div>
+		</div>
+</div>
+<br/>
+
+
+
+
+<div id="sfmap"></div>
+
+<div id="helpbox" v-show="showHelp" class="ui segment">
+        <h2 style="margin-bottom:0px;">
+        Bicycle and Pedestrian Collision Data</h2>
+        <hr style="margin-bottom:5px"/>
+        This data is the observed collisions in San Francisco thanks to the SWITRS database.
+        <ul>
+        <li>Currently, the points are the exact location in which the collision occurred.</li>
+        <li>Only collisions under the San Francisco area.
+        <li>Data is complete for years 2006-2014.</li>
+        <li>Data is not entirely complete according to SWITRS information for years 2015-2016.</li>
+        </ul>
+        <h2 style="margin-top:10px; margin-bottom:0px;">
+        How to use this map</h2>
+        <hr style="margin-bottom:5px"/>
+        Click any block to see the pickups and dropoffs for that area.
+        You can pick different days of the week and times of day on the right panel.
+        <table><tr>
+          <td class="help"><img height=96 src="images/mouse-left.png"></td>
+          <td class="help"><img height=96 src="images/mouse-wheel.png"></td>
+        </tr><tr>
+          <td width="33%" class="help">Left-click and drag to pan the map</td>
+          <td width="33%"class="help">Mouse wheel changes zoom</td>
+        </tr></table>
+
+        <div style="margin-top:20px;">
+          <button v-on:click="clickToggleHelp" class="small ui right floated violet button">OK, GOT IT</button>
+          &nbsp;&nbsp;
+          <button v-on:click="this.window.open('http://www.sfcta.org/CMP-home','_blank')"
+                  class="small ui right floated basic violet button"
+                  style="margin-right:5px">
+                  Learn more about safety and congestion&hellip;
+          </button>
+        </div>
+  </div>
+
+<script type="application/javascript" src="/bundles/safety.js"></script>
