@@ -4,29 +4,47 @@ const sfcta_components = [
      'cmp',
      'walkskims',
      'tnc',
-	 'autolos',
-	 'safety',
+     'autolos',
+     'safety',
      //'viz-template',
-	 //'cmp-v0', 
+     //'cmp-v0',
 ];
 
 module.exports = {
      entry: () => {
-       let entries = {};
-       for (let tool of sfcta_components) {
-         entries[tool] = `./src/${tool}/code.js`;
-       }
-       return entries;
+        let entries = {};
+        for (let tool of sfcta_components) {
+          entries[tool] = ['babel-polyfill', `./src/${tool}/code.js`];
+        }
+        return entries;
      },
 
      output: {
          path: path.join(__dirname, './src/bundles/'),
          filename: '[name].js'
      },
+
      module: {
        loaders: [{
-         exclude: /node_modules/,
          loader: 'babel-loader',
+         exclude: /node_modules/,
+         query: {
+           plugins: ['transform-runtime'],
+           presets: [
+             ['env', {
+               "targets": {
+                 "browsers": [
+                    "Explorer 11",
+                    "Safari >= 8",
+                    "last 3 Chrome versions",
+                    "last 3 Firefox versions",
+                    "last 3 Edge versions"
+                  ]
+               },
+               "useBuiltIns": true
+             }]
+           ]
+         }
        }]
      },
 };
