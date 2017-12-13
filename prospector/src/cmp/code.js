@@ -400,7 +400,7 @@ function showVizChartForSelectedSegment() {
   if (selviz_metric == 'los_hcm85') metric_col = 'auto_speed';
 
   let segmentData = _allCmpData
-    .filter(row => row.cmp_segid == geo.cmp_segid)
+    .filter(row => row.cmp_segid == _selectedGeo.cmp_segid)
     .filter(row => row[metric_col] != null);
 
   buildChartHtmlFromCmpData(segmentData);

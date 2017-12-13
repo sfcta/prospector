@@ -9,6 +9,11 @@ h3 {padding-top:5px;}
 h4 {margin-right:10px;}
 h5 {margin-top:4px; margin-bottom: 4px;}
 
+/* keeps vue elements from "flashing" empty content before load is complete */
+[v-cloak] {
+  display: none;
+}
+
 #container {
   position: relative;
   width:100%;
@@ -95,7 +100,7 @@ p.hint {color:#777; text-align:right; margin-right:24px; margin-top:-20px;}
      left:0;
      margin-top:8px;
      margin-left: 8px;
-     width: 480px;
+     width: 500px;
      z-index:20;
      box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
 }
@@ -128,14 +133,6 @@ p.hint {color:#777; text-align:right; margin-right:24px; margin-top:-20px;}
 
 .column1 {width:60%; float: left; margin-top:20px; margin-bottom:30px;}
 .column2 {width:40%; float: right; }
-
-/* 3D icon graphics */
-.mapboxgl-ctrl-pitchtoggle-3d {
-    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCI+ICAgIDx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjM1ZW0iIHN0eWxlPSJmb250LXNpemU6IDE0cHg7IGZvbnQtZmFtaWx5OiAnSGVsdmV0aWNhIE5ldWUnLEFyaWFsLEhlbHZldGljYSxzYW5zLXNlcmlmOyBmb250LXdlaWdodDogYm9sZDsgdGV4dC1hbmNob3I6IG1pZGRsZTsiPjNEPC90ZXh0Pjwvc3ZnPg==);
-}
-.mapboxgl-ctrl-pitchtoggle-2d {
-    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCI+ICAgIDx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjM1ZW0iIHN0eWxlPSJmb250LXNpemU6IDE0cHg7IGZvbnQtZmFtaWx5OiAnSGVsdmV0aWNhIE5ldWUnLEFyaWFsLEhlbHZldGljYSxzYW5zLXNlcmlmOyBmb250LXdlaWdodDogYm9sZDsgdGV4dC1hbmNob3I6IG1pZGRsZTsiPjJEPC90ZXh0Pjwvc3ZnPg==);
-}
 
 a {color: #fff;}
 a:hover {color: #ddd;}

@@ -75,9 +75,8 @@
       </div>
     </div>
 
-
-
-  <div id="helpbox" v-show="showHelp" class="ui segment">
+  <div id="helpbox" v-if="showHelp" class="ui segment">
+  <div v-cloak> <!-- hides everything until Vue finished loading -->
         <h2 style="margin-bottom:0px;">Congestion in San Francisco</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
         Use this tool to explore performance metrics for both automobiles and buses on San Francisco roadways.
@@ -120,6 +119,7 @@
           </button>
 
         </div>
+  </div>
   </div>
 
   <div id="sfmap"></div>
