@@ -425,11 +425,14 @@ function buildChartHtmlFromCmpData(json = null) {
       byYear[entry.year][entry.period] = val;
     }
     for (let year in byYear) {
-      data.push({ year: year, am: byYear[year]['AM'], pm: byYear[year]['PM'] });
-      if (byYear[year]['AM'])
-        maxHeight = Math.max(maxHeight, byYear[year]['AM']);
-      if (byYear[year]['PM'])
-        maxHeight = Math.max(maxHeight, byYear[year]['PM']);
+      if (app.isAMActive) {
+        data.push({year: year, period: byYear[year]['AM']});
+      } else {
+        data.push({year: year, period: byYear[year]['PM']});
+      }
+
+      if (byYear[year][selPeriod])
+        maxHeight = Math.max(maxHeight, byYear[year][selPeriod]);
     }
 
     // scale ymax to either 20 or 60:
@@ -445,13 +448,13 @@ function buildChartHtmlFromCmpData(json = null) {
       data: data,
       element: 'longchart',
       hideHover: true,
-      labels: ['AM', 'PM'],
-      lineColors: ['#f66', '#99f'],
+      labels: [selPeriod],
+      lineColors: [app.isAMActive ? '#f66' : '#99f'],
       postUnits: VIZ_INFO[app.selectedViz]['POST_UNITS'],
       xkey: 'year',
       xLabels: 'year',
       xLabelAngle: 45,
-      ykeys: ['am', 'pm'],
+      ykeys: ['period'],
       ymax: scale,
     });
   } else {
@@ -487,6 +490,7 @@ function pickAM(thing) {
 
   drawMapSegments();
   highlightSelectedSegment();
+  showVizChartForSelectedSegment();
 }
 
 function pickPM(thing) {
@@ -496,6 +500,7 @@ function pickPM(thing) {
 
   drawMapSegments();
   highlightSelectedSegment();
+  showVizChartForSelectedSegment();
 }
 
 function sliderChanged(thing) {
