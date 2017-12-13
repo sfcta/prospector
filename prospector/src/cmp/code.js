@@ -332,6 +332,23 @@ function hoverFeature(e) {
   }
 }
 
+let _selectedGeo;
+let _selectedLatLng;
+
+function highlightSelectedSegment() {
+  if (!selGeoId) return;
+
+  mymap.eachLayer(function (e) {
+    try {
+      if (e.feature.cmp_segid === selGeoId) {
+        e.setStyle(styles.popup);
+        selectedSegment = e;
+        return;
+      }
+    } catch(error) {}
+  });
+}
+
 function clickedOnFeature(e) {
   e.target.setStyle(styles.popup);
 
@@ -352,6 +369,9 @@ function clickedOnFeature(e) {
 }
 
 function showSegmentDetails(geo, latlng) {
+  _selectedGeo = geo;
+  _selectedLatLng = latlng;
+
   // show popup
   let popupText =
     `<b>${geo.cmp_name} ${geo.direction}-bound</b><br/>` +
@@ -362,26 +382,25 @@ function showSegmentDetails(geo, latlng) {
     .setContent(popupText)
     .addTo(mymap);
 
+  // Revert to overall chart when no segment selected
+  popSelSegment.on('remove', function(e) {
+    geoLayer.resetStyle(selectedSegment);
+    app.chartSubtitle = aggdata_label;
+    prevselectedSegment = selectedSegment = selGeoId = _selectedGeo = null;
+    buildChartHtmlFromCmpData();
+  });
+
   // Show chart (filter json results for just the selected segment)
 
   let metric_col = selviz_metric;
   // show actual speeds in chart, not A-F LOS categories
   if (selviz_metric == 'los_hcm85') metric_col = 'auto_speed';
 
-  console.log(geo);
   let segmentData = _allCmpData
     .filter(row => row.cmp_segid == geo.cmp_segid)
     .filter(row => row[metric_col] != null);
 
   buildChartHtmlFromCmpData(segmentData);
-
-  // Revert to overall chart when no segment selected
-  popSelSegment.on('remove', function(e) {
-    geoLayer.resetStyle(selectedSegment);
-    app.chartSubtitle = aggdata_label;
-    prevselectedSegment = selectedSegment = selGeoId = null;
-    buildChartHtmlFromCmpData();
-  });
 }
 
 function buildChartHtmlFromCmpData(json = null) {
@@ -416,8 +435,9 @@ function buildChartHtmlFromCmpData(json = null) {
 
     // use maxHeight for ALOS and TSPD; use auto for other metrics
     let scale = 'auto';
-    if (app.selectedViz == 'ALOS' || app.selectedViz == 'TSPD')
+    if (app.selectedViz == 'ALOS' || app.selectedViz == 'TSPD') {
       scale = maxHeight;
+    }
 
     new Morris.Line({
       data: data,
@@ -462,21 +482,34 @@ function pickAM(thing) {
   selPeriod = 'AM';
   app.isAMActive = true;
   app.isPMActive = false;
+
+  if (popSelSegment) popSelSegment.off('remove');
   drawMapSegments();
+  highlightSelectedSegment();
 }
 
 function pickPM(thing) {
   selPeriod = 'PM';
   app.isAMActive = false;
   app.isPMActive = true;
+
+  if (popSelSegment) popSelSegment.off('remove');
   drawMapSegments();
+  highlightSelectedSegment();
 }
 
 function sliderChanged(thing) {
+  // cancel all the side-effects when old popup disappears
+  if (popSelSegment) popSelSegment.off('remove');
+
   drawMapSegments();
+  highlightSelectedSegment();
 }
 
 function clickViz(chosenviz) {
+  // cancel all the side-effects when old popup disappears
+  if (popSelSegment) popSelSegment.off('remove');
+
   app.selectedViz = chosenviz;
   app.chartTitle = VIZ_INFO[chosenviz]['CHARTINFO'];
 
@@ -485,7 +518,12 @@ function clickViz(chosenviz) {
 
   drawMapSegments();
 
-  buildChartHtmlFromCmpData();
+  if (_selectedGeo) {
+    showSegmentDetails(_selectedGeo, _selectedLatLng);
+    highlightSelectedSegment();
+  } else {
+    buildChartHtmlFromCmpData();
+  }
 }
 
 // fetch the year details in data
