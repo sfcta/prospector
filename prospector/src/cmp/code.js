@@ -70,122 +70,146 @@ const VIZ_INFO = {
     POST_UNITS: '',
   },
 };
-const MISSING_COLOR = '#ccc';
+const MISSING_COLOR = '#ccd';
 
-let init_selectedViz = 'ALOS';
+let init_selectedViz = VIZ_LIST[0];
+
 let data_view = VIZ_INFO[init_selectedViz]['VIEW'];
 let selviz_metric = VIZ_INFO[init_selectedViz]['METRIC'];
 let selPeriod = 'AM';
 let aggdata_view = 'cmp_aggregate';
+let aggdata_label = 'All Segments Combined';
 let selGeoId;
 
 let geoLayer, mapLegend;
 let selMetricData;
 let yearData = {};
-let longDataCache = {};
-let cacheMetricData;
 let popHoverSegment, popSelSegment;
 let selectedSegment, prevselectedSegment;
 
-function queryServer() {
-  cacheMetricData = null;
+let _segmentJson;
+let _allCmpData;
+let _aggregateData;
 
-  let url = API_SERVER + data_view + '?';
+async function initialPrep() {
+
+  console.log('1...');
+  _segmentJson = await fetchCmpSegments();
+
+  console.log('2...');
+  _allCmpData = await fetchAllCmpSegmentData();
+
+  console.log('3...');
+  _aggregateData = await fetchAggregateData();
+
+  console.log('4... ');
+  await buildChartHtmlFromCmpData();
+
+  console.log('5...');
+  await updateSliderData();
+
+  console.log('6 !!!');
+}
+
+async function fetchCmpSegments() {
+  const geo_url = API_SERVER + GEO_VIEW +
+    '?select=geometry,cmp_segid,cmp_name,cmp_from,cmp_to,direction,length';
+
+  try {
+    let resp = await fetch(geo_url);
+    let segments = await resp.json();
+
+    // do some parsing and stuff
+    for (let segment of segments) {
+      segment['type'] = 'Feature';
+      segment['geometry'] = JSON.parse(segment.geometry);
+    }
+    return segments;
+
+  } catch (error) {
+    console.log('map segment error: ' + error);
+  }
+}
+
+async function fetchAllCmpSegmentData() {
+  //FIXME this should be a map()
   let params =
-    'year=eq.' +
-    app.sliderValue +
-    '&period=eq.' +
-    selPeriod +
-    '&select=cmp_segid,' +
-    selviz_metric;
-  let data_url = url + params;
+    'select=cmp_segid,year,period,los_hcm85,transit_speed,transit_cv,atspd_ratio,auto_speed';
 
-  const geo_url =
-    API_SERVER +
-    GEO_VIEW +
-    '?' +
-    'select=geometry,cmp_segid,cmp_name,cmp_from,cmp_to,direction,length';
+  let data_url = API_SERVER + data_view + '?' + params;
 
   selMetricData = {};
 
-  // Fetch map data
-  fetch(data_url)
-    .then(resp => resp.json())
-    .then(function(mapdata) {
-      for (let seg in mapdata) {
-        selMetricData[mapdata[seg]['cmp_segid']] = mapdata[seg][selviz_metric];
-      }
-    })
-    .catch(function(error) {
-      console.log('mapdata fetch error: ' + error);
-    });
-  // Fetch segments
-  fetch(geo_url)
-    .then(resp => resp.json())
-    .then(function(jsonData) {
-      mapSegments(jsonData);
-    })
-    .catch(function(error) {
-      console.log('map error: ' + error);
-    });
-  // Fetch aggregate longitudinal cmp data
-  if (!longDataCache[app.selectedViz]) {
-    longDataCache[app.selectedViz] = {};
-    fetch(
-      API_SERVER +
-        aggdata_view +
-        '?viz=eq.' +
-        app.selectedViz +
-        '&select=fac_typ,period,year,metric'
-    )
-      .then(resp => resp.json())
-      .then(function(jsonData) {
-        let byYearAM = {};
-        let byYearPM = {};
-        for (let entry of jsonData) {
-          let val = Number(entry.metric).toFixed(
-            VIZ_INFO[app.selectedViz]['CHART_PREC']
-          );
-          if (val === 'NaN') continue;
-          if (entry.period == 'AM') {
-            if (!byYearAM[entry.year]) byYearAM[entry.year] = {};
-            byYearAM[entry.year][entry.fac_typ] = val;
-          } else {
-            if (!byYearPM[entry.year]) byYearPM[entry.year] = {};
-            byYearPM[entry.year][entry.fac_typ] = val;
-          }
-        }
-        let data = [];
-        for (let year in byYearAM) {
-          data.push({
-            year: year,
-            art: byYearAM[year]['Arterial'],
-            fwy: byYearAM[year]['Freeway'],
-          });
-        }
-        longDataCache[app.selectedViz]['AM'] = data;
-        data = [];
-        for (let year in byYearPM) {
-          data.push({
-            year: year,
-            art: byYearPM[year]['Arterial'],
-            fwy: byYearPM[year]['Freeway'],
-          });
-        }
-        longDataCache[app.selectedViz]['PM'] = data;
-      })
-      .then(function() {
-        buildChartHtmlFromCmpData();
-      })
-      .catch(function(error) {
-        console.log('longdata fetch error: ' + error);
-      });
-  } else buildChartHtmlFromCmpData();
+  try {
+    let resp = await fetch(data_url);
+    return await resp.json();
 
-  document.getElementById('chartinfo').innerHTML =
-    '<h3 style="font-size: 22px;">' +
-    VIZ_INFO[app.selectedViz]['CHARTINFO'] +
-    '</h3>';
+  } catch (error) {console.log('cmp data fetch error: ' + error);}
+}
+
+async function fetchAggregateData() {
+  let buildAggData = {};
+
+  const url = API_SERVER + aggdata_view
+    + '?select=fac_typ,period,year,viz,metric';
+
+  try {
+    let resp = await fetch(url);
+    let jsonData = await resp.json();
+
+    for (let viz of VIZ_LIST) {
+      parseAllAggregateData(buildAggData, jsonData, viz);
+    }
+    return buildAggData;
+
+  } catch(error) {
+    console.log('aggregate data error: ' + error);
+  }
+}
+
+async function parseAllAggregateData(buildAggData, jsonData, viz) {
+  buildAggData[viz] = {};
+
+  let vizData = jsonData.filter(row => row['viz'] === viz);
+
+  let byYearAM = {};
+  let byYearPM = {};
+
+  for (let entry of vizData) {
+    let val = Number(entry.metric).toFixed(
+      VIZ_INFO[viz]['CHART_PREC']
+    );
+    if (val === 'NaN') continue;
+    if (entry.period == 'AM') {
+      if (!byYearAM[entry.year]) byYearAM[entry.year] = {};
+      byYearAM[entry.year][entry.fac_typ] = val;
+    } else {
+      if (!byYearPM[entry.year]) byYearPM[entry.year] = {};
+      byYearPM[entry.year][entry.fac_typ] = val;
+    }
+  }
+
+  // Push AM data
+  let data = [];
+  for (let year in byYearAM) {
+    data.push({
+      year: year,
+      art: byYearAM[year]['Arterial'],
+      fwy: byYearAM[year]['Freeway'],
+    });
+  }
+  buildAggData[viz]['AM'] = data;
+
+  // Push PM data
+  data = [];
+  for (let year in byYearPM) {
+    data.push({
+      year: year,
+      art: byYearPM[year]['Arterial'],
+      fwy: byYearPM[year]['Freeway'],
+    });
+  }
+  buildAggData[viz]['PM'] = data;
 }
 
 // hover panel -------------------
@@ -193,8 +217,7 @@ let infoPanel = L.control();
 
 infoPanel.onAdd = function(map) {
   // create a div with a class "info"
-  this._div = L.DomUtil.create('div', 'info-panel');
-  //this.update();
+  this._div = L.DomUtil.create('div', 'info-panel-hide');
   return this._div;
 };
 
@@ -204,38 +227,47 @@ infoPanel.update = function(geo) {
 
   if (geo) {
     this._div.innerHTML =
-      '<b>' +
-      geo.cmp_name +
-      ' ' +
-      geo.direction +
-      '-bound</b><br/>' +
-      geo.cmp_from +
-      ' to ' +
-      geo.cmp_to;
+      `<b>${geo.cmp_name} ${geo.direction}-bound</b><br/>` +
+      `${geo.cmp_from} to ${geo.cmp_to}`;
   }
 
   infoPanelTimeout = setTimeout(function() {
+    // use CSS to hide the info-panel
     infoPanel._div.className = 'info-panel-hide';
+    // and clear the hover too
+    geoLayer.resetStyle(oldHoverTarget);
   }, 2000);
 };
-
 infoPanel.addTo(mymap);
 
-function mapSegments(cmpsegJson) {
-  // add segments to the map by using metric data to color
-  // TODO: figure out why PostGIS geojson isn't in exactly the right format.
-  for (let segment of cmpsegJson) {
-    segment['type'] = 'Feature';
-    segment['geometry'] = JSON.parse(segment.geometry);
-    //update segment json with metric data (to be used to assign color)
-    segment['metric'] = selMetricData[segment.cmp_segid];
+function drawMapSegments() {
+
+  // create a clean copy of the segment Json
+  let cleanSegments = _segmentJson.slice();
+
+  let relevantRows = _allCmpData.filter(
+    row => row.year==app.sliderValue && row.period===selPeriod
+  );
+
+  let lookup = {};
+  for (let row of relevantRows) {
+    lookup[row.cmp_segid] = row;
+  };
+
+  // update metric-colored segment data
+  for (let segment of cleanSegments) {
+    if (lookup[segment.cmp_segid]) {
+      segment['metric'] = lookup[segment.cmp_segid][selviz_metric];
+    } else {
+      segment['metric'] = null;
+    }
   }
 
   if (geoLayer) mymap.removeLayer(geoLayer);
   if (mapLegend) mymap.removeControl(mapLegend);
   if (popSelSegment) popSelSegment.remove();
 
-  geoLayer = L.geoJSON(cmpsegJson, {
+  geoLayer = L.geoJSON(cleanSegments, {
     style: styleByMetricColor,
     onEachFeature: function(feature, layer) {
       layer.on({
@@ -305,50 +337,22 @@ function clickedOnFeature(e) {
 
   let geo = e.target.feature;
   selGeoId = geo.cmp_segid;
-  if (selectedSegment) {
-    if (selectedSegment.feature.cmp_segid != geo.cmp_segid) {
-      prevselectedSegment = selectedSegment;
-      geoLayer.resetStyle(prevselectedSegment);
-      selectedSegment = e.target;
-    }
-  } else {
-    selectedSegment = e.target;
+
+  // unselect the previously-selected selection, if there is one
+  if (selectedSegment && selectedSegment.feature.cmp_segid != geo.cmp_segid) {
+    prevselectedSegment = selectedSegment;
+    geoLayer.resetStyle(prevselectedSegment);
   }
+  selectedSegment = e.target;
 
-  let tmptxt = geo.cmp_name + ' ' + geo.direction + '-bound';
-  document.getElementById('geoinfo').innerHTML = `<h5>${tmptxt} [${
-    geo.cmp_from
-  } to ${geo.cmp_to}]</h5>`;
+  let tmptxt = `${geo.cmp_name} ${geo.direction}-bound`;
+  app.chartSubtitle = `${tmptxt} [${geo.cmp_from} to ${geo.cmp_to}]`;
 
-  if (!cacheMetricData) {
-    // fetch longitudinal data for selected cmp segment
-    let metric_col = selviz_metric;
-    if (selviz_metric == VIZ_INFO['ALOS']['METRIC']) metric_col = 'auto_speed';
-
-    let url = API_SERVER + data_view + '?';
-    let params =
-      metric_col +
-      '=not.is.null&' +
-      'select=cmp_segid,period,year,' +
-      metric_col;
-    let data_url = url + params;
-
-    fetch(data_url)
-      .then(resp => resp.json())
-      .then(function(jsonData) {
-        cacheMetricData = jsonData;
-        showSegmentDetails(geo, e.latlng);
-      })
-      .catch(function(error) {
-        console.log('longitudinal data err: ' + error);
-      });
-  } else {
-    showSegmentDetails(geo, e.latlng);
-  }
+  showSegmentDetails(geo, e.latlng);
 }
 
 function showSegmentDetails(geo, latlng) {
-  // Show popup
+  // show popup
   let popupText =
     `<b>${geo.cmp_name} ${geo.direction}-bound</b><br/>` +
     `${geo.cmp_from} to ${geo.cmp_to}`;
@@ -359,16 +363,22 @@ function showSegmentDetails(geo, latlng) {
     .addTo(mymap);
 
   // Show chart (filter json results for just the selected segment)
-  let segmentData = cacheMetricData.filter(
-    segment => segment['cmp_segid'] === geo.cmp_segid
-  );
+
+  let metric_col = selviz_metric;
+  // show actual speeds in chart, not A-F LOS categories
+  if (selviz_metric == 'los_hcm85') metric_col = 'auto_speed';
+
+  console.log(geo);
+  let segmentData = _allCmpData
+    .filter(row => row.cmp_segid == geo.cmp_segid)
+    .filter(row => row[metric_col] != null);
+
   buildChartHtmlFromCmpData(segmentData);
 
   // Revert to overall chart when no segment selected
   popSelSegment.on('remove', function(e) {
     geoLayer.resetStyle(selectedSegment);
-    document.getElementById('geoinfo').innerHTML =
-      '<h5>All Segments Combined</h5>';
+    app.chartSubtitle = aggdata_label;
     prevselectedSegment = selectedSegment = selGeoId = null;
     buildChartHtmlFromCmpData();
   });
@@ -432,7 +442,7 @@ function buildChartHtmlFromCmpData(json = null) {
       lab_tmp = ['Arterial'];
     }
     new Morris.Line({
-      data: longDataCache[app.selectedViz][selPeriod],
+      data: _aggregateData[app.selectedViz][selPeriod],
       element: 'longchart',
       gridTextColor: '#aaa',
       hideHover: true,
@@ -449,28 +459,33 @@ function buildChartHtmlFromCmpData(json = null) {
 }
 
 function pickAM(thing) {
+  selPeriod = 'AM';
   app.isAMActive = true;
   app.isPMActive = false;
-  selPeriod = 'AM';
-  queryServer();
+  drawMapSegments();
 }
 
 function pickPM(thing) {
+  selPeriod = 'PM';
   app.isAMActive = false;
   app.isPMActive = true;
-  selPeriod = 'PM';
-  queryServer();
+  drawMapSegments();
 }
 
 function sliderChanged(thing) {
-  queryServer();
+  drawMapSegments();
 }
 
 function clickViz(chosenviz) {
   app.selectedViz = chosenviz;
+  app.chartTitle = VIZ_INFO[chosenviz]['CHARTINFO'];
+
   data_view = VIZ_INFO[chosenviz]['VIEW'];
   selviz_metric = VIZ_INFO[chosenviz]['METRIC'];
-  queryServer();
+
+  drawMapSegments();
+
+  buildChartHtmlFromCmpData();
 }
 
 // fetch the year details in data
@@ -533,6 +548,8 @@ let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
   data: {
+    chartTitle: VIZ_INFO[VIZ_LIST[0]].CHARTINFO,
+    chartSubtitle: aggdata_label,
     isAMActive: true,
     isPMActive: false,
     selectedViz: VIZ_LIST[0],
@@ -587,4 +604,4 @@ let helpPanel = new Vue({
 
 // this to get the year list directly from the database
 // so if database view get updated with new data, the slider data will reflect it too
-updateSliderData();
+initialPrep();
