@@ -265,7 +265,6 @@ function drawMapSegments() {
 
   if (geoLayer) mymap.removeLayer(geoLayer);
   if (mapLegend) mymap.removeControl(mapLegend);
-  if (popSelSegment) popSelSegment.remove();
 
   geoLayer = L.geoJSON(cleanSegments, {
     style: styleByMetricColor,
@@ -390,7 +389,11 @@ function showSegmentDetails(geo, latlng) {
     buildChartHtmlFromCmpData();
   });
 
-  // Show chart (filter json results for just the selected segment)
+  showVizChartForSelectedSegment();
+}
+
+// Show chart (filter json results for just the selected segment)
+function showVizChartForSelectedSegment() {
 
   let metric_col = selviz_metric;
   // show actual speeds in chart, not A-F LOS categories
@@ -483,7 +486,6 @@ function pickAM(thing) {
   app.isAMActive = true;
   app.isPMActive = false;
 
-  if (popSelSegment) popSelSegment.off('remove');
   drawMapSegments();
   highlightSelectedSegment();
 }
@@ -493,23 +495,16 @@ function pickPM(thing) {
   app.isAMActive = false;
   app.isPMActive = true;
 
-  if (popSelSegment) popSelSegment.off('remove');
   drawMapSegments();
   highlightSelectedSegment();
 }
 
 function sliderChanged(thing) {
-  // cancel all the side-effects when old popup disappears
-  if (popSelSegment) popSelSegment.off('remove');
-
   drawMapSegments();
   highlightSelectedSegment();
 }
 
 function clickViz(chosenviz) {
-  // cancel all the side-effects when old popup disappears
-  if (popSelSegment) popSelSegment.off('remove');
-
   app.selectedViz = chosenviz;
   app.chartTitle = VIZ_INFO[chosenviz]['CHARTINFO'];
 
@@ -519,7 +514,8 @@ function clickViz(chosenviz) {
   drawMapSegments();
 
   if (_selectedGeo) {
-    showSegmentDetails(_selectedGeo, _selectedLatLng);
+    showVizChartForSelectedSegment();
+    // showSegmentDetails(_selectedGeo, _selectedLatLng);
     highlightSelectedSegment();
   } else {
     buildChartHtmlFromCmpData();
