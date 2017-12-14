@@ -431,8 +431,11 @@ function buildChartHtmlFromCmpData(json = null) {
         data.push({year: year, period: byYear[year]['PM']});
       }
 
-      if (byYear[year][selPeriod])
-        maxHeight = Math.max(maxHeight, byYear[year][selPeriod]);
+      // use the same scale for am/pm even though we only show one
+      if (byYear[year]['AM'])
+        maxHeight = Math.max(maxHeight, byYear[year]['AM']);
+      if (byYear[year]['PM'])
+        maxHeight = Math.max(maxHeight, byYear[year]['PM']);
     }
 
     // scale ymax to either 20 or 60:
