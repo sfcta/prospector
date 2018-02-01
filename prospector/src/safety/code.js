@@ -7,9 +7,11 @@ import vueSlider from 'vue-slider-component';
 import Cookies from 'js-cookie';
 
 let api_server = 'http://api.sfcta.org/api/switrs_viz';
+var maplib = require('../jslib/maplib');
+let styles = maplib.styles;
 
 // add the SF Map using Leafleft and MapBox
-let mymap = L.map('sfmap').setView([37.78, -122.415], 14);
+let mymap = maplib.sfmap;
 let url = 'https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
 let token = 'pk.eyJ1IjoicHNyYyIsImEiOiJjaXFmc2UxanMwM3F6ZnJtMWp3MjBvZHNrIn0._Dmske9er0ounTbBmdRrRQ';
 let attribution ='<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
@@ -20,16 +22,15 @@ L.tileLayer(url, {
   accessToken:token,
 }).addTo(mymap);
 
-let incColor = {'Killed Pedestrian':"#280f34", 'Killed Bicyclist':"#cb0101", 
-'Injured Pedestrian':"#11cbd7", 'Injured Bicyclist':"#ff5200", 'Uninjured Pedestrian':"#ff0099", 
-'Uninjured Bicyclist':"#1bc644"};
-let incOpacity = {'Killed Pedestrian':0.5, 'Killed Bicyclist':0.5, 'Injured Pedestrian':0.15, 
-'Injured Bicyclist':0.15, 'Uninjured Pedestrian':0.5, 'Uninjured Bicyclist':0.5};
+let incColor = {'Fatal':"#ff0000",'Non-fatal':"#800080"};
+let incOpacity = {'Fatal':1, 'Non-fatal':0.15};
 let missingColor = '#ccc';
 
 let collisionLayer;
 let mapLegend;
 let segmentLos = {};
+
+let popHoverSegment;
 
 // add SWITRS layer
 function addSWITRSLayer(collisions) {
@@ -46,18 +47,20 @@ function addSWITRSLayer(collisions) {
   collisionLayer = L.geoJSON(collisions, {
     style: styleByIncidentColor,
 	pointToLayer: function(feature, latlng) {
+		
 		if (feature['pedkill'] > 0 || feature['bickill'] > 0) { 
-			return new L.CircleMarker(latlng, {radius: 5, fillOpacity: 0.5});
+			return new L.CircleMarker(latlng, {radius: (1.5/feature['count'])+feature['count']+.5, fillOpacity: 1});
 		} else if (feature['pedinj'] > 0 || feature['bicinj'] > 0){
-			return new L.CircleMarker(latlng, {radius: 5, fillOpacity: 0.2});
+			return new L.CircleMarker(latlng, {radius: (1.5/feature['count'])+feature['count']+.5, fillOpacity: 1/(feature['count']+(feature['count']/2))});
 		} else if (chosenSeverity != 'Fatal'){
-			return new L.CircleMarker(latlng, {radius: 5, fillOpacity: 0.5});
+			return new L.CircleMarker(latlng, {radius: (1.5/feature['count'])+feature['count']+.5, fillOpacity: 1/(feature['count']+(feature['count']/2))});
 		}
 	  },
     onEachFeature: function(feature, layer) {
-      layer.on({
-                 click : clickedOnSegment,
-      });
+        layer.on({
+                 mouseover : highlightFeature,
+				 mouseout : resetHighlight
+        });
     },
   });
   collisionLayer.addTo(mymap);
@@ -67,8 +70,7 @@ function addSWITRSLayer(collisions) {
   mapLegend.onAdd = function (map) {
 	  
 	  var div = L.DomUtil.create('div', 'info legend'),
-		  grades = ['Killed Pedestrian', 'Killed Bicyclist', 'Injured Pedestrian', 'Injured Bicyclist', 'Uninjured Pedestrian',
-		  'Uninjured Bicyclist'],
+		  grades = ['Fatal', 'Non-fatal'],
 		  labels = [];
 	  
 	  div.innerHTML = '<h4>Incident Category</h4>';
@@ -82,24 +84,12 @@ function addSWITRSLayer(collisions) {
 };
 
 function styleByIncidentColor(collision) {
-  if (collision['pedkill'] > 0) {
-	  return {"color": incColor['Killed Pedestrian'],"weight": 0.1,
-	  "opacity": incOpacity['Killed Pedestrian']};
-  } else if (collision['bickill'] > 0){
-	  return {"color": incColor['Killed Bicyclist'],"weight": 0.1,
-	  "opacity": incOpacity['Killed Bicyclist']}; 
-  } else if (collision['pedinj'] > 0){
-	  return {"color": incColor['Injured Pedestrian'],"weight": 0.1,
-	  "opacity": incOpacity['Injured Pedestrian']};
-  } else if (collision['bicinj'] > 0) {
-	  return {"color": incColor['Injured Bicyclist'],"weight": 0.1,
-	  "opacity": incOpacity['Injured Bicyclist']};
-  } else if (collision['pedcol'] == 'Y'){
-	  return {"color": incColor['Uninjured Pedestrian'],"weight": 0.1,
-	  "opacity": incOpacity['Uninjured Pedestrian']};
+  if (collision['pedkill'] > 0 || collision['bickill'] > 0) {
+	  return {"color": incColor['Fatal'],"weight": 0.1,
+	  "opacity": incOpacity['Fatal']};
   } else {
-	  return {"color": incColor['Uninjured Bicyclist'],"weight": 0.1,
-	  "opacity": incOpacity['Uninjured Bicyclist']};
+	  return {"color": incColor['Non-fatal'],"weight": 0.1,
+	  "opacity": incOpacity['Non-fatal']};
   }
 
   let color = incColor[incType];
@@ -111,7 +101,7 @@ function styleByIncidentColor(collision) {
 
 function getSWITRSinfo() {
   
-  const url = api_server + '?select=st_asgeojson,pedcol,biccol,year,time_,pedkill,pedinj,bickill,bicinj';
+  const url = api_server + '?select=st_asgeojson,pedcol,biccol,year,time_,pedkill,pedinj,bickill,bicinj,count,primaryrd,secondrd';
   if (chosenIncidents == 'Both') var chosenCollisions = '';
   else if (chosenIncidents == 'Bike') var chosenCollisions = '&pedcol=eq.N';
   else if (chosenIncidents == 'Ped') var chosenCollisions = '&biccol=eq.N';
@@ -129,16 +119,36 @@ function getSWITRSinfo() {
   });
 }
 
-function hoverOnSegment(e) {
-  console.log("Hover!", e);
+var popupTimeout;
+
+function highlightFeature(e) {
+
+  clearTimeout(popupTimeout);
+
+  let highlightedGeo = e.target;
+  highlightedGeo.bringToFront();
+
+  
+  highlightedGeo.setStyle(styles.selected);
+  let geo = e.target.feature;
+  let popupText = "<b>Collisions: "+geo.count+"<br/>" + "Primary Road: " +geo.primaryrd + "<br/>" + "Secondary Road: " +geo.secondrd+ "<br/>";
+  popHoverSegment = L.popup()
+                    .setLatLng(e.latlng)
+                    .setContent(popupText);
+
+  popupTimeout = setTimeout( function () {
+    popHoverSegment.openOn(mymap);
+  }, 300);
 }
 
-function clickedOnSegment(e) {
-  console.log("Click!", e);
+
+function resetHighlight(e) {
+  popHoverSegment.remove();
+  collisionLayer.resetStyle(e.target);
 }
 
 let chosenPeriod = 'AM';
-let chosenIncidents = 'Both';
+let chosenIncidents = 'Ped';
 let chosenSeverity = 'All';
 
 function pickAM(thing) {
@@ -155,18 +165,9 @@ function pickPM(thing) {
   getSWITRSinfo();
 }
 
-function pickBoth(thing) {
-	app.isBikeactive = false;
-	app.isPedactive = false;
-	app.isBothactive = true;
-	chosenIncidents = 'Both'
-	getSWITRSinfo();
-}
-
 function pickBike(thing) {
 	app.isBikeactive = true;
 	app.isPedactive = false;
-	app.isBothactive = false;
 	chosenIncidents = 'Bike'
 	getSWITRSinfo();
 }
@@ -174,7 +175,6 @@ function pickBike(thing) {
 function pickPed(thing) {
 	app.isBikeactive = false;
 	app.isPedactive = true;
-	app.isBothactive = false;
 	chosenIncidents = 'Ped'
 	getSWITRSinfo();
 }
@@ -266,8 +266,7 @@ let app = new Vue({
     isAMactive: true,
     isPMactive: false,
 	isBikeactive: false,
-	isPedactive: false,
-	isBothactive: true,
+	isPedactive: true,
 	isFatalactive: false,
 	isNonfactive: false,
 	isAllactive: true,
@@ -280,7 +279,6 @@ let app = new Vue({
     pickPM: pickPM,
 	pickBike: pickBike,
 	pickPed: pickPed,
-	pickBoth: pickBoth,
 	pickFatal: pickFatal,
 	pickNonf: pickNonf,
 	pickAll: pickAll
