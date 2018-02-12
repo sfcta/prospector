@@ -108,7 +108,7 @@ function getSWITRSinfo() {
   if (chosenSeverity == 'All') var chosenInjuries = '';
   else if (chosenSeverity == 'Fatal') var chosenInjuries = '&pedinj=eq.0&bicinj=eq.0';
   else if (chosenSeverity == 'Nonf') var chosenInjuries = '&pedkill=eq.0&bickill=eq.0';
-  let queryurl = url + '&period=eq.' + chosenPeriod + chosenCollisions + chosenInjuries + '&year=eq.' + app.sliderValue;
+  let queryurl = url + chosenCollisions + chosenInjuries + '&year=eq.' + app.sliderValue;
   
   // Fetch the segments
   fetch(queryurl).then((resp) => resp.json()).then(function(jsonData) {
@@ -147,23 +147,23 @@ function resetHighlight(e) {
   collisionLayer.resetStyle(e.target);
 }
 
-let chosenPeriod = 'AM';
+//let chosenPeriod = 'AM';
 let chosenIncidents = 'Ped';
 let chosenSeverity = 'All';
 
-function pickAM(thing) {
-  app.isAMactive = true;
-  app.isPMactive = false;
-  chosenPeriod = 'AM';
-  getSWITRSinfo();
-}
+//function pickAM(thing) {
+  //app.isAMactive = true;
+  //app.isPMactive = false;
+  //chosenPeriod = 'AM';
+  //getSWITRSinfo();
+//}
 
-function pickPM(thing) {
-  app.isAMactive = false;
-  app.isPMactive = true;
-  chosenPeriod = 'PM';
-  getSWITRSinfo();
-}
+//function pickPM(thing) {
+  //app.isAMactive = false;
+  //app.isPMactive = true;
+  //chosenPeriod = 'PM';
+  //getSWITRSinfo();
+//}
 
 function pickBike(thing) {
 	app.isBikeactive = true;
@@ -263,8 +263,8 @@ let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
   data: {
-    isAMactive: true,
-    isPMactive: false,
+    //isAMactive: true,
+    //isPMactive: false,
 	isBikeactive: false,
 	isPedactive: true,
 	isFatalactive: false,
@@ -275,8 +275,8 @@ let app = new Vue({
   },
   methods: {
 	clickToggleHelp: clickToggleHelp,
-    pickAM: pickAM,
-    pickPM: pickPM,
+    //pickAM: pickAM,
+    //pickPM: pickPM,
 	pickBike: pickBike,
 	pickPed: pickPed,
 	pickFatal: pickFatal,
