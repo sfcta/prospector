@@ -1,9 +1,8 @@
 <head>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
-
   <!-- Enable responsiveness on mobile devices-->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=1.0, user-scalable=yes" />
 
   <title>
     {% if page.title == "Home" %}
@@ -21,11 +20,11 @@
   <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
   <!-- LEAFLET -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
 
   <!-- VUE -->
-  <script src="https://unpkg.com/vue"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 
   <!-- MAPBOX GL -->
   <script src='https://api.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
@@ -43,7 +42,7 @@
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
   <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
-  
+
   <!-- IONICONS -->
   <link rel="stylesheet" href="{{ site.baseurl }}assets/ionicons/ionicons.min.css">
   <link rel="stylesheet" href="{{ site.baseurl }}assets/ionicons/leaflet.awesome-markers.css">
@@ -53,6 +52,17 @@
   <link rel="stylesheet" href="{{ site.baseurl }}assets/css/poole.css">
   <link rel="stylesheet" href="{{ site.baseurl }}assets/css/syntax.css">
   <link rel="stylesheet" href="{{ site.baseurl }}assets/css/sfcta.css">
+
+  <!-- GOOGLE ANALYTICS -->
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-100715169-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-100715169-2');
+  </script>
 
   <!-- Page CSS -->
   {% if page.css %}

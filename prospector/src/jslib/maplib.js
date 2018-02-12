@@ -66,20 +66,24 @@ function getColorFromVal(x, vals, colors, bins=true){
   }
 }
 
-function getLegHTML(vals, colors, bins=true){
+function getLegHTML(vals, colors, bins=true, postunits=''){
   let ret = '';
   if(bins){
     // loop through our bin intervals and generate a label with a colored square for each interval
     for (var i = 0; i < vals.length; i++) {
-      ret +=
-          '<i style="background:' + colors[i+1] + '"></i> ' +
-          vals[i] + (vals[i + 1] ? ' &ndash; ' + vals[i + 1] + '<br>' : '+');
+      ret += 
+          '<p class="legend-row"><i style="background:' + colors[i+1] + '"></i> '
+          + vals[i] + postunits 
+          + (vals[i + 1] ? ' &ndash; ' + vals[i + 1] + postunits + '<br>' : '+')
+          + '</p>';
     }
   } else{
     for (var i = 0; i < vals.length; i++) {
       ret +=
-          '<i style="background:' + colors[i] + '"></i> ' +
-          vals[i] + (vals[i + 1] ? '<br>' : '');
+          '<p class="legend-row"><i style="background:'
+          + colors[i] + '"></i> '
+          + vals[i] + postunits + (vals[i + 1] ? '<br>' : '')
+          + '</p>';
     }
   }
   return ret;

@@ -1,8 +1,11 @@
 ---
-layout: page
-title: CMP
+layout: standalone
+title: Congestion Management Program
 thumbnail: scrnshot.png
-css: main.css
+css:
+  - '/cmp/main.css'
+  - '/assets/css/standalone.css'
+
 ---
 
 {% include cmp.html %}
