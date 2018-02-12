@@ -18,13 +18,49 @@ L.tileLayer(url, {
   maxZoom: 18,
   accessToken:token,
 }).addTo(mymap);
-
+let intersectionLayer;
 
 let losColor = {'A':'#060', 'B':'#9f0', 'C':'#ff3', 'D':'#f90', 'E':'#f60', 'F':'#c00'};
 let missingColor = '#ccc';
 
+let osm = 1
 let segmentLayer;
 let segmentLos = {};
+
+// add Intersection layer
+function addIntersectionsLayer(intersections) {
+   //TODO: figure out why PostGIS geojson isn't in exactly the right format.
+
+
+  for (let intersection of intersections) {
+    intersection["type"] = "Feature";
+    intersection["geometry"] = JSON.parse(intersection.st_asgeojson);
+  }
+
+
+  if (intersectionLayer) mymap.removeLayer(intersectionLayer);
+
+
+  intersectionLayer = L.geoJSON(intersections, {
+    style: styleByIntersectionColor,
+    pointToLayer: function(feature, latlng) {
+
+    return new L.CircleMarker(latlng, {radius: 4, fillOpacity: .2});
+    },
+    onEachFeature: function(feature, layer) {
+        //layer.on({
+                 //mouseover : highlightFeature,
+        // mouseout : resetHighlight
+        //});
+    },
+  });
+  intersectionLayer.addTo(mymap);
+};
+
+function styleByIntersectionColor(intersection) {
+  return {"color": "#ff0000","weight": 0.1,"opacity": .5};
+
+}
 
 // add CMP segment layer
 function addCmpSegmentLayer(segments) {
@@ -63,16 +99,15 @@ function styleByLosColor(segment) {
 }
 
 
-function getCmpSegments() {
-  const url = api_server + 'api/cmp_segments?' +
-                           'select=geometry,segnum2013,cmp_name,cmp_from,cmp_to,cmp_dir,cmp_len';
+function getIntersections() {
+  const url = api_server + 'api/';
+  if (osm == 1) var chosenIntersections = 'osm_intersections?';
+  else var chosenIntersections = 'intersections?';
+  var queryurl = url+chosenIntersections;
 
   // Fetch the segments
-  fetch(url).then((resp) => resp.json()).then(function(jsonData) {
-
-    // do stuff here!
-    addCmpSegmentLayer(jsonData);
-    //getCmpData(jsonData, 2015);
+  fetch(queryurl).then((resp) => resp.json()).then(function(jsonData) {
+    addIntersectionsLayer(jsonData);
   })
   .catch(function(error) {
     console.log("err: "+error);
@@ -151,4 +186,4 @@ let app = new Vue({
 });
 
 // Ready to go! Read some data.
-getCmpSegments();
+getIntersections();

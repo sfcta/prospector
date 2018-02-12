@@ -4,10 +4,10 @@ const sfcta_components = [
      'cmp',
      'walkskims',
      'tnc',
-     'autolos',
-     'safety',
-     //'viz-template',
-     //'cmp-v0',
+	   'autolos',
+	   'safety',
+     'viz-template',
+	 //'cmp-v0',
 ];
 
 module.exports = {
