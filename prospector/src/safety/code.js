@@ -101,7 +101,7 @@ function styleByIncidentColor(collision) {
 
 function getSWITRSinfo() {
   
-  const url = api_server + '?select=st_asgeojson,pedcol,biccol,year,time_,pedkill,pedinj,bickill,bicinj,count,primaryrd,secondrd';
+  const url = api_server + '?select=st_asgeojson,pedcol,biccol,year,time_,pedkill,pedinj,bickill,bicinj,count,street_names';
   if (chosenIncidents == 'Both') var chosenCollisions = '';
   else if (chosenIncidents == 'Bike') var chosenCollisions = '&pedcol=eq.N';
   else if (chosenIncidents == 'Ped') var chosenCollisions = '&biccol=eq.N';
@@ -131,7 +131,8 @@ function highlightFeature(e) {
   
   highlightedGeo.setStyle(styles.selected);
   let geo = e.target.feature;
-  let popupText = "<b>Collisions: "+geo.count+"<br/>" + "Primary Road: " +geo.primaryrd + "<br/>" + "Secondary Road: " +geo.secondrd+ "<br/>";
+  let popupText = "<b>Total Collisions Here: "+geo.count+"<br/>" + "Roads at Intersection: ";
+  popupText += "<br/>"+geo.street_names;
   popHoverSegment = L.popup()
                     .setLatLng(e.latlng)
                     .setContent(popupText);
