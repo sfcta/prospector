@@ -35,61 +35,61 @@ let popHoverSegment;
 // add SWITRS layer
 function addSWITRSLayer(collisions) {
    //TODO: figure out why PostGIS geojson isn't in exactly the right format.
-   
+
   for (let collision of collisions) {
     collision["type"] = "Feature";
     collision["geometry"] = JSON.parse(collision.st_asgeojson);
   }
-  
+
   if (mapLegend) mymap.removeControl(mapLegend);
   if (collisionLayer) mymap.removeLayer(collisionLayer);
-  
+
   collisionLayer = L.geoJSON(collisions, {
     style: styleByIncidentColor,
-	pointToLayer: function(feature, latlng) {
-		
-		if (feature['pedkill'] > 0 || feature['bickill'] > 0) { 
-			return new L.CircleMarker(latlng, {radius: (1.5/feature['count'])+feature['count']+.5, fillOpacity: 1});
-		} else if (feature['pedinj'] > 0 || feature['bicinj'] > 0){
-			return new L.CircleMarker(latlng, {radius: (1.5/feature['count'])+feature['count']+.5, fillOpacity: 1/(feature['count']+(feature['count']/2))});
-		} else if (chosenSeverity != 'Fatal'){
-			return new L.CircleMarker(latlng, {radius: (1.5/feature['count'])+feature['count']+.5, fillOpacity: 1/(feature['count']+(feature['count']/2))});
-		}
-	  },
+  pointToLayer: function(feature, latlng) {
+
+    if (feature['pedkill'] > 0 || feature['bickill'] > 0) {
+      return new L.CircleMarker(latlng, {radius: (1.5/feature['count'])+feature['count']+.5, fillOpacity: 0.8});
+    } else if (feature['pedinj'] > 0 || feature['bicinj'] > 0){
+      return new L.CircleMarker(latlng, {radius: (1.5/feature['count'])+feature['count']+.5, fillOpacity: 1/(feature['count']+(feature['count']/2))});
+    } else if (chosenSeverity != 'Fatal'){
+      return new L.CircleMarker(latlng, {radius: (1.5/feature['count'])+feature['count']+.5, fillOpacity: 1/(feature['count']+(feature['count']/2))});
+    }
+    },
     onEachFeature: function(feature, layer) {
         layer.on({
                  mouseover : highlightFeature,
-				 mouseout : resetHighlight
+         mouseout : resetHighlight
         });
     },
   });
   collisionLayer.addTo(mymap);
 
   mapLegend = L.control({position: 'bottomright'});
- 
+
   mapLegend.onAdd = function (map) {
-	  
-	  var div = L.DomUtil.create('div', 'info legend'),
-		  grades = ['Fatal', 'Non-fatal'],
-		  labels = [];
-	  
-	  div.innerHTML = '<h4>Incident Category</h4>';
+
+    var div = L.DomUtil.create('div', 'info legend'),
+      grades = ['Fatal', 'Non-fatal'],
+      labels = [];
+
+    div.innerHTML = '<h4>Incident Category</h4>';
       for (var i = 0; i < grades.length; i++) div.innerHTML += '<i style="background:' + incColor[grades[i]] + '"></i>' + grades[i] + '<br>';
-	  
-	  return div;
-	  
+
+    return div;
+
   };
-  
+
   mapLegend.addTo(mymap);
 };
 
 function styleByIncidentColor(collision) {
   if (collision['pedkill'] > 0 || collision['bickill'] > 0) {
-	  return {"color": incColor['Fatal'],"weight": 0.1,
-	  "opacity": incOpacity['Fatal']};
+    return {"color": incColor['Fatal'],"weight": 0.1,
+    "opacity": incOpacity['Fatal']};
   } else {
-	  return {"color": incColor['Non-fatal'],"weight": 0.1,
-	  "opacity": incOpacity['Non-fatal']};
+    return {"color": incColor['Non-fatal'],"weight": 0.1,
+    "opacity": incOpacity['Non-fatal']};
   }
 
   let color = incColor[incType];
@@ -100,16 +100,17 @@ function styleByIncidentColor(collision) {
 }
 
 function getSWITRSinfo() {
-  
-  const url = api_server + '?select=st_asgeojson,pedcol,biccol,year,time_,pedkill,pedinj,bickill,bicinj,count,street_names';
+
+  const url = api_server + '?select=st_asgeojson,pedcol,biccol,year,time_,count,street_names';
   if (chosenIncidents == 'Both') var chosenCollisions = '';
-  else if (chosenIncidents == 'Bike') var chosenCollisions = '&pedcol=eq.N';
-  else if (chosenIncidents == 'Ped') var chosenCollisions = '&biccol=eq.N';
-  if (chosenSeverity == 'All') var chosenInjuries = '';
-  else if (chosenSeverity == 'Fatal') var chosenInjuries = '&pedinj=eq.0&bicinj=eq.0';
-  else if (chosenSeverity == 'Nonf') var chosenInjuries = '&pedkill=eq.0&bickill=eq.0';
-  let queryurl = url + chosenCollisions + chosenInjuries + '&year=eq.' + app.sliderValue;
-  
+  else if (chosenIncidents == 'Bike' && chosenSeverity == 'All') var chosenCollisions = ',bickill,bicinj&biccol=eq.Y';
+  else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal') var chosenCollisions = ',bickill,bicinj&biccol=eq.Y&bickill=eq.1';
+  else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf') var chosenCollisions = ',bickill,bicinj&biccol=eq.Y&bickill=eq.0';
+  else if (chosenIncidents == 'Ped' && chosenSeverity == 'All') var chosenCollisions = ',pedkill,pedinj&pedcol=eq.Y';
+  else if (chosenIncidents == 'Ped' && chosenSeverity == 'Fatal') var chosenCollisions = ',pedkill,pedinj&pedcol=eq.Y&pedkill=eq.1';
+  else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf') var chosenCollisions = ',pedkill,pedinj&pedcol=eq.Y&pedkill=eq.0';
+  let queryurl = url + chosenCollisions + '&year=eq.' + app.sliderValue;
+
   // Fetch the segments
   fetch(queryurl).then((resp) => resp.json()).then(function(jsonData) {
     addSWITRSLayer(jsonData);
@@ -128,7 +129,7 @@ function highlightFeature(e) {
   let highlightedGeo = e.target;
   highlightedGeo.bringToFront();
 
-  
+
   highlightedGeo.setStyle(styles.selected);
   let geo = e.target.feature;
   let popupText = "<b>Total Collisions Here: "+geo.count+"<br/>" + "Roads at Intersection: ";
@@ -167,41 +168,41 @@ let chosenSeverity = 'All';
 //}
 
 function pickBike(thing) {
-	app.isBikeactive = true;
-	app.isPedactive = false;
-	chosenIncidents = 'Bike'
-	getSWITRSinfo();
+  app.isBikeactive = true;
+  app.isPedactive = false;
+  chosenIncidents = 'Bike'
+  getSWITRSinfo();
 }
 
 function pickPed(thing) {
-	app.isBikeactive = false;
-	app.isPedactive = true;
-	chosenIncidents = 'Ped'
-	getSWITRSinfo();
+  app.isBikeactive = false;
+  app.isPedactive = true;
+  chosenIncidents = 'Ped'
+  getSWITRSinfo();
 }
 
 function pickFatal(thing) {
-	app.isFatalactive = true;
-	app.isNonfactive = false;
-	app.isAllactive = false;
-	chosenSeverity = 'Fatal'
-	getSWITRSinfo();
+  app.isFatalactive = true;
+  app.isNonfactive = false;
+  app.isAllactive = false;
+  chosenSeverity = 'Fatal'
+  getSWITRSinfo();
 }
 
 function pickNonf(thing) {
-	app.isFatalactive = false;
-	app.isNonfactive = true;
-	app.isAllactive = false;
-	chosenSeverity = 'Nonf'
-	getSWITRSinfo();
+  app.isFatalactive = false;
+  app.isNonfactive = true;
+  app.isAllactive = false;
+  chosenSeverity = 'Nonf'
+  getSWITRSinfo();
 }
 
 function pickAll(thing) {
-	app.isFatalactive = false;
-	app.isNonfactive = false;
-	app.isAllactive = true;
-	chosenSeverity = 'All'
-	getSWITRSinfo();
+  app.isFatalactive = false;
+  app.isNonfactive = false;
+  app.isAllactive = true;
+  chosenSeverity = 'All'
+  getSWITRSinfo();
 }
 
 function sliderChanged(thing) {
@@ -225,20 +226,20 @@ let timeSlider = {
           data: [0],
           sliderValue: 0,
           disabled: false,
-					width: 'auto',
-					height: 3,
-					direction: 'horizontal',
-					dotSize: 16,
-					eventType: 'auto',
-					show: true,
-					realTime: false,
-					tooltip: 'always',
-					clickable: true,
-					tooltipDir: 'bottom',
-					piecewise: true,
+          width: 'auto',
+          height: 3,
+          direction: 'horizontal',
+          dotSize: 16,
+          eventType: 'auto',
+          show: true,
+          realTime: false,
+          tooltip: 'always',
+          clickable: true,
+          tooltipDir: 'bottom',
+          piecewise: true,
           piecewiseLabel: false,
-					lazy: false,
-					reverse: false,
+          lazy: false,
+          reverse: false,
           speed: 0.25,
           piecewiseStyle: {
             "backgroundColor": "#ccc",
@@ -266,23 +267,23 @@ let app = new Vue({
   data: {
     //isAMactive: true,
     //isPMactive: false,
-	isBikeactive: false,
-	isPedactive: true,
-	isFatalactive: false,
-	isNonfactive: false,
-	isAllactive: true,
-	sliderValue: 0,
-	timeSlider: timeSlider
+  isBikeactive: false,
+  isPedactive: true,
+  isFatalactive: false,
+  isNonfactive: false,
+  isAllactive: true,
+  sliderValue: 0,
+  timeSlider: timeSlider
   },
   methods: {
-	clickToggleHelp: clickToggleHelp,
+  clickToggleHelp: clickToggleHelp,
     //pickAM: pickAM,
     //pickPM: pickPM,
-	pickBike: pickBike,
-	pickPed: pickPed,
-	pickFatal: pickFatal,
-	pickNonf: pickNonf,
-	pickAll: pickAll
+  pickBike: pickBike,
+  pickPed: pickPed,
+  pickFatal: pickFatal,
+  pickNonf: pickNonf,
+  pickAll: pickAll
   },
   watch: {
     sliderValue: sliderChanged,
