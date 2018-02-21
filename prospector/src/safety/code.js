@@ -51,21 +51,21 @@ function addSWITRSLayer(collisions) {
   pointToLayer: function(feature, latlng) {
 
     if (feature['pedkill'] > 0 && chosenSeverity == 'All' && chosenIncidents == 'Ped') {
-      return new L.CircleMarker(latlng, {radius: feature['pedcol']*1.5, fillOpacity: 0.8});
+      return new L.CircleMarker(latlng, {radius: feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.8});
     } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Ped'){
-	  return new L.CircleMarker(latlng, {radius: feature['pedkill']*1.5, fillOpacity: 0.8});
+	  return new L.CircleMarker(latlng, {radius: feature['pedkill']+feature['pedkill']/(feature['pedkill']+.01), fillOpacity: 0.8});
 	} else if (feature['pedkill'] == 0 && chosenSeverity == 'All' && chosenIncidents == 'Ped'){
-      return new L.CircleMarker(latlng, {radius: feature['pedcol']*1.5, fillOpacity: 0.5});
+      return new L.CircleMarker(latlng, {radius: feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.5});
     } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
-      return new L.CircleMarker(latlng, {radius: feature['pedinj']*1.5, fillOpacity: 0.5});
+      return new L.CircleMarker(latlng, {radius: feature['pedinj']+feature['pedinj']/(feature['pedinj']+.01), fillOpacity: 0.5});
     } else if (feature['bickill'] > 0 && chosenSeverity == 'All' && chosenIncidents == 'Bike') {
-      return new L.CircleMarker(latlng, {radius: feature['biccol']*1.5, fillOpacity: 0.8});
+      return new L.CircleMarker(latlng, {radius: feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.8});
     } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Bike'){
-	  return new L.CircleMarker(latlng, {radius: feature['bickill']*1.5, fillOpacity: 0.8});
+	  return new L.CircleMarker(latlng, {radius: feature['bickill']+feature['bickill']/(feature['bickill']+.01), fillOpacity: 0.8});
 	} else if (feature['bickill'] == 0 && chosenSeverity == 'All' && chosenIncidents == 'Bike'){
-      return new L.CircleMarker(latlng, {radius: feature['biccol']*1.5, fillOpacity: 0.5});
+      return new L.CircleMarker(latlng, {radius: feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.5});
     } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
-      return new L.CircleMarker(latlng, {radius: feature['bicinj']*1.5, fillOpacity: 0.5});
+      return new L.CircleMarker(latlng, {radius: feature['bicinj']+feature['bicinj']/(feature['bicinj']+.01), fillOpacity: 0.5});
     }
     },
     onEachFeature: function(feature, layer) {
