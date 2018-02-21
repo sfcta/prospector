@@ -25,12 +25,14 @@ L.tileLayer(url, {
 let incColor = {'Fatal':"#ff0000",'Non-fatal':"#800080"};
 let incOpacity = {'Fatal':1, 'Non-fatal':0.15};
 let missingColor = '#ccc';
-
+let popup = null;
 let collisionLayer;
 let mapLegend;
 let segmentLos = {};
+let years = [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016]
 
 let popHoverSegment;
+let currentChart = null;
 
 // add SWITRS layer
 function addSWITRSLayer(collisions) {
@@ -49,26 +51,27 @@ function addSWITRSLayer(collisions) {
   pointToLayer: function(feature, latlng) {
 
     if (feature['pedkill'] > 0 && chosenSeverity == 'All' && chosenIncidents == 'Ped') {
-      return new L.CircleMarker(latlng, {radius: feature['pedcol'], fillOpacity: 0.8});
+      return new L.CircleMarker(latlng, {radius: feature['pedcol']*1.5, fillOpacity: 0.8});
     } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Ped'){
-	  return new L.CircleMarker(latlng, {radius: feature['pedkill'], fillOpacity: 0.8});
+	  return new L.CircleMarker(latlng, {radius: feature['pedkill']*1.5, fillOpacity: 0.8});
 	} else if (feature['pedkill'] == 0 && chosenSeverity == 'All' && chosenIncidents == 'Ped'){
-      return new L.CircleMarker(latlng, {radius: feature['pedcol'], fillOpacity: 0.5});
+      return new L.CircleMarker(latlng, {radius: feature['pedcol']*1.5, fillOpacity: 0.5});
     } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
-      return new L.CircleMarker(latlng, {radius: feature['pedinj'], fillOpacity: 0.5});
+      return new L.CircleMarker(latlng, {radius: feature['pedinj']*1.5, fillOpacity: 0.5});
     } else if (feature['bickill'] > 0 && chosenSeverity == 'All' && chosenIncidents == 'Bike') {
-      return new L.CircleMarker(latlng, {radius: feature['biccol'], fillOpacity: 0.8});
+      return new L.CircleMarker(latlng, {radius: feature['biccol']*1.5, fillOpacity: 0.8});
     } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Bike'){
-	  return new L.CircleMarker(latlng, {radius: feature['bickill'], fillOpacity: 0.8});
+	  return new L.CircleMarker(latlng, {radius: feature['bickill']*1.5, fillOpacity: 0.8});
 	} else if (feature['bickill'] == 0 && chosenSeverity == 'All' && chosenIncidents == 'Bike'){
-      return new L.CircleMarker(latlng, {radius: feature['biccol'], fillOpacity: 0.5});
+      return new L.CircleMarker(latlng, {radius: feature['biccol']*1.5, fillOpacity: 0.5});
     } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
-      return new L.CircleMarker(latlng, {radius: feature['bicinj'], fillOpacity: 0.5});
+      return new L.CircleMarker(latlng, {radius: feature['bicinj']*1.5, fillOpacity: 0.5});
     }
     },
     onEachFeature: function(feature, layer) {
         layer.on({
                  mouseover : highlightFeature,
+				 click: clickedOnFeature,
          mouseout : resetHighlight
         });
     },
@@ -155,23 +158,105 @@ function resetHighlight(e) {
   collisionLayer.resetStyle(e.target);
 }
 
-//let chosenPeriod = 'AM';
+function clickedOnFeature(e) {
+	let chosenIntersection = e.target.feature.street_names;
+	let intersection = chosenIntersection;
+	// delete old chart
+    let chart = document.getElementById("chart");
+    if (chart) {
+        chart.parentNode.removeChild(chart);
+        currentChart = null;
+    }
+	let vizurl = api_server+'?street_names=eq.' + intersection;
+	
+	fetch(vizurl).then((resp) => resp.json()).then(function(jsonData) {
+      let popupText = buildPopupTitle(intersection) +
+              "<hr/>" +
+              "<div id=\"chart\" style=\"width: 250px; height:200px;\"></div>";
+
+      // one more time, make sure popup is gone
+      if (popup) {
+        popup.remove();
+      }
+
+      popup = new L.Popup({closeOnClick: true})
+        .setLatLng(e.latlng)
+        .setContent(popupText);
+
+      popup.addTo(mymap);
+
+      let data = buildChartDataFromJson(jsonData);
+      createChart(data);
+    }).catch(function(error) {
+      console.log("err: "+error);
+    });
+
+}
+
+function buildChartDataFromJson(jsonData){
+	let data = [];
+	
+	for (let year in years){
+		let pedcol = 0;
+		let biccol = 0;
+		for (let json in jsonData){
+			if (years[year] == Number(jsonData[json].year)){
+				pedcol += jsonData[json].pedcol;
+				biccol += jsonData[json].biccol;
+			}
+		}
+		data.push({year:years[year], pedcols:pedcol, biccols:biccol});
+	}
+	return data;
+}
+
+function createChart(data) {
+  // do some weird rounding to get y-axis scale to the 20s
+  let ymax = 0;
+  for (let entry of data) {
+    ymax = Math.max(ymax,entry['pedcols']+entry['biccols']);
+  }
+
+  currentChart = new Morris.Bar({
+    // ID of the element in which to draw the chart.
+    element: 'chart',
+    data: data,
+    stacked: true,
+    // The name of the data record attribute that contains x-values.
+    xkey: 'year',
+    // A list of names of data record attributes that contain y-values.
+    ykeys: ['pedcols', 'biccols'],
+    ymax: ymax,
+    labels: ['Pedestrian Collisions', 'Bicycle Collisions'],
+//    barColors: ["#3377cc","#cc3300",],
+    barColors: ["#3377cc","#cc0033",],
+    xLabels: "Year",
+    xLabelAngle: 60,
+    xLabelFormat: dateFmt,
+    yLabelFormat: yFmt,
+    hideHover: 'true',
+    parseTime: false,
+  });
+}
+
+function yFmt(y) { return Math.round(y).toLocaleString() }
+
+const yearLabels = ['2006','2007','2008','2009','2010',
+                  '2011','2012','2013','2014',
+                  '2015','2016'];
+
+function dateFmt(x) {
+  return yearLabels[x.x];
+}
+
+function buildPopupTitle(intersection) {
+  let title = "<h3 id=\"popup-title\"> Collision trends at selected intersection:<br/>" + intersection
+              //+chosenDir+"</h3>"
+  return title;
+}
+
 let chosenIncidents = 'Ped';
 let chosenSeverity = 'All';
-
-//function pickAM(thing) {
-  //app.isAMactive = true;
-  //app.isPMactive = false;
-  //chosenPeriod = 'AM';
-  //getSWITRSinfo();
-//}
-
-//function pickPM(thing) {
-  //app.isAMactive = false;
-  //app.isPMactive = true;
-  //chosenPeriod = 'PM';
-  //getSWITRSinfo();
-//}
 
 function pickBike(thing) {
   app.isBikeactive = true;
