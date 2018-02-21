@@ -212,7 +212,7 @@ function buildChartDataFromJson(jsonData){
 
 function createChart(data) {
   // do some weird rounding to get y-axis scale to the 20s
-  let ymax = 5;
+  let ymax = 4;
   for (let entry of data) {
     ymax = Math.max(ymax,entry['pedcols']+entry['biccols']);
   }
