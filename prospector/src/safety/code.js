@@ -6,7 +6,7 @@ import 'isomorphic-fetch';
 import vueSlider from 'vue-slider-component';
 import Cookies from 'js-cookie';
 
-let api_server = 'http://api.sfcta.org/api/switrs_viz';
+let api_server = 'http://api.sfcta.org/api/switrs_viz2';
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
 
@@ -48,12 +48,22 @@ function addSWITRSLayer(collisions) {
     style: styleByIncidentColor,
   pointToLayer: function(feature, latlng) {
 
-    if (feature['pedkill'] > 0 || feature['bickill'] > 0) {
-      return new L.CircleMarker(latlng, {radius: (1.5/feature['count'])+feature['count']+.5, fillOpacity: 0.8});
-    } else if (feature['pedinj'] > 0 || feature['bicinj'] > 0){
-      return new L.CircleMarker(latlng, {radius: (1.5/feature['count'])+feature['count']+.5, fillOpacity: 1/(feature['count']+(feature['count']/2))});
-    } else if (chosenSeverity != 'Fatal'){
-      return new L.CircleMarker(latlng, {radius: (1.5/feature['count'])+feature['count']+.5, fillOpacity: 1/(feature['count']+(feature['count']/2))});
+    if (feature['pedkill'] > 0 && chosenSeverity == 'All' && chosenIncidents == 'Ped') {
+      return new L.CircleMarker(latlng, {radius: feature['pedcol'], fillOpacity: 0.8});
+    } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Ped'){
+	  return new L.CircleMarker(latlng, {radius: feature['pedkill'], fillOpacity: 0.8});
+	} else if (feature['pedkill'] == 0 && chosenSeverity == 'All' && chosenIncidents == 'Ped'){
+      return new L.CircleMarker(latlng, {radius: feature['pedcol'], fillOpacity: 0.5});
+    } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
+      return new L.CircleMarker(latlng, {radius: feature['pedinj'], fillOpacity: 0.5});
+    } else if (feature['bickill'] > 0 && chosenSeverity == 'All' && chosenIncidents == 'Bike') {
+      return new L.CircleMarker(latlng, {radius: feature['biccol'], fillOpacity: 0.8});
+    } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Bike'){
+	  return new L.CircleMarker(latlng, {radius: feature['bickill'], fillOpacity: 0.8});
+	} else if (feature['bickill'] == 0 && chosenSeverity == 'All' && chosenIncidents == 'Bike'){
+      return new L.CircleMarker(latlng, {radius: feature['biccol'], fillOpacity: 0.5});
+    } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
+      return new L.CircleMarker(latlng, {radius: feature['bicinj'], fillOpacity: 0.5});
     }
     },
     onEachFeature: function(feature, layer) {
@@ -84,8 +94,11 @@ function addSWITRSLayer(collisions) {
 };
 
 function styleByIncidentColor(collision) {
-  if (collision['pedkill'] > 0 || collision['bickill'] > 0) {
+  if (collision['pedkill'] > 0 && chosenIncidents == 'Ped' && chosenSeverity != 'Nonf') {
     return {"color": incColor['Fatal'],"weight": 0.1,
+    "opacity": incOpacity['Fatal']};
+  } else if (collision['bickill'] > 0 && chosenIncidents == 'Bike' && chosenSeverity != 'Nonf') {
+	return {"color": incColor['Fatal'],"weight": 0.1,
     "opacity": incOpacity['Fatal']};
   } else {
     return {"color": incColor['Non-fatal'],"weight": 0.1,
@@ -101,15 +114,8 @@ function styleByIncidentColor(collision) {
 
 function getSWITRSinfo() {
 
-  const url = api_server + '?select=st_asgeojson,pedcol,biccol,year,time_,count,street_names';
-  if (chosenIncidents == 'Both') var chosenCollisions = '';
-  else if (chosenIncidents == 'Bike' && chosenSeverity == 'All') var chosenCollisions = ',bickill,bicinj&biccol=eq.Y';
-  else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal') var chosenCollisions = ',bickill,bicinj&biccol=eq.Y&bickill=eq.1';
-  else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf') var chosenCollisions = ',bickill,bicinj&biccol=eq.Y&bickill=eq.0';
-  else if (chosenIncidents == 'Ped' && chosenSeverity == 'All') var chosenCollisions = ',pedkill,pedinj&pedcol=eq.Y';
-  else if (chosenIncidents == 'Ped' && chosenSeverity == 'Fatal') var chosenCollisions = ',pedkill,pedinj&pedcol=eq.Y&pedkill=eq.1';
-  else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf') var chosenCollisions = ',pedkill,pedinj&pedcol=eq.Y&pedkill=eq.0';
-  let queryurl = url + chosenCollisions + '&year=eq.' + app.sliderValue;
+  const url = api_server + '?select=st_asgeojson,year,biccol,pedcol,bickill,pedkill,street_names,bicinj,pedinj';
+  let queryurl = url + '&year=eq.' + app.sliderValue;
 
   // Fetch the segments
   fetch(queryurl).then((resp) => resp.json()).then(function(jsonData) {
@@ -132,7 +138,7 @@ function highlightFeature(e) {
 
   highlightedGeo.setStyle(styles.selected);
   let geo = e.target.feature;
-  let popupText = "<b>Total Collisions Here: "+geo.count+"<br/>" + "Roads at Intersection: ";
+  let popupText = "<b>Bicycle Collisions: "+geo.biccol+"<br/>" + "Pedestrian Collisions: " + geo.pedcol + "<br/>"+ "Total Deaths: " + (geo.pedkill+geo.bickill) + "<br/>" + "Roads at Intersection: ";
   popupText += "<br/>"+geo.street_names;
   popHoverSegment = L.popup()
                     .setLatLng(e.latlng)
