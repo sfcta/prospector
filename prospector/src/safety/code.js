@@ -141,8 +141,32 @@ function highlightFeature(e) {
 
   highlightedGeo.setStyle(styles.selected);
   let geo = e.target.feature;
-  let popupText = "<b>Bicycle Collisions: "+geo.biccol+"<br/>" + "Pedestrian Collisions: " + geo.pedcol + "<br/>"+ "Total Deaths: " + (geo.pedkill+geo.bickill) + "<br/>" + "Roads at Intersection: ";
-  popupText += "<br/>"+geo.street_names;
+  let street_names = geo.street_names;
+  street_names = street_names.split(', ')
+  let intersectionName = '';
+  for (let i in street_names){
+	  if (i < street_names.length - 2) {
+		intersectionName += street_names[i].replace("'", "").replace("'", "").replace("[","").replace("]","") + ", ";
+	  } else if (i < street_names.length - 1){
+		intersectionName += street_names[i].replace("'", "").replace("'", "").replace("[","").replace("]","") + ", and ";
+	  } else {
+		intersectionName += street_names[i].replace("'", "").replace("'", "").replace("[","").replace("]","")
+	  }
+  }
+  let popupText = "<b>Intersection: "+intersectionName;
+  if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
+	  popupText += "<br/> Bike Collisions: " + geo.biccol;
+  } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
+	  popupText += "<br/> Bike Injuries: " + geo.bicinj;
+  } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
+	  popupText += "<br/> Bike Deaths: " + geo.bickill ;
+  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
+	  popupText += "<br/> Pedestrian Collisions: " + geo.pedcol;
+  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
+	  popupText += "<br/> Pedestrian Injuries: " + geo.pedinj;
+  } else {
+	  popupText += "<br/> Pedestrian Deaths: " + geo.pedkill;
+  }
   popHoverSegment = L.popup()
                     .setLatLng(e.latlng)
                     .setContent(popupText);
