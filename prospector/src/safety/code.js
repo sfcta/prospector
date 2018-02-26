@@ -252,29 +252,11 @@ function clickedOnFeature(e) {
 	
 	let chosenIntersection = e.target.feature.street_names;
 	let intersection = chosenIntersection;
-	// delete old chart
-    //let chart = document.getElementById("chart");
-    //if (chart) {
-        //chart.parentNode.removeChild(chart);
-        //currentChart = null;
-    //}
+	
 	let vizurl = api_server+'?street_names=eq.' + intersection;
 	
 	fetch(vizurl).then((resp) => resp.json()).then(function(jsonData) {
-      //let popupText = buildPopupTitle(intersection) +
-              //"<hr/>" +
-              //"<div id=\"chart\" style=\"width: 250px; height:200px;\"></div>";
-
-      // one more time, make sure popup is gone
-      //if (popup) {
-        //popup.remove();
-      //}
-
-      //popup = new L.Popup({closeOnClick: true})
-        //.setLatLng(e.latlng)
-        //.setContent(popupText);
-
-      //popup.addTo(mymap);
+      
 
       let data = buildChartDataFromJson(jsonData);
       createChart(data);
@@ -302,9 +284,6 @@ function buildChartDataFromJson(jsonData){
 }
 
 function createChart(data) {
-  // do some weird rounding to get y-axis scale to the 20s
-  //document.getElementById('longchart').innerHTML = '';
-  //console.log(document);
   let ymax = 4;
   for (let entry of data) {
     ymax = Math.max(ymax,entry['pedcols']+entry['biccols']);
