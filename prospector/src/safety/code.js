@@ -55,7 +55,6 @@ infopanel.update = function(geo, popupText) {
 	}, 3000);
 };
 infopanel.addTo(mymap);
-console.log(infopanel);
 
 // add SWITRS layer
 function addSWITRSLayer(collisions) {
@@ -146,6 +145,7 @@ function getSWITRSinfo() {
   // Fetch the segments
   fetch(queryurl).then((resp) => resp.json()).then(function(jsonData) {
     addSWITRSLayer(jsonData);
+	fetchYearlyDetails();
   })
   .catch(function(error) {
     console.log("err: "+error);
@@ -247,31 +247,34 @@ function hoverFeature(e) {
 }
 
 function clickedOnFeature(e) {
+	let clickedIntersection = e.target;
+	clickedIntersection.bringToFront();
+	
 	let chosenIntersection = e.target.feature.street_names;
 	let intersection = chosenIntersection;
 	// delete old chart
-    let chart = document.getElementById("chart");
-    if (chart) {
-        chart.parentNode.removeChild(chart);
-        currentChart = null;
-    }
+    //let chart = document.getElementById("chart");
+    //if (chart) {
+        //chart.parentNode.removeChild(chart);
+        //currentChart = null;
+    //}
 	let vizurl = api_server+'?street_names=eq.' + intersection;
 	
 	fetch(vizurl).then((resp) => resp.json()).then(function(jsonData) {
-      let popupText = buildPopupTitle(intersection) +
-              "<hr/>" +
-              "<div id=\"chart\" style=\"width: 250px; height:200px;\"></div>";
+      //let popupText = buildPopupTitle(intersection) +
+              //"<hr/>" +
+              //"<div id=\"chart\" style=\"width: 250px; height:200px;\"></div>";
 
       // one more time, make sure popup is gone
-      if (popup) {
-        popup.remove();
-      }
+      //if (popup) {
+        //popup.remove();
+      //}
 
-      popup = new L.Popup({closeOnClick: true})
-        .setLatLng(e.latlng)
-        .setContent(popupText);
+      //popup = new L.Popup({closeOnClick: true})
+        //.setLatLng(e.latlng)
+        //.setContent(popupText);
 
-      popup.addTo(mymap);
+      //popup.addTo(mymap);
 
       let data = buildChartDataFromJson(jsonData);
       createChart(data);
@@ -300,31 +303,45 @@ function buildChartDataFromJson(jsonData){
 
 function createChart(data) {
   // do some weird rounding to get y-axis scale to the 20s
+  //document.getElementById('longchart').innerHTML = '';
+  //console.log(document);
   let ymax = 4;
   for (let entry of data) {
     ymax = Math.max(ymax,entry['pedcols']+entry['biccols']);
   }
+  
+  if (currentChart) {
+	  currentChart.options.labels = ['Pedestrian Collisions', 'Bicycle Collisions'];
+	  currentChart.options.ykeys = ['pedcols', 'biccols'];
+	  currentChart.options.ymax = ymax;
+	  currentChart.options.barColors = ["#3377cc","#cc0033",];
+	  currentChart.setData(yearlyTotals);
+	  
+	  currentChart.setData(data);
 
-  currentChart = new Morris.Bar({
+  } else {
+
+    currentChart = new Morris.Bar({
     // ID of the element in which to draw the chart.
-    element: 'chart',
-    data: data,
-    stacked: true,
+      element: 'chart',
+      data: data,
+      stacked: true,
     // The name of the data record attribute that contains x-values.
-    xkey: 'year',
+      xkey: 'year',
     // A list of names of data record attributes that contain y-values.
-    ykeys: ['pedcols', 'biccols'],
-    ymax: ymax,
-    labels: ['Pedestrian Collisions', 'Bicycle Collisions'],
+      ykeys: ['pedcols', 'biccols'],
+      ymax: ymax,
+      labels: ['Pedestrian Collisions', 'Bicycle Collisions'],
 //    barColors: ["#3377cc","#cc3300",],
-    barColors: ["#3377cc","#cc0033",],
-    xLabels: "Year",
-    xLabelAngle: 60,
-    xLabelFormat: dateFmt,
-    yLabelFormat: yFmt,
-    hideHover: 'true',
-    parseTime: false,
+      barColors: ["#3377cc","#cc0033",],
+      xLabels: "Year",
+      xLabelAngle: 60,
+      xLabelFormat: dateFmt,
+      yLabelFormat: yFmt,
+      hideHover: 'true',
+      parseTime: false,
   });
+  }
 }
 
 function yFmt(y) { return Math.round(y).toLocaleString() }
@@ -341,6 +358,132 @@ function buildPopupTitle(intersection) {
   let title = "<h3 id=\"popup-title\"> Collision trends at selected intersection:<br/>" + intersection
               //+chosenDir+"</h3>"
   return title;
+}
+
+let yearlyTotals = [];
+
+function fetchYearlyDetails() {
+  const url = api_server;
+  fetch(url).then((resp) => resp.json()).then(function(json) {
+    buildYearlyDetails(json);
+  })
+  .catch(function(error) {
+    console.log("err: "+error);
+  });
+}
+
+function buildYearlyDetails(jsonData) {
+    yearlyTotals = [];
+	
+	for (let year in years){
+		let pedcol = 0;
+		let biccol = 0;
+		let pedkill = 0;
+		let bickill = 0;
+		let pedinj = 0;
+		let bicinj = 0;
+		for (let json in jsonData){
+			if (years[year] == Number(jsonData[json].year)){
+				pedcol += jsonData[json].pedcol;
+				biccol += jsonData[json].biccol;
+				pedkill += jsonData[json].pedkill;
+				bickill += jsonData[json].bickill;
+				pedinj += jsonData[json].pedinj;
+				bicinj += jsonData[json].bicinj;
+			}
+		}
+		yearlyTotals.push({year:years[year], pedcols:pedcol, biccols:biccol, pedkills:pedkill, bickills:bickill, pedinjs:pedinj, bicinjs:bicinj});
+	}
+
+    app.timeSlider.disabled = false;
+    showYearlyChart();
+
+    return yearlyTotals;
+}
+
+function showYearlyChart() {
+  let data = yearlyTotals;
+  
+
+  if (currentChart) {
+	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
+	  currentChart.options.labels = ['Bicycle Collisions'];
+	  currentChart.options.ykeys = ['biccols'];
+	  var yearmax = 4;
+	  for (let entry of data) {
+        yearmax = Math.max(yearmax,entry['biccols']);
+      }
+	  currentChart.options.ymax = yearmax;
+    } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
+	  currentChart.options.labels = ['Bicycle Injuries'];
+	  currentChart.options.ykeys = ['bicinjs'];
+	  var yearmax = 4;
+	  for (let entry of data) {
+        yearmax = Math.max(yearmax,entry['bicinjs']);
+      }
+	  currentChart.options.ymax = yearmax;
+    } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
+	  currentChart.options.labels = ['Bicycle Deaths'];
+	  currentChart.options.ykeys = ['bickills'];
+	  var yearmax = 4;
+	  for (let entry of data) {
+        yearmax = Math.max(yearmax,entry['bickills']);
+      }
+	  currentChart.options.ymax = yearmax;
+    } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
+	  currentChart.options.labels = ['Pedestrian Collisions'];
+	  currentChart.options.ykeys = ['pedcols'];
+	  var yearmax = 4;
+	  for (let entry of data) {
+        yearmax = Math.max(yearmax,entry['pedcols']);
+      }
+	  currentChart.options.ymax = yearmax;
+    } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
+	  currentChart.options.labels = ['Pedestrian Injuries'];
+	  currentChart.options.ykeys = ['pedinjs'];
+	  var yearmax = 4;
+	  for (let entry of data) {
+        yearmax = Math.max(yearmax,entry['pedinjs']);
+      }
+	  currentChart.options.ymax = yearmax;
+    } else {
+	  currentChart.options.labels = ['Pedestrian Deaths'];
+	  currentChart.options.ykeys = ['pedkills'];
+	  var yearmax = 4;
+	  for (let entry of data) {
+        yearmax = Math.max(yearmax,entry['pedkills']);
+      }
+	  currentChart.options.ymax = yearmax;
+    }
+
+    currentChart.setData(yearlyTotals);
+
+  } else {
+    currentChart = new Morris.Bar({
+    // ID of the element in which to draw the chart.
+    element: 'chart',
+    data: data,
+    stacked: true,
+    // The name of the data record attribute that contains x-values.
+    xkey: 'year',
+    // A list of names of data record attributes that contain y-values.
+    ykeys: ['pedcols'],
+    ymax: yearmax,
+    labels: ['Pedestrian Collisions'],
+//    barColors: ["#3377cc","#cc3300",],
+    barColors: ["#3377cc",],
+    xLabels: "Year",
+    xLabelAngle: 60,
+    xLabelFormat: dateFmt,
+    yLabelFormat: yFmt,
+    hideHover: 'true',
+    parseTime: false,
+  });
+
+  
+  }
+
+  //updateLegend();
 }
 
 let chosenIncidents = 'Ped';
@@ -444,8 +587,6 @@ let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
   data: {
-    //isAMactive: true,
-    //isPMactive: false,
   isBikeactive: false,
   isPedactive: true,
   isFatalactive: false,
@@ -456,8 +597,6 @@ let app = new Vue({
   },
   methods: {
   clickToggleHelp: clickToggleHelp,
-    //pickAM: pickAM,
-    //pickPM: pickPM,
   pickBike: pickBike,
   pickPed: pickPed,
   pickFatal: pickFatal,

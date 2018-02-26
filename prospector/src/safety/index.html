@@ -62,10 +62,11 @@ css: main.css
                     All
             </button>
 			</div>
-			<hr/>
-			<h2>Summary Statistics</h32>
 			<h4>Select What Year:</h4>
 			<vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
+			<hr/>
+			<h2>Summary Statistics</h2>
+			<div id="chart">
         <transition name="fade">
         </transition>
         </div>
