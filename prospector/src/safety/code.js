@@ -52,7 +52,7 @@ infopanel.update = function(geo, popupText) {
 	infopanelTimeout = setTimeout(function() {
 		infopanel._div.className = 'info-panel-hide';
 		//collisionLayer.resetStyle(oldHoverTarget);
-	}, 2000);
+	}, 3000);
 };
 infopanel.addTo(mymap);
 console.log(infopanel);
