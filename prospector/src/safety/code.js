@@ -34,6 +34,29 @@ let years = [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016]
 let popHoverSegment;
 let currentChart = null;
 
+let infopanel = L.control();
+
+infopanel.onAdd = function(map) {
+	this._div = L.DomUtil.create('div', 'info-panel-hide');
+	return this._div;
+};
+
+infopanel.update = function(geo, popupText) {
+	infopanel._div.innerHTML = '';
+	infopanel._div.className = 'info-panel'
+	
+	if (geo) {
+		this._div.innerHTML = 
+		  `${popupText}`;
+	}
+	infopanelTimeout = setTimeout(function() {
+		infopanel._div.className = 'info-panel-hide';
+		//collisionLayer.resetStyle(oldHoverTarget);
+	}, 2000);
+};
+infopanel.addTo(mymap);
+console.log(infopanel);
+
 // add SWITRS layer
 function addSWITRSLayer(collisions) {
    //TODO: figure out why PostGIS geojson isn't in exactly the right format.
@@ -70,7 +93,7 @@ function addSWITRSLayer(collisions) {
     },
     onEachFeature: function(feature, layer) {
         layer.on({
-                 mouseover : highlightFeature,
+                 mouseover : hoverFeature,
 				 click: clickedOnFeature,
          mouseout : resetHighlight
         });
@@ -153,7 +176,7 @@ function highlightFeature(e) {
 		intersectionName += street_names[i].replace("'", "").replace("'", "").replace("[","").replace("]","")
 	  }
   }
-  let popupText = "<b>Intersection: "+intersectionName;
+  var popupText = "<b>Intersection: "+intersectionName;
   if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
 	  popupText += "<br/> Bike Collisions: " + geo.biccol;
   } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
@@ -178,8 +201,49 @@ function highlightFeature(e) {
 
 
 function resetHighlight(e) {
-  popHoverSegment.remove();
+  infopanel.remove();
   collisionLayer.resetStyle(e.target);
+  infopanel.addTo(mymap);
+}
+
+let infopanelTimeout;
+let oldHoverTarget;
+
+function hoverFeature(e) {
+  clearTimeout(infopanelTimeout);
+  let highlightedGeo = e.target;
+  highlightedGeo.bringToFront();
+
+
+  highlightedGeo.setStyle(styles.selected);
+  let geo = e.target.feature;
+  let street_names = geo.street_names;
+  street_names = street_names.split(', ')
+  let intersectionName = '';
+  for (let i in street_names){
+	  if (i < street_names.length - 2) {
+		intersectionName += street_names[i].replace("'", "").replace("'", "").replace("[","").replace("]","") + ", ";
+	  } else if (i < street_names.length - 1){
+		intersectionName += street_names[i].replace("'", "").replace("'", "").replace("[","").replace("]","") + ", and ";
+	  } else {
+		intersectionName += street_names[i].replace("'", "").replace("'", "").replace("[","").replace("]","")
+	  }
+  }
+  var popupText = "<b>Intersection: "+intersectionName;
+  if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
+	  popupText += "<br/> Bike Collisions: " + geo.biccol;
+  } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
+	  popupText += "<br/> Bike Injuries: " + geo.bicinj;
+  } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
+	  popupText += "<br/> Bike Deaths: " + geo.bickill ;
+  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
+	  popupText += "<br/> Pedestrian Collisions: " + geo.pedcol;
+  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
+	  popupText += "<br/> Pedestrian Injuries: " + geo.pedinj;
+  } else {
+	  popupText += "<br/> Pedestrian Deaths: " + geo.pedkill;
+  }
+  infopanel.update(highlightedGeo, popupText);
 }
 
 function clickedOnFeature(e) {
