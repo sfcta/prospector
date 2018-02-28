@@ -249,6 +249,7 @@ function hoverFeature(e) {
 function clickedOnFeature(e) {
 	let clickedIntersection = e.target;
 	clickedIntersection.bringToFront();
+	clickedIntersection.setStyle(styles.popup);
 	
 	let chosenIntersection = e.target.feature.street_names;
 	let intersection = chosenIntersection;
@@ -393,6 +394,7 @@ function showYearlyChart() {
         yearmax = Math.max(yearmax,entry['biccols']);
       }
 	  currentChart.options.ymax = yearmax;
+
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
 	  currentChart.options.labels = ['Bicycle Injuries'];
 	  currentChart.options.ykeys = ['bicinjs'];
