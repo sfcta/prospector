@@ -32,6 +32,7 @@ let segmentLos = {};
 let years = [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016]
 
 let popHoverSegment;
+let selectedIntersection, prevSelectedIntersection;
 let currentChart = null;
 
 let infopanel = L.control();
@@ -51,7 +52,7 @@ infopanel.update = function(geo, popupText) {
 	}
 	infopanelTimeout = setTimeout(function() {
 		infopanel._div.className = 'info-panel-hide';
-		//collisionLayer.resetStyle(oldHoverTarget);
+		collisionLayer.resetStyle(oldHoverTarget);
 	}, 3000);
 };
 infopanel.addTo(mymap);
@@ -93,8 +94,8 @@ function addSWITRSLayer(collisions) {
     onEachFeature: function(feature, layer) {
         layer.on({
                  mouseover : hoverFeature,
-				 click: clickedOnFeature,
-         mouseout : resetHighlight
+                 click: clickedOnFeature,
+         //mouseout : resetHighlight
         });
     },
   });
@@ -212,23 +213,9 @@ let oldHoverTarget;
 function hoverFeature(e) {
   clearTimeout(infopanelTimeout);
   let highlightedGeo = e.target;
-  highlightedGeo.bringToFront();
-
-
-  highlightedGeo.setStyle(styles.selected);
-  let geo = e.target.feature;
-  let street_names = geo.street_names;
-  street_names = street_names.split(', ')
-  let intersectionName = '';
-  for (let i in street_names){
-	  if (i < street_names.length - 2) {
-		intersectionName += street_names[i].replace("'", "").replace("'", "").replace("[","").replace("]","") + ", ";
-	  } else if (i < street_names.length - 1){
-		intersectionName += street_names[i].replace("'", "").replace("'", "").replace("[","").replace("]","") + ", and ";
-	  } else {
-		intersectionName += street_names[i].replace("'", "").replace("'", "").replace("[","").replace("]","")
-	  }
-  }
+  let geo = highlightedGeo.feature;
+  
+let intersectionName = highlightedGeo.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and');
   var popupText = "<b>Intersection: "+intersectionName;
   if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
 	  popupText += "<br/> Bike Collisions: " + geo.biccol;
@@ -244,17 +231,42 @@ function hoverFeature(e) {
 	  popupText += "<br/> Pedestrian Deaths: " + geo.pedkill;
   }
   infopanel.update(highlightedGeo, popupText);
+  
+  highlightedGeo.bringToFront();
+  // don't do anything else if the feature is already clicked
+  if (selectedIntersection) {
+    if (selectedIntersection.feature.street_names === highlightedGeo.feature.street_names) return;
+    
+    // return previously-hovered segment to its original color
+    if (oldHoverTarget) {
+      if (oldHoverTarget.feature.street_names != selectedIntersection.feature.street_names)
+        collisionLayer.resetStyle(oldHoverTarget);
+    }
+
+    if (highlightedGeo.feature.street_names != selectedIntersection.feature.street_names) {
+      highlightedGeo.setStyle(styles.selected);
+      oldHoverTarget = e.target;
+    }    
+  } else {
+    if (oldHoverTarget) collisionLayer.resetStyle(oldHoverTarget);
+    highlightedGeo.setStyle(styles.selected);
+    oldHoverTarget = e.target;
+  }  
 }
 
 function clickedOnFeature(e) {
-	let clickedIntersection = e.target;
-	clickedIntersection.bringToFront();
-	clickedIntersection.setStyle(styles.popup);
+	let clickedIntersection = e.target.feature;
+  
+  // unselect the previously-selected selection, if there is one
+  if (selectedIntersection && selectedIntersection.feature.street_names != clickedIntersection.street_names) {
+    prevSelectedIntersection = selectedIntersection;
+    collisionLayer.resetStyle(prevSelectedIntersection);
+  }
+  selectedIntersection = e.target;
+  selectedIntersection.bringToFront();
+	selectedIntersection.setStyle(styles.popup);
 	
-	let chosenIntersection = e.target.feature.street_names;
-	let intersection = chosenIntersection;
-	
-	let vizurl = api_server+'?street_names=eq.' + intersection;
+	let vizurl = api_server+'?street_names=eq.' + selectedIntersection.feature.street_names;
 	
 	fetch(vizurl).then((resp) => resp.json()).then(function(jsonData) {
       
