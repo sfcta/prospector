@@ -21,7 +21,7 @@ L.tileLayer(url, {
   maxZoom: 18,
   accessToken:token,
 }).addTo(mymap);
-
+let label = 'YEARLY COUNT OF ALL PEDESTRIAN COLLISIONS';
 let incColor = {'Fatal':"#ff0000",'Non-fatal':"#800080"};
 let incOpacity = {'Fatal':1, 'Non-fatal':0.15};
 let missingColor = '#ccc';
@@ -31,10 +31,9 @@ let mapLegend;
 let segmentLos = {};
 let years = [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016]
 
-let popHoverSegment;
+let popSelIntersection;
 let selectedIntersection, prevSelectedIntersection;
 let currentChart = null;
-
 let infopanel = L.control();
 
 infopanel.onAdd = function(map) {
@@ -155,58 +154,6 @@ function getSWITRSinfo() {
 
 var popupTimeout;
 
-function highlightFeature(e) {
-
-  clearTimeout(popupTimeout);
-
-  let highlightedGeo = e.target;
-  highlightedGeo.bringToFront();
-
-
-  highlightedGeo.setStyle(styles.selected);
-  let geo = e.target.feature;
-  let street_names = geo.street_names;
-  street_names = street_names.split(', ')
-  let intersectionName = '';
-  for (let i in street_names){
-	  if (i < street_names.length - 2) {
-		intersectionName += street_names[i].replace("'", "").replace("'", "").replace("[","").replace("]","") + ", ";
-	  } else if (i < street_names.length - 1){
-		intersectionName += street_names[i].replace("'", "").replace("'", "").replace("[","").replace("]","") + ", and ";
-	  } else {
-		intersectionName += street_names[i].replace("'", "").replace("'", "").replace("[","").replace("]","")
-	  }
-  }
-  var popupText = "<b>Intersection: "+intersectionName;
-  if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
-	  popupText += "<br/> Bike Collisions: " + geo.biccol;
-  } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
-	  popupText += "<br/> Bike Injuries: " + geo.bicinj;
-  } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
-	  popupText += "<br/> Bike Deaths: " + geo.bickill ;
-  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-	  popupText += "<br/> Pedestrian Collisions: " + geo.pedcol;
-  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
-	  popupText += "<br/> Pedestrian Injuries: " + geo.pedinj;
-  } else {
-	  popupText += "<br/> Pedestrian Deaths: " + geo.pedkill;
-  }
-  popHoverSegment = L.popup()
-                    .setLatLng(e.latlng)
-                    .setContent(popupText);
-
-  popupTimeout = setTimeout( function () {
-    popHoverSegment.openOn(mymap);
-  }, 300);
-}
-
-
-function resetHighlight(e) {
-  infopanel.remove();
-  collisionLayer.resetStyle(e.target);
-  infopanel.addTo(mymap);
-}
-
 let infopanelTimeout;
 let oldHoverTarget;
 
@@ -215,7 +162,7 @@ function hoverFeature(e) {
   let highlightedGeo = e.target;
   let geo = highlightedGeo.feature;
   
-let intersectionName = highlightedGeo.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and');
+  let intersectionName = highlightedGeo.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and');
   var popupText = "<b>Intersection: "+intersectionName;
   if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
 	  popupText += "<br/> Bike Collisions: " + geo.biccol;
@@ -254,6 +201,22 @@ let intersectionName = highlightedGeo.feature.street_names.replace(/'/g, "").rep
   }  
 }
 
+function remakeLabel() {
+  if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
+	label = 'YEARLY COUNT OF ALL BIKE COLLISIONS:';
+  } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
+	label = 'YEARLY COUNT OF NON-FATAL PEDESTRIAN COLLISIONS:';
+  } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
+	label = 'YEARLY COUNT OF FATAL PEDESTRIAN COLLISIONS:';
+  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
+	label = 'YEARLY COUNT OF ALL PEDESTRIAN COLLISIONS:';
+  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
+	label = 'YEARLY COUNT OF NON-FATAL PEDESTRIAN COLLISIONS:';
+  } else {
+	label = 'YEARLY COUNT OF FATAL PEDESTRIAN COLLISIONS:';
+  }
+}
+
 function clickedOnFeature(e) {
 	let clickedIntersection = e.target.feature;
   
@@ -264,18 +227,33 @@ function clickedOnFeature(e) {
   }
   selectedIntersection = e.target;
   selectedIntersection.bringToFront();
-	selectedIntersection.setStyle(styles.popup);
+  selectedIntersection.setStyle(styles.popup);
+  
+  let intersectionName = selectedIntersection.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and'); 
+  app.chartTitle = 'ALL COLLISIONS at ' + intersectionName + ':';
+  
+  popSelIntersection = L.popup()
+    .setLatLng(e.latlng)
+    .setContent(intersectionName)
+    .addTo(mymap);
+
+  // Revert to overall chart when no segment selected
+  popSelIntersection.on('remove', function(e) {
+    collisionLayer.resetStyle(selectedIntersection);
+    prevSelectedIntersection = selectedIntersection = null;
+    showYearlyChart();
+  });
 	
-	let vizurl = api_server+'?street_names=eq.' + selectedIntersection.feature.street_names;
+  let vizurl = api_server+'?street_names=eq.' + selectedIntersection.feature.street_names;
 	
-	fetch(vizurl).then((resp) => resp.json()).then(function(jsonData) {
+  fetch(vizurl).then((resp) => resp.json()).then(function(jsonData) {
       
 
-      let data = buildChartDataFromJson(jsonData);
-      createChart(data);
-    }).catch(function(error) {
-      console.log("err: "+error);
-    });
+    let data = buildChartDataFromJson(jsonData);
+    createChart(data);
+  }).catch(function(error) {
+    console.log("err: "+error);
+  });
 
 }
 
@@ -395,7 +373,8 @@ function buildYearlyDetails(jsonData) {
 
 function showYearlyChart() {
   let data = yearlyTotals;
-  
+  remakeLabel();
+  app.chartTitle = label;
 
   if (currentChart) {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
@@ -580,13 +559,14 @@ let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
   data: {
-  isBikeactive: false,
-  isPedactive: true,
-  isFatalactive: false,
-  isNonfactive: false,
-  isAllactive: true,
-  sliderValue: 0,
-  timeSlider: timeSlider
+	chartTitle: label,  
+    isBikeactive: false,
+    isPedactive: true,
+    isFatalactive: false,
+    isNonfactive: false,
+    isAllactive: true,
+    sliderValue: 0,
+    timeSlider: timeSlider
   },
   methods: {
   clickToggleHelp: clickToggleHelp,
