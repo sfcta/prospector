@@ -605,7 +605,7 @@ let app = new Vue({
   el: '#panel',
   //The delimiters will grab what data from the code if it is between these two values in the html
   delimiters: ['${', '}'],
-  //The dynamic data from the code.
+  //The dynamic data from the code and their default values.
   data: {
 	chartTitle: label,  
     isBikeactive: false,
