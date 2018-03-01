@@ -409,6 +409,7 @@ function showYearlyChart() {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Bicycle Collisions'];
 	  currentChart.options.ykeys = ['biccols'];
+	  currentChart.options.barColors = ["#cc0033",];
 	  var yearmax = 4;
 	  for (let entry of data) {
         yearmax = Math.max(yearmax,entry['biccols']);
@@ -418,6 +419,7 @@ function showYearlyChart() {
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
 	  currentChart.options.labels = ['Bicycle Injuries'];
 	  currentChart.options.ykeys = ['bicinjs'];
+	  currentChart.options.barColors = ["#cc0033",];
 	  var yearmax = 4;
 	  for (let entry of data) {
         yearmax = Math.max(yearmax,entry['bicinjs']);
@@ -426,6 +428,7 @@ function showYearlyChart() {
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
 	  currentChart.options.labels = ['Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bickills'];
+	  currentChart.options.barColors = ["#cc0033",];
 	  var yearmax = 4;
 	  for (let entry of data) {
         yearmax = Math.max(yearmax,entry['bickills']);
@@ -434,6 +437,7 @@ function showYearlyChart() {
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Pedestrian Collisions'];
 	  currentChart.options.ykeys = ['pedcols'];
+	  currentChart.options.barColors = ["#3377cc",];
 	  var yearmax = 4;
 	  for (let entry of data) {
         yearmax = Math.max(yearmax,entry['pedcols']);
@@ -442,6 +446,7 @@ function showYearlyChart() {
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
 	  currentChart.options.labels = ['Pedestrian Injuries'];
 	  currentChart.options.ykeys = ['pedinjs'];
+	  currentChart.options.barColors = ["#3377cc",];
 	  var yearmax = 4;
 	  for (let entry of data) {
         yearmax = Math.max(yearmax,entry['pedinjs']);
@@ -450,6 +455,7 @@ function showYearlyChart() {
     } else {
 	  currentChart.options.labels = ['Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedkills'];
+	  currentChart.options.barColors = ["#3377cc",];
 	  var yearmax = 4;
 	  for (let entry of data) {
         yearmax = Math.max(yearmax,entry['pedkills']);
