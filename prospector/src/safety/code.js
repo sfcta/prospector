@@ -153,7 +153,6 @@ function getSWITRSinfo() {
   // Fetch the json and yearly details
   fetch(queryurl).then((resp) => resp.json()).then(function(jsonData) {
     addSWITRSLayer(jsonData);
-	fetchYearlyDetails();
   })
   .catch(function(error) {
     console.log("err: "+error);
@@ -506,6 +505,7 @@ function pickBike(thing) {
   app.isPedactive = false;
   chosenIncidents = 'Bike'
   getSWITRSinfo();
+  showYearlyChart();
 }
 
 //same as above, but with ped
@@ -514,6 +514,7 @@ function pickPed(thing) {
   app.isPedactive = true;
   chosenIncidents = 'Ped'
   getSWITRSinfo();
+  showYearlyChart();
 }
 
 
@@ -524,6 +525,7 @@ function pickFatal(thing) {
   app.isAllactive = false;
   chosenSeverity = 'Fatal'
   getSWITRSinfo();
+  showYearlyChart();
 }
 
 //Same as above, but severity to non-fatal
@@ -533,6 +535,7 @@ function pickNonf(thing) {
   app.isAllactive = false;
   chosenSeverity = 'Nonf'
   getSWITRSinfo();
+  showYearlyChart();
 }
 
 //same as above changing the severity to any collision
@@ -542,6 +545,7 @@ function pickAll(thing) {
   app.isAllactive = true;
   chosenSeverity = 'All'
   getSWITRSinfo();
+  showYearlyChart();
 }
 
 //When the year time slider changes, requery the data for visualization.
@@ -564,6 +568,7 @@ function updateSliderData() {
 	//set the value to the last year
     app.sliderValue = yearlist[yearlist.length-1];
   });
+  fetchYearlyDetails();
 }
 
 //creating the timeslider for the visualization.
