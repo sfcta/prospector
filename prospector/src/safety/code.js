@@ -30,7 +30,8 @@ let missingColor = '#ccc';
 let popup = null;
 let collisionLayer;
 let mapLegend;
-let years = [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016]
+let years = [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016];
+let allJSONData;
 
 //Initialization of selective aspects
 let popSelIntersection;
@@ -264,16 +265,11 @@ function clickedOnFeature(e) {
   });
 	
   //query data based on intersection then create chart of all collisions for that intersection	
-  let vizurl = api_server+'?street_names=eq.' + selectedIntersection.feature.street_names;
+  let jsonData = allJSONData
+	.filter(row => row.street_names == selectedIntersection.feature.street_names);
 	
-  fetch(vizurl).then((resp) => resp.json()).then(function(jsonData) {
-      
-
-    let data = buildChartDataFromJson(jsonData);
-    createChart(data);
-  }).catch(function(error) {
-    console.log("err: "+error);
-  });
+  let data = buildChartDataFromJson(jsonData);
+  createChart(data);
 
 }
 
@@ -298,7 +294,6 @@ function buildChartDataFromJson(jsonData){
 
 //Actually creating the chart
 function createChart(data) {
-	
   //get a ymax for intersections that have almost no collisions as 4, else the max amount of collisions at the intersection.	
   let ymax = 4;
   for (let entry of data) {
@@ -369,6 +364,7 @@ function fetchYearlyDetails() {
 
 //This functions adds the totals of each count for each year. Similar to buildChartDataFromJson function
 function buildYearlyDetails(jsonData) {
+	allJSONData = jsonData;
     yearlyTotals = [];
 	
 	for (let year in years){
