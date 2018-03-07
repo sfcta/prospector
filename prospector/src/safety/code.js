@@ -236,7 +236,7 @@ function remakeLabel() {
 }
 
 function clickedOnFeature(e) {
-	let clickedIntersection = e.target.feature;
+  let clickedIntersection = e.target.feature;
   
   // unselect the previously-selected selection, if there is one
   if (selectedIntersection && selectedIntersection.feature.street_names != clickedIntersection.street_names) {
@@ -491,7 +491,6 @@ function showYearlyChart() {
   
   }
 
-  //updateLegend();
 }
 
 let chosenIncidents = 'Ped';
@@ -505,7 +504,11 @@ function pickBike(thing) {
   app.isPedactive = false;
   chosenIncidents = 'Bike'
   getSWITRSinfo();
-  showYearlyChart();
+  if (selectedIntersection){
+	  
+  } else {
+	showYearlyChart();  
+  }
 }
 
 //same as above, but with ped
@@ -514,7 +517,11 @@ function pickPed(thing) {
   app.isPedactive = true;
   chosenIncidents = 'Ped'
   getSWITRSinfo();
-  showYearlyChart();
+  if (selectedIntersection){
+	  
+  } else {
+	showYearlyChart();  
+  }
 }
 
 
@@ -525,7 +532,11 @@ function pickFatal(thing) {
   app.isAllactive = false;
   chosenSeverity = 'Fatal'
   getSWITRSinfo();
-  showYearlyChart();
+  if (selectedIntersection){
+	  
+  } else {
+	showYearlyChart();  
+  }
 }
 
 //Same as above, but severity to non-fatal
@@ -535,7 +546,11 @@ function pickNonf(thing) {
   app.isAllactive = false;
   chosenSeverity = 'Nonf'
   getSWITRSinfo();
-  showYearlyChart();
+  if (selectedIntersection){
+	  
+  } else {
+	showYearlyChart();  
+  }
 }
 
 //same as above changing the severity to any collision
@@ -545,7 +560,11 @@ function pickAll(thing) {
   app.isAllactive = true;
   chosenSeverity = 'All'
   getSWITRSinfo();
-  showYearlyChart();
+  if (selectedIntersection){
+	  
+  } else {
+	showYearlyChart();  
+  }
 }
 
 //When the year time slider changes, requery the data for visualization.
