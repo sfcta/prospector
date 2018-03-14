@@ -179,17 +179,17 @@ function hoverFeature(e) {
   let intersectionName = highlightedGeo.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and');
   var popupText = "<b>Intersection: "+intersectionName;
   if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
-	  popupText += "<br/> Bike Collisions: " + geo.biccol;
+	  popupText += "<br/> Bike Collisions for year " + geo.year + " : " + geo.biccol;
   } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
-	  popupText += "<br/> Bike Injuries: " + geo.bicinj;
+	  popupText += "<br/> Bike Injuries for year " + geo.year + " : " + geo.bicinj;
   } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
-	  popupText += "<br/> Bike Deaths: " + geo.bickill ;
+	  popupText += "<br/> Bike Deaths for year " + geo.year + " : " + geo.bickill ;
   } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-	  popupText += "<br/> Pedestrian Collisions: " + geo.pedcol;
+	  popupText += "<br/> Pedestrian Collisions for year " + geo.year + " : " + geo.pedcol;
   } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
-	  popupText += "<br/> Pedestrian Injuries: " + geo.pedinj;
+	  popupText += "<br/> Pedestrian Injuries for year " + geo.year + " : " + geo.pedinj;
   } else {
-	  popupText += "<br/> Pedestrian Deaths: " + geo.pedkill;
+	  popupText += "<br/> Pedestrian Deaths for year " + geo.year + " : " + geo.pedkill;
   }
   
   //update the infopanel on the top right
@@ -224,9 +224,9 @@ function remakeLabel() {
   if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
 	label = 'YEARLY COUNT OF ALL BIKE COLLISIONS:';
   } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
-	label = 'YEARLY COUNT OF NON-FATAL PEDESTRIAN COLLISIONS:';
+	label = 'YEARLY COUNT OF NON-FATAL BIKE COLLISIONS:';
   } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
-	label = 'YEARLY COUNT OF FATAL PEDESTRIAN COLLISIONS:';
+	label = 'YEARLY COUNT OF FATAL BIKE COLLISIONS:';
   } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
 	label = 'YEARLY COUNT OF ALL PEDESTRIAN COLLISIONS:';
   } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
@@ -305,7 +305,7 @@ function createChart(data) {
 	  currentChart.options.labels = ['Pedestrian Collisions', 'Bicycle Collisions'];
 	  currentChart.options.ykeys = ['pedcols', 'biccols'];
 	  currentChart.options.ymax = ymax;
-	  currentChart.options.barColors = ["#3377cc","#cc0033",];
+	  currentChart.options.barColors = ["#3377cc","#e68a00",];
 	  
 	  currentChart.setData(data);
 
@@ -323,7 +323,7 @@ function createChart(data) {
       ykeys: ['pedcols', 'biccols'],
       ymax: ymax,
       labels: ['Pedestrian Collisions', 'Bicycle Collisions'],
-      barColors: ["#3377cc","#cc0033",],
+      barColors: ["#3377cc","#e68a00",],
       xLabels: "Year",
       xLabelAngle: 60,
       xLabelFormat: dateFmt,
@@ -404,57 +404,39 @@ function showYearlyChart() {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Bicycle Collisions'];
 	  currentChart.options.ykeys = ['biccols'];
-	  currentChart.options.barColors = ["#cc0033",];
-	  var yearmax = 4;
-	  for (let entry of data) {
-        yearmax = Math.max(yearmax,entry['biccols']);
-      }
+	  currentChart.options.barColors = ["#e68a00",];
+	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
 
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
 	  currentChart.options.labels = ['Bicycle Injuries'];
 	  currentChart.options.ykeys = ['bicinjs'];
-	  currentChart.options.barColors = ["#cc0033",];
-	  var yearmax = 4;
-	  for (let entry of data) {
-        yearmax = Math.max(yearmax,entry['bicinjs']);
-      }
+	  currentChart.options.barColors = ["#e68a00",];
+	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
 	  currentChart.options.labels = ['Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bickills'];
-	  currentChart.options.barColors = ["#cc0033",];
-	  var yearmax = 4;
-	  for (let entry of data) {
-        yearmax = Math.max(yearmax,entry['bickills']);
-      }
+	  currentChart.options.barColors = ["#e68a00",];
+	  var yearmax = 30;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Pedestrian Collisions'];
 	  currentChart.options.ykeys = ['pedcols'];
 	  currentChart.options.barColors = ["#3377cc",];
-	  var yearmax = 4;
-	  for (let entry of data) {
-        yearmax = Math.max(yearmax,entry['pedcols']);
-      }
+	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
 	  currentChart.options.labels = ['Pedestrian Injuries'];
 	  currentChart.options.ykeys = ['pedinjs'];
 	  currentChart.options.barColors = ["#3377cc",];
-	  var yearmax = 4;
-	  for (let entry of data) {
-        yearmax = Math.max(yearmax,entry['pedinjs']);
-      }
+	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
     } else {
 	  currentChart.options.labels = ['Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedkills'];
 	  currentChart.options.barColors = ["#3377cc",];
-	  var yearmax = 4;
-	  for (let entry of data) {
-        yearmax = Math.max(yearmax,entry['pedkills']);
-      }
+	  var yearmax = 30;
 	  currentChart.options.ymax = yearmax;
     }
 
