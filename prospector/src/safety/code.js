@@ -8,6 +8,7 @@ import Cookies from 'js-cookie';
 let api_server = 'http://api.sfcta.org/api/switrs_viz2';
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
+let size = 1;
 
 // add the SF Map using Leafleft and MapBox
 // Basic leaflet information: .addTo adds a layer to your map.
@@ -83,21 +84,21 @@ function addSWITRSLayer(collisions) {
   pointToLayer: function(feature, latlng) {
 
     if (feature['pedkill'] > 0 && chosenSeverity == 'All' && chosenIncidents == 'Ped') {
-      return new L.CircleMarker(latlng, {radius: feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.8});
+      return new L.CircleMarker(latlng, {radius: size*feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.8});
     } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Ped'){
-	  return new L.CircleMarker(latlng, {radius: feature['pedkill']+feature['pedkill']/(feature['pedkill']+.01), fillOpacity: 0.8});
+	  return new L.CircleMarker(latlng, {radius: size*feature['pedkill']+feature['pedkill']/(feature['pedkill']+.01), fillOpacity: 0.8});
 	} else if (feature['pedkill'] == 0 && chosenSeverity == 'All' && chosenIncidents == 'Ped'){
-      return new L.CircleMarker(latlng, {radius: feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.5});
+      return new L.CircleMarker(latlng, {radius: size*feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.5});
     } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
-      return new L.CircleMarker(latlng, {radius: feature['pedinj']+feature['pedinj']/(feature['pedinj']+.01), fillOpacity: 0.5});
+      return new L.CircleMarker(latlng, {radius: size*feature['pedinj']+feature['pedinj']/(feature['pedinj']+.01), fillOpacity: 0.5});
     } else if (feature['bickill'] > 0 && chosenSeverity == 'All' && chosenIncidents == 'Bike') {
-      return new L.CircleMarker(latlng, {radius: feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.8});
+      return new L.CircleMarker(latlng, {radius: size*feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.8});
     } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Bike'){
-	  return new L.CircleMarker(latlng, {radius: feature['bickill']+feature['bickill']/(feature['bickill']+.01), fillOpacity: 0.8});
+	  return new L.CircleMarker(latlng, {radius: size*feature['bickill']+feature['bickill']/(feature['bickill']+.01), fillOpacity: 0.8});
 	} else if (feature['bickill'] == 0 && chosenSeverity == 'All' && chosenIncidents == 'Bike'){
-      return new L.CircleMarker(latlng, {radius: feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.5});
+      return new L.CircleMarker(latlng, {radius: size*feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.5});
     } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
-      return new L.CircleMarker(latlng, {radius: feature['bicinj']+feature['bicinj']/(feature['bicinj']+.01), fillOpacity: 0.5});
+      return new L.CircleMarker(latlng, {radius: size*feature['bicinj']+feature['bicinj']/(feature['bicinj']+.01), fillOpacity: 0.5});
     }
     },
 	//add functions for when we click and hover over any feature.
@@ -531,6 +532,20 @@ function pickNonf(thing) {
   }
 }
 
+function pickSmall(thing) {
+	app.isSmallactive = true;
+	app.isLargeactive = false;
+	size = 1;
+	getSWITRSinfo();
+}
+
+function pickLarge(thing) {
+	app.isSmallactive = false;
+	app.isLargeactive = true;
+	size = 2;
+	getSWITRSinfo();
+}
+
 //same as above changing the severity to any collision
 function pickAll(thing) {
   app.isFatalactive = false;
@@ -621,6 +636,8 @@ let app = new Vue({
     isFatalactive: false,
     isNonfactive: false,
     isAllactive: true,
+	isSmallactive: true,
+	isLargeactive: false,
     sliderValue: 0,
     timeSlider: timeSlider
   },
@@ -631,7 +648,9 @@ let app = new Vue({
   pickPed: pickPed,
   pickFatal: pickFatal,
   pickNonf: pickNonf,
-  pickAll: pickAll
+  pickAll: pickAll,
+  pickSmall: pickSmall,
+  pickLarge: pickLarge
   },
   //what to continually watch out for
   watch: {
