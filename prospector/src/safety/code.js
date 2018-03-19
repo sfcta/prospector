@@ -58,7 +58,7 @@ infopanel.update = function(geo, popupText) {
 infopanel.addTo(mymap);
 
 function getBucketSize(d){
-  return d > 5     ? d + d/(d+0.01)  :
+  return d > 4     ? d + d/(d+0.01)  :
          d > 0     ? 4 :
                       0 ;
 }
