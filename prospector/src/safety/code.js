@@ -83,7 +83,7 @@ function addSWITRSLayer(collisions) {
     style: styleByIncidentColor,
 	//at specific latitude longitude give a different size to the point depending on the specific count we are looking at.
   pointToLayer: function(feature, latlng) {
-    if (app.sliderValue != "All Years") {
+    if (app.sliderValue != "All Years" || chosenSeverity == 'Fatal') {
       if (feature['pedkill'] > 0 && chosenSeverity == 'All' && chosenIncidents == 'Ped') {
         return new L.CircleMarker(latlng, {radius: size*feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.6});
       } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Ped'){
@@ -102,19 +102,11 @@ function addSWITRSLayer(collisions) {
         return new L.CircleMarker(latlng, {radius: size*feature['bicinj']+feature['bicinj']/(feature['bicinj']+.01), fillOpacity: 0.6});
       }
 	} else {
-	  if (feature['pedkill'] > 0 && chosenSeverity == 'All' && chosenIncidents == 'Ped') {
-        return new L.CircleMarker(latlng, {radius: size/2*getBucketSize(feature['pedcol']), fillOpacity: 0.6});
-      } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Ped'){
-	    return new L.CircleMarker(latlng, {radius: size/2*getBucketSize(feature['pedkill']), fillOpacity: 0.6});
-	  } else if (feature['pedkill'] == 0 && chosenSeverity == 'All' && chosenIncidents == 'Ped'){
+	  if (chosenSeverity == 'All' && chosenIncidents == 'Ped') {
         return new L.CircleMarker(latlng, {radius: size/2*getBucketSize(feature['pedcol']), fillOpacity: 0.6});
       } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
         return new L.CircleMarker(latlng, {radius: size/2*getBucketSize(feature['pedinj']), fillOpacity: 0.6});
-      } else if (feature['bickill'] > 0 && chosenSeverity == 'All' && chosenIncidents == 'Bike') {
-        return new L.CircleMarker(latlng, {radius: size/2*getBucketSize(feature['biccol']), fillOpacity: 0.6});
-      } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Bike'){
-	    return new L.CircleMarker(latlng, {radius: size/2*getBucketSize(feature['bickill']), fillOpacity: 0.6});
-	  } else if (feature['bickill'] == 0 && chosenSeverity == 'All' && chosenIncidents == 'Bike'){
+      } else if (chosenSeverity == 'All' && chosenIncidents == 'Bike') {
         return new L.CircleMarker(latlng, {radius: size/2*getBucketSize(feature['biccol']), fillOpacity: 0.6});
       } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
         return new L.CircleMarker(latlng, {radius: size/2*getBucketSize(feature['bicinj']), fillOpacity: 0.6});
@@ -137,12 +129,12 @@ function addSWITRSLayer(collisions) {
   mapLegend.onAdd = function (map) {
 
     var div = L.DomUtil.create('div', 'info legend'),
-      grades = ['Fatal', 'Non-fatal'],
+      grades = ['Non-fatal'],
       labels = [];
 	  
 	//Text and color for the legend
-    div.innerHTML = '<h4>Incident Category</h4>';
-      for (var i = 0; i < grades.length; i++) div.innerHTML += '<i style="background:' + incColor[grades[i]] + '"></i>' + grades[i] + '<br>';
+    div.innerHTML = '<h4>Legend:</h4>';
+      for (var i = 0; i < grades.length; i++) div.innerHTML += '<i style="background:' + incColor[grades[i]] + '"></i>' + 'Collision' + '<br>';
 
     return div;
 
