@@ -75,7 +75,6 @@ function addSWITRSLayer(collisions) {
   }
   
   //If these layers are already on the map, remove them.
-  if (mapLegend) mymap.removeControl(mapLegend);
   if (collisionLayer) mymap.removeLayer(collisionLayer);
   
   //loading in the new geoJSON features we created we create our collision layer
@@ -85,31 +84,31 @@ function addSWITRSLayer(collisions) {
   pointToLayer: function(feature, latlng) {
     if (app.sliderValue != "All Years" || chosenSeverity == 'Fatal') {
       if (feature['pedkill'] > 0 && chosenSeverity == 'All' && chosenIncidents == 'Ped') {
-        return new L.CircleMarker(latlng, {radius: size*feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.6});
+        return new L.CircleMarker(latlng, {radius: 2*feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.6});
       } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Ped'){
-	    return new L.CircleMarker(latlng, {radius: size*feature['pedkill']+feature['pedkill']/(feature['pedkill']+.01), fillOpacity: 0.6});
+	    return new L.CircleMarker(latlng, {radius: 2*feature['pedkill']+feature['pedkill']/(feature['pedkill']+.01), fillOpacity: 0.6});
 	  } else if (feature['pedkill'] == 0 && chosenSeverity == 'All' && chosenIncidents == 'Ped'){
-        return new L.CircleMarker(latlng, {radius: size*feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.6});
+        return new L.CircleMarker(latlng, {radius: 2*feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.6});
       } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
-        return new L.CircleMarker(latlng, {radius: size*feature['pedinj']+feature['pedinj']/(feature['pedinj']+.01), fillOpacity: 0.6});
+        return new L.CircleMarker(latlng, {radius: 2*feature['pedinj']+feature['pedinj']/(feature['pedinj']+.01), fillOpacity: 0.6});
       } else if (feature['bickill'] > 0 && chosenSeverity == 'All' && chosenIncidents == 'Bike') {
-        return new L.CircleMarker(latlng, {radius: size*feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.6});
+        return new L.CircleMarker(latlng, {radius: 2*feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.6});
       } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Bike'){
-	    return new L.CircleMarker(latlng, {radius: size*feature['bickill']+feature['bickill']/(feature['bickill']+.01), fillOpacity: 0.6});
+	    return new L.CircleMarker(latlng, {radius: 2*feature['bickill']+feature['bickill']/(feature['bickill']+.01), fillOpacity: 0.6});
 	  } else if (feature['bickill'] == 0 && chosenSeverity == 'All' && chosenIncidents == 'Bike'){
-        return new L.CircleMarker(latlng, {radius: size*feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.6});
+        return new L.CircleMarker(latlng, {radius: 2*feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.6});
       } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
-        return new L.CircleMarker(latlng, {radius: size*feature['bicinj']+feature['bicinj']/(feature['bicinj']+.01), fillOpacity: 0.6});
+        return new L.CircleMarker(latlng, {radius: 2*feature['bicinj']+feature['bicinj']/(feature['bicinj']+.01), fillOpacity: 0.6});
       }
 	} else {
 	  if (chosenSeverity == 'All' && chosenIncidents == 'Ped') {
-        return new L.CircleMarker(latlng, {radius: size/2*getBucketSize(feature['pedcol']), fillOpacity: 0.6});
+        return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['pedcol']), fillOpacity: 0.6});
       } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
-        return new L.CircleMarker(latlng, {radius: size/2*getBucketSize(feature['pedinj']), fillOpacity: 0.6});
+        return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['pedinj']), fillOpacity: 0.6});
       } else if (chosenSeverity == 'All' && chosenIncidents == 'Bike') {
-        return new L.CircleMarker(latlng, {radius: size/2*getBucketSize(feature['biccol']), fillOpacity: 0.6});
+        return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['biccol']), fillOpacity: 0.6});
       } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
-        return new L.CircleMarker(latlng, {radius: size/2*getBucketSize(feature['bicinj']), fillOpacity: 0.6});
+        return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['bicinj']), fillOpacity: 0.6});
       }
 	}
   },
@@ -123,24 +122,7 @@ function addSWITRSLayer(collisions) {
   });
   collisionLayer.addTo(mymap);
 
-  //create our legend for the map
-  mapLegend = L.control({position: 'bottomright'});
-
-  mapLegend.onAdd = function (map) {
-
-    var div = L.DomUtil.create('div', 'info legend'),
-      grades = ['Non-fatal'],
-      labels = [];
-	  
-	//Text and color for the legend
-    div.innerHTML = '<h4>Legend:</h4>';
-      for (var i = 0; i < grades.length; i++) div.innerHTML += '<i style="background:' + incColor[grades[i]] + '"></i>' + 'Collision' + '<br>';
-
-    return div;
-
-  };
-
-  mapLegend.addTo(mymap);
+  
 };
 
 // this functions gives the feature a color weight and opacity depending on specifics of the json.
@@ -334,13 +316,21 @@ function buildChartDataFromJson(jsonData){
 	for (let year in years){
 		let pedcol = 0;
 		let biccol = 0;
+		let pedinj = 0;
+		let bicinj = 0;
+		let pedkill = 0;
+		let bickill = 0;
 		for (let json in jsonData){
 			if (years[year] == Number(jsonData[json].year)){
 				pedcol += jsonData[json].pedcol;
 				biccol += jsonData[json].biccol;
+				pedinj += jsonData[json].pedinj;
+				bicinj += jsonData[json].bicinj;
+				pedkill += jsonData[json].pedkill;
+				bickill += jsonData[json].bickill;
 			}
 		}
-		data.push({year:years[year], pedcols:pedcol, biccols:biccol});
+		data.push({year:years[year], pedcols:pedcol, biccols:biccol, pedinjs:pedinj, bicinjs:bicinj, pedkills:pedkill, bickills:bickill});
 	}
 	return data;
 }
@@ -355,13 +345,41 @@ function createChart(data) {
   
   //If there is already a chart there, change ymax, labels, ykeys, barColors, and data.
   if (currentChart) {
-	  currentChart.options.labels = ['Pedestrian Collisions', 'Bicycle Collisions'];
-	  currentChart.options.ykeys = ['pedcols', 'biccols'];
+	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
+	  currentChart.options.labels = ['Bicycle Injuries', 'Bicycle Deaths'];
+	  currentChart.options.ykeys = ['bicinjs', 'bickills'];
+	  currentChart.options.barColors = ["#3377cc","#ff0000"];
 	  currentChart.options.ymax = ymax;
-	  currentChart.options.barColors = ["#3377cc","#e68a00",];
-	  
-	  currentChart.setData(data);
 
+    } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
+	  currentChart.options.labels = ['Bicycle Injuries'];
+	  currentChart.options.ykeys = ['bicinjs'];
+	  currentChart.options.barColors = ["#3377cc",];
+	  currentChart.options.ymax = ymax;
+    } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
+	  currentChart.options.labels = ['Bicycle Deaths'];
+	  currentChart.options.ykeys = ['bickills'];
+	  currentChart.options.barColors = ["#ff0000",];
+	  currentChart.options.ymax = ymax;
+    } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
+	  currentChart.options.labels = ['Pedestrian Injuries', 'Pedestrian Deaths'];
+	  currentChart.options.ykeys = ['pedinjs', 'pedkills'];
+	  currentChart.options.barColors = ["#3377cc","#ff0000"];
+	  currentChart.options.ymax = ymax;
+    } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
+	  currentChart.options.labels = ['Pedestrian Injuries'];
+	  currentChart.options.ykeys = ['pedinjs'];
+	  currentChart.options.barColors = ["#3377cc",];
+	  currentChart.options.ymax = ymax;
+    } else {
+	  currentChart.options.labels = ['Pedestrian Deaths'];
+	  currentChart.options.ykeys = ['pedkills'];
+	  currentChart.options.barColors = ["#ff0000",];
+	  currentChart.options.ymax = ymax;
+    }
+
+	//Then set the data to be yearlyTotals
+    currentChart.setData(data);
   //If the chart is new, create it with the parameters found before.	  
   } else {
 
@@ -471,14 +489,14 @@ function showYearlyChart() {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Bicycle Injuries', 'Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bicinjs', 'bickills'];
-	  currentChart.options.barColors = ["#e68a00","#ff0000"];
+	  currentChart.options.barColors = ["#3377cc","#ff0000"];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
 
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
 	  currentChart.options.labels = ['Bicycle Injuries'];
 	  currentChart.options.ykeys = ['bicinjs'];
-	  currentChart.options.barColors = ["#e68a00",];
+	  currentChart.options.barColors = ["#3377cc",];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
@@ -597,19 +615,6 @@ function pickNonf(thing) {
   }
 }
 
-function pickSmall(thing) {
-	app.isSmallactive = true;
-	app.isLargeactive = false;
-	size = 1;
-	getSWITRSinfo();
-}
-
-function pickLarge(thing) {
-	app.isSmallactive = false;
-	app.isLargeactive = true;
-	size = 2;
-	getSWITRSinfo();
-}
 
 //same as above changing the severity to any collision
 function pickAll(thing) {
@@ -716,8 +721,6 @@ let app = new Vue({
     isFatalactive: false,
     isNonfactive: false,
     isAllactive: true,
-	isSmallactive: true,
-	isLargeactive: false,
     sliderValue: 0,
     timeSlider: timeSlider
   },
@@ -728,9 +731,7 @@ let app = new Vue({
   pickPed: pickPed,
   pickFatal: pickFatal,
   pickNonf: pickNonf,
-  pickAll: pickAll,
-  pickSmall: pickSmall,
-  pickLarge: pickLarge
+  pickAll: pickAll
   },
   //what to continually watch out for
   watch: {

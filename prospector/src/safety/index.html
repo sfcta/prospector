@@ -45,19 +45,19 @@ css: main.css
 			<h5>Severity:</h5>
 			<button
                     v-on:click="pickFatal"
-                    class="mini ui inverted yellow icon button"
+                    class="mini ui inverted red icon button"
                     v-bind:class="{ active: isFatalactive}">
                     Fatal
             </button>
 			<button
                     v-on:click="pickNonf"
-                    class="mini ui inverted yellow icon button"
+                    class="mini ui inverted blue icon button"
                     v-bind:class="{ active: isNonfactive}">
                     Non-Fatal
             </button>
 			<button
                     v-on:click="pickAll"
-                    class="mini ui inverted yellow icon button"
+                    class="mini ui inverted violet icon button"
                     v-bind:class="{ active: isAllactive}">
                     All
             </button>
@@ -70,21 +70,6 @@ css: main.css
         <transition name="fade">
         </transition>
         </div>
-        <div style="height:70px;font-size:1px;">
-      <h4>Select Size of Points:</h4>
-      <button
-                    v-on:click="pickSmall"
-                    class="mini ui inverted blue icon button"
-                    v-bind:class="{ active: isSmallactive}">
-                    Small
-            </button>
-      <button
-                    v-on:click="pickLarge"
-                    class="mini ui inverted blue icon button"
-                    v-bind:class="{ active: isLargeactive}">
-                    Large
-            </button>
-      </div>
 		</div>
 		</div>
 		</div>
