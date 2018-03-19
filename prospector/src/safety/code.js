@@ -28,9 +28,8 @@ let collisionLayer;
 let mapLegend;
 let years = [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016];
 let allJSONData;
-let gradIncColor = {'Greater than 75% Fatal':"#ff0000",'Greater than 50% Fatal':"#f2000c",'Greater than 25% Fatal':"#e50029",
-                    'Greater than 15% Fatal':"#d80026",'Greater than 10% Fatal':"#cc0033",'Greater than 5% Fatal':"#af0040",
-					'Greater than 2% Fatal':"#b2004c",'Greater than 0% Fatal':"#a60059",'0% Fatal':"#800080"}
+let gradIncColor = {'Greater than 25% Fatal':"#ff0000",'Greater than 10% Fatal':"#e50029",
+                    'Greater than 0% Fatal':"#cc0033",'0% Fatal':"#800080"}
 
 //Initialization of selective aspects
 let popSelIntersection;
@@ -61,14 +60,9 @@ infopanel.update = function(geo, popupText) {
 infopanel.addTo(mymap);
 
 function getGradIncColor(d){
-  return d > 0.75   ? '#ff0000' :
-         d > 0.5    ? '#f2000c' :
-		 d > 0.25   ? '#e50029' :
-         d > 0.15   ? '#d80026' :
-		 d > 0.1    ? '#cc0033' :
-         d > 0.05   ? '#bf0040' :
-         d > 0.02   ? '#b2004c' :
-         d > 0      ? '#a60059' :
+  return d > 0.25   ? '#ff0000' :
+		 d > 0.1    ? '#e50029' :
+         d > 0      ? '#cc0033' :
                       '#800080';
 }
 
@@ -146,9 +140,7 @@ function addSWITRSLayer(collisions) {
   mapLegend.onAdd = function (map) {
 
     var div = L.DomUtil.create('div', 'info legend'),
-      grades = ['Greater than 75% Fatal', 'Greater than 50% Fatal', 'Greater than 25% Fatal', 'Greater than 15% Fatal',
-	            'Greater than 10% Fatal', 'Greater than 5% Fatal', 'Greater than 2% Fatal', 'Greater than 0% Fatal',
-				'0% Fatal'],
+      grades = ['Greater than 25% Fatal','Greater than 10% Fatal','Greater than 0% Fatal','0% Fatal'],
       labels = [];
 	  
 	//Text and color for the legend
@@ -490,9 +482,9 @@ function showYearlyChart() {
   //If there is already a chart there, dependent on chosen incident and severity. Change the labels, ykeys, and ymax.
   if (currentChart) {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
-	  currentChart.options.labels = ['Bicycle Collisions'];
-	  currentChart.options.ykeys = ['biccols'];
-	  currentChart.options.barColors = ["#e68a00",];
+	  currentChart.options.labels = ['Bicycle Injuries', 'Bicycle Deaths'];
+	  currentChart.options.ykeys = ['bicinjs', 'bickills'];
+	  currentChart.options.barColors = ["#e68a00", '#ff0000'];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
 
@@ -505,13 +497,13 @@ function showYearlyChart() {
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
 	  currentChart.options.labels = ['Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bickills'];
-	  currentChart.options.barColors = ["#e68a00",];
+	  currentChart.options.barColors = ["#ff0000",];
 	  var yearmax = 30;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-	  currentChart.options.labels = ['Pedestrian Collisions'];
-	  currentChart.options.ykeys = ['pedcols'];
-	  currentChart.options.barColors = ["#3377cc",];
+	  currentChart.options.labels = ['Pedestrian Injuries', 'Pedestrian Deaths'];
+	  currentChart.options.ykeys = ['pedinjs', 'pedkills'];
+	  currentChart.options.barColors = ["#3377cc","#ff0000"];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
@@ -523,7 +515,7 @@ function showYearlyChart() {
     } else {
 	  currentChart.options.labels = ['Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedkills'];
-	  currentChart.options.barColors = ["#3377cc",];
+	  currentChart.options.barColors = ["#ff0000",];
 	  var yearmax = 30;
 	  currentChart.options.ymax = yearmax;
     }
@@ -542,10 +534,10 @@ function showYearlyChart() {
     // The name of the data record attribute that contains x-values.
     xkey: 'year',
     // A list of names of data record attributes that contain y-values.
-    ykeys: ['pedcols'],
+    ykeys: ['pedinjs','pedkills'],
     ymax: yearmax,
-    labels: ['Pedestrian Collisions'],
-    barColors: ["#3377cc",],
+    labels: ['Pedestrian Injuries', 'Pedestrian Deaths'],
+    barColors: ["#3377cc","#ff0000"],
     xLabels: "Year",
     xLabelAngle: 60,
     xLabelFormat: dateFmt,
