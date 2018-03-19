@@ -14,15 +14,7 @@ let size = 1;
 // add the SF Map using Leafleft and MapBox
 // Basic leaflet information: .addTo adds a layer to your map.
 let mymap = maplib.sfmap;
-let url = 'https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
-let token = 'pk.eyJ1IjoicHNyYyIsImEiOiJjaXFmc2UxanMwM3F6ZnJtMWp3MjBvZHNrIn0._Dmske9er0ounTbBmdRrRQ';
-let attribution ='<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
-                 '<a href="http://mapbox.com">Mapbox</a>';
-L.tileLayer(url, {
-  attribution:attribution,
-  maxZoom: 18,
-  accessToken:token,
-}).addTo(mymap);
+mymap.setView([37.76889, -122.430997], 13);
 
 //Initialization of visual aspects
 let totals = true;
@@ -36,6 +28,9 @@ let collisionLayer;
 let mapLegend;
 let years = [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016];
 let allJSONData;
+let gradIncColor = {'Greater than 75% Fatal':"#ff0000",'Greater than 50% Fatal':"#f2000c",'Greater than 25% Fatal':"#e50029",
+                    'Greater than 15% Fatal':"#d80026",'Greater than 10% Fatal':"#cc0033",'Greater than 5% Fatal':"#af0040",
+					'Greater than 2% Fatal':"#b2004c",'Greater than 0% Fatal':"#a60059",'0% Fatal':"#800080"}
 
 //Initialization of selective aspects
 let popSelIntersection;
@@ -65,6 +60,18 @@ infopanel.update = function(geo, popupText) {
 };
 infopanel.addTo(mymap);
 
+function getGradIncColor(d){
+  return d > 0.75   ? '#ff0000' :
+         d > 0.5    ? '#f2000c' :
+		 d > 0.25   ? '#e50029' :
+         d > 0.15   ? '#d80026' :
+		 d > 0.1    ? '#cc0033' :
+         d > 0.05   ? '#bf0040' :
+         d > 0.02   ? '#b2004c' :
+         d > 0      ? '#a60059' :
+                      '#800080';
+}
+
 // add layers of intersection collisions to the map
 function addSWITRSLayer(collisions) {
   /*Input: json of collisions
@@ -85,7 +92,7 @@ function addSWITRSLayer(collisions) {
     style: styleByIncidentColor,
 	//at specific latitude longitude give a different size to the point depending on the specific count we are looking at.
   pointToLayer: function(feature, latlng) {
-    if (app.sliderValue != "All Years") {
+    if (app.sliderValue != "All Years" || chosenSeverity == 'Fatal') {
       if (feature['pedkill'] > 0 && chosenSeverity == 'All' && chosenIncidents == 'Ped') {
         return new L.CircleMarker(latlng, {radius: size*feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.8});
       } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Ped'){
@@ -139,12 +146,14 @@ function addSWITRSLayer(collisions) {
   mapLegend.onAdd = function (map) {
 
     var div = L.DomUtil.create('div', 'info legend'),
-      grades = ['Fatal', 'Non-fatal'],
+      grades = ['Greater than 75% Fatal', 'Greater than 50% Fatal', 'Greater than 25% Fatal', 'Greater than 15% Fatal',
+	            'Greater than 10% Fatal', 'Greater than 5% Fatal', 'Greater than 2% Fatal', 'Greater than 0% Fatal',
+				'0% Fatal'],
       labels = [];
 	  
 	//Text and color for the legend
     div.innerHTML = '<h4>Incident Category</h4>';
-      for (var i = 0; i < grades.length; i++) div.innerHTML += '<i style="background:' + incColor[grades[i]] + '"></i>' + grades[i] + '<br>';
+      for (var i = 0; i < grades.length; i++) div.innerHTML += '<i style="background:' + gradIncColor[grades[i]] + '"></i>' + grades[i] + '<br>';
 
     return div;
 
@@ -155,11 +164,18 @@ function addSWITRSLayer(collisions) {
 
 // this functions gives the feature a color weight and opacity depending on specifics of the json.
 function styleByIncidentColor(collision) {
-  if (collision['pedkill'] > 0 && chosenIncidents == 'Ped' && chosenSeverity != 'Nonf') {
+	
+  if (collision['pedkill'] > 0 && chosenIncidents == 'Ped' && chosenSeverity == 'Fatal') {
     return {"color": incColor['Fatal'],"weight": 0.1,
     "opacity": incOpacity['Fatal']};
-  } else if (collision['bickill'] > 0 && chosenIncidents == 'Bike' && chosenSeverity != 'Nonf') {
+  } else if (collision['bickill'] > 0 && chosenIncidents == 'Bike' && chosenSeverity == 'Fatal') {
 	return {"color": incColor['Fatal'],"weight": 0.1,
+    "opacity": incOpacity['Fatal']};
+  } else if (collision['pedkill'] > 0 && chosenIncidents == 'Ped' && chosenSeverity == 'All') {
+    return {"color": getGradIncColor(collision['pedkill']/collision['pedcol']),"weight": 0.1,
+    "opacity": incOpacity['Fatal']};
+  } else if (collision['bickill'] > 0 && chosenIncidents == 'Bike' && chosenSeverity == 'All') {
+	return {"color": getGradIncColor(collision['bickill']/collision['biccol']),"weight": 0.1,
     "opacity": incOpacity['Fatal']};
   } else {
     return {"color": incColor['Non-fatal'],"weight": 0.1,
