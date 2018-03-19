@@ -105,21 +105,21 @@ function addSWITRSLayer(collisions) {
       }
 	} else {
 	  if (feature['pedkill'] > 0 && chosenSeverity == 'All' && chosenIncidents == 'Ped') {
-        return new L.CircleMarker(latlng, {radius: size/2*feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.8});
+        return new L.CircleMarker(latlng, {radius: size/3.5*feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.8});
       } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Ped'){
-	    return new L.CircleMarker(latlng, {radius: size/2*feature['pedkill']+feature['pedkill']/(feature['pedkill']+.01), fillOpacity: 0.8});
+	    return new L.CircleMarker(latlng, {radius: size/3.5*feature['pedkill']+feature['pedkill']/(feature['pedkill']+.01), fillOpacity: 0.8});
 	  } else if (feature['pedkill'] == 0 && chosenSeverity == 'All' && chosenIncidents == 'Ped'){
-        return new L.CircleMarker(latlng, {radius: size/2*feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.5});
+        return new L.CircleMarker(latlng, {radius: size/3.5*feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.5});
       } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
-        return new L.CircleMarker(latlng, {radius: size/2*feature['pedinj']+feature['pedinj']/(feature['pedinj']+.01), fillOpacity: 0.5});
+        return new L.CircleMarker(latlng, {radius: size/3.5*feature['pedinj']+feature['pedinj']/(feature['pedinj']+.01), fillOpacity: 0.5});
       } else if (feature['bickill'] > 0 && chosenSeverity == 'All' && chosenIncidents == 'Bike') {
-        return new L.CircleMarker(latlng, {radius: size/2*feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.8});
+        return new L.CircleMarker(latlng, {radius: size/3.5*feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.8});
       } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Bike'){
-	    return new L.CircleMarker(latlng, {radius: size/2*feature['bickill']+feature['bickill']/(feature['bickill']+.01), fillOpacity: 0.8});
+	    return new L.CircleMarker(latlng, {radius: size/3.5*feature['bickill']+feature['bickill']/(feature['bickill']+.01), fillOpacity: 0.8});
 	  } else if (feature['bickill'] == 0 && chosenSeverity == 'All' && chosenIncidents == 'Bike'){
-        return new L.CircleMarker(latlng, {radius: size/2*feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.5});
+        return new L.CircleMarker(latlng, {radius: size/3.5*feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.5});
       } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
-        return new L.CircleMarker(latlng, {radius: size/2*feature['bicinj']+feature['bicinj']/(feature['bicinj']+.01), fillOpacity: 0.5});
+        return new L.CircleMarker(latlng, {radius: size/3.5*feature['bicinj']+feature['bicinj']/(feature['bicinj']+.01), fillOpacity: 0.5});
       }
 	}
   },
