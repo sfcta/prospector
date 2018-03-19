@@ -28,13 +28,13 @@ css: main.css
 			<hr/>
 			<div style="height:70px;font-size:1px;">
 			<h4>Select What Incidents:</h4>
-			<button 
+			<button
                     v-on:click="pickBike"
                     class="mini ui inverted green icon button"
                     v-bind:class="{ active: isBikeactive}">
                     Bike
             </button>
-			<button 
+			<button
                     v-on:click="pickPed"
                     class="mini ui inverted green icon button"
                     v-bind:class="{ active: isPedactive}">
@@ -43,19 +43,19 @@ css: main.css
 			</div>
 			<div>
 			<h5>Severity:</h5>
-			<button 
+			<button
                     v-on:click="pickFatal"
                     class="mini ui inverted yellow icon button"
                     v-bind:class="{ active: isFatalactive}">
                     Fatal
             </button>
-			<button 
+			<button
                     v-on:click="pickNonf"
                     class="mini ui inverted yellow icon button"
                     v-bind:class="{ active: isNonfactive}">
                     Non-Fatal
             </button>
-			<button 
+			<button
                     v-on:click="pickAll"
                     class="mini ui inverted yellow icon button"
                     v-bind:class="{ active: isAllactive}">
@@ -70,6 +70,21 @@ css: main.css
         <transition name="fade">
         </transition>
         </div>
+        <div style="height:70px;font-size:1px;">
+      <h4>Select Size of Points:</h4>
+      <button
+                    v-on:click="pickSmall"
+                    class="mini ui inverted blue icon button"
+                    v-bind:class="{ active: isSmallactive}">
+                    Small
+            </button>
+      <button
+                    v-on:click="pickLarge"
+                    class="mini ui inverted blue icon button"
+                    v-bind:class="{ active: isLargeactive}">
+                    Large
+            </button>
+      </div>
 		</div>
 		</div>
 		</div>
