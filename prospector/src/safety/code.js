@@ -31,6 +31,7 @@ let allJSONData;
 //Initialization of selective aspects
 let popSelIntersection;
 let selectedIntersection, prevSelectedIntersection;
+let selectedData;
 let currentChart = null;
 let infopanel = L.control();
 
@@ -298,8 +299,8 @@ function clickedOnFeature(e) {
   let jsonData = allJSONData
 	.filter(row => row.street_names == selectedIntersection.feature.street_names);
 	
-  let data = buildChartDataFromJson(jsonData);
-  createChart(data);
+  selectedData = buildChartDataFromJson(jsonData);
+  createChart();
 
 }
 
@@ -331,7 +332,7 @@ function buildChartDataFromJson(jsonData){
 }
 
 //Actually creating the chart
-function createChart(data) {
+function createChart() {
   //get a ymax for intersections that have almost no collisions as 4, else the max amount of collisions at the intersection.	
   
   
@@ -371,14 +372,14 @@ function createChart(data) {
     }
 
 	//Then set the data to be yearlyTotals
-    currentChart.setData(data);
+    currentChart.setData(selectedData);
   //If the chart is new, create it with the parameters found before.	  
   } else {
 
     currentChart = new Morris.Bar({
     // ID of the element in which to draw the chart.
       element: 'chart',
-      data: data,
+      data: selectedData,
       stacked: true,
     // The name of the data record attribute that contains x-values.
       xkey: 'year',
@@ -559,7 +560,7 @@ function pickBike(thing) {
   chosenIncidents = 'Bike'
   getSWITRSinfo();
   if (selectedIntersection){
-	  
+	createChart();  
   } else {
 	showYearlyChart();  
   }
@@ -572,7 +573,7 @@ function pickPed(thing) {
   chosenIncidents = 'Ped'
   getSWITRSinfo();
   if (selectedIntersection){
-	  
+	createChart();  
   } else {
 	showYearlyChart();  
   }
@@ -587,7 +588,7 @@ function pickFatal(thing) {
   chosenSeverity = 'Fatal'
   getSWITRSinfo();
   if (selectedIntersection){
-	  
+	createChart();  
   } else {
 	showYearlyChart();  
   }
@@ -601,7 +602,7 @@ function pickNonf(thing) {
   chosenSeverity = 'Nonf'
   getSWITRSinfo();
   if (selectedIntersection){
-	  
+	createChart();  
   } else {
 	showYearlyChart();  
   }
@@ -616,7 +617,7 @@ function pickAll(thing) {
   chosenSeverity = 'All'
   getSWITRSinfo();
   if (selectedIntersection){
-	  
+	createChart();  
   } else {
 	showYearlyChart();  
   }
