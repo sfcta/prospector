@@ -333,10 +333,7 @@ function buildChartDataFromJson(jsonData){
 //Actually creating the chart
 function createChart(data) {
   //get a ymax for intersections that have almost no collisions as 4, else the max amount of collisions at the intersection.	
-  let ymax = 4;
-  for (let entry of data) {
-    ymax = Math.max(ymax,entry['pedcols']+entry['biccols']);
-  }
+  
   
   //If there is already a chart there, change ymax, labels, ykeys, barColors, and data.
   if (currentChart) {
@@ -344,33 +341,33 @@ function createChart(data) {
 	  currentChart.options.labels = ['Bicycle Injuries', 'Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bicinjs', 'bickills'];
 	  currentChart.options.barColors = ["#3377cc","#ff0000"];
-	  currentChart.options.ymax = ymax;
+	  currentChart.options.ymax = 12;
 
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
 	  currentChart.options.labels = ['Bicycle Injuries'];
 	  currentChart.options.ykeys = ['bicinjs'];
 	  currentChart.options.barColors = ["#3377cc",];
-	  currentChart.options.ymax = ymax;
+	  currentChart.options.ymax = 12;
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
 	  currentChart.options.labels = ['Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bickills'];
 	  currentChart.options.barColors = ["#ff0000",];
-	  currentChart.options.ymax = ymax;
+	  currentChart.options.ymax = 12;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Pedestrian Injuries', 'Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedinjs', 'pedkills'];
 	  currentChart.options.barColors = ["#3377cc","#ff0000"];
-	  currentChart.options.ymax = ymax;
+	  currentChart.options.ymax = 12;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
 	  currentChart.options.labels = ['Pedestrian Injuries'];
 	  currentChart.options.ykeys = ['pedinjs'];
 	  currentChart.options.barColors = ["#3377cc",];
-	  currentChart.options.ymax = ymax;
+	  currentChart.options.ymax = 12;
     } else {
 	  currentChart.options.labels = ['Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedkills'];
 	  currentChart.options.barColors = ["#ff0000",];
-	  currentChart.options.ymax = ymax;
+	  currentChart.options.ymax = 12;
     }
 
 	//Then set the data to be yearlyTotals
