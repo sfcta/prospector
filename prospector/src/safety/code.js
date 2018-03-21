@@ -309,7 +309,7 @@ function buildChartDataFromJson(jsonData){
 	let data = [];
 	
 	//for every year make sure that you are getting the data from only that year and add the information of that intersection to the data.
-	for (let year in years){
+	for (let year in yearlist){
 		let pedcol = 0;
 		let biccol = 0;
 		let pedinj = 0;
@@ -317,7 +317,7 @@ function buildChartDataFromJson(jsonData){
 		let pedkill = 0;
 		let bickill = 0;
 		for (let json in jsonData){
-			if (years[year] == Number(jsonData[json].year)){
+			if (yearlist[year] == Number(jsonData[json].year)){
 				pedcol += jsonData[json].pedcol;
 				biccol += jsonData[json].biccol;
 				pedinj += jsonData[json].pedinj;
@@ -326,7 +326,7 @@ function buildChartDataFromJson(jsonData){
 				bickill += jsonData[json].bickill;
 			}
 		}
-		data.push({year:years[year], pedcols:pedcol, biccols:biccol, pedinjs:pedinj, bicinjs:bicinj, pedkills:pedkill, bickills:bickill});
+		data.push({year:yearlist[year], pedcols:pedcol, biccols:biccol, pedinjs:pedinj, bicinjs:bicinj, pedkills:pedkill, bickills:bickill});
 	}
 	return data;
 }
@@ -407,7 +407,7 @@ function yFmt(y) { return Math.round(y).toLocaleString() }
 //initialize labels
 const yearLabels = ['2006','2007','2008','2009','2010',
                   '2011','2012','2013','2014',
-                  '2015','2016'];
+                  '2015','2016','2017'];
 
 //Format x labels				  
 function dateFmt(x) {
@@ -439,7 +439,7 @@ function buildYearlyDetails(jsonData) {
 	let every_bickill = 0;
 	let every_pedinj = 0;
 	let every_bicinj = 0;
-	for (let year in years){
+	for (let year in yearlist){
 		let pedcol = 0;
 		let biccol = 0;
 		let pedkill = 0;
@@ -447,7 +447,7 @@ function buildYearlyDetails(jsonData) {
 		let pedinj = 0;
 		let bicinj = 0;
 		for (let json in jsonData){
-			if (years[year] == Number(jsonData[json].year)){
+			if (yearlist[year] == Number(jsonData[json].year)){
 				pedcol += jsonData[json].pedcol;
 				biccol += jsonData[json].biccol;
 				pedkill += jsonData[json].pedkill;
@@ -457,7 +457,7 @@ function buildYearlyDetails(jsonData) {
 				
 			}
 		}
-		yearlyTotals.push({year:years[year], pedcols:pedcol, biccols:biccol, pedkills:pedkill, bickills:bickill, pedinjs:pedinj, bicinjs:bicinj});
+		yearlyTotals.push({year:yearlist[year], pedcols:pedcol, biccols:biccol, pedkills:pedkill, bickills:bickill, pedinjs:pedinj, bicinjs:bicinj});
 		every_pedcol += pedcol;
 		every_biccol += biccol;
 		every_pedkill += pedkill;
@@ -639,10 +639,12 @@ function sliderChanged(thing) {
   
 }
 
+let yearlist = [];
+
 //update the year slider
 function updateSliderData() {
   //create the yearlabels based upon what years are in the data.
-  let yearlist = [];
+  yearlist = [];
   fetch(api_server + '?select=year')
   .then((resp) => resp.json()).then(function(jsonData) {
     for (let entry of jsonData) {
