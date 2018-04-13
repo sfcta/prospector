@@ -6,6 +6,7 @@ const sfcta_components = [
      'tnc',
 	   'autolos',
 	   'safety',
+     'tmcshp',
      'viz-template',
 	 //'cmp-v0',
 ];
