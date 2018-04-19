@@ -1,6 +1,6 @@
 'use strict';
+
 // Use npm and babel to support IE11/Safari
-import 'babel-polyfill';
 import 'isomorphic-fetch';
 import vueSlider from 'vue-slider-component';
 import Cookies from 'js-cookie';
