@@ -20,7 +20,7 @@
       <div id="picker">
         <hr/>
         <div style="height:70px;font-size:1px;">
-          <h4>Select What Incidents:</h4>
+          <h4>CHOOSE TYPE:</h4>
           <button class="mini ui inverted green icon button"
                   v-on:click="pickBike"
                   v-bind:class="{ active: isBikeactive}">
@@ -34,7 +34,7 @@
         </div>
         
         <div>
-          <h5>Severity:</h5>
+          <h5>CHOOSE SEVERITY:</h5>
           <button class="mini ui inverted red icon button"
                   v-on:click="pickFatal"
                   v-bind:class="{ active: isFatalactive}">
@@ -52,7 +52,7 @@
           </button>
         </div>
 			
-        <h4>Select What Year:</h4>
+        <h4>CHOOSE YEAR:</h4>
         <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
         <hr/>
         <h3>${chartTitle}</h3>
