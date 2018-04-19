@@ -17,52 +17,64 @@
         </button>
       </div>
       
-      <div class="dashboard">
-        <div id="picker">
-          <hr/>
-          <div style="height:70px;font-size:1px;">
-            <h4>Select What Incidents:</h4>
-            <button class="mini ui inverted green icon button"
-                    v-on:click="pickBike"
-                    v-bind:class="{ active: isBikeactive}">
-                    Bike
-            </button>
-            <button class="mini ui inverted green icon button"
-                    v-on:click="pickPed"
-                    v-bind:class="{ active: isPedactive}">
-                    Pedestrian
-            </button>
-          </div>
-          
-          <div>
-            <h5>Severity:</h5>
-            <button class="mini ui inverted red icon button"
-                    v-on:click="pickFatal"
-                    v-bind:class="{ active: isFatalactive}">
-                    Fatal
-            </button>
-            <button class="mini ui inverted blue icon button"
-                    v-on:click="pickNonf"
-                    v-bind:class="{ active: isNonfactive}">
-                    Non-Fatal
-            </button>
-            <button class="mini ui inverted violet icon button"
-                    v-on:click="pickAll"
-                    v-bind:class="{ active: isAllactive}">
-                    All
-            </button>
-          </div>
+      <div id="picker">
+        <hr/>
+        <div style="height:70px;font-size:1px;">
+          <h4>Select What Incidents:</h4>
+          <button class="mini ui inverted green icon button"
+                  v-on:click="pickBike"
+                  v-bind:class="{ active: isBikeactive}">
+                  Bike
+          </button>
+          <button class="mini ui inverted green icon button"
+                  v-on:click="pickPed"
+                  v-bind:class="{ active: isPedactive}">
+                  Pedestrian
+          </button>
+        </div>
+        
+        <div>
+          <h5>Severity:</h5>
+          <button class="mini ui inverted red icon button"
+                  v-on:click="pickFatal"
+                  v-bind:class="{ active: isFatalactive}">
+                  Fatal
+          </button>
+          <button class="mini ui inverted blue icon button"
+                  v-on:click="pickNonf"
+                  v-bind:class="{ active: isNonfactive}">
+                  Non-Fatal
+          </button>
+          <button class="mini ui inverted violet icon button"
+                  v-on:click="pickAll"
+                  v-bind:class="{ active: isAllactive}">
+                  All
+          </button>
+        </div>
 			
-          <h4>Select What Year:</h4>
-          <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
-          <hr/>
-          <h3>${chartTitle}</h3>
-          <div id="chart">
-            <transition name="fade">
-            </transition>
-          </div>
+        <h4>Select What Year:</h4>
+        <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
+        <hr/>
+        <h3>${chartTitle}</h3>
+        <div id="chart">
+          <transition name="fade"></transition>
         </div>
       </div>
+      
+      <div class="logo">
+        <hr/>
+        <table id="table-logo"><tr>
+          <td class="td-logo">
+            <h4 class="agency"><b><a target="_blank" href="http://www.sfcta.org/congestion">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
+          </td>
+          <td class="td-logo">
+            <a class="agency-link" target="_blank" href="http://www.sfcta.org/congestion">
+              <img class="img-logo" src="/assets/sfcta-logo-144.png" width="80">
+            </a>
+          </td>
+        </tr></table>
+      </div>
+      
   </div>
 
   <div id="sfmap"></div>
