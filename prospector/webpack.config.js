@@ -8,6 +8,7 @@ const sfcta_components = [
 	   'safety',
      'tmcshp',
      'viz-template',
+     'tncemp'
 	 //'cmp-v0',
 ];
 
