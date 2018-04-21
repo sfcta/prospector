@@ -3,7 +3,7 @@
   <div id="panel">
       <div id="preheader">
         <hr/>
-        <h3 class="apptitle">CONGESTION EXPLORER</h3>
+        <h3 class="apptitle">TNCs AND CONGESTION</h3>
         <div id="helpbar">
             <button class="ui mini right labeled icon violet button"
                     v-on:click="clickToggleHelp">
@@ -20,14 +20,26 @@
            </div>
 
           <div id="picker">
-            <div id="vizbuttons" class="ui vertical buttons">
-              <button v-for="item in vizlist"
-                    v-on:click="clickViz(item)"
-                    class="ui grey button"
-                    v-bind:class="{ active: item==selectedViz, yellow: item==selectedViz }">
-                    ${vizinfo[item]['TXT']}
-              </button>
-            </div>
+            <h5 style="margin-top:10px">CHOOSE SCENARIO:</h5>
+            <select v-model="selected_scenario">
+              <option v-for="option in scen_options" v-bind:value="option.value">
+                ${option.text}
+              </option>
+            </select>
+            
+            <h5 style="margin-top:10px">CHOOSE TIME PERIOD:</h5>
+            <select v-model="selected_timep">
+              <option v-for="option in time_options" v-bind:value="option.value">
+                ${option.text}
+              </option>
+            </select>
+            
+            <h5 style="margin-top:10px">CHOOSE MAP METRIC:</h5>
+            <select v-model="selected_metric">
+              <option v-for="option in metric_options" v-bind:value="option.value">
+                ${option.text}
+              </option>
+            </select>
           </div>
       </div>
       <div id="header">
@@ -44,24 +56,7 @@
       </div>
 
       <div class="logo">
-        <div class="pickers">
-            <h5 style="margin-top:10px">CHOOSE YEAR:</h5>
-            <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
-
-            <h5>CHOOSE TIME PERIOD:</h5>
-            <button v-on:click="pickAM"
-                    v-bind:class="{ active: isAMActive, yellow: isAMActive}"
-                     class="mini ui grey button">
-                     AM</button>
-            <button v-on:click="pickPM"
-                    v-bind:class="{ active: isPMActive, yellow: isPMActive }"
-                     class="mini ui grey button">
-                     PM</button>
-        </div>
-            <br>
-
             <hr/>
-
             <table id="table-logo"><tr>
               <td class="td-logo">
                 <h4 class="agency"><b><a target="_blank" href="http://www.sfcta.org/congestion">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
