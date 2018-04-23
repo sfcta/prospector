@@ -169,41 +169,41 @@ function hoverFeature(e) {
   var popupText = "<b>Intersection: "+intersectionName;
   if (app.sliderValue != "All Years"){
     if (chosenIncidents == 'Bike' && chosenSeverity == 'All'  && geo.bickill > 0){
-	  popupText += "<br/> Total Bike Collisions for year " + geo.year + " : " + geo.biccol;
-	  popupText += "<br/> Bike Deaths for year " + geo.year + " : " + geo.bickill;
+	  popupText += "<br/> All Bike Collisions for year " + geo.year + " : " + geo.biccol;
+	  popupText += "<br/> Fatal Bike Collisions for year " + geo.year + " : " + geo.bickill;
 	} else if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
-	  popupText += "<br/> Total Bike Collisions for year " + geo.year + " : " + geo.biccol;
+	  popupText += "<br/> All Bike Collisions for year " + geo.year + " : " + geo.biccol;
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
-	  popupText += "<br/> Bike Injuries for year " + geo.year + " : " + geo.bicinj;
+	  popupText += "<br/> Non-fatal Bike Collisions for year " + geo.year + " : " + geo.bicinj;
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
-	  popupText += "<br/> Bike Deaths for year " + geo.year + " : " + geo.bickill;
+	  popupText += "<br/> Fatal Bike Collisions for year " + geo.year + " : " + geo.bickill;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All' && geo.pedkill > 0){
-	  popupText += "<br/> Total Pedestrian Collisions for year " + geo.year + " : " + geo.pedcol;
-	  popupText += "<br/> Pedestrian Deaths for year " + geo.year + " : " + geo.pedkill;
+	  popupText += "<br/> All Pedestrian Collisions for year " + geo.year + " : " + geo.pedcol;
+	  popupText += "<br/> Fatal Pedestrian Collisions for year " + geo.year + " : " + geo.pedkill;
 	} else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-	  popupText += "<br/> Total Pedestrian Collisions for year " + geo.year + " : " + geo.pedcol;
+	  popupText += "<br/> All Pedestrian Collisions for year " + geo.year + " : " + geo.pedcol;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
-	  popupText += "<br/> Pedestrian Injuries for year " + geo.year + " : " + geo.pedinj;
+	  popupText += "<br/> Non-fatal Pedestrian Collisions for year " + geo.year + " : " + geo.pedinj;
     } else {
-	  popupText += "<br/> Pedestrian Deaths for year " + geo.year + " : " + geo.pedkill;
+	  popupText += "<br/> Fatal Pedestrian Collisions for year " + geo.year + " : " + geo.pedkill;
     }
   } else {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All' && geo.bickill > 0){
-	  popupText += "<br/> Total Bike Collisions : " + geo.biccol + "<br/> Bike Deaths : " + geo.bickill;
+	  popupText += "<br/> All Bike Collisions : " + geo.biccol + "<br/> Fatal Bike Collisions : " + geo.bickill;
 	} else if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
-	  popupText += "<br/> Total Bike Collisions : " + geo.biccol;
+	  popupText += "<br/> All Bike Collisions : " + geo.biccol;
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
-	  popupText += "<br/> Bike Injuries : " + geo.bicinj;
+	  popupText += "<br/> Non-fatal Bike Collisions : " + geo.bicinj;
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
-	  popupText += "<br/> Bike Deaths : " + geo.bickill ;
+	  popupText += "<br/> Fatal Bike Collisions : " + geo.bickill ;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All' && geo.pedkill > 0){
-	  popupText += "<br/> Total Pedestrian Collisions : " + geo.pedcol + "<br/> Pedestrian Deaths : " + geo.pedkill;
+	  popupText += "<br/> All Pedestrian Collisions : " + geo.pedcol + "<br/> Fatal Pedestrian Collisions : " + geo.pedkill;
 	} else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-      popupText += "<br/> Total Pedestrian Collisions : " + geo.pedcol;
+      popupText += "<br/> All Pedestrian Collisions : " + geo.pedcol;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
-	  popupText += "<br/> Pedestrian Injuries : " + geo.pedinj;
+	  popupText += "<br/> Non-fatal Pedestrian Collisions : " + geo.pedinj;
     } else {
-	  popupText += "<br/> Pedestrian Deaths : " + geo.pedkill;
+	  popupText += "<br/> Fatal Pedestrian Collisions : " + geo.pedkill;
     }
   }
 
@@ -252,17 +252,17 @@ function remakeLabel() {
 	}
   } else {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
-	  label = 'Count of all bike collisions: ' + yearlyTotals[yearlyTotals.length-1]['biccols'];
+	  label = 'Count of all bike collisions: \n' + yearlyTotals[yearlyTotals.length-1]['biccols'];
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
-	  label = 'Count of non-fatal bike collisions: ' + yearlyTotals[yearlyTotals.length-1]['bicinjs'];
+	  label = 'Count of non-fatal bike collisions: \n' + yearlyTotals[yearlyTotals.length-1]['bicinjs'];
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
-	  label = 'Count of fatal bike collisions: ' + yearlyTotals[yearlyTotals.length-1]['bickills'];
+	  label = 'Count of fatal bike collisions: \n' + yearlyTotals[yearlyTotals.length-1]['bickills'];
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-	  label = 'Count of all pedestrian collisions: ' + yearlyTotals[yearlyTotals.length-1]['pedcols'];
+	  label = 'Count of all pedestrian collisions: \n' + yearlyTotals[yearlyTotals.length-1]['pedcols'];
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
-	  label = 'Count of non-fatal pedestrian collisions: ' + yearlyTotals[yearlyTotals.length-1]['pedinjs'];
+	  label = 'Count of non-fatal pedestrian collisions: \n' + yearlyTotals[yearlyTotals.length-1]['pedinjs'];
     } else {
-	  label = 'Count of fatal pedestrian collisions: ' + yearlyTotals[yearlyTotals.length-1]['pedkills'];
+	  label = 'Count of fatal pedestrian collisions: \n' + yearlyTotals[yearlyTotals.length-1]['pedkills'];
 	}
   }
 }
