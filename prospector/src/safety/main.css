@@ -19,7 +19,6 @@ h5 {color: white;}
   right:0;
   bottom:0;
   width:380px;
-  height:880px;
   padding:0px 20px 0px 30px;
   z-index:10;
   background-color:#444;
@@ -30,10 +29,7 @@ h5 {color: white;}
   background-color:#eee;
   height: 880px;
   margin-right: 380px;
-  margin-top: -19px;
 }
-
-.dashboard { width:100%; height:100%; padding:10px;}
 
 #panel label {
   color:white;

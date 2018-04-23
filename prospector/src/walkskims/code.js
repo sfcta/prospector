@@ -206,7 +206,7 @@ function usrOptionChanged(thing) {
       let cen_coords = getTAZCentroid(geoFeatures[app.tazSelVal.value].centroid);
       if (tazMarker) tazMarker.remove();
       tazMarker = new L.marker(cen_coords, {icon: app.dirSel==app.dirOrig? iconOrig : iconDest}).addTo(mymap);
-      mymap.setView(cen_coords, DEFAULT_ZOOM);
+      //mymap.setView(cen_coords, DEFAULT_ZOOM);
       selTAZProps = [app.tazSelVal.label, geoFeatures[app.tazSelVal.value].nhood];
       info.update(null, selTAZProps, app.dirSel==app.dirOrig? 'otaz' : 'dtaz');
       queryServer();

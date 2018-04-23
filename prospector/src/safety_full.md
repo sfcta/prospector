@@ -8,6 +8,6 @@ css:
 
 ---
 
-{% include cmp.html %}
+{% include safety.html %}
 
-<script type="application/javascript" src="/bundles/cmp.js"></script>
+<script type="application/javascript" src="/bundles/safety.js"></script>
