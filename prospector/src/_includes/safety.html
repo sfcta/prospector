@@ -1,5 +1,5 @@
 <div id="container">
-	
+
   <div id="panel">
       <hr/>
       <h3 class="apptitle">SF Collisions Data from SWITRS</h3>
@@ -16,23 +16,23 @@
                 Learn More
         </button>
       </div>
-      
+
       <div id="picker">
         <hr/>
         <div style="height:70px;font-size:1px;">
           <h4>CHOOSE TYPE:</h4>
-          <button class="mini ui inverted green icon button"
+          <button class="mini ui inverted violet icon button"
                   v-on:click="pickBike"
                   v-bind:class="{ active: isBikeactive}">
                   Bike
           </button>
-          <button class="mini ui inverted green icon button"
+          <button class="mini ui inverted violet icon button"
                   v-on:click="pickPed"
                   v-bind:class="{ active: isPedactive}">
                   Pedestrian
           </button>
         </div>
-        
+
         <div>
           <h5>CHOOSE SEVERITY:</h5>
           <button class="mini ui inverted red icon button"
@@ -51,16 +51,17 @@
                   All
           </button>
         </div>
-			
+
         <h4>CHOOSE YEAR:</h4>
         <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
         <hr/>
-        <h3>${chartTitle}</h3>
+        <div id="chartinfo"><h3 style="font-size: 18px;">${chartTitle}</h3></div>
+        <h5 style="font-size: 12px">${chartSubTitle}</h5>
         <div id="chart">
           <transition name="fade"></transition>
         </div>
       </div>
-      
+
       <div class="logo">
         <hr/>
         <table id="table-logo"><tr>
@@ -74,7 +75,7 @@
           </td>
         </tr></table>
       </div>
-      
+
   </div>
 
   <div id="sfmap"></div>
@@ -83,13 +84,13 @@
         <h2 style="margin-bottom:0px;">Bicycle and Pedestrian Collision Data</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
         This data is the observed collisions in San Francisco thanks to the SWITRS database.
-        
+
         <ul>
         <li>Collision locations are snapped to the nearest intersection.</li>
         <li>Data is complete for years 2006-2014.</li>
         <li>Data is not entirely complete according to SWITRS information for years 2015-2017.</li>
         </ul>
-        
+
         <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
         <ul>
