@@ -2,6 +2,7 @@
 
   <div id="panel">
       <hr/>
+      <br/>
       <h3 class="apptitle">SF Collisions Data from SWITRS</h3>
       <div id="helpbar">
         <button class="ui mini right labeled icon violet button"
@@ -19,6 +20,7 @@
 
       <div id="picker">
         <hr/>
+        <br/>
         <div style="height:70px;font-size:1px;">
           <h4>CHOOSE TYPE:</h4>
           <button class="mini ui inverted violet icon button"
@@ -32,7 +34,6 @@
                   Pedestrian
           </button>
         </div>
-
         <div>
           <h5>CHOOSE SEVERITY:</h5>
           <button class="mini ui inverted red icon button"
@@ -51,16 +52,17 @@
                   All
           </button>
         </div>
+        <br/>
 
         <h4>CHOOSE YEAR:</h4>
         <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
         <hr/>
+      </div>  
         <div id="chartinfo"><h3 style="font-size: 18px;">${chartTitle}</h3></div>
         <h5 style="font-size: 12px">${chartSubTitle}</h5>
         <div id="chart">
           <transition name="fade"></transition>
         </div>
-      </div>
 
       <div class="logo">
         <hr/>
