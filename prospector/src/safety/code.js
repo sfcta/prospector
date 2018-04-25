@@ -351,7 +351,7 @@ function createChart() {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Bicycle Injuries', 'Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bicinjs', 'bickills'];
-	  currentChart.options.barColors = ["#3377cc","#ff0000"];
+	  currentChart.options.barColors = ["#1279c6","#d41515"];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'All Bike Collisions :';
 	  app.chartSubTitle = intersectionName;
@@ -359,35 +359,35 @@ function createChart() {
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
 	  currentChart.options.labels = ['Bicycle Injuries'];
 	  currentChart.options.ykeys = ['bicinjs'];
-	  currentChart.options.barColors = ["#3377cc",];
+	  currentChart.options.barColors = ["#1279c6",];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'Non-fatal Bike Collisions :';
 	  app.chartSubTitle = intersectionName;
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
 	  currentChart.options.labels = ['Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bickills'];
-	  currentChart.options.barColors = ["#ff0000",];
+	  currentChart.options.barColors = ["#d41515",];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'Fatal Bike Collisions :';
 	  app.chartSubTitle = intersectionName;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Pedestrian Injuries', 'Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedinjs', 'pedkills'];
-	  currentChart.options.barColors = ["#3377cc","#ff0000"];
+	  currentChart.options.barColors = ["#1279c6","#d41515"];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'All Pedestrian Collisions :';
 	  app.chartSubTitle = intersectionName;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
 	  currentChart.options.labels = ['Pedestrian Injuries'];
 	  currentChart.options.ykeys = ['pedinjs'];
-	  currentChart.options.barColors = ["#3377cc",];
+	  currentChart.options.barColors = ["#1279c6",];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'Non-fatal Pedestrian Collisions :';
 	  app.chartSubTitle = intersectionName;
     } else {
 	  currentChart.options.labels = ['Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedkills'];
-	  currentChart.options.barColors = ["#ff0000",];
+	  currentChart.options.barColors = ["#d41515",];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'Fatal Pedestrian Collisions :';
 	  app.chartSubTitle = intersectionName;
@@ -409,7 +409,7 @@ function createChart() {
       ykeys: ['pedcols', 'biccols'],
       ymax: ymax,
       labels: ['Pedestrian Collisions', 'Bicycle Collisions'],
-      barColors: ["#3377cc","#e68a00",],
+      barColors: ["#1279c6","#d41515",],
       xLabels: "Year",
       xLabelAngle: 60,
       xLabelFormat: dateFmt,
@@ -502,38 +502,38 @@ function showYearlyChart() {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Bicycle Injuries', 'Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bicinjs', 'bickills'];
-	  currentChart.options.barColors = ["#3377cc","#ff0000"];
+	  currentChart.options.barColors = ["#1279c6","#d41515"];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
 
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
 	  currentChart.options.labels = ['Bicycle Injuries'];
 	  currentChart.options.ykeys = ['bicinjs'];
-	  currentChart.options.barColors = ["#3377cc",];
+	  currentChart.options.barColors = ["#1279c6",];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
 	  currentChart.options.labels = ['Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bickills'];
-	  currentChart.options.barColors = ["#ff0000",];
+	  currentChart.options.barColors = ["#d41515",];
 	  var yearmax = 30;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Pedestrian Injuries', 'Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedinjs', 'pedkills'];
-	  currentChart.options.barColors = ["#3377cc","#ff0000"];
+	  currentChart.options.barColors = ["#1279c6","#d41515"];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
 	  currentChart.options.labels = ['Pedestrian Injuries'];
 	  currentChart.options.ykeys = ['pedinjs'];
-	  currentChart.options.barColors = ["#3377cc",];
+	  currentChart.options.barColors = ["#1279c6",];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
     } else {
 	  currentChart.options.labels = ['Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedkills'];
-	  currentChart.options.barColors = ["#ff0000",];
+	  currentChart.options.barColors = ["#d41515",];
 	  var yearmax = 30;
 	  currentChart.options.ymax = yearmax;
     }
@@ -555,7 +555,7 @@ function showYearlyChart() {
     ykeys: ['pedinjs', 'pedkills'],
     ymax: yearmax,
     labels: ['Pedestrian Injuries', 'Pedestrian Deaths'],
-    barColors: ["#3377cc","#ff0000"],
+    barColors: ["#1279c6","#d41515"],
     xLabels: "Year",
     xLabelAngle: 60,
     xLabelFormat: dateFmt,
@@ -700,6 +700,7 @@ let timeSlider = {
           tooltipDir: 'bottom',
           piecewise: true,
           piecewiseLabel: false,
+          tooltipStyle: { backgroundColor: '#9724be', borderColor: '#9724be' },
           lazy: false,
           reverse: false,
           speed: 0.25,

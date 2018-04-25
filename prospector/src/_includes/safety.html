@@ -23,32 +23,32 @@
         <br/>
         <div style="height:70px;font-size:1px;">
           <h4>CHOOSE TYPE:</h4>
-          <button class="mini ui inverted violet icon button"
+          <button class="mini ui grey button"
                   v-on:click="pickBike"
-                  v-bind:class="{ active: isBikeactive}">
+                  v-bind:class="{ active: isBikeactive, purple: isBikeactive}">
                   Bike
           </button>
-          <button class="mini ui inverted violet icon button"
+          <button class="mini ui grey button"
                   v-on:click="pickPed"
-                  v-bind:class="{ active: isPedactive}">
+                  v-bind:class="{ active: isPedactive, purple: isPedactive}">
                   Pedestrian
           </button>
         </div>
         <div>
           <h5>CHOOSE SEVERITY:</h5>
-          <button class="mini ui inverted red icon button"
+          <button class="mini ui grey button"
                   v-on:click="pickFatal"
-                  v-bind:class="{ active: isFatalactive}">
+                  v-bind:class="{ active: isFatalactive, red: isFatalactive}">
                   Fatal
           </button>
-          <button class="mini ui inverted blue icon button"
+          <button class="mini ui grey button"
                   v-on:click="pickNonf"
-                  v-bind:class="{ active: isNonfactive}">
+                  v-bind:class="{ active: isNonfactive, blue: isNonfactive}">
                   Non-Fatal
           </button>
-          <button class="mini ui inverted violet icon button"
+          <button class="mini ui grey button"
                   v-on:click="pickAll"
-                  v-bind:class="{ active: isAllactive}">
+                  v-bind:class="{ active: isAllactive, purple: isAllactive}">
                   All
           </button>
         </div>
