@@ -398,11 +398,14 @@ function showVizChartForSelectedSegment() {
   // show actual speeds in chart, not A-F LOS categories
   if (selviz_metric == 'los_hcm85') metric_col = 'auto_speed';
 
-  let segmentData = _allCmpData
-    .filter(row => row.cmp_segid == _selectedGeo.cmp_segid)
-    .filter(row => row[metric_col] != null);
-
-  buildChartHtmlFromCmpData(segmentData);
+  if (_selectedGeo) {
+    let segmentData = _allCmpData
+      .filter(row => row.cmp_segid == _selectedGeo.cmp_segid)
+      .filter(row => row[metric_col] != null);
+    buildChartHtmlFromCmpData(segmentData);
+  } else {
+    buildChartHtmlFromCmpData();
+  }
 }
 
 function buildChartHtmlFromCmpData(json = null) {
