@@ -14,7 +14,7 @@ let size = 1;
 // add the SF Map using Leafleft and MapBox
 // Basic leaflet information: .addTo adds a layer to your map.
 let mymap = maplib.sfmap;
-mymap.setView([37.76889, -122.430997], 13);
+mymap.setView([37.76889, -122.440997], 13);
 
 //Initialization of visual aspects
 let totals = true;
