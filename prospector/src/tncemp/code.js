@@ -267,26 +267,33 @@ function drawMapFeatures() {
       vals = vals.filter(function (n) { return n !== null});
       vals = vals.sort();
       if (vals.length > 0) {
-        sel_colorvals = Array.from(new Set(vals)).sort();
+        sel_colorvals = Array.from(new Set(vals)).sort((a, b) => a - b);
         let color_func;
         if (sel_colorvals.length <= 10) {
           console.log('Using unique values for mapping');
           sel_binsflag = false;
-          color_func = chroma.scale('OrRd').classes(sel_colorvals.length);
+          color_func = chroma.scale('OrRd').classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
         } else{
           console.log('Using quintiles for mapping');
           sel_colorvals = [];
           for(var i = 1; i <= 5; i++) {
             sel_colorvals.push(parseInt(vals[Math.floor(vals.length*1/i)-1]));
           }
-          sel_colorvals.push(vals[0]);
-          sel_colorvals = sel_colorvals.sort();
+          sel_colorvals.push(Math.floor(vals[0]));
+          sel_colorvals = sel_colorvals.sort((a, b) => a - b);
           sel_binsflag = true; 
-          color_func = chroma.scale('OrRd').classes(sel_colorvals);         
+          color_func = chroma.scale('OrRd').classes(sel_colorvals);
+          sel_colorvals = sel_colorvals.slice(0,sel_colorvals.length-1);
         }
         sel_colors = [];
         for(let i of sel_colorvals) {
           sel_colors.push(color_func(i).hex());
+        }
+        let sel_colorvals2 = sel_colorvals.slice(0);
+        let sel_colors2 = sel_colors.slice(0);
+        if (sel_binsflag) {
+          sel_colorvals2 = sel_colorvals2.slice(1);
+          sel_colors2 = ['0000'].concat(sel_colors);
         }
         
         // update metric-colored feature data
@@ -305,7 +312,7 @@ function drawMapFeatures() {
           style: function(feat) {
             let color = getColorFromVal(
               feat['metric'],
-              sel_colorvals,
+              sel_colorvals2,
               sel_colors,
               sel_binsflag
             );
@@ -326,10 +333,10 @@ function drawMapFeatures() {
           let div = L.DomUtil.create('div', 'info legend');
           let legHTML = getLegHTML(
             sel_colorvals,
-            sel_colors,
+            sel_colors2,
             sel_binsflag
           );
-          div.innerHTML = '<h4>' + VIZ_INFO[app.selectedViz]['METRIC_DESC'] + '</h4>' + legHTML;
+          div.innerHTML = '<h4>' + sel_metric.toUpperCase() + '</h4>' + legHTML;
           return div;
         };
         mapLegend.addTo(mymap);
