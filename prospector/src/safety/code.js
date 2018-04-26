@@ -14,12 +14,13 @@ let size = 1;
 // add the SF Map using Leafleft and MapBox
 // Basic leaflet information: .addTo adds a layer to your map.
 let mymap = maplib.sfmap;
-mymap.setView([37.76889, -122.430997], 13);
+mymap.setView([37.76889, -122.440997], 13);
 
 //Initialization of visual aspects
 let totals = true;
 let queryurl = '';
 let label = '';
+let sublabel = '';
 let incColor = {'Fatal':"#ff0000",'Non-fatal':"#800080"};
 let incOpacity = {'Fatal':1, 'Non-fatal':0.15};
 let missingColor = '#ccc';
@@ -45,9 +46,9 @@ infopanel.onAdd = function(map) {
 infopanel.update = function(geo, popupText) {
 	infopanel._div.innerHTML = '';
 	infopanel._div.className = 'info-panel'
-	
+
 	if (geo) {
-		this._div.innerHTML = 
+		this._div.innerHTML =
 		  `${popupText}`;
 	}
 	infopanelTimeout = setTimeout(function() {
@@ -68,15 +69,15 @@ function addSWITRSLayer(collisions) {
   /*Input: json of collisions
   What this function does: Adds features to the map according to the information given from the json and website parameters.*/
 
-  //for each intersection of data in the api, we add new information so we can add layers to map. 
+  //for each intersection of data in the api, we add new information so we can add layers to map.
   for (let collision of collisions) {
     collision["type"] = "Feature";
     collision["geometry"] = JSON.parse(collision.st_asgeojson);
   }
-  
+
   //If these layers are already on the map, remove them.
   if (collisionLayer) mymap.removeLayer(collisionLayer);
-  
+
   //loading in the new geoJSON features we created we create our collision layer
   collisionLayer = L.geoJSON(collisions, {
     style: styleByIncidentColor,
@@ -118,16 +119,16 @@ function addSWITRSLayer(collisions) {
   });
   collisionLayer.addTo(mymap);
 
-  
+
 };
 
 // this functions gives the feature a color weight and opacity depending on specifics of the json.
 function styleByIncidentColor(collision) {
-	
-  
+
+
   return {"color": incColor['Non-fatal'],"weight": 0.1,
   "opacity": incOpacity['Non-fatal']};
-  
+
 }
 
 // This function queries the api for json dependent on the year and refresh yearly detail chart on webpage.
@@ -157,119 +158,120 @@ let oldHoverTarget;
 // This function will create an info-panel at the top right of the map of the intersection that will hide after a delay.
 // There are special cases dependent on the clicked on feature inside this function as well.
 function hoverFeature(e) {
-  //Refresh Timeout	
+  //Refresh Timeout
   clearTimeout(infopanelTimeout);
-  
+
   //Initializing commonly used objects
   let highlightedGeo = e.target;
   let geo = highlightedGeo.feature;
-  
+
   //Fixing the street_names for easier readability and have it dependent on query information.
   let intersectionName = highlightedGeo.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and');
   var popupText = "<b>Intersection: "+intersectionName;
   if (app.sliderValue != "All Years"){
     if (chosenIncidents == 'Bike' && chosenSeverity == 'All'  && geo.bickill > 0){
-	  popupText += "<br/> Total Bike Collisions for year " + geo.year + " : " + geo.biccol;
-	  popupText += "<br/> Bike Deaths for year " + geo.year + " : " + geo.bickill;
+	  popupText += "<br/> All Bike Collisions for year " + geo.year + " : " + geo.biccol;
+	  popupText += "<br/> Fatal Bike Collisions for year " + geo.year + " : " + geo.bickill;
 	} else if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
-	  popupText += "<br/> Total Bike Collisions for year " + geo.year + " : " + geo.biccol;
+	  popupText += "<br/> All Bike Collisions for year " + geo.year + " : " + geo.biccol;
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
-	  popupText += "<br/> Bike Injuries for year " + geo.year + " : " + geo.bicinj;
+	  popupText += "<br/> Non-fatal Bike Collisions for year " + geo.year + " : " + geo.bicinj;
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
-	  popupText += "<br/> Bike Deaths for year " + geo.year + " : " + geo.bickill;
+	  popupText += "<br/> Fatal Bike Collisions for year " + geo.year + " : " + geo.bickill;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All' && geo.pedkill > 0){
-	  popupText += "<br/> Total Pedestrian Collisions for year " + geo.year + " : " + geo.pedcol;
-	  popupText += "<br/> Pedestrian Deaths for year " + geo.year + " : " + geo.pedkill;
+	  popupText += "<br/> All Pedestrian Collisions for year " + geo.year + " : " + geo.pedcol;
+	  popupText += "<br/> Fatal Pedestrian Collisions for year " + geo.year + " : " + geo.pedkill;
 	} else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-	  popupText += "<br/> Total Pedestrian Collisions for year " + geo.year + " : " + geo.pedcol;
+	  popupText += "<br/> All Pedestrian Collisions for year " + geo.year + " : " + geo.pedcol;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
-	  popupText += "<br/> Pedestrian Injuries for year " + geo.year + " : " + geo.pedinj;
+	  popupText += "<br/> Non-fatal Pedestrian Collisions for year " + geo.year + " : " + geo.pedinj;
     } else {
-	  popupText += "<br/> Pedestrian Deaths for year " + geo.year + " : " + geo.pedkill;
+	  popupText += "<br/> Fatal Pedestrian Collisions for year " + geo.year + " : " + geo.pedkill;
     }
   } else {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All' && geo.bickill > 0){
-	  popupText += "<br/> Total Bike Collisions : " + geo.biccol + "<br/> Bike Deaths : " + geo.bickill;
-	} else if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){  
-	  popupText += "<br/> Total Bike Collisions : " + geo.biccol;
+	  popupText += "<br/> All Bike Collisions : " + geo.biccol + "<br/> Fatal Bike Collisions : " + geo.bickill;
+	} else if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
+	  popupText += "<br/> All Bike Collisions : " + geo.biccol;
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
-	  popupText += "<br/> Bike Injuries : " + geo.bicinj;
+	  popupText += "<br/> Non-fatal Bike Collisions : " + geo.bicinj;
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
-	  popupText += "<br/> Bike Deaths : " + geo.bickill ;
+	  popupText += "<br/> Fatal Bike Collisions : " + geo.bickill ;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All' && geo.pedkill > 0){
-	  popupText += "<br/> Total Pedestrian Collisions : " + geo.pedcol + "<br/> Pedestrian Deaths : " + geo.pedkill;
+	  popupText += "<br/> All Pedestrian Collisions : " + geo.pedcol + "<br/> Fatal Pedestrian Collisions : " + geo.pedkill;
 	} else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-      popupText += "<br/> Total Pedestrian Collisions : " + geo.pedcol;
+      popupText += "<br/> All Pedestrian Collisions : " + geo.pedcol;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
-	  popupText += "<br/> Pedestrian Injuries : " + geo.pedinj;
+	  popupText += "<br/> Non-fatal Pedestrian Collisions : " + geo.pedinj;
     } else {
-	  popupText += "<br/> Pedestrian Deaths : " + geo.pedkill;
-    }  
+	  popupText += "<br/> Fatal Pedestrian Collisions : " + geo.pedkill;
+    }
   }
-  
+
   //update the infopanel on the top right
   infopanel.update(highlightedGeo, popupText);
-  
+
   highlightedGeo.bringToFront();
   // Special cases for clicked on intersection
   if (selectedIntersection) {
-	// don't do anything else if the feature is already clicked  
+	// don't do anything else if the feature is already clicked
     if (selectedIntersection.feature.street_names === highlightedGeo.feature.street_names) return;
-    
+
     // return previously-hovered segment to its original color
     if (oldHoverTarget) {
       if (oldHoverTarget.feature.street_names != selectedIntersection.feature.street_names)
         collisionLayer.resetStyle(oldHoverTarget);
     }
-	
+
 	//if the hovered area is not the same as the currently selected intersection, give hover information
     if (highlightedGeo.feature.street_names != selectedIntersection.feature.street_names) {
       highlightedGeo.setStyle(styles.selected);
       oldHoverTarget = e.target;
-    }    
+    }
   } else {
     if (oldHoverTarget) collisionLayer.resetStyle(oldHoverTarget);
     highlightedGeo.setStyle(styles.selected);
     oldHoverTarget = e.target;
-  }  
+  }
 }
 
 //remake the title for the chart on the bottom right for when there is no selected intersection
 function remakeLabel() {
-  if (app.sliderValue != "All Years"){	
+  if (app.sliderValue != "All Years"){
     if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
-	  label = 'COUNT OF ALL BIKE COLLISIONS FOR ' + String(app.sliderValue) + ' : ' + yearlyTotals[app.sliderValue-2006]['biccols'];
+	  label = 'All Bike Collisions for ' + String(app.sliderValue) + ' : ' + yearlyTotals[app.sliderValue-2006]['biccols'];
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
-	  label = 'COUNT OF NON-FATAL BIKE COLLISIONS FOR ' + String(app.sliderValue) + ' : ' + yearlyTotals[app.sliderValue-2006]['bicinjs'];
+	  label = 'Non-fatal Bike Collisions for ' + String(app.sliderValue) + ' : ' + yearlyTotals[app.sliderValue-2006]['bicinjs'];
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
-	  label = 'COUNT OF FATAL BIKE COLLISIONS FOR ' + String(app.sliderValue) + ' : ' + yearlyTotals[app.sliderValue-2006]['bickills'];
+	  label = 'Fatal Bike Collisions for ' + String(app.sliderValue) + ' : ' + yearlyTotals[app.sliderValue-2006]['bickills'];
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-	  label = 'COUNT OF ALL PEDESTRIAN COLLISIONS FOR ' + String(app.sliderValue) + ' : ' + yearlyTotals[app.sliderValue-2006]['pedcols'];
+	  label = 'All Pedestrian Collisions for ' + String(app.sliderValue) + ' : ' + yearlyTotals[app.sliderValue-2006]['pedcols'];
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
-	  label = 'COUNT OF NON-FATAL PEDESTRIAN COLLISIONS FOR ' + String(app.sliderValue) + ' : ' + yearlyTotals[app.sliderValue-2006]['pedinjs'];
+	  label = 'Non-fatal Pedestrian Collisions for ' + String(app.sliderValue) + ' : ' + yearlyTotals[app.sliderValue-2006]['pedinjs'];
     } else {
-	  label = 'COUNT OF FATAL PEDESTRIAN COLLISIONS FOR ' + String(app.sliderValue) + ' : ' + yearlyTotals[app.sliderValue-2006]['pedkills'];
+	  label = 'Fatal Pedestrian Collisions for ' + String(app.sliderValue) + ' : ' + yearlyTotals[app.sliderValue-2006]['pedkills'];
 	}
   } else {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
-	  label = 'COUNT OF ALL BIKE COLLISIONS: ' + yearlyTotals[yearlyTotals.length-1]['biccols'];
+	  label = 'All Bike Collisions: ' + yearlyTotals[yearlyTotals.length-1]['biccols'];
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
-	  label = 'COUNT OF NON-FATAL BIKE COLLISIONS: ' + yearlyTotals[yearlyTotals.length-1]['bicinjs'];
+	  label = 'Non-fatal Bike Collisions: ' + yearlyTotals[yearlyTotals.length-1]['bicinjs'];
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
-	  label = 'COUNT OF FATAL BIKE COLLISIONS: ' + yearlyTotals[yearlyTotals.length-1]['bickills'];
+	  label = 'Fatal Bike Collisions: ' + yearlyTotals[yearlyTotals.length-1]['bickills'];
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-	  label = 'COUNT OF ALL PEDESTRIAN COLLISIONS: ' + yearlyTotals[yearlyTotals.length-1]['pedcols'];
+	  label = 'All Pedestrian Collisions: ' + yearlyTotals[yearlyTotals.length-1]['pedcols'];
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
-	  label = 'COUNT OF NON-FATAL PEDESTRIAN COLLISIONS: ' + yearlyTotals[yearlyTotals.length-1]['pedinjs'];
+	  label = 'Non-fatal Pedestrian Collisions: ' + yearlyTotals[yearlyTotals.length-1]['pedinjs'];
     } else {
-	  label = 'COUNT OF FATAL PEDESTRIAN COLLISIONS: ' + yearlyTotals[yearlyTotals.length-1]['pedkills'];
-	}  
+	  label = 'Fatal Pedestrian Collisions: ' + yearlyTotals[yearlyTotals.length-1]['pedkills'];
+	}
   }
+  app.chartSubTitle = 'All Intersections';
 }
 
 function clickedOnFeature(e) {
   let clickedIntersection = e.target.feature;
-  
+
   // unselect the previously-selected selection, if there is one
   if (selectedIntersection && selectedIntersection.feature.street_names != clickedIntersection.street_names) {
     prevSelectedIntersection = selectedIntersection;
@@ -278,11 +280,11 @@ function clickedOnFeature(e) {
   selectedIntersection = e.target;
   selectedIntersection.bringToFront();
   selectedIntersection.setStyle(styles.popup);
-  
+
   //Fix streetname for readability and change title of chart
-  let intersectionName = selectedIntersection.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and'); 
-  app.chartTitle = 'ALL COLLISIONS at ' + intersectionName + ':';
-  
+  let intersectionName = selectedIntersection.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and');
+  app.chartTitle = 'All collisions at ' + intersectionName + ':';
+
   popSelIntersection = L.popup()
     .setLatLng(e.latlng)
     .setContent(intersectionName)
@@ -294,11 +296,11 @@ function clickedOnFeature(e) {
     prevSelectedIntersection = selectedIntersection = null;
     showYearlyChart();
   });
-	
-  //query data based on intersection then create chart of all collisions for that intersection	
+
+  //query data based on intersection then create chart of all collisions for that intersection
   let jsonData = allJSONData
 	.filter(row => row.street_names == selectedIntersection.feature.street_names);
-	
+
   selectedData = buildChartDataFromJson(jsonData);
   createChart();
 
@@ -307,7 +309,7 @@ function clickedOnFeature(e) {
 //This function gets the data needed in the right format for the chart
 function buildChartDataFromJson(jsonData){
 	let data = [];
-	
+
 	//for every year make sure that you are getting the data from only that year and add the information of that intersection to the data.
 	for (let year in yearlist){
 		let pedcol = 0;
@@ -333,54 +335,67 @@ function buildChartDataFromJson(jsonData){
 
 //Actually creating the chart
 function createChart() {
-  //get a ymax for intersections that have almost no collisions as 4, else the max amount of collisions at the intersection.	
-  let intersectionName = selectedIntersection.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and'); 
-  
-  
+  //get a ymax for intersections that have almost no collisions as 4, else the max amount of collisions at the intersection.
+  let intersectionName;
+  if (selectedIntersection.feature.street_names.length>56){
+      intersectionName = selectedIntersection.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and').substr(0,50);
+  } else if (selectedIntersection.feature.street_names.length == 54){
+    intersectionName = selectedIntersection.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and').substr(0,32);
+  } else {  
+    intersectionName = selectedIntersection.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and');
+  }
+
+
   //If there is already a chart there, change ymax, labels, ykeys, barColors, and data.
   if (currentChart) {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Bicycle Injuries', 'Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bicinjs', 'bickills'];
-	  currentChart.options.barColors = ["#3377cc","#ff0000"];
+	  currentChart.options.barColors = ["#1279c6","#d41515"];
 	  currentChart.options.ymax = 12;
-	  app.chartTitle = 'ALL BIKE COLLISIONS at ' + intersectionName + ':';
+	  app.chartTitle = 'All Bike Collisions :';
+	  app.chartSubTitle = intersectionName;
 
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
 	  currentChart.options.labels = ['Bicycle Injuries'];
 	  currentChart.options.ykeys = ['bicinjs'];
-	  currentChart.options.barColors = ["#3377cc",];
+	  currentChart.options.barColors = ["#1279c6",];
 	  currentChart.options.ymax = 12;
-	  app.chartTitle = 'NON-FATAL BIKE COLLISIONS at ' + intersectionName + ':';
+	  app.chartTitle = 'Non-fatal Bike Collisions :';
+	  app.chartSubTitle = intersectionName;
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
 	  currentChart.options.labels = ['Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bickills'];
-	  currentChart.options.barColors = ["#ff0000",];
+	  currentChart.options.barColors = ["#d41515",];
 	  currentChart.options.ymax = 12;
-	  app.chartTitle = 'FATAL BIKE COLLISIONS at ' + intersectionName + ':';
+	  app.chartTitle = 'Fatal Bike Collisions :';
+	  app.chartSubTitle = intersectionName;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Pedestrian Injuries', 'Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedinjs', 'pedkills'];
-	  currentChart.options.barColors = ["#3377cc","#ff0000"];
+	  currentChart.options.barColors = ["#1279c6","#d41515"];
 	  currentChart.options.ymax = 12;
-	  app.chartTitle = 'ALL PEDESTRIAN COLLISIONS at ' + intersectionName + ':';
+	  app.chartTitle = 'All Pedestrian Collisions :';
+	  app.chartSubTitle = intersectionName;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
 	  currentChart.options.labels = ['Pedestrian Injuries'];
 	  currentChart.options.ykeys = ['pedinjs'];
-	  currentChart.options.barColors = ["#3377cc",];
+	  currentChart.options.barColors = ["#1279c6",];
 	  currentChart.options.ymax = 12;
-	  app.chartTitle = 'NON-FATAL PEDESTRIAN COLLISIONS at ' + intersectionName + ':';
+	  app.chartTitle = 'Non-fatal Pedestrian Collisions :';
+	  app.chartSubTitle = intersectionName;
     } else {
 	  currentChart.options.labels = ['Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedkills'];
-	  currentChart.options.barColors = ["#ff0000",];
+	  currentChart.options.barColors = ["#d41515",];
 	  currentChart.options.ymax = 12;
-	  app.chartTitle = 'FATAL PEDESTRIAN COLLISIONS at ' + intersectionName + ':';
+	  app.chartTitle = 'Fatal Pedestrian Collisions :';
+	  app.chartSubTitle = intersectionName;
     }
 
 	//Then set the data to be yearlyTotals
     currentChart.setData(selectedData);
-  //If the chart is new, create it with the parameters found before.	  
+  //If the chart is new, create it with the parameters found before.
   } else {
 
     currentChart = new Morris.Bar({
@@ -394,7 +409,7 @@ function createChart() {
       ykeys: ['pedcols', 'biccols'],
       ymax: ymax,
       labels: ['Pedestrian Collisions', 'Bicycle Collisions'],
-      barColors: ["#3377cc","#e68a00",],
+      barColors: ["#1279c6","#d41515",],
       xLabels: "Year",
       xLabelAngle: 60,
       xLabelFormat: dateFmt,
@@ -413,13 +428,13 @@ const yearLabels = ['2006','2007','2008','2009','2010',
                   '2011','2012','2013','2014',
                   '2015','2016','2017'];
 
-//Format x labels				  
+//Format x labels
 function dateFmt(x) {
   return yearLabels[x.x];
 }
 
 //initialize yearlyTotals data
-let yearlyTotals = [];
+let yearlyTotals;
 
 //This function will query the api server for everything to make the yearlyTotals data
 function fetchYearlyDetails() {
@@ -458,7 +473,7 @@ function buildYearlyDetails(jsonData) {
 				bickill += jsonData[json].bickill;
 				pedinj += jsonData[json].pedinj;
 				bicinj += jsonData[json].bicinj;
-				
+
 			}
 		}
 		yearlyTotals.push({year:yearlist[year], pedcols:pedcol, biccols:biccol, pedkills:pedkill, bickills:bickill, pedinjs:pedinj, bicinjs:bicinj});
@@ -473,8 +488,6 @@ function buildYearlyDetails(jsonData) {
 
     app.timeSlider.disabled = false;
     showYearlyChart();
-
-    return yearlyTotals;
 }
 
 //use the yearly totals data to get the chart you want dependent on chosen incidents and severity
@@ -483,54 +496,54 @@ function showYearlyChart() {
   data = data.slice(0,yearlyTotals.length-1);
   remakeLabel();
   app.chartTitle = label;
-  
+
   //If there is already a chart there, dependent on chosen incident and severity. Change the labels, ykeys, and ymax.
   if (currentChart) {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Bicycle Injuries', 'Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bicinjs', 'bickills'];
-	  currentChart.options.barColors = ["#3377cc","#ff0000"];
+	  currentChart.options.barColors = ["#1279c6","#d41515"];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
 
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
 	  currentChart.options.labels = ['Bicycle Injuries'];
 	  currentChart.options.ykeys = ['bicinjs'];
-	  currentChart.options.barColors = ["#3377cc",];
+	  currentChart.options.barColors = ["#1279c6",];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
 	  currentChart.options.labels = ['Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bickills'];
-	  currentChart.options.barColors = ["#ff0000",];
+	  currentChart.options.barColors = ["#d41515",];
 	  var yearmax = 30;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Pedestrian Injuries', 'Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedinjs', 'pedkills'];
-	  currentChart.options.barColors = ["#3377cc","#ff0000"];
+	  currentChart.options.barColors = ["#1279c6","#d41515"];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
 	  currentChart.options.labels = ['Pedestrian Injuries'];
 	  currentChart.options.ykeys = ['pedinjs'];
-	  currentChart.options.barColors = ["#3377cc",];
+	  currentChart.options.barColors = ["#1279c6",];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
     } else {
 	  currentChart.options.labels = ['Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedkills'];
-	  currentChart.options.barColors = ["#ff0000",];
+	  currentChart.options.barColors = ["#d41515",];
 	  var yearmax = 30;
 	  currentChart.options.ymax = yearmax;
     }
 
 	//Then set the data to be yearlyTotals
     currentChart.setData(data);
-  
-  
+
+
   //Else initialize the data for the first time.
-  } else {  
+  } else {
     currentChart = new Morris.Bar({
     // ID of the element in which to draw the chart.
     element: 'chart',
@@ -542,7 +555,7 @@ function showYearlyChart() {
     ykeys: ['pedinjs', 'pedkills'],
     ymax: yearmax,
     labels: ['Pedestrian Injuries', 'Pedestrian Deaths'],
-    barColors: ["#3377cc","#ff0000"],
+    barColors: ["#1279c6","#d41515"],
     xLabels: "Year",
     xLabelAngle: 60,
     xLabelFormat: dateFmt,
@@ -551,7 +564,7 @@ function showYearlyChart() {
     parseTime: false,
   });
 
-  
+
   }
 
 }
@@ -567,9 +580,9 @@ function pickBike(thing) {
   chosenIncidents = 'Bike'
   getSWITRSinfo();
   if (selectedIntersection){
-	createChart();  
+	createChart();
   } else {
-	showYearlyChart();  
+	showYearlyChart();
   }
 }
 
@@ -580,9 +593,9 @@ function pickPed(thing) {
   chosenIncidents = 'Ped'
   getSWITRSinfo();
   if (selectedIntersection){
-	createChart();  
+	createChart();
   } else {
-	showYearlyChart();  
+	showYearlyChart();
   }
 }
 
@@ -595,9 +608,9 @@ function pickFatal(thing) {
   chosenSeverity = 'Fatal'
   getSWITRSinfo();
   if (selectedIntersection){
-	createChart();  
+	createChart();
   } else {
-	showYearlyChart();  
+	showYearlyChart();
   }
 }
 
@@ -609,9 +622,9 @@ function pickNonf(thing) {
   chosenSeverity = 'Nonf'
   getSWITRSinfo();
   if (selectedIntersection){
-	createChart();  
+	createChart();
   } else {
-	showYearlyChart();  
+	showYearlyChart();
   }
 }
 
@@ -624,9 +637,9 @@ function pickAll(thing) {
   chosenSeverity = 'All'
   getSWITRSinfo();
   if (selectedIntersection){
-	createChart();  
+	createChart();
   } else {
-	showYearlyChart();  
+	showYearlyChart();
   }
 }
 
@@ -634,13 +647,13 @@ function pickAll(thing) {
 function sliderChanged(thing) {
   totals = false;
   getSWITRSinfo();
-  if (selectedIntersection){
-	  
+  if (selectedIntersection || !yearlyTotals){
+
   } else {
 	remakeLabel();
-    app.chartTitle = label;  
+    app.chartTitle = label;
   }
-  
+
 }
 
 let yearlist = [];
@@ -687,6 +700,7 @@ let timeSlider = {
           tooltipDir: 'bottom',
           piecewise: true,
           piecewiseLabel: false,
+          tooltipStyle: { backgroundColor: '#9724be', borderColor: '#9724be' },
           lazy: false,
           reverse: false,
           speed: 0.25,
@@ -717,7 +731,8 @@ let app = new Vue({
   delimiters: ['${', '}'],
   //The dynamic data from the code and their default values.
   data: {
-	chartTitle: label,  
+	chartTitle: label,
+    chartSubTitle: 'All Intersections',
     isBikeactive: false,
     isPedactive: true,
     isFatalactive: false,
