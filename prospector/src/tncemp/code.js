@@ -16,7 +16,12 @@ mymap.setView([37.76889, -122.440997], 13);
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'tmc_trueshp';
 const DATA_VIEW = 'tmcemp';
-const EXCLUDE_COLS = ['tmc','geometry','geom','tod','modifiedtmc','scenario']
+const EXCLUDE_COLS = ['tmc','geometry','geom','tod','modifiedtmc','scenario'];
+const FRAC_COLS = ['champ_link_count','speed_std_dev','tnc_pickups','tnc_dropoffs','tnc_pickups_avg','tnc_dropoffs_avg','tnc_pudo_avg',
+                  'tt','ff_time','inrix_time','tnc_pudo',
+                  'vht','vhd','obs_vht','obs_vhd',
+                  'obs_tti','obs_pti80','obs_bti80','obs_pti95','obs_bti95','tti','pti80','bti80','pti95','bti95'];
+const INT_COLS = ['dt'];
 const VIZ_LIST = ['ALOS', 'TSPD', 'TRLB', 'ATRAT'];
 const VIZ_INFO = {
   ALOS: {
@@ -105,7 +110,7 @@ async function initialPrep() {
   _aggregateData = await fetchAggregateData();
 
   console.log('4... ');
-  await buildChartHtmlFromCmpData();
+  //await buildChartHtmlFromCmpData();
 
   console.log('5...');
   app.scen_options = await updateOptionsData('scenario');
@@ -228,11 +233,12 @@ infoPanel.onAdd = function(map) {
 infoPanel.update = function(geo) {
   infoPanel._div.innerHTML = '';
   infoPanel._div.className = 'info-panel';
-
+  let metric_val = null;
+  if (geo.metric) metric_val = Math.round(geo.metric*100)/100;
   if (geo) {
     this._div.innerHTML =
-      `<b>${geo.cmp_name} ${geo.direction}-bound</b><br/>` +
-      `${geo.cmp_from} to ${geo.cmp_to}`;
+      '<b>TMC ID: </b>' + `${geo.tmc}<br/>` +
+      `<b>${app.selected_metric.toUpperCase()}: </b>` + `${metric_val}`;
   }
 
   infoPanelTimeout = setTimeout(function() {
@@ -244,19 +250,49 @@ infoPanel.update = function(geo) {
 };
 infoPanel.addTo(mymap);
 
-function drawMapFeatures() {
+async function getMapData(scen) {
+  let data_url = API_SERVER + DATA_VIEW + '?select=tmc,scenario,' + app.selected_metric + 
+                '&tod=eq.' + app.selected_timep;
+  let resp = await fetch(data_url);
+  let jsonData = await resp.json();
+  jsonData = jsonData.filter(row => row['scenario'] === scen);
+  let lookup = {};
+  for (let entry of jsonData) {
+        lookup[entry.tmc] = entry;
+  }
+  return lookup;
+}
+
+async function drawMapFeatures() {
 
   // create a clean copy of the feature Json
   let cleanFeatures = _featJson.slice();
-  
   let sel_metric = app.selected_metric;
-  let data_url = API_SERVER + DATA_VIEW + '?select=tmc,' + sel_metric;
-  data_url += '&scenario=eq.' + app.selected_scenario;
-  data_url += '&tod=eq.' + app.selected_timep;
   
-  let lookup = {};
+  let base_lookup = {}, comp_lookup = {};
   let vals = [];
   try {
+    let base_lookup = await getMapData(app.selected_scenario);
+    let comp_lookup = await getMapData(app.selected_comp_scenario);
+    let map_metric;
+    for (let feat of cleanFeatures) {
+      feat['metric'] = null;
+      if (app.comp_check) {
+        if (base_lookup[feat.tmc] && comp_lookup[feat.tmc]) {
+          map_metric = comp_lookup[feat.tmc][sel_metric] - base_lookup[feat.tmc][sel_metric];
+          feat['metric'] = map_metric;
+          vals.push(map_metric);
+        }
+      } else {
+        if (base_lookup[feat.tmc]) {
+          map_metric = base_lookup[feat.tmc][sel_metric];
+          feat['metric'] = map_metric;
+          vals.push(map_metric);
+        }
+      }
+    }
+    
+    /*
     fetch(data_url)
     .then(resp => resp.json())
     .then(function(jsonData) {
@@ -264,86 +300,77 @@ function drawMapFeatures() {
         lookup[entry.tmc] = entry;
         vals.push(entry[sel_metric]);
       }
-      vals = vals.filter(function (n) { return n !== null});
-      vals = vals.sort();
-      if (vals.length > 0) {
-        sel_colorvals = Array.from(new Set(vals)).sort((a, b) => a - b);
-        let color_func;
-        if (sel_colorvals.length <= 10) {
-          console.log('Using unique values for mapping');
-          sel_binsflag = false;
-          color_func = chroma.scale('OrRd').classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
-        } else{
-          console.log('Using quintiles for mapping');
-          sel_colorvals = [];
-          for(var i = 1; i <= 5; i++) {
-            sel_colorvals.push(parseInt(vals[Math.floor(vals.length*1/i)-1]));
-          }
-          sel_colorvals.push(Math.floor(vals[0]));
-          sel_colorvals = sel_colorvals.sort((a, b) => a - b);
-          sel_binsflag = true; 
-          color_func = chroma.scale('OrRd').classes(sel_colorvals);
-          sel_colorvals = sel_colorvals.slice(0,sel_colorvals.length-1);
+      vals = vals.filter(function (n) { return n !== null});*/
+    vals = vals.sort((a, b) => a - b);
+    if (vals.length > 0) {
+      sel_colorvals = Array.from(new Set(vals)).sort((a, b) => a - b);
+      let color_func;
+      if (sel_colorvals.length <= 10 || INT_COLS.includes(sel_metric)) {
+        sel_binsflag = false;
+        color_func = chroma.scale(app.selected_colorscheme).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
+      } else{
+        sel_colorvals = [];
+        let prec = (FRAC_COLS.includes(sel_metric) ? 100 : 1);
+        for(var i = 1; i <= app.selected_breaks; i++) {
+          sel_colorvals.push(Math.round(vals[Math.floor(vals.length*1/i)-1]*prec)/prec);
         }
-        sel_colors = [];
-        for(let i of sel_colorvals) {
-          sel_colors.push(color_func(i).hex());
-        }
-        let sel_colorvals2 = sel_colorvals.slice(0);
-        let sel_colors2 = sel_colors.slice(0);
-        if (sel_binsflag) {
-          sel_colorvals2 = sel_colorvals2.slice(1);
-          sel_colors2 = ['0000'].concat(sel_colors);
-        }
-        
-        // update metric-colored feature data
-        for (let feat of cleanFeatures) {
-          if (lookup[feat.tmc]) {
-          feat['metric'] = lookup[feat.tmc][sel_metric];
-          } else {
-            feat['metric'] = null;
-          }
-        }
-        
-        if (geoLayer) mymap.removeLayer(geoLayer);
-        if (mapLegend) mymap.removeControl(mapLegend);
-        
-        geoLayer = L.geoJSON(cleanFeatures, {
-          style: function(feat) {
-            let color = getColorFromVal(
-              feat['metric'],
-              sel_colorvals2,
-              sel_colors,
-              sel_binsflag
-            );
-            if (!color) color = MISSING_COLOR;
-            return { color: color, weight: 4, opacity: 1.0 };
-          }
-          //onEachFeature: function(feature, layer) {
-          //  layer.on({
-          //    mouseover: hoverFeature,
-          //    click: clickedOnFeature,
-          //    });
-          //},
-        });
-        geoLayer.addTo(mymap);
-        
-        mapLegend = L.control({ position: 'bottomright' });
-        mapLegend.onAdd = function(map) {
-          let div = L.DomUtil.create('div', 'info legend');
-          let legHTML = getLegHTML(
-            sel_colorvals,
-            sel_colors2,
+        sel_colorvals.push(Math.floor(vals[0]));
+        sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
+        sel_binsflag = true; 
+        color_func = chroma.scale(app.selected_colorscheme).classes(sel_colorvals);
+        sel_colorvals = sel_colorvals.slice(0,sel_colorvals.length-1);
+      }
+      sel_colors = [];
+      for(let i of sel_colorvals) {
+        sel_colors.push(color_func(i).hex());
+      }
+
+      let sel_colorvals2 = sel_colorvals.slice(0);
+      let sel_colors2 = sel_colors.slice(0);
+      if (sel_binsflag) {
+        sel_colorvals2 = sel_colorvals2.slice(1);
+        sel_colors2 = ['0000'].concat(sel_colors);
+      }
+ 
+      if (geoLayer) mymap.removeLayer(geoLayer);
+      if (mapLegend) mymap.removeControl(mapLegend);
+      geoLayer = L.geoJSON(cleanFeatures, {
+        style: function(feat) {
+          let color = getColorFromVal(
+            feat['metric'],
+            sel_colorvals2,
+            sel_colors,
             sel_binsflag
           );
-          div.innerHTML = '<h4>' + sel_metric.toUpperCase() + '</h4>' + legHTML;
-          return div;
-        };
-        mapLegend.addTo(mymap);
-      }
+          if (!color) color = MISSING_COLOR;
+          return { color: color, weight: 4, opacity: 1.0 };
+        },
+        onEachFeature: function(feature, layer) {
+          layer.on({
+            mouseover: hoverFeature,
+        //    click: clickedOnFeature,
+            });
+        },
+      });
+      geoLayer.addTo(mymap);
       
-    });
+      mapLegend = L.control({ position: 'bottomright' });
+      mapLegend.onAdd = function(map) {
+        let div = L.DomUtil.create('div', 'info legend');
+        let legHTML = getLegHTML(
+          sel_colorvals,
+          sel_colors2,
+          sel_binsflag
+        );
+        div.innerHTML = '<h4>' + sel_metric.toUpperCase() + '</h4>' + legHTML;
+        return div;
+      };
+      mapLegend.addTo(mymap);
+    }
+      
+  //  });
   } catch(error) {
+    console.log(error);
   }
 }
 
@@ -366,18 +393,18 @@ function hoverFeature(e) {
   infoPanel.update(e.target.feature);
 
   // don't do anything else if the feature is already clicked
-  if (selGeoId === e.target.feature.cmp_segid) return;
+  if (selGeoId === e.target.feature.tmc) return;
 
   // return previously-hovered segment to its original color
-  if (oldHoverTarget && e.target.feature.cmp_segid != selGeoId) {
-    if (oldHoverTarget.feature.cmp_segid != selGeoId)
+  if (oldHoverTarget && e.target.feature.tmc != selGeoId) {
+    if (oldHoverTarget.feature.tmc != selGeoId)
       geoLayer.resetStyle(oldHoverTarget);
   }
 
   let highlightedGeo = e.target;
   highlightedGeo.bringToFront();
 
-  if (highlightedGeo.feature.cmp_segid != selGeoId) {
+  if (highlightedGeo.feature.tmc != selGeoId) {
     highlightedGeo.setStyle(styles.selected);
     oldHoverTarget = e.target;
   }
@@ -567,7 +594,10 @@ function selectionChanged(thing) {
 }
 
 function optionsChanged(thing) {
-  if (app.scen_options.length > 0) app.selected_scenario = app.scen_options[app.scen_options.length - 1].value;
+  if (app.scen_options.length > 0) {
+    app.selected_scenario = app.scen_options[app.scen_options.length - 1].value;
+    app.selected_comp_scenario = app.scen_options[0].value;
+  }
   if (app.time_options.length > 0) app.selected_timep = app.time_options[0].value;
 }
 
@@ -637,7 +667,9 @@ let app = new Vue({
     sliderValue: 0,
     vizlist: VIZ_LIST,
     vizinfo: VIZ_INFO,
+    comp_check: false,
     
+    selected_comp_scenario: null,
     selected_scenario: null,
     scen_options: [
     {text: '', value: ''},
@@ -651,7 +683,25 @@ let app = new Vue({
     selected_metric: null,
     metric_options: [
     {text: '', value: ''},
-    ]
+    ],
+    
+    selected_colorscheme: ['Green','Yellow','Red'],
+    color_options: [
+    {text: 'GnYlRd', value: ['Green','Yellow','Red']},
+    {text: 'RdYlGn', value: ['Red','Yellow','Green']},
+    {text: 'YlRd', value: ['Yellow','Red']},
+    {text: 'YlRdBl', value: ['Yellow','Red','Black']},
+    {text: 'YlGnBu', value: ['Yellow','Green','Blue']},
+    {text: 'Spectral', value: 'Spectral'},
+    {text: 'YlGn', value: 'YlGn'},
+    ],
+
+    selected_breaks: 5,
+    break_options: [
+    {text: 'Tertiles (3)', value: 3},
+    {text: 'Quartiles (4)', value: 4},
+    {text: 'Quintiles (5)', value: 5},
+    ]      
   },
   watch: {
     scen_options: optionsChanged,
@@ -659,6 +709,10 @@ let app = new Vue({
     selected_scenario: selectionChanged,
     selected_timep: selectionChanged,
     selected_metric: selectionChanged,
+    selected_colorscheme: selectionChanged,
+    selected_breaks: selectionChanged,
+    comp_check: selectionChanged,
+    selected_comp_scenario: selectionChanged,
   },
   methods: {
     pickAM: pickAM,

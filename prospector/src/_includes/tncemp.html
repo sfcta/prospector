@@ -20,7 +20,7 @@
            </div>
 
           <div id="picker">
-            <h5 style="margin-top:10px">CHOOSE SCENARIO:</h5>
+            <h5 style="margin-top:10px">CHOOSE BASE SCENARIO:</h5>
             <select v-model="selected_scenario">
               <option v-for="option in scen_options" v-bind:value="option.value">
                 ${option.text}
@@ -40,10 +40,35 @@
                 ${option.text}
               </option>
             </select>
+            
+            <h5 style="margin-top:10px">CHOOSE COLOR SCHEME:</h5>
+            <select v-model="selected_colorscheme">
+              <option v-for="option in color_options" v-bind:value="option.value">
+                ${option.text}
+              </option>
+            </select>
+            
+            <h5 style="margin-top:10px">CHOOSE BREAKS:</h5>
+            <select v-model="selected_breaks">
+              <option v-for="option in break_options" v-bind:value="option.value">
+                ${option.text}
+              </option>
+            </select>
+            
+            <hr/>
+            
+            <input type="checkbox" id="checkbox" v-model="comp_check" style="margin-top:10px">
+            <label for="checkbox"><b>&nbsp;&nbsp;SELECT COMPARE SCENARIO</b></label>
+            <select v-model="selected_comp_scenario" v-bind:disabled="!comp_check">
+              <option v-for="option in scen_options" v-bind:value="option.value">
+                ${option.text}
+              </option>
+            </select>
+            
           </div>
       </div>
       <div id="header">
-          <div id="stats-panel">
+          <!--div id="stats-panel">
             <hr style="margin-bottom:-5px;" />
             <div id="chartinfo"><h3 style="font-size: 22px;">${chartTitle}</h3></div>
             <div id="geoinfo"><h5>${chartSubtitle}</h5></div>
@@ -52,7 +77,7 @@
                   <div class="ui text loader">Loading</div>
                 </div>
             </div>
-          </div>
+          </div-->
       </div>
 
       <div class="logo">
