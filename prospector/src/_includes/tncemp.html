@@ -65,6 +65,17 @@
               </option>
             </select>
             
+            <h5 style="margin-top:10px">CHOOSE BREAK POINTS:</h5>
+            <vue-slider v-bind="breakSlider1" v-model="sliderValue1"></vue-slider>
+            <vue-slider v-bind="breakSlider2" v-model="sliderValue2"></vue-slider>
+            <vue-slider v-bind="breakSlider3" v-model="sliderValue3"></vue-slider>
+            <vue-slider v-bind="breakSlider4" v-model="sliderValue4"></vue-slider>
+            
+            <button v-on:click="updateMap"
+                    v-bind:class="{ active: isUpdActive, yellow: isUpdActive}"
+                     class="mini ui grey button">
+                     Update Map!</button>
+            
           </div>
       </div>
       <div id="header">

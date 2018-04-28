@@ -263,63 +263,83 @@ async function getMapData(scen) {
   return lookup;
 }
 
-async function drawMapFeatures() {
+let base_lookup, comp_lookup;
+let map_vals;
+async function drawMapFeatures(queryMapData=true) {
 
   // create a clean copy of the feature Json
   let cleanFeatures = _featJson.slice();
   let sel_metric = app.selected_metric;
   
-  let base_lookup = {}, comp_lookup = {};
-  let vals = [];
   try {
-    let base_lookup = await getMapData(app.selected_scenario);
-    let comp_lookup = await getMapData(app.selected_comp_scenario);
-    let map_metric;
-    for (let feat of cleanFeatures) {
-      feat['metric'] = null;
-      if (app.comp_check) {
-        if (base_lookup[feat.tmc] && comp_lookup[feat.tmc]) {
-          map_metric = comp_lookup[feat.tmc][sel_metric] - base_lookup[feat.tmc][sel_metric];
-          feat['metric'] = map_metric;
-          vals.push(map_metric);
-        }
-      } else {
-        if (base_lookup[feat.tmc]) {
-          map_metric = base_lookup[feat.tmc][sel_metric];
-          feat['metric'] = map_metric;
-          vals.push(map_metric);
+    if (queryMapData) {
+      base_lookup = await getMapData(app.selected_scenario);
+      comp_lookup = await getMapData(app.selected_comp_scenario);
+      
+      let map_metric;
+      map_vals = [];
+      for (let feat of cleanFeatures) {
+        feat['metric'] = null;
+        if (app.comp_check) {
+          if (base_lookup[feat.tmc] && comp_lookup[feat.tmc]) {
+            map_metric = comp_lookup[feat.tmc][sel_metric] - base_lookup[feat.tmc][sel_metric];
+            feat['metric'] = map_metric;
+            map_vals.push(map_metric);
+          }
+        } else {
+          if (base_lookup[feat.tmc]) {
+            map_metric = base_lookup[feat.tmc][sel_metric];
+            feat['metric'] = map_metric;
+            map_vals.push(map_metric);
+          }
         }
       }
+      map_vals = map_vals.sort((a, b) => a - b);      
     }
     
-    /*
-    fetch(data_url)
-    .then(resp => resp.json())
-    .then(function(jsonData) {
-      for (let entry of jsonData) {
-        lookup[entry.tmc] = entry;
-        vals.push(entry[sel_metric]);
-      }
-      vals = vals.filter(function (n) { return n !== null});*/
-    vals = vals.sort((a, b) => a - b);
-    if (vals.length > 0) {
-      sel_colorvals = Array.from(new Set(vals)).sort((a, b) => a - b);
+    if (map_vals.length > 0) {
       let color_func;
-      if (sel_colorvals.length <= 10 || INT_COLS.includes(sel_metric)) {
-        sel_binsflag = false;
-        color_func = chroma.scale(app.selected_colorscheme).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
-      } else{
-        sel_colorvals = [];
-        let prec = (FRAC_COLS.includes(sel_metric) ? 100 : 1);
-        for(var i = 1; i <= app.selected_breaks; i++) {
-          sel_colorvals.push(Math.round(vals[Math.floor(vals.length*1/i)-1]*prec)/prec);
-        }
-        sel_colorvals.push(Math.floor(vals[0]));
-        sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
+      
+      if (queryMapData) {
+        sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
+        if (sel_colorvals.length <= 10 || INT_COLS.includes(sel_metric)) {
+          sel_binsflag = false;
+          color_func = chroma.scale(app.selected_colorscheme).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
+        } else{
+          sel_colorvals = [];
+          let prec = (FRAC_COLS.includes(sel_metric) ? 100 : 1);
+          for(var i = 1; i <= app.selected_breaks; i++) {
+            sel_colorvals.push(Math.round(map_vals[Math.floor(map_vals.length*1/i)-1]*prec)/prec);
+          }
+          sel_colorvals.push(Math.floor(map_vals[0])); 
+          
+          let bp = Array.from(sel_colorvals).sort((a, b) => a - b);
+          app.breakSlider1.min = bp[0];
+          app.breakSlider1.max = bp[bp.length-1];
+          app.breakSlider1.interval = 1/prec;
+          app.sliderValue1 = [bp[0], bp[1]];
+          app.sliderValue4 = [bp[bp.length-2], bp[bp.length-1]];
+          if (app.selected_breaks==3) {
+            app.sliderValue2 = app.sliderValue3 = bp[2];
+          } else {
+            app.sliderValue2 = bp[2];
+            app.sliderValue3 = bp[3];
+          }
+          
+          sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
+          sel_binsflag = true; 
+          color_func = chroma.scale(app.selected_colorscheme).classes(sel_colorvals);
+          sel_colorvals = sel_colorvals.slice(0,sel_colorvals.length-1);
+        }        
+      } else {
+        sel_colorvals = new Set([app.sliderValue1[0], app.sliderValue1[1], app.sliderValue2, app.sliderValue3, app.sliderValue4[0], app.sliderValue4[1]]);
+        sel_colorvals = Array.from(sel_colorvals).sort((a, b) => a - b);
         sel_binsflag = true; 
         color_func = chroma.scale(app.selected_colorscheme).classes(sel_colorvals);
         sel_colorvals = sel_colorvals.slice(0,sel_colorvals.length-1);
       }
+      
+
       sel_colors = [];
       for(let i of sel_colorvals) {
         sel_colors.push(color_func(i).hex());
@@ -566,26 +586,6 @@ function buildChartHtmlFromCmpData(json = null) {
   }
 }
 
-function pickAM(thing) {
-  selPeriod = 'AM';
-  app.isAMActive = true;
-  app.isPMActive = false;
-
-  drawMapFeatures();
-  highlightSelectedSegment();
-  showVizChartForSelectedSegment();
-}
-
-function pickPM(thing) {
-  selPeriod = 'PM';
-  app.isAMActive = false;
-  app.isPMActive = true;
-
-  drawMapFeatures();
-  highlightSelectedSegment();
-  showVizChartForSelectedSegment();
-}
-
 function selectionChanged(thing) {
   if (app.selected_scenario && app.selected_timep && app.selected_metric) {
     drawMapFeatures();
@@ -655,6 +655,73 @@ function getMetricOptions() {
 }
 
 
+// SLIDER ----
+let breakSlider = {
+  clickable: true,
+  min: 1,
+  max: 100,
+  interval: 0.01,
+  direction: 'horizontal',
+  disabled: false,
+  dotSize: 16,
+  eventType: 'auto',
+  height: 3,
+  labelStyle: { color: '#ccc' },
+  labelActiveStyle: { color: '#ccc' },
+  lazy: false,
+  piecewise: false,
+  piecewiseLabel: false,
+  realTime: false,
+  reverse: false,
+  show: true,
+  sliderValue: 0,
+  speed: 0.25,
+  style: { marginTop: '0px', marginBottom: '40px' },
+  tooltip: 'always',
+  tooltipDir: 'bottom',
+  tooltipStyle: { backgroundColor: '#eaae00', borderColor: '#eaae00' },
+  width: 'auto',
+  piecewiseStyle: {
+    backgroundColor: '#ccc',
+    visibility: 'visible',
+    width: '6px',
+    height: '6px',
+  },
+  piecewiseActiveStyle: {
+    backgroundColor: '#ccc',
+    visibility: 'visible',
+    width: '6px',
+    height: '6px',
+  },
+  processStyle: {
+    backgroundColor: '#ffc',
+  },
+};
+
+
+function slider1Changed(thing) {
+  if (thing[1] > app.sliderValue2) app.sliderValue2 = thing[1];
+  app.isUpdActive = true;
+}
+function slider2Changed(thing) {
+  if (thing < app.sliderValue1[1]) app.sliderValue1 = [app.sliderValue1[0],thing];
+  if (thing > app.sliderValue3) app.sliderValue3 = thing;
+  app.isUpdActive = true;
+}
+function slider3Changed(thing) {
+  if (thing < app.sliderValue2) app.sliderValue2 = thing;
+  if (thing > app.sliderValue4[0]) app.sliderValue4 = [thing,app.sliderValue4[1]];
+  app.isUpdActive = true;
+}
+function slider4Changed(thing) {
+  if (thing[0] < app.sliderValue3) app.sliderValue3 = thing[0];
+  app.isUpdActive = true;
+}
+function updateMap(thing) {
+  app.isUpdActive = false;
+  drawMapFeatures(false);
+}
+
 let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
@@ -664,10 +731,18 @@ let app = new Vue({
     isAMActive: true,
     isPMActive: false,
     selectedViz: VIZ_LIST[0],
-    sliderValue: 0,
     vizlist: VIZ_LIST,
     vizinfo: VIZ_INFO,
+    isUpdActive: false,
     comp_check: false,
+    breakSlider1: breakSlider,
+    breakSlider2: breakSlider,
+    breakSlider3: breakSlider,
+    breakSlider4: breakSlider,
+    sliderValue1: [0,0],
+    sliderValue2: 0,
+    sliderValue3: 0,
+    sliderValue4: [0,0],
     
     selected_comp_scenario: null,
     selected_scenario: null,
@@ -713,10 +788,15 @@ let app = new Vue({
     selected_breaks: selectionChanged,
     comp_check: selectionChanged,
     selected_comp_scenario: selectionChanged,
+    
+    sliderValue1: slider1Changed,
+    sliderValue2: slider2Changed,
+    sliderValue3: slider3Changed,
+    sliderValue4: slider4Changed
+    
   },
   methods: {
-    pickAM: pickAM,
-    pickPM: pickPM,
+    updateMap: updateMap,
     clickToggleHelp: clickToggleHelp,
     clickViz: clickViz,
   },
