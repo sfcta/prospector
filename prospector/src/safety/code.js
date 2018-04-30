@@ -10,7 +10,6 @@ let api_totals = 'http://api.sfcta.org/api/switrs_totals';
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
 let size = 1;
-
 // add the SF Map using Leafleft and MapBox
 // Basic leaflet information: .addTo adds a layer to your map.
 let mymap = maplib.sfmap;
@@ -28,6 +27,7 @@ let popup = null;
 let collisionLayer;
 let mapLegend;
 let allJSONData;
+let prevAppValue;
 
 //Initialization of selective aspects
 let popSelIntersection;
@@ -124,7 +124,6 @@ function addSWITRSLayer(collisions) {
 
 // this functions gives the feature a color weight and opacity depending on specifics of the json.
 function styleByIncidentColor(collision) {
-
 
   return {"color": incColor['Non-fatal'],"weight": 0.1,
   "opacity": incOpacity['Non-fatal']};
@@ -653,6 +652,7 @@ function sliderChanged(thing) {
 	remakeLabel();
     app.chartTitle = label;
   }
+  prevAppValue = app.sliderValue;
 
 }
 
@@ -703,7 +703,7 @@ let timeSlider = {
           tooltipStyle: { backgroundColor: '#9724be', borderColor: '#9724be' },
           lazy: false,
           reverse: false,
-          speed: 0.25,
+          speed: .25,
           piecewiseStyle: {
             "backgroundColor": "#ccc",
             "visibility": "visible",
