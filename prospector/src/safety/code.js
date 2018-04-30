@@ -27,7 +27,6 @@ let popup = null;
 let collisionLayer;
 let mapLegend;
 let allJSONData;
-let prevAppValue;
 
 //Initialization of selective aspects
 let popSelIntersection;
@@ -652,7 +651,6 @@ function sliderChanged(thing) {
 	remakeLabel();
     app.chartTitle = label;
   }
-  prevAppValue = app.sliderValue;
 
 }
 
