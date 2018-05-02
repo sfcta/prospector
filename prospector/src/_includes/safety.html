@@ -15,29 +15,47 @@
                 <i class="icon right arrow"></i>
                 Learn More
         </button>
+        <hr/>
       </div>
 
       <div id="picker">
-        <hr/>
         <br/>
         <div style="height:70px;font-size:1px;">
           <h4>CHOOSE TYPE:</h4>
           <button class="mini ui grey button"
                   v-on:click="pickBike"
-                  v-bind:class="{ active: isBikeactive, purple: isBikeactive}">
+                  v-bind:class="{ active: isBikeactive, green: isBikeactive}">
                   Bike
           </button>
           <button class="mini ui grey button"
                   v-on:click="pickPed"
-                  v-bind:class="{ active: isPedactive, purple: isPedactive}">
+                  v-bind:class="{ active: isPedactive, green: isPedactive}">
                   Pedestrian
           </button>
         </div>
-        <div>
+        <div style="height:70px;font-size:1px;">
+          <h5>CHOOSE TIME OF DAY:</h5>
+          <button class="mini ui grey button"
+                  v-on:click="pickAM"
+                  v-bind:class="{ active: isAMactive, green: isAMactive}">
+                  AM
+          </button>
+          <button class="mini ui grey button"
+                  v-on:click="pickPM"
+                  v-bind:class="{ active: isPMactive, green: isPMactive}">
+                  PM
+          </button>
+          <button class="mini ui grey button"
+                  v-on:click="pickAllDay"
+                  v-bind:class="{ active: isAllDayactive, green: isAllDayactive}">
+                  All Day
+          </button>
+        </div>
+        <div style="height:70px;font-size:1px;">
           <h5>CHOOSE SEVERITY:</h5>
           <button class="mini ui grey button"
                   v-on:click="pickFatal"
-                  v-bind:class="{ active: isFatalactive, red: isFatalactive}">
+                  v-bind:class="{ active: isFatalactive, orange: isFatalactive}">
                   Fatal
           </button>
           <button class="mini ui grey button"
@@ -47,7 +65,7 @@
           </button>
           <button class="mini ui grey button"
                   v-on:click="pickAll"
-                  v-bind:class="{ active: isAllactive, purple: isAllactive}">
+                  v-bind:class="{ active: isAllactive, green: isAllactive}">
                   All
           </button>
         </div>
@@ -57,7 +75,7 @@
         <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
         <hr/>
       </div>  
-        <div id="chartinfo"><h3 style="font-size: 18px;">${chartTitle}</h3></div>
+        <div id="chartinfo"><h3 style="font-size: 16px;">${chartTitle}</h3></div>
         <h5 style="font-size: 12px">${chartSubTitle}</h5>
         <div id="chart">
           <transition name="fade"></transition>
@@ -97,7 +115,7 @@
         <ul>
         <li>Select a collision type and severity to display it on the map for all years.</li>
         <li>Move the year slider to map historic data.</li>
-        <li>Click on an intersection to update withe chart with historic data for the intersection.</li>
+        <li>Click on an intersection to update the chart with historic data for the intersection.</li>
         </ul>
 
         <div style="margin-top:20px;">

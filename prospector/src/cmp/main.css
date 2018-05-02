@@ -191,6 +191,7 @@ td {text-align:center; vertical-align:top; }
 .info h4 {
     margin: 0 0 5px;
     color: #777;
+    text-align:right;
 }
 
 .legend {
@@ -203,6 +204,12 @@ td {text-align:center; vertical-align:top; }
     float: left;
     margin-right: 8px;
     opacity: 1;
+}
+
+.legend .circlepadding {
+    border-radius: 50%;
+    margin-top: 0px;
+    background: rgba(255, 255, 255, 0.8);
 }
 
 p.legend-row {
