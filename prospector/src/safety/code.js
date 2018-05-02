@@ -20,7 +20,7 @@ let totals = true;
 let queryurl = '';
 let label = '';
 let sublabel = '';
-let incColor = {'Fatal':"#ff0000",'Non-fatal':"#800080"};
+let incColor = {'Fatal':"#ff0000",'Non-fatal':"#f56100"};
 let incOpacity = {'Fatal':1, 'Non-fatal':0.15};
 let missingColor = '#ccc';
 let popup = null;
@@ -349,7 +349,7 @@ function createChart() {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Bicycle Injuries', 'Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bicinjs', 'bickills'];
-	  currentChart.options.barColors = ["#1279c6","#d41515"];
+	  currentChart.options.barColors = ["#1279c6","#eaae00"];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'All Bike Collisions :';
 	  app.chartSubTitle = intersectionName;
@@ -364,14 +364,14 @@ function createChart() {
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
 	  currentChart.options.labels = ['Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bickills'];
-	  currentChart.options.barColors = ["#d41515",];
+	  currentChart.options.barColors = ["#eaae00",];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'Fatal Bike Collisions :';
 	  app.chartSubTitle = intersectionName;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Pedestrian Injuries', 'Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedinjs', 'pedkills'];
-	  currentChart.options.barColors = ["#1279c6","#d41515"];
+	  currentChart.options.barColors = ["#1279c6","#eaae00"];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'All Pedestrian Collisions :';
 	  app.chartSubTitle = intersectionName;
@@ -385,7 +385,7 @@ function createChart() {
     } else {
 	  currentChart.options.labels = ['Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedkills'];
-	  currentChart.options.barColors = ["#d41515",];
+	  currentChart.options.barColors = ["#eaae00",];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'Fatal Pedestrian Collisions :';
 	  app.chartSubTitle = intersectionName;
@@ -500,7 +500,7 @@ function showYearlyChart() {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Bicycle Injuries', 'Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bicinjs', 'bickills'];
-	  currentChart.options.barColors = ["#1279c6","#d41515"];
+	  currentChart.options.barColors = ["#1279c6","#eaae00"];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
 
@@ -513,13 +513,13 @@ function showYearlyChart() {
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
 	  currentChart.options.labels = ['Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bickills'];
-	  currentChart.options.barColors = ["#d41515",];
+	  currentChart.options.barColors = ["#eaae00",];
 	  var yearmax = 30;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Pedestrian Injuries', 'Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedinjs', 'pedkills'];
-	  currentChart.options.barColors = ["#1279c6","#d41515"];
+	  currentChart.options.barColors = ["#1279c6","#eaae00"];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
@@ -531,7 +531,7 @@ function showYearlyChart() {
     } else {
 	  currentChart.options.labels = ['Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedkills'];
-	  currentChart.options.barColors = ["#d41515",];
+	  currentChart.options.barColors = ["#eaae00",];
 	  var yearmax = 30;
 	  currentChart.options.ymax = yearmax;
     }
@@ -553,7 +553,7 @@ function showYearlyChart() {
     ykeys: ['pedinjs', 'pedkills'],
     ymax: yearmax,
     labels: ['Pedestrian Injuries', 'Pedestrian Deaths'],
-    barColors: ["#1279c6","#d41515"],
+    barColors: ["#1279c6","#eaae00"],
     xLabels: "Year",
     xLabelAngle: 60,
     xLabelFormat: dateFmt,
@@ -698,7 +698,7 @@ let timeSlider = {
           tooltipDir: 'bottom',
           piecewise: true,
           piecewiseLabel: false,
-          tooltipStyle: { backgroundColor: '#9724be', borderColor: '#9724be' },
+          tooltipStyle: { backgroundColor: '#f56100', borderColor: '#f56100' },
           lazy: false,
           reverse: false,
           speed: .25,
