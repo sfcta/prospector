@@ -75,6 +75,7 @@ function addSWITRSLayer(collisions) {
   }
 
   //If these layers are already on the map, remove them.
+  if (mapLegend) mymap.removeControl(mapLegend);
   if (collisionLayer) mymap.removeLayer(collisionLayer);
 
   //loading in the new geoJSON features we created we create our collision layer
@@ -98,13 +99,13 @@ function addSWITRSLayer(collisions) {
       }
 	} else {
 	  if (chosenSeverity == 'All' && chosenIncidents == 'Ped') {
-        return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['pedcol']), fillOpacity: 0.6*(feature['pedcol']/(feature['pedcol']+1))});
+        return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['pedcol']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
       } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
-        return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['pedinj']), fillOpacity: 0.6*(feature['pedinj']/(feature['pedinj']+1))});
+        return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['pedinj']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
       } else if (chosenSeverity == 'All' && chosenIncidents == 'Bike') {
-        return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['biccol']), fillOpacity: 0.6*(feature['biccol']/(feature['biccol']+1))});
+        return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['biccol']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
       } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
-        return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['bicinj']), fillOpacity: 0.6*(feature['bicinj']/(feature['bicinj']+1))});
+        return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['bicinj']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
       }
 	}
   },
@@ -117,6 +118,39 @@ function addSWITRSLayer(collisions) {
     },
   });
   collisionLayer.addTo(mymap);
+  
+  mapLegend = L.control({position: 'bottomright'});
+ 
+   mapLegend.onAdd = function (map) {
+     var div = L.DomUtil.create('div', 'info legend'),
+     grades = [1, 3, 5, 7, 9],
+     labels = ['<strong>Size</strong>'],
+     from, to;   
+     if (app.sliderValue != "All Years" || chosenSeverity == 'Fatal') {
+       for (var i = 0; i < grades.length; i++) {
+         from = grades[i];
+         to = grades[i + 1];
+         labels.push(
+            '<i class="circlepadding" style="width: '+Math.max(0,(40-(2*from+from/(from+.01))))+'px;"></i> <i style="background: #8080A0; width: '+1.8*(2*from+from/(from+.01))+'px; height: '+1.8*(2*from+from/(from+.01))+'px; border-radius: 50%; margin-top: '+Math.max(0,(6-(2*from+from/(from+.01))))+'px;"></i> ' + from)
+       } 
+     } else {
+       div = L.DomUtil.create('div', 'info legend'),
+       grades = [1, 15, 30, 45, 60],
+       labels = ['<strong>Size</strong>'],
+       from, to;
+       for (var i = 0; i < grades.length; i++) {
+         from = grades[i];
+         to = grades[i + 1];
+         labels.push(
+            '<i class="circlepadding" style="width: '+Math.max(0,(55-getBucketSize(from)))+'px;"></i> <i style="background: #8080A0; width: '+getBucketSize(from)+'px; height: '+getBucketSize(from)+'px; border-radius: 50%; margin-top: '+Math.max(0,(10-getBucketSize(from)))+'px;"></i> ' + from)
+       }       
+     }
+     div.innerHTML = labels.join('<br>');
+     return div;
+ 
+   };
+ 
+   mapLegend.addTo(mymap);
 
 
 };
@@ -676,7 +710,7 @@ function updateSliderData() {
     }
     sliderlist.push('All Years');
     app.timeSlider.data = sliderlist;
-	app.sliderValue = sliderlist[sliderlist.length-1];
+	app.sliderValue = sliderlist[sliderlist.length-2];
   });
   fetchYearlyDetails();
 }
