@@ -5,8 +5,8 @@ import 'isomorphic-fetch';
 import vueSlider from 'vue-slider-component';
 import Cookies from 'js-cookie';
 
-let api_server = 'http://api.sfcta.org/api/switrs_viz2';
-let api_totals = 'http://api.sfcta.org/api/switrs_totals';
+let api_server = 'http://api.sfcta.org/api/switrs_viz3';
+let api_totals = 'http://api.sfcta.org/api/switrs_totals2';
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
 let size = 1;
@@ -20,7 +20,7 @@ let totals = true;
 let queryurl = '';
 let label = '';
 let sublabel = '';
-let incColor = {'Fatal':"#ff0000",'Non-fatal':"#f56100"};
+let incColor = {'Fatal':"#ff0000",'Non-fatal':"#13ae38"};
 let incOpacity = {'Fatal':1, 'Non-fatal':0.15};
 let missingColor = '#ccc';
 let popup = null;
@@ -73,6 +73,26 @@ function addSWITRSLayer(collisions) {
     collision["type"] = "Feature";
     collision["geometry"] = JSON.parse(collision.st_asgeojson);
   }
+  
+  let queryitem;
+  
+  if (chosenSeverity == 'All' && chosenIncidents == 'Ped') {
+    queryitem = 'pedcol';
+  } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Ped'){
+	queryitem = 'pedkill';
+  } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
+    queryitem = 'pedinj';
+  } else if (chosenSeverity == 'All' && chosenIncidents == 'Bike') {
+    queryitem = 'biccol';
+  } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Bike'){
+	queryitem = 'bickill';
+  } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
+    queryitem = 'bicinj';
+  }
+  
+  if (chosenTimeofDay != 'All Day'){
+    queryitem = chosenTimeofDay+queryitem;  
+  }
 
   //If these layers are already on the map, remove them.
   if (mapLegend) mymap.removeControl(mapLegend);
@@ -84,29 +104,31 @@ function addSWITRSLayer(collisions) {
 	//at specific latitude longitude give a different size to the point depending on the specific count we are looking at.
   pointToLayer: function(feature, latlng) {
     if (app.sliderValue != "All Years" || chosenSeverity == 'Fatal') {
-      if (chosenSeverity == 'All' && chosenIncidents == 'Ped') {
-        return new L.CircleMarker(latlng, {radius: 2*feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.8*(feature['pedcol']/(feature['pedcol']+1))});
-      } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Ped'){
-	    return new L.CircleMarker(latlng, {radius: 2*feature['pedkill']+feature['pedkill']/(feature['pedkill']+.01), fillOpacity: 0.6});
-      } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
-        return new L.CircleMarker(latlng, {radius: 2*feature['pedinj']+feature['pedinj']/(feature['pedinj']+.01), fillOpacity: 0.8*(feature['pedinj']/(feature['pedinj']+1))});
-      } else if (chosenSeverity == 'All' && chosenIncidents == 'Bike') {
-        return new L.CircleMarker(latlng, {radius: 2*feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.8*(feature['biccol']/(feature['biccol']+1))});
-      } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Bike'){
-	    return new L.CircleMarker(latlng, {radius: 2*feature['bickill']+feature['bickill']/(feature['bickill']+.01), fillOpacity: 0.6});
-      } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
-        return new L.CircleMarker(latlng, {radius: 2*feature['bicinj']+feature['bicinj']/(feature['bicinj']+.01), fillOpacity: 0.8*(feature['bicinj']/(feature['bicinj']+1))});
-      }
+      return new L.CircleMarker(latlng, {radius: 2*feature[queryitem]+feature[queryitem]/(feature[queryitem]+0.1), fillOpacity: 0.9*(feature[queryitem]/(feature[queryitem]+1))});
+    //  if (chosenSeverity == 'All' && chosenIncidents == 'Ped') {
+    //    return new L.CircleMarker(latlng, {radius: 2*feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.8*(feature['pedcol']/(feature['pedcol']+1))});
+    //  } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Ped'){
+	//    return new L.CircleMarker(latlng, {radius: 2*feature['pedkill']+feature['pedkill']/(feature['pedkill']+.01), fillOpacity: 0.6});
+    //  } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
+    //    return new L.CircleMarker(latlng, {radius: 2*feature['pedinj']+feature['pedinj']/(feature['pedinj']+.01), fillOpacity: 0.8*(feature['pedinj']/(feature['pedinj']+1))});
+    //  } else if (chosenSeverity == 'All' && chosenIncidents == 'Bike') {
+    //    return new L.CircleMarker(latlng, {radius: 2*feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.8*(feature['biccol']/(feature['biccol']+1))});
+    //  } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Bike'){
+	//    return new L.CircleMarker(latlng, {radius: 2*feature['bickill']+feature['bickill']/(feature['bickill']+.01), fillOpacity: 0.6});
+    //  } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
+    //    return new L.CircleMarker(latlng, {radius: 2*feature['bicinj']+feature['bicinj']/(feature['bicinj']+.01), fillOpacity: 0.8*(feature['bicinj']/(feature['bicinj']+1))});
+    //  }
 	} else {
-	  if (chosenSeverity == 'All' && chosenIncidents == 'Ped') {
-        return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['pedcol']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
-      } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
-        return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['pedinj']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
-      } else if (chosenSeverity == 'All' && chosenIncidents == 'Bike') {
-        return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['biccol']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
-      } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
-        return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['bicinj']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
-      }
+	//  if (chosenSeverity == 'All' && chosenIncidents == 'Ped') {
+    //    return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['pedcol']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
+    //  } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
+    //    return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['pedinj']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
+    //  } else if (chosenSeverity == 'All' && chosenIncidents == 'Bike') {
+    //    return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['biccol']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
+    //  } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
+    //    return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['bicinj']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
+    //  }
+      return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature[queryitem]), fillOpacity: 0.6*(getBucketSize(feature[queryitem])/(getBucketSize(feature[queryitem])+1))});
 	}
   },
 	//add functions for when we click and hover over any feature.
@@ -169,7 +191,7 @@ function getSWITRSinfo() {
   if (app.sliderValue === "All Years") {
 	queryurl = api_totals;
   } else {
-	let url = api_server + '?select=st_asgeojson,year,biccol,pedcol,bickill,pedkill,street_names,bicinj,pedinj';
+	let url = api_server + '?select=st_asgeojson,year,biccol,pedcol,bickill,pedkill,street_names,bicinj,pedinj,ambiccol,pmbiccol,ampedcol,pmpedcol,ambickill,pmbickill,ampedkill,pmpedkill,ambicinj,pmbicinj,ampedinj,pmpedinj';
 	queryurl = url + '&year=eq.' + app.sliderValue;
   }
 
@@ -383,7 +405,7 @@ function createChart() {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Bicycle Injuries', 'Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bicinjs', 'bickills'];
-	  currentChart.options.barColors = ["#1279c6","#eaae00"];
+	  currentChart.options.barColors = ["#1279c6","#f56100"];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'All Bike Collisions :';
 	  app.chartSubTitle = intersectionName;
@@ -398,14 +420,14 @@ function createChart() {
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
 	  currentChart.options.labels = ['Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bickills'];
-	  currentChart.options.barColors = ["#eaae00",];
+	  currentChart.options.barColors = ["#f56100",];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'Fatal Bike Collisions :';
 	  app.chartSubTitle = intersectionName;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Pedestrian Injuries', 'Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedinjs', 'pedkills'];
-	  currentChart.options.barColors = ["#1279c6","#eaae00"];
+	  currentChart.options.barColors = ["#1279c6","#f56100"];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'All Pedestrian Collisions :';
 	  app.chartSubTitle = intersectionName;
@@ -419,7 +441,7 @@ function createChart() {
     } else {
 	  currentChart.options.labels = ['Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedkills'];
-	  currentChart.options.barColors = ["#eaae00",];
+	  currentChart.options.barColors = ["#f56100",];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'Fatal Pedestrian Collisions :';
 	  app.chartSubTitle = intersectionName;
@@ -534,7 +556,7 @@ function showYearlyChart() {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Bicycle Injuries', 'Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bicinjs', 'bickills'];
-	  currentChart.options.barColors = ["#1279c6","#eaae00"];
+	  currentChart.options.barColors = ["#1279c6","#f56100"];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
 
@@ -547,13 +569,13 @@ function showYearlyChart() {
     } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
 	  currentChart.options.labels = ['Bicycle Deaths'];
 	  currentChart.options.ykeys = ['bickills'];
-	  currentChart.options.barColors = ["#eaae00",];
+	  currentChart.options.barColors = ["#f56100",];
 	  var yearmax = 30;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
 	  currentChart.options.labels = ['Pedestrian Injuries', 'Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedinjs', 'pedkills'];
-	  currentChart.options.barColors = ["#1279c6","#eaae00"];
+	  currentChart.options.barColors = ["#1279c6","#f56100"];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
@@ -565,7 +587,7 @@ function showYearlyChart() {
     } else {
 	  currentChart.options.labels = ['Pedestrian Deaths'];
 	  currentChart.options.ykeys = ['pedkills'];
-	  currentChart.options.barColors = ["#eaae00",];
+	  currentChart.options.barColors = ["#f56100",];
 	  var yearmax = 30;
 	  currentChart.options.ymax = yearmax;
     }
@@ -587,7 +609,7 @@ function showYearlyChart() {
     ykeys: ['pedinjs', 'pedkills'],
     ymax: yearmax,
     labels: ['Pedestrian Injuries', 'Pedestrian Deaths'],
-    barColors: ["#1279c6","#eaae00"],
+    barColors: ["#1279c6","#f56100"],
     xLabels: "Year",
     xLabelAngle: 60,
     xLabelFormat: dateFmt,
@@ -603,7 +625,48 @@ function showYearlyChart() {
 
 let chosenIncidents = 'Ped';
 let chosenSeverity = 'All';
+let chosenTimeofDay = 'All Day';
 //These functions are based around when something is clicked on the website.
+
+function pickAM(thing) {
+  app.isAMactive = true;
+  app.isPMactive = false;
+  app.isAllDayactive = false;
+  chosenTimeofDay = 'am'
+  getSWITRSinfo();
+  if (selectedIntersection){
+	createChart();
+  } else {
+	showYearlyChart();
+  }
+}
+
+function pickPM(thing) {
+  app.isAMactive = false;
+  app.isPMactive = true;
+  app.isAllDayactive = false;
+  chosenTimeofDay = 'pm'
+  getSWITRSinfo();
+  if (selectedIntersection){
+	createChart();
+  } else {
+	showYearlyChart();
+  }
+}
+
+function pickAllDay(thing) {
+  app.isAMactive = false;
+  app.isPMactive = false;
+  app.isAllDayactive = true;
+  chosenTimeofDay = 'All Day'
+  getSWITRSinfo();
+  if (selectedIntersection){
+	createChart();
+  } else {
+	showYearlyChart();
+  }
+}
+
 
 //When you click bike, change the active app to bike then chosen incidents to bike and regrab the switrsinfo
 function pickBike(thing) {
@@ -732,7 +795,7 @@ let timeSlider = {
           tooltipDir: 'bottom',
           piecewise: true,
           piecewiseLabel: false,
-          tooltipStyle: { backgroundColor: '#f56100', borderColor: '#f56100' },
+          tooltipStyle: { backgroundColor: '#13ae38', borderColor: '#13ae38' },
           lazy: false,
           reverse: false,
           speed: .25,
@@ -770,6 +833,9 @@ let app = new Vue({
     isFatalactive: false,
     isNonfactive: false,
     isAllactive: true,
+    isAMactive: false,
+    isPMactive: false,
+    isAllDayactive: true,
     sliderValue: 0,
     timeSlider: timeSlider
   },
@@ -780,7 +846,10 @@ let app = new Vue({
   pickPed: pickPed,
   pickFatal: pickFatal,
   pickNonf: pickNonf,
-  pickAll: pickAll
+  pickAll: pickAll,
+  pickAM: pickAM,
+  pickPM: pickPM,
+  pickAllDay: pickAllDay
   },
   //what to continually watch out for
   watch: {

@@ -24,20 +24,38 @@
           <h4>CHOOSE TYPE:</h4>
           <button class="mini ui grey button"
                   v-on:click="pickBike"
-                  v-bind:class="{ active: isBikeactive, orange: isBikeactive}">
+                  v-bind:class="{ active: isBikeactive, green: isBikeactive}">
                   Bike
           </button>
           <button class="mini ui grey button"
                   v-on:click="pickPed"
-                  v-bind:class="{ active: isPedactive, orange: isPedactive}">
+                  v-bind:class="{ active: isPedactive, green: isPedactive}">
                   Pedestrian
           </button>
         </div>
-        <div>
+        <div style="height:70px;font-size:1px;">
+          <h5>CHOOSE TIME OF DAY:</h5>
+          <button class="mini ui grey button"
+                  v-on:click="pickAM"
+                  v-bind:class="{ active: isAMactive, green: isAMactive}">
+                  AM
+          </button>
+          <button class="mini ui grey button"
+                  v-on:click="pickPM"
+                  v-bind:class="{ active: isPMactive, green: isPMactive}">
+                  PM
+          </button>
+          <button class="mini ui grey button"
+                  v-on:click="pickAllDay"
+                  v-bind:class="{ active: isAllDayactive, green: isAllDayactive}">
+                  All Day
+          </button>
+        </div>
+        <div style="height:70px;font-size:1px;">
           <h5>CHOOSE SEVERITY:</h5>
           <button class="mini ui grey button"
                   v-on:click="pickFatal"
-                  v-bind:class="{ active: isFatalactive, yellow: isFatalactive}">
+                  v-bind:class="{ active: isFatalactive, orange: isFatalactive}">
                   Fatal
           </button>
           <button class="mini ui grey button"
@@ -47,7 +65,7 @@
           </button>
           <button class="mini ui grey button"
                   v-on:click="pickAll"
-                  v-bind:class="{ active: isAllactive, orange: isAllactive}">
+                  v-bind:class="{ active: isAllactive, green: isAllactive}">
                   All
           </button>
         </div>
