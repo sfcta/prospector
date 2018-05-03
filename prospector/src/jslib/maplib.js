@@ -66,6 +66,23 @@ function getColorFromVal(x, vals, colors, bins=true){
   }
 }
 
+function getColorFromVal2(x, vals, colors, bins=true){
+  if (x==null) return null;
+  
+  if(bins){
+    if (x < vals[0] || x > vals[vals.length-1]) {
+      return null;
+    } else {
+      for (var i=1; i < vals.length; i++){
+        if (x <= vals[i]) return colors[i-1];
+      }      
+    }
+  } else{
+    return colors[vals.indexOf(x)]; 
+  }
+}
+
+// this default implementation assigns the last color to any value beyond the last threshold
 function getLegHTML(vals, colors, bins=true, postunits=''){
   let ret = '';
   if(bins){
@@ -75,6 +92,31 @@ function getLegHTML(vals, colors, bins=true, postunits=''){
           '<p class="legend-row"><i style="background:' + colors[i+1] + '"></i> '
           + vals[i] + postunits 
           + (vals[i + 1] ? ' &ndash; ' + vals[i + 1] + postunits + '<br>' : '+')
+          + '</p>';
+    }
+  } else{
+    for (var i = 0; i < vals.length; i++) {
+      ret +=
+          '<p class="legend-row"><i style="background:'
+          + colors[i] + '"></i> '
+          + vals[i] + postunits + (vals[i + 1] ? '<br>' : '')
+          + '</p>';
+    }
+  }
+  return ret;
+}
+
+// this variation is to only assign colors to values in the range passed in as input
+function getLegHTML2(vals, colors, bins=true, postunits=''){
+  let ret = '';
+  if(bins){
+    // loop through our bin intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < vals.length-1; i++) {
+      ret += 
+          '<p class="legend-row"><i style="background:' + colors[i] + '"></i> '
+          + vals[i] + postunits 
+          + ' &ndash; ' + vals[i + 1] + postunits
+          + (vals[i + 2] ? '<br>' : '')
           + '</p>';
     }
   } else{
@@ -101,5 +143,7 @@ module.exports = {
   colorFunc: colorFunc,
   getColorByBin: getColorByBin,
   getColorFromVal: getColorFromVal,
+  getColorFromVal2: getColorFromVal2,
   getLegHTML: getLegHTML,
+  getLegHTML2: getLegHTML2,
 };

@@ -7,8 +7,8 @@ import Cookies from 'js-cookie';
 
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
-let getLegHTML = maplib.getLegHTML;
-let getColorFromVal = maplib.getColorFromVal;
+let getLegHTML = maplib.getLegHTML2;
+let getColorFromVal = maplib.getColorFromVal2;
 let mymap = maplib.sfmap;
 mymap.setView([37.76889, -122.440997], 13);
 
@@ -118,8 +118,7 @@ async function initialPrep() {
   
   console.log('6...');
   await getMetricOptions();
-  await selectionChanged();
-  
+ 
   console.log('7 !!!');
 }
 
@@ -273,8 +272,11 @@ async function drawMapFeatures(queryMapData=true) {
   
   try {
     if (queryMapData) {
+      app.custom_check = false;
       base_lookup = await getMapData(app.selected_scenario);
-      comp_lookup = await getMapData(app.selected_comp_scenario);
+      if (app.comp_check) {
+        comp_lookup = await getMapData(app.selected_comp_scenario);
+      }
       
       let map_metric;
       map_vals = [];
@@ -329,27 +331,17 @@ async function drawMapFeatures(queryMapData=true) {
           sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
           sel_binsflag = true; 
           color_func = chroma.scale(app.selected_colorscheme).classes(sel_colorvals);
-          sel_colorvals = sel_colorvals.slice(0,sel_colorvals.length-1);
         }        
       } else {
         sel_colorvals = new Set([app.sliderValue1[0], app.sliderValue1[1], app.sliderValue2, app.sliderValue3, app.sliderValue4[0], app.sliderValue4[1]]);
         sel_colorvals = Array.from(sel_colorvals).sort((a, b) => a - b);
         sel_binsflag = true; 
         color_func = chroma.scale(app.selected_colorscheme).classes(sel_colorvals);
-        sel_colorvals = sel_colorvals.slice(0,sel_colorvals.length-1);
       }
       
-
       sel_colors = [];
-      for(let i of sel_colorvals) {
+      for(let i of sel_colorvals.slice(0,sel_colorvals.length-1)) {
         sel_colors.push(color_func(i).hex());
-      }
-
-      let sel_colorvals2 = sel_colorvals.slice(0);
-      let sel_colors2 = sel_colors.slice(0);
-      if (sel_binsflag) {
-        sel_colorvals2 = sel_colorvals2.slice(1);
-        sel_colors2 = ['0000'].concat(sel_colors);
       }
  
       if (geoLayer) mymap.removeLayer(geoLayer);
@@ -358,7 +350,7 @@ async function drawMapFeatures(queryMapData=true) {
         style: function(feat) {
           let color = getColorFromVal(
             feat['metric'],
-            sel_colorvals2,
+            sel_colorvals,
             sel_colors,
             sel_binsflag
           );
@@ -373,13 +365,13 @@ async function drawMapFeatures(queryMapData=true) {
         },
       });
       geoLayer.addTo(mymap);
-      
+
       mapLegend = L.control({ position: 'bottomright' });
       mapLegend.onAdd = function(map) {
         let div = L.DomUtil.create('div', 'info legend');
         let legHTML = getLegHTML(
           sel_colorvals,
-          sel_colors2,
+          sel_colors,
           sel_binsflag
         );
         div.innerHTML = '<h4>' + sel_metric.toUpperCase() + '</h4>' + legHTML;
@@ -387,8 +379,7 @@ async function drawMapFeatures(queryMapData=true) {
       };
       mapLegend.addTo(mymap);
     }
-      
-  //  });
+
   } catch(error) {
     console.log(error);
   }
@@ -594,11 +585,11 @@ function selectionChanged(thing) {
 }
 
 function optionsChanged(thing) {
-  if (app.scen_options.length > 0) {
+  if (app.scen_options.length > 0 && app.time_options.length > 0) {
     app.selected_scenario = app.scen_options[app.scen_options.length - 1].value;
     app.selected_comp_scenario = app.scen_options[0].value;
+    app.selected_timep = app.time_options[0].value;
   }
-  if (app.time_options.length > 0) app.selected_timep = app.time_options[0].value;
 }
 
 function clickViz(chosenviz) {
@@ -717,10 +708,19 @@ function slider4Changed(thing) {
   if (thing[0] < app.sliderValue3) app.sliderValue3 = thing[0];
   app.isUpdActive = true;
 }
+
 function updateMap(thing) {
   app.isUpdActive = false;
   drawMapFeatures(false);
 }
+function customBreakPoints(thing) {
+  if(thing) {
+    app.isUpdActive = false;
+  } else {
+    drawMapFeatures();
+  }
+}
+
 
 let app = new Vue({
   el: '#panel',
@@ -735,6 +735,7 @@ let app = new Vue({
     vizinfo: VIZ_INFO,
     isUpdActive: false,
     comp_check: false,
+    custom_check: false,
     breakSlider1: breakSlider,
     breakSlider2: breakSlider,
     breakSlider3: breakSlider,
@@ -792,7 +793,9 @@ let app = new Vue({
     sliderValue1: slider1Changed,
     sliderValue2: slider2Changed,
     sliderValue3: slider3Changed,
-    sliderValue4: slider4Changed
+    sliderValue4: slider4Changed,
+    
+    custom_check: customBreakPoints,
     
   },
   methods: {
@@ -835,7 +838,5 @@ let helpPanel = new Vue({
   },
 });
 
-// this to get the year list directly from the database
-// so if database view get updated with new data, the slider data will reflect it too
 initialPrep();
 

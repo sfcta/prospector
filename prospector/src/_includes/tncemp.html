@@ -65,15 +65,19 @@
               </option>
             </select>
             
-            <h5 style="margin-top:10px">CHOOSE BREAK POINTS:</h5>
-            <vue-slider v-bind="breakSlider1" v-model="sliderValue1"></vue-slider>
-            <vue-slider v-bind="breakSlider2" v-model="sliderValue2"></vue-slider>
-            <vue-slider v-bind="breakSlider3" v-model="sliderValue3"></vue-slider>
-            <vue-slider v-bind="breakSlider4" v-model="sliderValue4"></vue-slider>
+            <hr/>
+            
+            <input type="checkbox" id="checkbox" v-model="custom_check" style="margin-top:10px">
+            <label for="checkbox"><b>&nbsp;&nbsp;CHOOSE CUSTOM BREAK POINTS</b></label>
+            <vue-slider v-bind="breakSlider1" v-model="sliderValue1" v-bind:disabled="!custom_check"></vue-slider>
+            <vue-slider v-bind="breakSlider2" v-model="sliderValue2" v-bind:disabled="!custom_check"></vue-slider>
+            <vue-slider v-bind="breakSlider3" v-model="sliderValue3" v-bind:disabled="!custom_check"></vue-slider>
+            <vue-slider v-bind="breakSlider4" v-model="sliderValue4" v-bind:disabled="!custom_check"></vue-slider>
             
             <button v-on:click="updateMap"
                     v-bind:class="{ active: isUpdActive, yellow: isUpdActive}"
-                     class="mini ui grey button">
+                     class="mini ui grey button"
+                    v-bind:disabled="!custom_check">
                      Update Map!</button>
             
           </div>
