@@ -301,13 +301,17 @@ async function drawMapFeatures(queryMapData=true) {
     
     if (map_vals.length > 0) {
       let color_func;
+      let sel_colorvals2;
       
       if (queryMapData) {
         sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
         if (sel_colorvals.length <= 10 || INT_COLS.includes(sel_metric)) {
           sel_binsflag = false;
           color_func = chroma.scale(app.selected_colorscheme).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
+          sel_colorvals2 = sel_colorvals.slice(0);
+          app.custom_disable = true;
         } else{
+          app.custom_disable = false;
           sel_colorvals = [];
           let prec = (FRAC_COLS.includes(sel_metric) ? 100 : 1);
           for(var i = 1; i <= app.selected_breaks; i++) {
@@ -331,16 +335,18 @@ async function drawMapFeatures(queryMapData=true) {
           sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
           sel_binsflag = true; 
           color_func = chroma.scale(app.selected_colorscheme).classes(sel_colorvals);
+          sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
         }        
       } else {
         sel_colorvals = new Set([app.sliderValue1[0], app.sliderValue1[1], app.sliderValue2, app.sliderValue3, app.sliderValue4[0], app.sliderValue4[1]]);
         sel_colorvals = Array.from(sel_colorvals).sort((a, b) => a - b);
         sel_binsflag = true; 
         color_func = chroma.scale(app.selected_colorscheme).classes(sel_colorvals);
+        sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
       }
       
       sel_colors = [];
-      for(let i of sel_colorvals.slice(0,sel_colorvals.length-1)) {
+      for(let i of sel_colorvals2) {
         sel_colors.push(color_func(i).hex());
       }
  
@@ -736,6 +742,7 @@ let app = new Vue({
     isUpdActive: false,
     comp_check: false,
     custom_check: false,
+    custom_disable: false,
     breakSlider1: breakSlider,
     breakSlider2: breakSlider,
     breakSlider3: breakSlider,

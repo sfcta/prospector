@@ -59,7 +59,7 @@
             
             <input type="checkbox" id="checkbox" v-model="comp_check" style="margin-top:10px">
             <label for="checkbox"><b>&nbsp;&nbsp;SELECT COMPARE SCENARIO</b></label>
-            <select v-model="selected_comp_scenario" v-bind:disabled="!comp_check">
+            <select v-model="selected_comp_scenario" v-bind:disabled="!comp_check" style="margin-bottom:20px">
               <option v-for="option in scen_options" v-bind:value="option.value">
                 ${option.text}
               </option>
@@ -67,7 +67,7 @@
             
             <hr/>
             
-            <input type="checkbox" id="checkbox" v-model="custom_check" style="margin-top:10px">
+            <input type="checkbox" id="checkbox" v-model="custom_check" v-bind:disabled="custom_disable" style="margin-top:10px">
             <label for="checkbox"><b>&nbsp;&nbsp;CHOOSE CUSTOM BREAK POINTS</b></label>
             <vue-slider v-bind="breakSlider1" v-model="sliderValue1" v-bind:disabled="!custom_check"></vue-slider>
             <vue-slider v-bind="breakSlider2" v-model="sliderValue2" v-bind:disabled="!custom_check"></vue-slider>
