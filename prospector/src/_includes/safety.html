@@ -19,7 +19,6 @@
       </div>
 
       <div id="picker">
-        <br/>
         <div style="height:70px;font-size:1px;">
           <h4>CHOOSE TYPE:</h4>
           <button class="mini ui grey button"
@@ -69,7 +68,12 @@
                   All
           </button>
         </div>
-        <br/>
+        <h5>ADD INFORMATION LAYERS:</h5>
+        <input type="checkbox" id="coc" value="Jack" v-model="checkedNames">
+        <label for="jack">Communities of Concern</label>
+        <input type="checkbox" id="hin" value="John" v-model="checkedNames">
+        <label for="john">High Injury Network</label>
+        <span>Checked names: {{ checkedNames }}</span>
 
         <h4>CHOOSE YEAR:</h4>
         <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>

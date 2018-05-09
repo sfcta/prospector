@@ -189,12 +189,12 @@ td {text-align:center; vertical-align:top; }
 }
 
 .legend {
-    line-height: 46px;
+    line-height: 18px;
     color: #555;
 }
 .legend i {
     width: 18px;
-    height: 46px;
+    height: 18px;
     float: left;
     margin-right: 8px;
     opacity: 1;

@@ -917,7 +917,8 @@ let app = new Vue({
     isPMactive: false,
     isAllDayactive: true,
     sliderValue: 0,
-    timeSlider: timeSlider
+    timeSlider: timeSlider,
+    checkedNames: []
   },
   //What methods clicking will change one of the above data, or run certain scipts.
   methods: {
