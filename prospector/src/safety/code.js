@@ -7,6 +7,7 @@ import Cookies from 'js-cookie';
 
 let api_server = 'http://api.sfcta.org/api/switrs_viz3';
 let api_totals = 'http://api.sfcta.org/api/switrs_totals2';
+let api_geo = 'https://api.sfcta.org/api/coc';
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
 let size = 1;
@@ -25,6 +26,7 @@ let incOpacity = {'Fatal':1, 'Non-fatal':0.15};
 let missingColor = '#ccc';
 let popup = null;
 let collisionLayer;
+let cocLayer
 let mapLegend;
 let allJSONData;
 
@@ -105,29 +107,7 @@ function addSWITRSLayer(collisions) {
   pointToLayer: function(feature, latlng) {
     if (app.sliderValue != "All Years" || chosenSeverity == 'Fatal') {
       return new L.CircleMarker(latlng, {radius: 2*feature[queryitem]+feature[queryitem]/(feature[queryitem]+0.1), fillOpacity: 0.9*(feature[queryitem]/(feature[queryitem]+1))});
-    //  if (chosenSeverity == 'All' && chosenIncidents == 'Ped') {
-    //    return new L.CircleMarker(latlng, {radius: 2*feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.8*(feature['pedcol']/(feature['pedcol']+1))});
-    //  } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Ped'){
-	//    return new L.CircleMarker(latlng, {radius: 2*feature['pedkill']+feature['pedkill']/(feature['pedkill']+.01), fillOpacity: 0.6});
-    //  } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
-    //    return new L.CircleMarker(latlng, {radius: 2*feature['pedinj']+feature['pedinj']/(feature['pedinj']+.01), fillOpacity: 0.8*(feature['pedinj']/(feature['pedinj']+1))});
-    //  } else if (chosenSeverity == 'All' && chosenIncidents == 'Bike') {
-    //    return new L.CircleMarker(latlng, {radius: 2*feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.8*(feature['biccol']/(feature['biccol']+1))});
-    //  } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Bike'){
-	//    return new L.CircleMarker(latlng, {radius: 2*feature['bickill']+feature['bickill']/(feature['bickill']+.01), fillOpacity: 0.6});
-    //  } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
-    //    return new L.CircleMarker(latlng, {radius: 2*feature['bicinj']+feature['bicinj']/(feature['bicinj']+.01), fillOpacity: 0.8*(feature['bicinj']/(feature['bicinj']+1))});
-    //  }
 	} else {
-	//  if (chosenSeverity == 'All' && chosenIncidents == 'Ped') {
-    //    return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['pedcol']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
-    //  } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
-    //    return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['pedinj']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
-    //  } else if (chosenSeverity == 'All' && chosenIncidents == 'Bike') {
-    //    return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['biccol']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
-    //  } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
-    //    return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['bicinj']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
-    //  }
       return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature[queryitem]), fillOpacity: 0.6*(getBucketSize(feature[queryitem])/(getBucketSize(feature[queryitem])+1))});
 	}
   },
@@ -831,9 +811,22 @@ function sliderChanged(thing) {
 
 }
 
+var cocStyle = {
+    "color" : "#3813ae",
+    "opacity" : .3
+    
+}
+
 function changeCheckbox(thing) {
+    if (cocLayer) mymap.removeLayer(cocLayer);
     if (app.checkedNames.includes("Communities of Concern")){
         console.log('Communities of Concern: Yes')
+        console.log(_cocSegments)
+        cocLayer = L.geoJSON(_cocSegments, {
+          style: cocStyle,
+        });
+        cocLayer.addTo(mymap);
+        
     } else {
         console.log('Communities of Concern: No')
     } if (app.checkedNames.includes("High Injury Network")){
@@ -841,6 +834,26 @@ function changeCheckbox(thing) {
     } else {
         console.log('High Injury Network: No')
     }
+}
+
+async function fetchCocGeometry() {
+  const geo_url_item = api_geo + '?select=geometry,name';
+
+  try {
+    let resp = await fetch(geo_url_item);
+    let segments = await resp.json();
+
+    // do some parsing and stuff
+    for (let segment of segments) {
+      segment['type'] = 'Feature';
+      segment['geometry'] = JSON.parse(segment.geometry);
+    }
+    
+    return segments;
+
+  } catch (error) {
+    console.log('map segment error: ' + error);
+  }
 }
 
 let yearlist = [];
@@ -985,4 +998,5 @@ let helpPanel = new Vue({
   }}
 );
 // Ready to go! Read some data.
+let _cocSegments = fetchCocGeometry();
 updateSliderData();
