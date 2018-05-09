@@ -831,6 +831,18 @@ function sliderChanged(thing) {
 
 }
 
+function changeCheckbox(thing) {
+    if (app.checkedNames.includes("Communities of Concern")){
+        console.log('Communities of Concern: Yes')
+    } else {
+        console.log('Communities of Concern: No')
+    } if (app.checkedNames.includes("High Injury Network")){
+        console.log('High Injury Network: Yes')
+    } else {
+        console.log('High Injury Network: No')
+    }
+}
+
 let yearlist = [];
 
 //update the year slider
@@ -930,7 +942,8 @@ let app = new Vue({
   pickAll: pickAll,
   pickAM: pickAM,
   pickPM: pickPM,
-  pickAllDay: pickAllDay
+  pickAllDay: pickAllDay,
+  onChange: changeCheckbox
   },
   //what to continually watch out for
   watch: {

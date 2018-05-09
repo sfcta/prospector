@@ -69,10 +69,10 @@
           </button>
         </div>
         <h5>ADD INFORMATION LAYERS:</h5>
-        <input type="checkbox" id="coc" value="Jack" v-model="checkedNames">
-        <label for="jack">Communities of Concern</label>
-        <input type="checkbox" id="hin" value="John" v-model="checkedNames">
-        <label for="john">High Injury Network</label>
+        <input type="checkbox" id="coc" value="Communities of Concern" v-model="checkedNames" v-on:change="onChange">
+        <label for="coc">Communities of Concern</label>
+        <input type="checkbox" id="hin" value="High Injury Network" v-model="checkedNames" v-on:change="onChange">
+        <label for="hin">High Injury Network</label>
         <span>Checked names: {{ checkedNames }}</span>
 
         <h4>CHOOSE YEAR:</h4>
