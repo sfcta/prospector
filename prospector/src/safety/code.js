@@ -7,6 +7,7 @@ import Cookies from 'js-cookie';
 
 let api_server = 'http://api.sfcta.org/api/switrs_viz3';
 let api_totals = 'http://api.sfcta.org/api/switrs_totals2';
+let api_geo = 'https://api.sfcta.org/api/coc';
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
 let size = 1;
@@ -25,6 +26,7 @@ let incOpacity = {'Fatal':1, 'Non-fatal':0.15};
 let missingColor = '#ccc';
 let popup = null;
 let collisionLayer;
+let cocLayer
 let mapLegend;
 let allJSONData;
 
@@ -105,29 +107,7 @@ function addSWITRSLayer(collisions) {
   pointToLayer: function(feature, latlng) {
     if (app.sliderValue != "All Years" || chosenSeverity == 'Fatal') {
       return new L.CircleMarker(latlng, {radius: 2*feature[queryitem]+feature[queryitem]/(feature[queryitem]+0.1), fillOpacity: 0.9*(feature[queryitem]/(feature[queryitem]+1))});
-    //  if (chosenSeverity == 'All' && chosenIncidents == 'Ped') {
-    //    return new L.CircleMarker(latlng, {radius: 2*feature['pedcol']+feature['pedcol']/(feature['pedcol']+.01), fillOpacity: 0.8*(feature['pedcol']/(feature['pedcol']+1))});
-    //  } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Ped'){
-	//    return new L.CircleMarker(latlng, {radius: 2*feature['pedkill']+feature['pedkill']/(feature['pedkill']+.01), fillOpacity: 0.6});
-    //  } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
-    //    return new L.CircleMarker(latlng, {radius: 2*feature['pedinj']+feature['pedinj']/(feature['pedinj']+.01), fillOpacity: 0.8*(feature['pedinj']/(feature['pedinj']+1))});
-    //  } else if (chosenSeverity == 'All' && chosenIncidents == 'Bike') {
-    //    return new L.CircleMarker(latlng, {radius: 2*feature['biccol']+feature['biccol']/(feature['biccol']+.01), fillOpacity: 0.8*(feature['biccol']/(feature['biccol']+1))});
-    //  } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Bike'){
-	//    return new L.CircleMarker(latlng, {radius: 2*feature['bickill']+feature['bickill']/(feature['bickill']+.01), fillOpacity: 0.6});
-    //  } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
-    //    return new L.CircleMarker(latlng, {radius: 2*feature['bicinj']+feature['bicinj']/(feature['bicinj']+.01), fillOpacity: 0.8*(feature['bicinj']/(feature['bicinj']+1))});
-    //  }
 	} else {
-	//  if (chosenSeverity == 'All' && chosenIncidents == 'Ped') {
-    //    return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['pedcol']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
-    //  } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
-    //    return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['pedinj']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
-    //  } else if (chosenSeverity == 'All' && chosenIncidents == 'Bike') {
-    //    return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['biccol']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
-    //  } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
-    //    return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature['bicinj']), fillOpacity: 0.6*(getBucketSize(feature['pedcol'])/(getBucketSize(feature['pedcol'])+1))});
-    //  }
       return new L.CircleMarker(latlng, {radius: 1/2*getBucketSize(feature[queryitem]), fillOpacity: 0.6*(getBucketSize(feature[queryitem])/(getBucketSize(feature[queryitem])+1))});
 	}
   },
@@ -223,42 +203,122 @@ function hoverFeature(e) {
   let intersectionName = highlightedGeo.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and');
   var popupText = "<b>Intersection: "+intersectionName;
   if (app.sliderValue != "All Years"){
-    if (chosenIncidents == 'Bike' && chosenSeverity == 'All'  && geo.bickill > 0){
-	  popupText += "<br/> All Bike Collisions for year " + geo.year + " : " + geo.biccol;
-	  popupText += "<br/> Fatal Bike Collisions for year " + geo.year + " : " + geo.bickill;
-	} else if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
-	  popupText += "<br/> All Bike Collisions for year " + geo.year + " : " + geo.biccol;
-    } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
-	  popupText += "<br/> Non-fatal Bike Collisions for year " + geo.year + " : " + geo.bicinj;
-    } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
-	  popupText += "<br/> Fatal Bike Collisions for year " + geo.year + " : " + geo.bickill;
-    } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All' && geo.pedkill > 0){
-	  popupText += "<br/> All Pedestrian Collisions for year " + geo.year + " : " + geo.pedcol;
-	  popupText += "<br/> Fatal Pedestrian Collisions for year " + geo.year + " : " + geo.pedkill;
-	} else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-	  popupText += "<br/> All Pedestrian Collisions for year " + geo.year + " : " + geo.pedcol;
-    } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
-	  popupText += "<br/> Non-fatal Pedestrian Collisions for year " + geo.year + " : " + geo.pedinj;
-    } else {
-	  popupText += "<br/> Fatal Pedestrian Collisions for year " + geo.year + " : " + geo.pedkill;
+    if (chosenTimeofDay == "All Day"){  
+      if (chosenIncidents == 'Bike' && chosenSeverity == 'All'  && geo.bickill > 0){
+	    popupText += "<br/> All Bike Collisions for year " + geo.year + " : " + geo.biccol;
+	    popupText += "<br/> Fatal Bike Collisions for year " + geo.year + " : " + geo.bickill;
+	  } else if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
+	    popupText += "<br/> All Bike Collisions for year " + geo.year + " : " + geo.biccol;
+      } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
+	    popupText += "<br/> Non-fatal Bike Collisions for year " + geo.year + " : " + geo.bicinj;
+      } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
+	    popupText += "<br/> Fatal Bike Collisions for year " + geo.year + " : " + geo.bickill;
+      } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All' && geo.pedkill > 0){
+	    popupText += "<br/> All Pedestrian Collisions for year " + geo.year + " : " + geo.pedcol;
+	    popupText += "<br/> Fatal Pedestrian Collisions for year " + geo.year + " : " + geo.pedkill;
+	  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
+	    popupText += "<br/> All Pedestrian Collisions for year " + geo.year + " : " + geo.pedcol;
+      } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
+	    popupText += "<br/> Non-fatal Pedestrian Collisions for year " + geo.year + " : " + geo.pedinj;
+      } else {
+	    popupText += "<br/> Fatal Pedestrian Collisions for year " + geo.year + " : " + geo.pedkill;
+      }
+    } else if (chosenTimeofDay == "am") {
+       if (chosenIncidents == 'Bike' && chosenSeverity == 'All'  && geo.ambickill > 0){
+	    popupText += "<br/> All AM Bike Collisions for year " + geo.year + " : " + geo.ambiccol;
+	    popupText += "<br/> Fatal AM Bike Collisions for year " + geo.year + " : " + geo.ambickill;
+	  } else if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
+	    popupText += "<br/> All AM Bike Collisions for year " + geo.year + " : " + geo.ambiccol;
+      } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
+	    popupText += "<br/> Non-fatal AM Bike Collisions for year " + geo.year + " : " + geo.ambicinj;
+      } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
+	    popupText += "<br/> Fatal AM Bike Collisions for year " + geo.year + " : " + geo.ambickill;
+      } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All' && geo.ampedkill > 0){
+	    popupText += "<br/> All AM Pedestrian Collisions for year " + geo.year + " : " + geo.ampedcol;
+	    popupText += "<br/> Fatal AM Pedestrian Collisions for year " + geo.year + " : " + geo.ampedkill;
+	  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
+	    popupText += "<br/> All AM Pedestrian Collisions for year " + geo.year + " : " + geo.ampedcol;
+      } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
+	    popupText += "<br/> Non-fatal AM Pedestrian Collisions for year " + geo.year + " : " + geo.ampedinj;
+      } else {
+	    popupText += "<br/> Fatal AM Pedestrian Collisions for year " + geo.year + " : " + geo.ampedkill;
+      } 
+    } else if (chosenTimeofDay == "pm"){
+       if (chosenIncidents == 'Bike' && chosenSeverity == 'All'  && geo.pmbickill > 0){
+	    popupText += "<br/> All PM Bike Collisions for year " + geo.year + " : " + geo.pmbiccol;
+	    popupText += "<br/> Fatal PM Bike Collisions for year " + geo.year + " : " + geo.pmbickill;
+	  } else if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
+	    popupText += "<br/> All PM Bike Collisions for year " + geo.year + " : " + geo.pmbiccol;
+      } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
+	    popupText += "<br/> Non-fatal PM Bike Collisions for year " + geo.year + " : " + geo.pmbicinj;
+      } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
+	    popupText += "<br/> Fatal PM Bike Collisions for year " + geo.year + " : " + geo.pmbickill;
+      } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All' && geo.pmpedkill > 0){
+	    popupText += "<br/> All PM Pedestrian Collisions for year " + geo.year + " : " + geo.pmpedcol;
+	    popupText += "<br/> Fatal PM Pedestrian Collisions for year " + geo.year + " : " + geo.pmpedkill;
+	  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
+	    popupText += "<br/> All PM Pedestrian Collisions for year " + geo.year + " : " + geo.pmpedcol;
+      } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
+	    popupText += "<br/> Non-fatal PM Pedestrian Collisions for year " + geo.year + " : " + geo.pmpedinj;
+      } else {
+	    popupText += "<br/> Fatal PM Pedestrian Collisions for year " + geo.year + " : " + geo.pmpedkill;
+      } 
     }
   } else {
-	if (chosenIncidents == 'Bike' && chosenSeverity == 'All' && geo.bickill > 0){
-	  popupText += "<br/> All Bike Collisions : " + geo.biccol + "<br/> Fatal Bike Collisions : " + geo.bickill;
-	} else if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
-	  popupText += "<br/> All Bike Collisions : " + geo.biccol;
-    } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
-	  popupText += "<br/> Non-fatal Bike Collisions : " + geo.bicinj;
-    } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
-	  popupText += "<br/> Fatal Bike Collisions : " + geo.bickill ;
-    } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All' && geo.pedkill > 0){
-	  popupText += "<br/> All Pedestrian Collisions : " + geo.pedcol + "<br/> Fatal Pedestrian Collisions : " + geo.pedkill;
-	} else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-      popupText += "<br/> All Pedestrian Collisions : " + geo.pedcol;
-    } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
-	  popupText += "<br/> Non-fatal Pedestrian Collisions : " + geo.pedinj;
-    } else {
-	  popupText += "<br/> Fatal Pedestrian Collisions : " + geo.pedkill;
+    if (chosenTimeofDay == "All Day"){  
+	  if (chosenIncidents == 'Bike' && chosenSeverity == 'All' && geo.bickill > 0){
+	    popupText += "<br/> All Bike Collisions : " + geo.biccol + "<br/> Fatal Bike Collisions : " + geo.bickill;
+	  } else if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
+	    popupText += "<br/> All Bike Collisions : " + geo.biccol;
+      } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
+	    popupText += "<br/> Non-fatal Bike Collisions : " + geo.bicinj;
+      } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
+	    popupText += "<br/> Fatal Bike Collisions : " + geo.bickill ;
+      } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All' && geo.pedkill > 0){
+	    popupText += "<br/> All Pedestrian Collisions : " + geo.pedcol + "<br/> Fatal Pedestrian Collisions : " + geo.pedkill;
+	  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
+        popupText += "<br/> All Pedestrian Collisions : " + geo.pedcol;
+      } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
+	    popupText += "<br/> Non-fatal Pedestrian Collisions : " + geo.pedinj;
+      } else {
+	    popupText += "<br/> Fatal Pedestrian Collisions : " + geo.pedkill;
+      }
+    } else if (chosenTimeofDay == "am") {
+      if (chosenIncidents == 'Bike' && chosenSeverity == 'All' && geo.ambickill > 0){
+	    popupText += "<br/> All AM Bike Collisions : " + geo.ambiccol + "<br/> Fatal AM Bike Collisions : " + geo.ambickill;
+	  } else if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
+	    popupText += "<br/> All AM Bike Collisions : " + geo.ambiccol;
+      } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
+	    popupText += "<br/> Non-fatal AM Bike Collisions : " + geo.ambicinj;
+      } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
+	    popupText += "<br/> Fatal AM Bike Collisions : " + geo.ambickill ;
+      } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All' && geo.ampedkill > 0){
+	    popupText += "<br/> All AM Pedestrian Collisions : " + geo.ampedcol + "<br/> Fatal AM Pedestrian Collisions : " + geo.ampedkill;
+	  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
+        popupText += "<br/> All AM Pedestrian Collisions : " + geo.ampedcol;
+      } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
+	    popupText += "<br/> Non-fatal AM Pedestrian Collisions : " + geo.ampedinj;
+      } else {
+	    popupText += "<br/> Fatal AM Pedestrian Collisions : " + geo.ampedkill;
+      }
+    } else if (chosenTimeofDay == "pm") {
+      if (chosenIncidents == 'Bike' && chosenSeverity == 'All' && geo.pmbickill > 0){
+	    popupText += "<br/> All PM Bike Collisions : " + geo.pmbiccol + "<br/> Fatal PM Bike Collisions : " + geo.pmbickill;
+	  } else if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
+	    popupText += "<br/> All PM Bike Collisions : " + geo.pmbiccol;
+      } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
+	    popupText += "<br/> Non-fatal PM Bike Collisions : " + geo.pmbicinj;
+      } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
+	    popupText += "<br/> Fatal PM Bike Collisions : " + geo.pmbickill ;
+      } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All' && geo.pmpedkill > 0){
+	    popupText += "<br/> All PM Pedestrian Collisions : " + geo.pmpedcol + "<br/> Fatal PM Pedestrian Collisions : " + geo.pmpedkill;
+	  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
+        popupText += "<br/> All PM Pedestrian Collisions : " + geo.pmpedcol;
+      } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
+	    popupText += "<br/> Non-fatal PM Pedestrian Collisions : " + geo.pmpedinj;
+      } else {
+	    popupText += "<br/> Fatal PM Pedestrian Collisions : " + geo.pmpedkill;
+      }
     }
   }
 
@@ -751,6 +811,51 @@ function sliderChanged(thing) {
 
 }
 
+var cocStyle = {
+    "color" : "#3813ae",
+    "opacity" : .3
+    
+}
+
+function changeCheckbox(thing) {
+    if (cocLayer) mymap.removeLayer(cocLayer);
+    if (app.checkedNames.includes("Communities of Concern")){
+        console.log('Communities of Concern: Yes')
+        console.log(_cocSegments)
+        cocLayer = L.geoJSON(_cocSegments, {
+          style: cocStyle,
+        });
+        cocLayer.addTo(mymap);
+        
+    } else {
+        console.log('Communities of Concern: No')
+    } if (app.checkedNames.includes("High Injury Network")){
+        console.log('High Injury Network: Yes')
+    } else {
+        console.log('High Injury Network: No')
+    }
+}
+
+async function fetchCocGeometry() {
+  const geo_url_item = api_geo + '?select=geometry,name';
+
+  try {
+    let resp = await fetch(geo_url_item);
+    let segments = await resp.json();
+
+    // do some parsing and stuff
+    for (let segment of segments) {
+      segment['type'] = 'Feature';
+      segment['geometry'] = JSON.parse(segment.geometry);
+    }
+    
+    return segments;
+
+  } catch (error) {
+    console.log('map segment error: ' + error);
+  }
+}
+
 let yearlist = [];
 
 //update the year slider
@@ -837,7 +942,8 @@ let app = new Vue({
     isPMactive: false,
     isAllDayactive: true,
     sliderValue: 0,
-    timeSlider: timeSlider
+    timeSlider: timeSlider,
+    checkedNames: []
   },
   //What methods clicking will change one of the above data, or run certain scipts.
   methods: {
@@ -849,7 +955,8 @@ let app = new Vue({
   pickAll: pickAll,
   pickAM: pickAM,
   pickPM: pickPM,
-  pickAllDay: pickAllDay
+  pickAllDay: pickAllDay,
+  onChange: changeCheckbox
   },
   //what to continually watch out for
   watch: {
@@ -891,4 +998,5 @@ let helpPanel = new Vue({
   }}
 );
 // Ready to go! Read some data.
+let _cocSegments = fetchCocGeometry();
 updateSliderData();
