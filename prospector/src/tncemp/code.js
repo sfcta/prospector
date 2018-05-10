@@ -18,8 +18,8 @@ const GEO_VIEW = 'tmc_trueshp';
 const DATA_VIEW = 'tmcemp';
 const EXCLUDE_COLS = ['tmc','geometry','geom','tod','modifiedtmc','scenario'];
 const FRAC_COLS = ['champ_link_count','speed_std_dev','tnc_pickups','tnc_dropoffs','tnc_pickups_avg','tnc_dropoffs_avg','tnc_pudo_avg',
-                  'tt','ff_time','inrix_time','tnc_pudo',
-                  'vht','vhd','obs_vht','obs_vhd',
+                  'tt','ff_time','inrix_time','tnc_pudo','speed',
+                  'vht','vhd','obs_vht','obs_vhd','delay_per_mile',
                   'obs_tti','obs_pti80','obs_bti80','obs_pti95','obs_bti95','tti','pti80','bti80','pti95','bti95'];
 const INT_COLS = ['dt'];
 const DISCRETE_VAR_LIMIT = 10;
