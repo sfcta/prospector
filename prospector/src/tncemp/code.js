@@ -706,7 +706,7 @@ function getMetricOptions() {
         selopts.push({text: entry, value: entry});
       }
       app.metric_options = selopts;
-      app.selected_metric = 'vhd';
+      app.selected_metric = 'delay_per_mile';
     });
 }
 
