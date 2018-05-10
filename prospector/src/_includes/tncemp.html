@@ -64,21 +64,27 @@
                 ${option.text}
               </option>
             </select>
-            
             <hr/>
             
             <input type="checkbox" id="checkbox" v-model="custom_check" v-bind:disabled="custom_disable" style="margin-top:10px">
             <label for="checkbox"><b>&nbsp;&nbsp;CHOOSE CUSTOM BREAK POINTS</b></label>
-            <vue-slider v-bind="breakSlider1" v-model="sliderValue1" v-bind:disabled="!custom_check"></vue-slider>
-            <vue-slider v-bind="breakSlider2" v-model="sliderValue2" v-bind:disabled="!custom_check"></vue-slider>
-            <vue-slider v-bind="breakSlider3" v-model="sliderValue3" v-bind:disabled="!custom_check"></vue-slider>
-            <vue-slider v-bind="breakSlider4" v-model="sliderValue4" v-bind:disabled="!custom_check"></vue-slider>
-            
+            <br>
+            <br>
+            <input v-model.number="bp1" type="number" v-bind:disabled="!custom_check" style="width:75px;">
+            <input v-model.number="bp2" type="number" v-bind:disabled="!custom_check" style="width:75px;">
+            <input v-model.number="bp3" type="number" v-bind:disabled="!custom_check" style="width:75px;">
+            <input v-model.number="bp4" type="number" v-bind:disabled="!custom_check" style="width:75px;">
+            <br>
+            <br>
             <button v-on:click="updateMap"
                     v-bind:class="{ active: isUpdActive, yellow: isUpdActive}"
                      class="mini ui grey button"
                     v-bind:disabled="!custom_check">
                      Update Map!</button>
+            
+            <h5 style="margin-top:10px">DISTRIBUTION</h5>
+            <div id="dist-chart">
+            </div>
             
           </div>
       </div>

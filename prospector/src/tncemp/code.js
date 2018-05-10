@@ -22,6 +22,7 @@ const FRAC_COLS = ['champ_link_count','speed_std_dev','tnc_pickups','tnc_dropoff
                   'vht','vhd','obs_vht','obs_vhd',
                   'obs_tti','obs_pti80','obs_bti80','obs_pti95','obs_bti95','tti','pti80','bti80','pti95','bti95'];
 const INT_COLS = ['dt'];
+const DISCRETE_VAR_LIMIT = 10;
 const VIZ_LIST = ['ALOS', 'TSPD', 'TRLB', 'ATRAT'];
 const VIZ_INFO = {
   ALOS: {
@@ -97,6 +98,7 @@ let selectedSegment, prevselectedSegment;
 let _featJson;
 let _allCmpData;
 let _aggregateData;
+let prec;
 
 async function initialPrep() {
 
@@ -233,7 +235,7 @@ infoPanel.update = function(geo) {
   infoPanel._div.innerHTML = '';
   infoPanel._div.className = 'info-panel';
   let metric_val = null;
-  if (geo.metric) metric_val = Math.round(geo.metric*100)/100;
+  if (geo.metric !== null) metric_val = Math.round(geo.metric*100)/100;
   if (geo) {
     this._div.innerHTML =
       '<b>TMC ID: </b>' + `${geo.tmc}<br/>` +
@@ -283,13 +285,13 @@ async function drawMapFeatures(queryMapData=true) {
       for (let feat of cleanFeatures) {
         feat['metric'] = null;
         if (app.comp_check) {
-          if (base_lookup[feat.tmc] && comp_lookup[feat.tmc]) {
+          if (base_lookup.hasOwnProperty(feat.tmc) && comp_lookup.hasOwnProperty(feat.tmc)) {
             map_metric = comp_lookup[feat.tmc][sel_metric] - base_lookup[feat.tmc][sel_metric];
             feat['metric'] = map_metric;
             map_vals.push(map_metric);
           }
         } else {
-          if (base_lookup[feat.tmc]) {
+          if (base_lookup.hasOwnProperty(feat.tmc)) {
             map_metric = base_lookup[feat.tmc][sel_metric];
             feat['metric'] = map_metric;
             map_vals.push(map_metric);
@@ -305,7 +307,19 @@ async function drawMapFeatures(queryMapData=true) {
       
       if (queryMapData) {
         sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
-        if (sel_colorvals.length <= 10 || INT_COLS.includes(sel_metric)) {
+        
+        //calculate distribution
+        let x = d3.scaleLinear()
+                .domain([map_vals[0], map_vals[map_vals.length-1]])
+        let numticks = 20;
+        if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) numticks = sel_colorvals.length;
+        let histogram = d3.histogram()
+            .domain(x.domain())
+            .thresholds(x.ticks(numticks));
+        updateDistChart(histogram(map_vals));
+
+        
+        if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) {
           sel_binsflag = false;
           color_func = chroma.scale(app.selected_colorscheme).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
           sel_colorvals2 = sel_colorvals.slice(0);
@@ -313,23 +327,22 @@ async function drawMapFeatures(queryMapData=true) {
         } else{
           app.custom_disable = false;
           sel_colorvals = [];
-          let prec = (FRAC_COLS.includes(sel_metric) ? 100 : 1);
+          prec = (FRAC_COLS.includes(sel_metric) ? 100 : 1);
           for(var i = 1; i <= app.selected_breaks; i++) {
             sel_colorvals.push(Math.round(map_vals[Math.floor(map_vals.length*1/i)-1]*prec)/prec);
           }
           sel_colorvals.push(Math.floor(map_vals[0])); 
           
           let bp = Array.from(sel_colorvals).sort((a, b) => a - b);
-          app.breakSlider1.min = bp[0];
-          app.breakSlider1.max = bp[bp.length-1];
-          app.breakSlider1.interval = 1/prec;
-          app.sliderValue1 = [bp[0], bp[1]];
-          app.sliderValue4 = [bp[bp.length-2], bp[bp.length-1]];
+          app.bp0 = bp[0];
+          app.bp5 = bp[bp.length-1];
+          app.bp1 = bp[1];
+          app.bp4 = bp[bp.length-2];
           if (app.selected_breaks==3) {
-            app.sliderValue2 = app.sliderValue3 = bp[2];
+            app.bp2 = app.bp3 = bp[2];
           } else {
-            app.sliderValue2 = bp[2];
-            app.sliderValue3 = bp[3];
+            app.bp2 = bp[2];
+            app.bp3 = bp[3];
           }
           
           sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
@@ -338,7 +351,7 @@ async function drawMapFeatures(queryMapData=true) {
           sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
         }        
       } else {
-        sel_colorvals = new Set([app.sliderValue1[0], app.sliderValue1[1], app.sliderValue2, app.sliderValue3, app.sliderValue4[0], app.sliderValue4[1]]);
+        sel_colorvals = new Set([app.bp0, app.bp1, app.bp2, app.bp3, app.bp4, app.bp5]);
         sel_colorvals = Array.from(sel_colorvals).sort((a, b) => a - b);
         sel_binsflag = true; 
         color_func = chroma.scale(app.selected_colorscheme).classes(sel_colorvals);
@@ -442,6 +455,52 @@ function highlightSelectedSegment() {
       }
     } catch(error) {}
   });
+}
+
+let distChart = null;
+let distLabels;
+function updateDistChart(bins) {
+  let data = [];
+  distLabels = [];
+  for (let b of bins) {
+    let x0 = Math.round(b.x0*prec)/prec;
+    let x1 = Math.round(b.x1*prec)/prec;
+    data.push({x:x0, y:b.length});
+    distLabels.push(x0 + '-' + x1);
+  }
+
+  if (distChart) {
+    distChart.setData(data);
+  } else {
+      distChart = new Morris.Area({
+        // ID of the element in which to draw the chart.
+        element: 'dist-chart',
+        data: data,
+        // The name of the data record attribute that contains x-values.
+        xkey: 'x',
+        // A list of names of data record attributes that contain y-values.
+        ykeys: 'y',
+        ymin: 0,
+        labels: 'Freq',
+        lineColors: ['#1fc231'],
+        xLabels: 'x',
+        xLabelAngle: 60,
+        xLabelFormat: binFmt,
+        //yLabelFormat: yFmt,
+        hideHover: true,
+        parseTime: false,
+        fillOpacity: 0.4,
+        pointSize: 1,
+        behaveLikeLine: false,
+        eventStrokeWidth: 2,
+        eventLineColors: ['#ccc'],
+      });
+  }
+
+}
+
+function binFmt(x) {
+  return distLabels[x.x];
 }
 
 function clickedOnFeature(e) {
@@ -695,23 +754,24 @@ let breakSlider = {
   },
 };
 
-
-function slider1Changed(thing) {
-  if (thing[1] > app.sliderValue2) app.sliderValue2 = thing[1];
+function bp1Changed(thing) {
+  if (thing < app.bp0) app.bp1 = app.bp0;
+  if (thing > app.bp2) app.bp2 = thing;
   app.isUpdActive = true;
 }
-function slider2Changed(thing) {
-  if (thing < app.sliderValue1[1]) app.sliderValue1 = [app.sliderValue1[0],thing];
-  if (thing > app.sliderValue3) app.sliderValue3 = thing;
+function bp2Changed(thing) {
+  if (thing < app.bp1) app.bp1 = thing;
+  if (thing > app.bp3) app.bp3 = thing;
   app.isUpdActive = true;
 }
-function slider3Changed(thing) {
-  if (thing < app.sliderValue2) app.sliderValue2 = thing;
-  if (thing > app.sliderValue4[0]) app.sliderValue4 = [thing,app.sliderValue4[1]];
+function bp3Changed(thing) {
+  if (thing < app.bp2) app.bp2 = thing;
+  if (thing > app.bp4) app.bp4 = thing;
   app.isUpdActive = true;
 }
-function slider4Changed(thing) {
-  if (thing[0] < app.sliderValue3) app.sliderValue3 = thing[0];
+function bp4Changed(thing) {
+  if (thing < app.bp3) app.bp3 = thing;
+  if (thing > app.bp5) app.bp4 = app.bp5;
   app.isUpdActive = true;
 }
 
@@ -743,14 +803,12 @@ let app = new Vue({
     comp_check: false,
     custom_check: false,
     custom_disable: false,
-    breakSlider1: breakSlider,
-    breakSlider2: breakSlider,
-    breakSlider3: breakSlider,
-    breakSlider4: breakSlider,
-    sliderValue1: [0,0],
-    sliderValue2: 0,
-    sliderValue3: 0,
-    sliderValue4: [0,0],
+    bp0: 0.0,
+    bp1: 0.0,
+    bp2: 0.0,
+    bp3: 0.0,
+    bp4: 0.0,
+    bp5: 0.0,
     
     selected_comp_scenario: null,
     selected_scenario: null,
@@ -797,11 +855,10 @@ let app = new Vue({
     comp_check: selectionChanged,
     selected_comp_scenario: selectionChanged,
     
-    sliderValue1: slider1Changed,
-    sliderValue2: slider2Changed,
-    sliderValue3: slider3Changed,
-    sliderValue4: slider4Changed,
-    
+    bp1: bp1Changed,
+    bp2: bp2Changed,
+    bp3: bp3Changed,
+    bp4: bp4Changed,
     custom_check: customBreakPoints,
     
   },
