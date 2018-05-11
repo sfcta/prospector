@@ -331,7 +331,7 @@ async function drawMapFeatures(queryMapData=true) {
           for(var i = 1; i <= app.selected_breaks; i++) {
             sel_colorvals.push(Math.round(map_vals[Math.floor(map_vals.length*1/i)-1]*prec)/prec);
           }
-          sel_colorvals.push(Math.floor(map_vals[0])); 
+          sel_colorvals.push(Math.round(map_vals[0]*prec)/prec); 
           
           let bp = Array.from(sel_colorvals).sort((a, b) => a - b);
           app.bp0 = bp[0];
@@ -786,6 +786,10 @@ function customBreakPoints(thing) {
     drawMapFeatures();
   }
 }
+function colorschemeChanged(thing) {
+  app.selected_colorscheme = thing;
+  drawMapFeatures(false);
+}
 
 
 let app = new Vue({
@@ -851,11 +855,11 @@ let app = new Vue({
     selected_scenario: selectionChanged,
     selected_timep: selectionChanged,
     selected_metric: selectionChanged,
-    selected_colorscheme: selectionChanged,
     selected_breaks: selectionChanged,
     comp_check: selectionChanged,
     selected_comp_scenario: selectionChanged,
     
+    selected_colorscheme: colorschemeChanged,
     bp1: bp1Changed,
     bp2: bp2Changed,
     bp3: bp3Changed,

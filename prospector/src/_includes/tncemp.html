@@ -26,6 +26,14 @@
                 ${option.text}
               </option>
             </select>
+            <br>
+            <input type="checkbox" id="checkbox" v-model="comp_check" style="margin-top:10px">
+            <label for="checkbox"><b>&nbsp;&nbsp;SELECT COMPARE SCENARIO</b></label>
+            <select v-model="selected_comp_scenario" v-bind:disabled="!comp_check" style="margin-top:10px">
+              <option v-for="option in scen_options" v-bind:value="option.value">
+                ${option.text}
+              </option>
+            </select>
             
             <h5 style="margin-top:10px">CHOOSE TIME PERIOD:</h5>
             <select v-model="selected_timep">
@@ -40,13 +48,8 @@
                 ${option.text}
               </option>
             </select>
-            
-            <h5 style="margin-top:10px">CHOOSE COLOR SCHEME:</h5>
-            <select v-model="selected_colorscheme">
-              <option v-for="option in color_options" v-bind:value="option.value">
-                ${option.text}
-              </option>
-            </select>
+     
+            <hr/>
             
             <h5 style="margin-top:10px">CHOOSE BREAKS:</h5>
             <select v-model="selected_breaks">
@@ -54,26 +57,17 @@
                 ${option.text}
               </option>
             </select>
-            
-            <hr/>
-            
-            <input type="checkbox" id="checkbox" v-model="comp_check" style="margin-top:10px">
-            <label for="checkbox"><b>&nbsp;&nbsp;SELECT COMPARE SCENARIO</b></label>
-            <select v-model="selected_comp_scenario" v-bind:disabled="!comp_check" style="margin-bottom:20px">
-              <option v-for="option in scen_options" v-bind:value="option.value">
-                ${option.text}
-              </option>
-            </select>
-            <hr/>
-            
+            <br>
             <input type="checkbox" id="checkbox" v-model="custom_check" v-bind:disabled="custom_disable" style="margin-top:10px">
             <label for="checkbox"><b>&nbsp;&nbsp;CHOOSE CUSTOM BREAK POINTS</b></label>
             <br>
             <br>
-            <input v-model.number="bp1" type="number" v-bind:disabled="!custom_check" style="width:75px;">
-            <input v-model.number="bp2" type="number" v-bind:disabled="!custom_check" style="width:75px;">
-            <input v-model.number="bp3" type="number" v-bind:disabled="!custom_check" style="width:75px;">
-            <input v-model.number="bp4" type="number" v-bind:disabled="!custom_check" style="width:75px;">
+            <input v-model.number="bp0" type="number" v-bind:disabled="true" style="width:50px;background-color:#f8d488">
+            <input v-model.number.lazy="bp1" type="number" v-bind:disabled="!custom_check" style="width:50px;">
+            <input v-model.number.lazy="bp2" type="number" v-bind:disabled="!custom_check" style="width:50px;">
+            <input v-model.number.lazy="bp3" type="number" v-bind:disabled="!custom_check" style="width:50px;">
+            <input v-model.number.lazy="bp4" type="number" v-bind:disabled="!custom_check" style="width:50px;">
+            <input v-model.number="bp5" type="number" v-bind:disabled="true" style="width:50px;background-color:#f8d488">            
             <br>
             <br>
             <button v-on:click="updateMap"
@@ -81,7 +75,16 @@
                      class="mini ui grey button"
                     v-bind:disabled="!custom_check">
                      Update Map!</button>
-            
+                     
+            <h5 style="margin-top:10px">CHOOSE COLOR SCHEME:</h5>
+            <select v-model="selected_colorscheme">
+              <option v-for="option in color_options" v-bind:value="option.value">
+                ${option.text}
+              </option>
+            </select>            
+
+            <hr/>
+
             <h5 style="margin-top:10px">DISTRIBUTION</h5>
             <div id="dist-chart">
             </div>
