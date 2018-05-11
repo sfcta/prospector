@@ -239,7 +239,10 @@ infoPanel.update = function(geo) {
   if (geo) {
     this._div.innerHTML =
       '<b>TMC ID: </b>' + `${geo.tmc}<br/>` +
-      `<b>${app.selected_metric.toUpperCase()}: </b>` + `${metric_val}`;
+      `<b>${app.selected_metric.toUpperCase()}</b>` + 
+      (app.pct_check? '<b> PCT_DIFF: </b>':'<b>: </b>') + 
+      `${metric_val}` + 
+      ((app.pct_check && metric_val !== null)? '%':'');
   }
 
   infoPanelTimeout = setTimeout(function() {
@@ -287,6 +290,7 @@ async function drawMapFeatures(queryMapData=true) {
         if (app.comp_check) {
           if (base_lookup.hasOwnProperty(feat.tmc) && comp_lookup.hasOwnProperty(feat.tmc)) {
             map_metric = comp_lookup[feat.tmc][sel_metric] - base_lookup[feat.tmc][sel_metric];
+            if (app.pct_check && base_lookup[feat.tmc][sel_metric]>0) map_metric = map_metric*100/base_lookup[feat.tmc][sel_metric];
             feat['metric'] = map_metric;
             map_vals.push(map_metric);
           }
@@ -391,9 +395,10 @@ async function drawMapFeatures(queryMapData=true) {
         let legHTML = getLegHTML(
           sel_colorvals,
           sel_colors,
-          sel_binsflag
+          sel_binsflag,
+          (app.pct_check && app.comp_check)? '%': ''
         );
-        div.innerHTML = '<h4>' + sel_metric.toUpperCase() + '</h4>' + legHTML;
+        div.innerHTML = '<h4>' + sel_metric.toUpperCase() + (app.pct_check? ' PCT_DIFF':'') +  '</h4>' + legHTML;
         return div;
       };
       mapLegend.addTo(mymap);
@@ -484,7 +489,7 @@ function updateDistChart(bins) {
         labels: 'Freq',
         lineColors: ['#1fc231'],
         xLabels: 'x',
-        xLabelAngle: 60,
+        xLabelAngle: 25,
         xLabelFormat: binFmt,
         //yLabelFormat: yFmt,
         hideHover: true,
@@ -500,7 +505,7 @@ function updateDistChart(bins) {
 }
 
 function binFmt(x) {
-  return distLabels[x.x];
+  return distLabels[x.x] + (app.pct_check? '%':'');
 }
 
 function clickedOnFeature(e) {
@@ -805,6 +810,7 @@ let app = new Vue({
     vizinfo: VIZ_INFO,
     isUpdActive: false,
     comp_check: false,
+    pct_check: false,
     custom_check: false,
     custom_disable: false,
     bp0: 0.0,
@@ -857,6 +863,7 @@ let app = new Vue({
     selected_metric: selectionChanged,
     selected_breaks: selectionChanged,
     comp_check: selectionChanged,
+    pct_check: selectionChanged,
     selected_comp_scenario: selectionChanged,
     
     selected_colorscheme: colorschemeChanged,

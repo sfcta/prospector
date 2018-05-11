@@ -27,8 +27,10 @@
               </option>
             </select>
             <br>
-            <input type="checkbox" id="checkbox" v-model="comp_check" style="margin-top:10px">
-            <label for="checkbox"><b>&nbsp;&nbsp;SELECT COMPARE SCENARIO</b></label>
+            <input type="checkbox" id="comp_checkbox" v-model="comp_check" style="margin-top:10px">
+            <label for="comp_checkbox"><b>&nbsp;&nbsp;SELECT COMPARE SCENARIO</b></label>&nbsp;&nbsp;
+            <input type="checkbox" id="pct_checkbox" v-model="pct_check" v-bind:disabled="!comp_check" style="margin-top:10px">
+            <label for="pct_checkbox"><b>&nbsp;&nbsp;PERCENT DIFF</b></label>
             <select v-model="selected_comp_scenario" v-bind:disabled="!comp_check" style="margin-top:10px">
               <option v-for="option in scen_options" v-bind:value="option.value">
                 ${option.text}
@@ -58,16 +60,15 @@
               </option>
             </select>
             <br>
-            <input type="checkbox" id="checkbox" v-model="custom_check" v-bind:disabled="custom_disable" style="margin-top:10px">
-            <label for="checkbox"><b>&nbsp;&nbsp;CHOOSE CUSTOM BREAK POINTS</b></label>
+            <input type="checkbox" id="custom_checkbox" v-model="custom_check" v-bind:disabled="custom_disable" style="margin-top:10px">
+            <label for="custom_checkbox"><b>&nbsp;&nbsp;CHOOSE CUSTOM BREAK POINTS</b></label>
             <br>
-            <br>
-            <input v-model.number="bp0" type="number" v-bind:disabled="true" style="width:50px;background-color:#f8d488">
-            <input v-model.number.lazy="bp1" type="number" v-bind:disabled="!custom_check" style="width:50px;">
-            <input v-model.number.lazy="bp2" type="number" v-bind:disabled="!custom_check" style="width:50px;">
-            <input v-model.number.lazy="bp3" type="number" v-bind:disabled="!custom_check" style="width:50px;">
-            <input v-model.number.lazy="bp4" type="number" v-bind:disabled="!custom_check" style="width:50px;">
-            <input v-model.number="bp5" type="number" v-bind:disabled="true" style="width:50px;background-color:#f8d488">            
+            <input v-model.number="bp0" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488">
+            <input v-model.number.lazy="bp1" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
+            <input v-model.number.lazy="bp2" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
+            <input v-model.number.lazy="bp3" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
+            <input v-model.number.lazy="bp4" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
+            <input v-model.number="bp5" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488">            
             <br>
             <br>
             <button v-on:click="updateMap"
