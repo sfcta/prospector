@@ -830,7 +830,8 @@ let app = new Vue({
     color_options: [
     {text: 'GnYlRd', value: ['Green','Yellow','Red']},
     {text: 'RdYlGn', value: ['Red','Yellow','Green']},
-    {text: 'YlRd', value: ['Yellow','Red']},
+    {text: 'YlOrRd', value: 'YlOrRd'},
+    {text: 'RdOrYl', value: ['Red','Orange','Yellow']},
     {text: 'YlRdBl', value: ['Yellow','Red','Black']},
     {text: 'YlGnBu', value: ['Yellow','Green','Blue']},
     {text: 'Spectral', value: 'Spectral'},
