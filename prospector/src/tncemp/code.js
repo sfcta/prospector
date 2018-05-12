@@ -23,6 +23,7 @@ const FRAC_COLS = ['champ_link_count','speed_std_dev','tnc_pickups','tnc_dropoff
                   'obs_tti','obs_pti80','obs_bti80','obs_pti95','obs_bti95','tti','pti80','bti80','pti95','bti95'];
 const INT_COLS = ['dt'];
 const DISCRETE_VAR_LIMIT = 10;
+
 const VIZ_LIST = ['ALOS', 'TSPD', 'TRLB', 'ATRAT'];
 const VIZ_INFO = {
   ALOS: {
@@ -80,9 +81,14 @@ const VIZ_INFO = {
 const MISSING_COLOR = '#ccd';
 
 let sel_colorvals, sel_colors, sel_binsflag;
+let init_selected_metric = 'delay_per_mile';
+let metric_options_all, metric_options_daily; 
+let daily_metric_list = ['vhd','vmt','vht','pcemt','vol','inrix_vol','obs_vhd','obs_vht',
+                          'tnc_avg_vol','tnc_inserv_avg_vol','tnc_outserv_avg_vol','tnc_pickups','tnc_dropoffs',
+                          'tnc_pudo','tnc_pudo_avg','tnc_pickups_avg','tnc_dropoffs_avg',
+                          'tnc_pickups_per_mile','tnc_dropoffs_per_mile','tnc_pudo_per_mile'];
 
 let init_selectedViz = VIZ_LIST[0];
-
 let data_view = VIZ_INFO[init_selectedViz]['VIEW'];
 let selviz_metric = VIZ_INFO[init_selectedViz]['METRIC'];
 let selPeriod = 'AM';
@@ -492,7 +498,7 @@ function updateDistChart(bins) {
         // A list of names of data record attributes that contain y-values.
         ykeys: 'y',
         ymin: 0,
-        labels: 'Freq',
+        labels: ['Freq'],
         lineColors: ['#1fc231'],
         xLabels: 'x',
         xLabelAngle: 25,
@@ -660,11 +666,27 @@ function selectionChanged(thing) {
   //highlightSelectedSegment();
 }
 
+function seltimepChanged(thing) {
+  if (app.selected_scenario && app.selected_timep && app.selected_metric) {
+    if (thing=='Daily') {
+      app.metric_options = metric_options_daily;
+      if (!daily_metric_list.includes(app.selected_metric)) {
+        app.selected_metric = daily_metric_list[0];
+      }
+    } else {
+      app.metric_options = metric_options_all;
+    }
+    drawMapFeatures();
+  }
+}
+
 function optionsChanged(thing) {
   if (app.scen_options.length > 0 && app.time_options.length > 0) {
     app.selected_scenario = app.scen_options[app.scen_options.length - 1].value;
     app.selected_comp_scenario = app.scen_options[0].value;
-    app.selected_timep = app.time_options[0].value;
+    app.selected_timep = 'Daily';
+    app.metric_options = metric_options_daily;
+    app.selected_metric = daily_metric_list[0];
   }
 }
 
@@ -707,6 +729,7 @@ function updateOptionsData(colname) {
 function getMetricOptions() {
   let sellist = [];
   let selopts = [];
+  metric_options_daily = [];
   fetch(API_SERVER + DATA_VIEW + '?limit=1')
     .then(resp => resp.json())
     .then(function(jsonData) {
@@ -716,8 +739,10 @@ function getMetricOptions() {
       for (let entry of sellist) {
         selopts.push({text: entry, value: entry});
       }
-      app.metric_options = selopts;
-      app.selected_metric = 'delay_per_mile';
+      metric_options_all = selopts;
+      for (let entry of daily_metric_list) {
+        metric_options_daily.push({text: entry, value: entry});
+      }
     });
 }
 
@@ -865,7 +890,7 @@ let app = new Vue({
     scen_options: optionsChanged,
     time_options: optionsChanged,
     selected_scenario: selectionChanged,
-    selected_timep: selectionChanged,
+    selected_timep: seltimepChanged,
     selected_metric: selectionChanged,
     selected_breaks: selectionChanged,
     comp_check: selectionChanged,
