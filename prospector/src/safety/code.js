@@ -26,8 +26,9 @@ let incOpacity = {'Fatal':1, 'Non-fatal':0.15};
 let missingColor = '#ccc';
 let popup = null;
 let collisionLayer;
-let cocLayer
+let cocLayer;
 let mapLegend;
+let _cocSegments;
 let allJSONData;
 
 //Initialization of selective aspects
@@ -834,9 +835,7 @@ function changeCheckbox(thing) {
     if (app.checkedNames.includes("Communities of Concern")){
         console.log('Communities of Concern: Yes');
         console.log(_cocSegments);
-        cocLayer = L.geoJSON(_cocSegments, {
-          style: cocStyle,
-        });
+        cocLayer = L.geoJSON(_cocSegments);
         cocLayer.addTo(mymap);
         
     } else {
@@ -848,20 +847,18 @@ function changeCheckbox(thing) {
     }
 }
 
-function fetchCocGeometry() {
-  const geo_url_item = api_geo + '?select=geometry,name';
+async function fetchCocGeometry() {
+  const geo_url_item = api_geo + '?select=geometry';
   
-  fetch(queryurl).then((resp) => resp.json())
   try {
-    let resp = fetch(geo_url_item);
-    let segments = resp.json();
+    let resp = await fetch(geo_url_item);
+    let segments = await resp.json();
 
     // do some parsing and stuff
     for (let segment of segments) {
       segment['type'] = 'Feature';
       segment['geometry'] = JSON.parse(segment.geometry);
     }
-    console.log(segments);
     return segments;
 
   } catch (error) {
@@ -1011,5 +1008,5 @@ let helpPanel = new Vue({
   }}
 );
 // Ready to go! Read some data.
-let _cocSegments = fetchCocGeometry();
+_cocSegments = fetchCocGeometry();
 updateSliderData();

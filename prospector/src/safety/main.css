@@ -7,24 +7,73 @@ h5 {color: white;}
 
 #container {
   position: relative;
-  height:100%;
   width:100%;
+  height:100%;
   background-color:#888;
-  overflow: scroll;
 }
 
 #panel {
-	display:table;
-  position: relative;
+  display:table;
+  position: absolute;
   top:0;
   right:0;
   bottom:0;
-  width:450px;
-  padding:0px 20px 0px 30px;
+  width:400px;
+  padding:0px 20px 0px 20px;
   z-index:10;
   background-color:#444;
   float: right;
-  overflow: auto;
+}
+
+
+#header {
+  display:table-row;
+  vertical-align:top;
+}
+
+#stats-loader {
+  margin-top:100px;
+  color:#ccc;
+}
+
+#stats-panel {
+  position:center;
+  vertical-align:top;
+  width: 100%;
+  margin-top: 50px;
+}
+
+#stats-panel h1 {font-size:28px;}
+
+
+.apptitle {
+  margin-top:-8px;
+  margin-bottom:3px;
+  color:#fff;
+  text-align:center;
+}
+
+#helpbar {
+  text-align:center;
+  margin-bottom:10px;
+}
+
+.moreinfo {
+  margin-bottom:15px;
+  font-style:italic;
+  font-size:13px;
+  color:#fff;
+}
+
+#table-logo {
+  margin-top:2px;
+  margin-bottom: 2px;
+}
+
+p.hint {color:#777; text-align:right; margin-right:24px; margin-top:-20px;}
+
+#panel label {
+  color:white;
 }
 
 #sfmap {
@@ -73,6 +122,12 @@ h5 {color: white;}
     float: left;
     margin-right: 8px;
     opacity: 0.7;
+}
+
+.legend .circlepadding {
+    border-radius: 50%;
+    margin-top: 0px;
+    background: rgba(255, 255, 255, 0.8);
 }
 
 #popup-title {
