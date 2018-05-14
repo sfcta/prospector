@@ -77,19 +77,26 @@ function addSWITRSLayer(collisions) {
   }
   
   let queryitem;
+  let circle_color;
   
   if (chosenSeverity == 'All' && chosenIncidents == 'Ped') {
     queryitem = 'pedcol';
+    circle_color = "#13ae38";
   } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Ped'){
 	queryitem = 'pedkill';
+    circle_color = "#f56100";
   } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
     queryitem = 'pedinj';
+    circle_color = "#1279c6";
   } else if (chosenSeverity == 'All' && chosenIncidents == 'Bike') {
     queryitem = 'biccol';
+    circle_color = "#13ae38";
   } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Bike'){
 	queryitem = 'bickill';
+    circle_color = "#f56100";
   } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
     queryitem = 'bicinj';
+    circle_color = "#1279c6";
   }
   
   if (chosenTimeofDay != 'All Day'){
@@ -102,7 +109,7 @@ function addSWITRSLayer(collisions) {
 
   //loading in the new geoJSON features we created we create our collision layer
   collisionLayer = L.geoJSON(collisions, {
-    style: styleByIncidentColor,
+    style: {"color": circle_color,"weight": 0.1,"opacity": 0.15},
 	//at specific latitude longitude give a different size to the point depending on the specific count we are looking at.
   pointToLayer: function(feature, latlng) {
     if (app.sliderValue != "All Years" || chosenSeverity == 'Fatal') {
@@ -159,9 +166,14 @@ function addSWITRSLayer(collisions) {
 
 // this functions gives the feature a color weight and opacity depending on specifics of the json.
 function styleByIncidentColor(collision) {
+  if (chosenSeverity == 'Fatal'){
+    return {"color": "#f56100","weight": 0.1,"opacity": 0.15};  
+  }  else if (chosenSeverity == 'Nonf'){
+    return {"color": "#1279c6","weight": 0.1,"opacity": 0.15};  
+  } else {
+    return {"color": "#13ae38","weight": 0.1,"opacity": 0.15};  
+  }
 
-  return {"color": incColor['Non-fatal'],"weight": 0.1,
-  "opacity": incOpacity['Non-fatal']};
 
 }
 
@@ -820,8 +832,8 @@ var cocStyle = {
 function changeCheckbox(thing) {
     if (cocLayer) mymap.removeLayer(cocLayer);
     if (app.checkedNames.includes("Communities of Concern")){
-        console.log('Communities of Concern: Yes')
-        console.log(_cocSegments)
+        console.log('Communities of Concern: Yes');
+        console.log(_cocSegments);
         cocLayer = L.geoJSON(_cocSegments, {
           style: cocStyle,
         });
@@ -836,19 +848,20 @@ function changeCheckbox(thing) {
     }
 }
 
-async function fetchCocGeometry() {
+function fetchCocGeometry() {
   const geo_url_item = api_geo + '?select=geometry,name';
-
+  
+  fetch(queryurl).then((resp) => resp.json())
   try {
-    let resp = await fetch(geo_url_item);
-    let segments = await resp.json();
+    let resp = fetch(geo_url_item);
+    let segments = resp.json();
 
     // do some parsing and stuff
     for (let segment of segments) {
       segment['type'] = 'Feature';
       segment['geometry'] = JSON.parse(segment.geometry);
     }
-    
+    console.log(segments);
     return segments;
 
   } catch (error) {
@@ -878,7 +891,7 @@ function updateSliderData() {
     }
     sliderlist.push('All Years');
     app.timeSlider.data = sliderlist;
-	app.sliderValue = sliderlist[sliderlist.length-2];
+	app.sliderValue = sliderlist[sliderlist.length-1];
   });
   fetchYearlyDetails();
 }

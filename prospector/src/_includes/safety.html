@@ -33,24 +33,6 @@
           </button>
         </div>
         <div style="height:70px;font-size:1px;">
-          <h5>CHOOSE TIME OF DAY:</h5>
-          <button class="mini ui grey button"
-                  v-on:click="pickAM"
-                  v-bind:class="{ active: isAMactive, green: isAMactive}">
-                  AM
-          </button>
-          <button class="mini ui grey button"
-                  v-on:click="pickPM"
-                  v-bind:class="{ active: isPMactive, green: isPMactive}">
-                  PM
-          </button>
-          <button class="mini ui grey button"
-                  v-on:click="pickAllDay"
-                  v-bind:class="{ active: isAllDayactive, green: isAllDayactive}">
-                  All Day
-          </button>
-        </div>
-        <div style="height:70px;font-size:1px;">
           <h5>CHOOSE SEVERITY:</h5>
           <button class="mini ui grey button"
                   v-on:click="pickFatal"
@@ -73,7 +55,6 @@
         <label for="coc">Communities of Concern</label>
         <input type="checkbox" id="hin" value="High Injury Network" v-model="checkedNames" v-on:change="onChange">
         <label for="hin">High Injury Network</label>
-        <span>Checked names: {{ checkedNames }}</span>
 
         <h4>CHOOSE YEAR:</h4>
         <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>

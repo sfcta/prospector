@@ -10,11 +10,12 @@ h5 {color: white;}
   height:100%;
   width:100%;
   background-color:#888;
+  overflow: scroll;
 }
 
 #panel {
 	display:table;
-  position: absolute;
+  position: relative;
   top:0;
   right:0;
   bottom:0;
@@ -23,6 +24,7 @@ h5 {color: white;}
   z-index:10;
   background-color:#444;
   float: right;
+  overflow: auto;
 }
 
 #sfmap {
