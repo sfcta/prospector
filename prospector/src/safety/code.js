@@ -133,21 +133,19 @@ function addSWITRSLayer(collisions) {
  
    mapLegend.onAdd = function (map) {
      var div = L.DomUtil.create('div', 'info legend'),
-     grades = [1, 3, 5, 7, 9],
+     grades = [5, 15, 25, 35, 55],
      labels = ['<strong>Size</strong>'],
      from, to;   
      if (app.sliderValue != "All Years" || chosenSeverity == 'Fatal') {
        for (var i = 0; i < grades.length; i++) {
+         let titles = [1, 3, 6, 8, 13]  
          from = grades[i];
          to = grades[i + 1];
          labels.push(
-            '<i class="circlepadding" style="width: '+Math.max(0,(40-(2*from+from/(from+.01))))+'px;"></i> <i style="background: #8080A0; width: '+1.8*(2*from+from/(from+.01))+'px; height: '+1.8*(2*from+from/(from+.01))+'px; border-radius: 50%; margin-top: '+Math.max(0,(6-(2*from+from/(from+.01))))+'px;"></i> ' + from)
+            //'<i class="circlepadding" style="width: '+Math.max(0,(40-(2*from+from/(from+.01))))+'px;"></i> <i style="background: #8080A0; width: '+1.8*(2*from+from/(from+.01))+'px; height: '+1.8*(2*from+from/(from+.01))+'px; border-radius: 50%; margin-top: '+Math.max(0,(6-(2*from+from/(from+.01))))+'px;"></i> ' + from)
+            '<i class="circlepadding" style="width: '+Math.max(0,(55-getBucketSize(from)))+'px;"></i> <i style="background: #8080A0; width: '+getBucketSize(from)+'px; height: '+getBucketSize(from)+'px; border-radius: 50%; margin-top: '+Math.max(0,(10-getBucketSize(from)))+'px;"></i> ' + titles[i])
        } 
      } else {
-       div = L.DomUtil.create('div', 'info legend'),
-       grades = [1, 15, 30, 45, 60],
-       labels = ['<strong>Size</strong>'],
-       from, to;
        for (var i = 0; i < grades.length; i++) {
          from = grades[i];
          to = grades[i + 1];
@@ -627,9 +625,9 @@ function showYearlyChart() {
   //If there is already a chart there, dependent on chosen incident and severity. Change the labels, ykeys, and ymax.
   if (currentChart) {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
-	  currentChart.options.labels = ['Bicycle Injuries', 'Bicycle Deaths'];
-	  currentChart.options.ykeys = ['bicinjs', 'bickills'];
-	  currentChart.options.barColors = ["#1279c6","#f56100"];
+	  currentChart.options.labels = ['Bicycle Collisions'];
+	  currentChart.options.ykeys = ['biccols'];
+	  currentChart.options.barColors = ["#13ae38"];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
 
@@ -646,9 +644,9 @@ function showYearlyChart() {
 	  var yearmax = 30;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-	  currentChart.options.labels = ['Pedestrian Injuries', 'Pedestrian Deaths'];
-	  currentChart.options.ykeys = ['pedinjs', 'pedkills'];
-	  currentChart.options.barColors = ["#1279c6","#f56100"];
+	  currentChart.options.labels = ['Pedestrian Collisions'];
+	  currentChart.options.ykeys = ['pedcols'];
+	  currentChart.options.barColors = ["#13ae38"];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
@@ -679,10 +677,10 @@ function showYearlyChart() {
     // The name of the data record attribute that contains x-values.
     xkey: 'year',
     // A list of names of data record attributes that contain y-values.
-    ykeys: ['pedinjs', 'pedkills'],
+    ykeys: ['pedcols'],
     ymax: yearmax,
-    labels: ['Pedestrian Injuries', 'Pedestrian Deaths'],
-    barColors: ["#1279c6","#f56100"],
+    labels: ['Pedestrian Collisions'],
+    barColors: ["#13ae38"],
     xLabels: "Year",
     xLabelAngle: 60,
     xLabelFormat: dateFmt,
