@@ -337,7 +337,7 @@ async function drawMapFeatures(queryMapData=true) {
         
         if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) {
           sel_binsflag = false;
-          color_func = chroma.scale(app.selected_colorscheme).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
+          color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
           sel_colorvals2 = sel_colorvals.slice(0);
           app.custom_disable = true;
         } else{
@@ -363,14 +363,14 @@ async function drawMapFeatures(queryMapData=true) {
           
           sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
           sel_binsflag = true; 
-          color_func = chroma.scale(app.selected_colorscheme).classes(sel_colorvals);
+          color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
           sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
         }        
       } else {
         sel_colorvals = new Set([app.bp0, app.bp1, app.bp2, app.bp3, app.bp4, app.bp5]);
         sel_colorvals = Array.from(sel_colorvals).sort((a, b) => a - b);
         sel_binsflag = true; 
-        color_func = chroma.scale(app.selected_colorscheme).classes(sel_colorvals);
+        color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
         sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
       }
       
@@ -827,6 +827,14 @@ function colorschemeChanged(thing) {
   drawMapFeatures(false);
 }
 
+function getColorMode(cscheme) {
+  if (app.modeMap.hasOwnProperty(cscheme.toString())) {
+    return app.modeMap[cscheme];
+  } else {
+    return 'lrgb';
+  }
+}
+
 
 let app = new Vue({
   el: '#panel',
@@ -867,8 +875,11 @@ let app = new Vue({
     {text: '', value: ''},
     ],
     
-    selected_colorscheme: ['Green','Yellow','Red'],
+    selected_colorscheme: ['#ffffcc','#663399'],
     color_options: [
+    {text: 'Yellow-Navy', value: ['Yellow','Navy']},
+    {text: 'Yellow-Purple', value: ['#ffffcc','#663399']},
+    {text: 'Yellow-Blue', value: ['#fafa6e','#2A4858']},
     {text: 'GnYlRd', value: ['Green','Yellow','Red']},
     {text: 'RdYlGn', value: ['Red','Yellow','Green']},
     {text: 'YlOrRd', value: 'YlOrRd'},
@@ -878,6 +889,11 @@ let app = new Vue({
     {text: 'Spectral', value: 'Spectral'},
     {text: 'YlGn', value: 'YlGn'},
     ],
+    modeMap: {
+      '#ffffcc,#663399': 'lch',
+      'Yellow,Navy': 'lch',
+      '#fafa6e,#2A4858': 'lch',
+    },
 
     selected_breaks: 5,
     break_options: [
