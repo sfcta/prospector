@@ -875,10 +875,11 @@ let app = new Vue({
     {text: '', value: ''},
     ],
     
-    selected_colorscheme: ['#ffffcc','#663399'],
+    selected_colorscheme: ['#ebbe5e','#3f324f'],
     color_options: [
+    {text: 'Yellow-Purple', value: ['#ebbe5e','#3f324f']},
+    {text: 'Cream-Purple', value: ['#ffffcc','#663399']},
     {text: 'Yellow-Navy', value: ['Yellow','Navy']},
-    {text: 'Yellow-Purple', value: ['#ffffcc','#663399']},
     {text: 'Yellow-Blue', value: ['#fafa6e','#2A4858']},
     {text: 'GnYlRd', value: ['Green','Yellow','Red']},
     {text: 'RdYlGn', value: ['Red','Yellow','Green']},
@@ -891,6 +892,7 @@ let app = new Vue({
     ],
     modeMap: {
       '#ffffcc,#663399': 'lch',
+      '#ebbe5e,#3f324f': 'lab',
       'Yellow,Navy': 'lch',
       '#fafa6e,#2A4858': 'lch',
     },
