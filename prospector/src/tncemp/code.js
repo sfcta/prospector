@@ -384,7 +384,7 @@ async function drawMapFeatures(queryMapData=true) {
       geoLayer = L.geoJSON(cleanFeatures, {
         style: function(feat) {
           let color = getColorFromVal(
-            feat['metric'],
+            Math.round(feat['metric']*prec)/prec,
             sel_colorvals,
             sel_colors,
             sel_binsflag
