@@ -892,7 +892,7 @@ let app = new Vue({
     ],
     modeMap: {
       '#ffffcc,#663399': 'lch',
-      '#ebbe5e,#3f324f': 'lab',
+      '#ebbe5e,#3f324f': 'hsl',
       'Yellow,Navy': 'lch',
       '#fafa6e,#2A4858': 'lch',
     },
