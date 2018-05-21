@@ -132,7 +132,7 @@ function addSWITRSLayer(collisions) {
   mapLegend = L.control({position: 'bottomright'});
  
    mapLegend.onAdd = function (map) {
-     var div = L.DomUtil.create('div', 'info legend'),
+     var div = L.DomUtil.create('div', 'info legend2'),
      grades = [5, 15, 25, 35, 55],
      labels = ['<strong>Size</strong>'],
      from, to;   
@@ -143,14 +143,14 @@ function addSWITRSLayer(collisions) {
          to = grades[i + 1];
          labels.push(
             //'<i class="circlepadding" style="width: '+Math.max(0,(40-(2*from+from/(from+.01))))+'px;"></i> <i style="background: #8080A0; width: '+1.8*(2*from+from/(from+.01))+'px; height: '+1.8*(2*from+from/(from+.01))+'px; border-radius: 50%; margin-top: '+Math.max(0,(6-(2*from+from/(from+.01))))+'px;"></i> ' + from)
-            '<i class="circlepadding" style="width: '+Math.max(0,(55-getBucketSize(from)))+'px;"></i> <i style="background: #8080A0; width: '+getBucketSize(from)+'px; height: '+getBucketSize(from)+'px; border-radius: 50%; margin-top: '+Math.max(0,(10-getBucketSize(from)))+'px;"></i> ' + titles[i])
+            '<i class="circlepadding" style="width: '+Math.max(0,(55-getBucketSize(from)))+'px;"></i> <i style="background: #8080A0; width: '+getBucketSize(from)+'px; height: '+getBucketSize(from)+'px; border-radius: 50%; margin-top: '+Math.max(0,(10-getBucketSize(from)))+'px;"></i><p style="color:#555;"> ' + titles[i] + '</p>')
        } 
      } else {
        for (var i = 0; i < grades.length; i++) {
          from = grades[i];
          to = grades[i + 1];
          labels.push(
-            '<i class="circlepadding" style="width: '+Math.max(0,(55-getBucketSize(from)))+'px;"></i> <i style="background: #8080A0; width: '+getBucketSize(from)+'px; height: '+getBucketSize(from)+'px; border-radius: 50%; margin-top: '+Math.max(0,(10-getBucketSize(from)))+'px;"></i> ' + from)
+            '<i class="circlepadding" style="width: '+Math.max(0,(55-getBucketSize(from)))+'px;"></i> <i style="background: #8080A0; width: '+getBucketSize(from)+'px; height: '+getBucketSize(from)+'px; border-radius: 50%; margin-top: '+Math.max(0,(10-getBucketSize(from)))+'px;"></i><p style="color:#555;"> ' + from + '</p>')
        }       
      }
      div.innerHTML = labels.join('<br>');

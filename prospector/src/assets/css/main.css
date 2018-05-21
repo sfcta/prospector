@@ -199,6 +199,18 @@ td {text-align:center; vertical-align:top; }
     margin-right: 8px;
     opacity: 1;
 }
+.legend2 {
+    line-height: 5px;
+    color: #555;
+    min-width: 120px;
+}
+.legend2 i {
+    width: 10px;
+    height: 10px;
+    float: left;
+    margin-right: 8px;
+    opacity: 1;
+}
 
 p.legend-row {
   margin-bottom: 3px;
