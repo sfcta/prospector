@@ -896,7 +896,7 @@ let timeSlider = {
           data: [0],
           sliderValue: 0,
           disabled: false,
-          width: 'auto',
+          width: '340px',
           height: 3,
           direction: 'horizontal',
           dotSize: 16,
