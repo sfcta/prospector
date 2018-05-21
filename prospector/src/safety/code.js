@@ -167,7 +167,7 @@ function addSWITRSLayer(collisions) {
 function styleByIncidentColor(collision) {
   if (chosenSeverity == 'Fatal'){
     return {"color": "#f56100","weight": 0.1,"opacity": 0.15};  
-  }  else if (chosenSeverity == 'Nonf'){
+  } else if (chosenSeverity == 'Nonf'){
     return {"color": "#1279c6","weight": 0.1,"opacity": 0.15};  
   } else {
     return {"color": "#13ae38","weight": 0.1,"opacity": 0.15};  
@@ -474,9 +474,9 @@ function createChart() {
   //If there is already a chart there, change ymax, labels, ykeys, barColors, and data.
   if (currentChart) {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
-	  currentChart.options.labels = ['Bicycle Injuries', 'Bicycle Deaths'];
-	  currentChart.options.ykeys = ['bicinjs', 'bickills'];
-	  currentChart.options.barColors = ["#1279c6","#f56100"];
+	  currentChart.options.labels = ['Bicycle Collisions'];
+	  currentChart.options.ykeys = ['biccols'];
+	  currentChart.options.barColors = ["#13ae38"];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'All Bike Collisions :';
 	  app.chartSubTitle = intersectionName;
@@ -496,9 +496,9 @@ function createChart() {
 	  app.chartTitle = 'Fatal Bike Collisions :';
 	  app.chartSubTitle = intersectionName;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-	  currentChart.options.labels = ['Pedestrian Injuries', 'Pedestrian Deaths'];
-	  currentChart.options.ykeys = ['pedinjs', 'pedkills'];
-	  currentChart.options.barColors = ["#1279c6","#f56100"];
+	  currentChart.options.labels = ['Pedestrian Collisions'];
+	  currentChart.options.ykeys = ['pedcols'];
+	  currentChart.options.barColors = ["#13ae38"];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'All Pedestrian Collisions :';
 	  app.chartSubTitle = intersectionName;
