@@ -26,8 +26,9 @@ let incOpacity = {'Fatal':1, 'Non-fatal':0.15};
 let missingColor = '#ccc';
 let popup = null;
 let collisionLayer;
-let cocLayer
+let cocLayer;
 let mapLegend;
+let _cocSegments;
 let allJSONData;
 
 //Initialization of selective aspects
@@ -77,19 +78,26 @@ function addSWITRSLayer(collisions) {
   }
   
   let queryitem;
+  let circle_color;
   
   if (chosenSeverity == 'All' && chosenIncidents == 'Ped') {
     queryitem = 'pedcol';
+    circle_color = "#13ae38";
   } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Ped'){
 	queryitem = 'pedkill';
+    circle_color = "#f56100";
   } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Ped'){
     queryitem = 'pedinj';
+    circle_color = "#1279c6";
   } else if (chosenSeverity == 'All' && chosenIncidents == 'Bike') {
     queryitem = 'biccol';
+    circle_color = "#13ae38";
   } else if (chosenSeverity == 'Fatal' && chosenIncidents == 'Bike'){
 	queryitem = 'bickill';
+    circle_color = "#f56100";
   } else if (chosenSeverity == 'Nonf' && chosenIncidents == 'Bike'){
     queryitem = 'bicinj';
+    circle_color = "#1279c6";
   }
   
   if (chosenTimeofDay != 'All Day'){
@@ -102,7 +110,7 @@ function addSWITRSLayer(collisions) {
 
   //loading in the new geoJSON features we created we create our collision layer
   collisionLayer = L.geoJSON(collisions, {
-    style: styleByIncidentColor,
+    style: {"color": circle_color,"weight": 0.1,"opacity": 0.15},
 	//at specific latitude longitude give a different size to the point depending on the specific count we are looking at.
   pointToLayer: function(feature, latlng) {
     if (app.sliderValue != "All Years" || chosenSeverity == 'Fatal') {
@@ -124,27 +132,25 @@ function addSWITRSLayer(collisions) {
   mapLegend = L.control({position: 'bottomright'});
  
    mapLegend.onAdd = function (map) {
-     var div = L.DomUtil.create('div', 'info legend'),
-     grades = [1, 3, 5, 7, 9],
+     var div = L.DomUtil.create('div', 'info legend2'),
+     grades = [5, 15, 25, 35, 55],
      labels = ['<strong>Size</strong>'],
      from, to;   
      if (app.sliderValue != "All Years" || chosenSeverity == 'Fatal') {
        for (var i = 0; i < grades.length; i++) {
+         let titles = [1, 3, 6, 8, 13]  
          from = grades[i];
          to = grades[i + 1];
          labels.push(
-            '<i class="circlepadding" style="width: '+Math.max(0,(40-(2*from+from/(from+.01))))+'px;"></i> <i style="background: #8080A0; width: '+1.8*(2*from+from/(from+.01))+'px; height: '+1.8*(2*from+from/(from+.01))+'px; border-radius: 50%; margin-top: '+Math.max(0,(6-(2*from+from/(from+.01))))+'px;"></i> ' + from)
+            //'<i class="circlepadding" style="width: '+Math.max(0,(40-(2*from+from/(from+.01))))+'px;"></i> <i style="background: #8080A0; width: '+1.8*(2*from+from/(from+.01))+'px; height: '+1.8*(2*from+from/(from+.01))+'px; border-radius: 50%; margin-top: '+Math.max(0,(6-(2*from+from/(from+.01))))+'px;"></i> ' + from)
+            '<i class="circlepadding" style="width: '+Math.max(0,(55-getBucketSize(from)))+'px;"></i> <i style="background: #8080A0; width: '+getBucketSize(from)+'px; height: '+getBucketSize(from)+'px; border-radius: 50%; margin-top: '+Math.max(0,(10-getBucketSize(from)))+'px;"></i><p style="color:#555;"> ' + titles[i] + '</p>')
        } 
      } else {
-       div = L.DomUtil.create('div', 'info legend'),
-       grades = [1, 15, 30, 45, 60],
-       labels = ['<strong>Size</strong>'],
-       from, to;
        for (var i = 0; i < grades.length; i++) {
          from = grades[i];
          to = grades[i + 1];
          labels.push(
-            '<i class="circlepadding" style="width: '+Math.max(0,(55-getBucketSize(from)))+'px;"></i> <i style="background: #8080A0; width: '+getBucketSize(from)+'px; height: '+getBucketSize(from)+'px; border-radius: 50%; margin-top: '+Math.max(0,(10-getBucketSize(from)))+'px;"></i> ' + from)
+            '<i class="circlepadding" style="width: '+Math.max(0,(55-getBucketSize(from)))+'px;"></i> <i style="background: #8080A0; width: '+getBucketSize(from)+'px; height: '+getBucketSize(from)+'px; border-radius: 50%; margin-top: '+Math.max(0,(10-getBucketSize(from)))+'px;"></i><p style="color:#555;"> ' + from + '</p>')
        }       
      }
      div.innerHTML = labels.join('<br>');
@@ -159,9 +165,14 @@ function addSWITRSLayer(collisions) {
 
 // this functions gives the feature a color weight and opacity depending on specifics of the json.
 function styleByIncidentColor(collision) {
+  if (chosenSeverity == 'Fatal'){
+    return {"color": "#f56100","weight": 0.1,"opacity": 0.15};  
+  } else if (chosenSeverity == 'Nonf'){
+    return {"color": "#1279c6","weight": 0.1,"opacity": 0.15};  
+  } else {
+    return {"color": "#13ae38","weight": 0.1,"opacity": 0.15};  
+  }
 
-  return {"color": incColor['Non-fatal'],"weight": 0.1,
-  "opacity": incOpacity['Non-fatal']};
 
 }
 
@@ -463,9 +474,9 @@ function createChart() {
   //If there is already a chart there, change ymax, labels, ykeys, barColors, and data.
   if (currentChart) {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
-	  currentChart.options.labels = ['Bicycle Injuries', 'Bicycle Deaths'];
-	  currentChart.options.ykeys = ['bicinjs', 'bickills'];
-	  currentChart.options.barColors = ["#1279c6","#f56100"];
+	  currentChart.options.labels = ['Bicycle Collisions'];
+	  currentChart.options.ykeys = ['biccols'];
+	  currentChart.options.barColors = ["#13ae38"];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'All Bike Collisions :';
 	  app.chartSubTitle = intersectionName;
@@ -485,9 +496,9 @@ function createChart() {
 	  app.chartTitle = 'Fatal Bike Collisions :';
 	  app.chartSubTitle = intersectionName;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-	  currentChart.options.labels = ['Pedestrian Injuries', 'Pedestrian Deaths'];
-	  currentChart.options.ykeys = ['pedinjs', 'pedkills'];
-	  currentChart.options.barColors = ["#1279c6","#f56100"];
+	  currentChart.options.labels = ['Pedestrian Collisions'];
+	  currentChart.options.ykeys = ['pedcols'];
+	  currentChart.options.barColors = ["#13ae38"];
 	  currentChart.options.ymax = 12;
 	  app.chartTitle = 'All Pedestrian Collisions :';
 	  app.chartSubTitle = intersectionName;
@@ -614,9 +625,9 @@ function showYearlyChart() {
   //If there is already a chart there, dependent on chosen incident and severity. Change the labels, ykeys, and ymax.
   if (currentChart) {
 	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
-	  currentChart.options.labels = ['Bicycle Injuries', 'Bicycle Deaths'];
-	  currentChart.options.ykeys = ['bicinjs', 'bickills'];
-	  currentChart.options.barColors = ["#1279c6","#f56100"];
+	  currentChart.options.labels = ['Bicycle Collisions'];
+	  currentChart.options.ykeys = ['biccols'];
+	  currentChart.options.barColors = ["#13ae38"];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
 
@@ -633,9 +644,9 @@ function showYearlyChart() {
 	  var yearmax = 30;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-	  currentChart.options.labels = ['Pedestrian Injuries', 'Pedestrian Deaths'];
-	  currentChart.options.ykeys = ['pedinjs', 'pedkills'];
-	  currentChart.options.barColors = ["#1279c6","#f56100"];
+	  currentChart.options.labels = ['Pedestrian Collisions'];
+	  currentChart.options.ykeys = ['pedcols'];
+	  currentChart.options.barColors = ["#13ae38"];
 	  var yearmax = 1000;
 	  currentChart.options.ymax = yearmax;
     } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
@@ -666,10 +677,10 @@ function showYearlyChart() {
     // The name of the data record attribute that contains x-values.
     xkey: 'year',
     // A list of names of data record attributes that contain y-values.
-    ykeys: ['pedinjs', 'pedkills'],
+    ykeys: ['pedcols'],
     ymax: yearmax,
-    labels: ['Pedestrian Injuries', 'Pedestrian Deaths'],
-    barColors: ["#1279c6","#f56100"],
+    labels: ['Pedestrian Collisions'],
+    barColors: ["#13ae38"],
     xLabels: "Year",
     xLabelAngle: 60,
     xLabelFormat: dateFmt,
@@ -820,11 +831,9 @@ var cocStyle = {
 function changeCheckbox(thing) {
     if (cocLayer) mymap.removeLayer(cocLayer);
     if (app.checkedNames.includes("Communities of Concern")){
-        console.log('Communities of Concern: Yes')
-        console.log(_cocSegments)
-        cocLayer = L.geoJSON(_cocSegments, {
-          style: cocStyle,
-        });
+        console.log('Communities of Concern: Yes');
+        console.log(_cocSegments);
+        cocLayer = L.geoJSON(_cocSegments);
         cocLayer.addTo(mymap);
         
     } else {
@@ -837,8 +846,8 @@ function changeCheckbox(thing) {
 }
 
 async function fetchCocGeometry() {
-  const geo_url_item = api_geo + '?select=geometry,name';
-
+  const geo_url_item = api_geo + '?select=geometry';
+  
   try {
     let resp = await fetch(geo_url_item);
     let segments = await resp.json();
@@ -848,7 +857,6 @@ async function fetchCocGeometry() {
       segment['type'] = 'Feature';
       segment['geometry'] = JSON.parse(segment.geometry);
     }
-    
     return segments;
 
   } catch (error) {
@@ -878,7 +886,7 @@ function updateSliderData() {
     }
     sliderlist.push('All Years');
     app.timeSlider.data = sliderlist;
-	app.sliderValue = sliderlist[sliderlist.length-2];
+	app.sliderValue = sliderlist[sliderlist.length-1];
   });
   fetchYearlyDetails();
 }
@@ -888,7 +896,7 @@ let timeSlider = {
           data: [0],
           sliderValue: 0,
           disabled: false,
-          width: 'auto',
+          width: '340px',
           height: 3,
           direction: 'horizontal',
           dotSize: 16,
@@ -998,5 +1006,5 @@ let helpPanel = new Vue({
   }}
 );
 // Ready to go! Read some data.
-let _cocSegments = fetchCocGeometry();
+_cocSegments = fetchCocGeometry();
 updateSliderData();
