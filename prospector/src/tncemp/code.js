@@ -280,6 +280,7 @@ async function drawMapFeatures(queryMapData=true) {
   // create a clean copy of the feature Json
   let cleanFeatures = _featJson.slice();
   let sel_metric = app.selected_metric;
+  prec = (FRAC_COLS.includes(sel_metric) ? 100 : 1);
   
   try {
     if (queryMapData) {
@@ -292,27 +293,26 @@ async function drawMapFeatures(queryMapData=true) {
       let map_metric;
       map_vals = [];
       for (let feat of cleanFeatures) {
-        feat['metric'] = null;
+        map_metric = null;
         if (app.comp_check) {
           if (base_lookup.hasOwnProperty(feat.tmc) && comp_lookup.hasOwnProperty(feat.tmc)) {
             map_metric = comp_lookup[feat.tmc][sel_metric] - base_lookup[feat.tmc][sel_metric];
             if (app.pct_check && app.comp_check) {
               if (base_lookup[feat.tmc][sel_metric]>0) {
                 map_metric = map_metric*100/base_lookup[feat.tmc][sel_metric];
-              } else {
-                map_metric = null;
               }
             }
-            feat['metric'] = map_metric;
-            map_vals.push(map_metric);
           }
         } else {
           if (base_lookup.hasOwnProperty(feat.tmc)) {
             map_metric = base_lookup[feat.tmc][sel_metric];
-            feat['metric'] = map_metric;
-            map_vals.push(map_metric);
           }
         }
+        if (map_metric !== null) {
+          map_metric = Math.round(map_metric*prec)/prec;
+          map_vals.push(map_metric);
+        }
+        feat['metric'] = map_metric;
       }
       map_vals = map_vals.sort((a, b) => a - b);      
     }
@@ -343,11 +343,10 @@ async function drawMapFeatures(queryMapData=true) {
         } else{
           app.custom_disable = false;
           sel_colorvals = [];
-          prec = (FRAC_COLS.includes(sel_metric) ? 100 : 1);
           for(var i = 1; i <= app.selected_breaks; i++) {
-            sel_colorvals.push(Math.round(map_vals[Math.floor(map_vals.length*1/i)-1]*prec)/prec);
+            sel_colorvals.push(map_vals[Math.floor(map_vals.length*1/i)-1]);
           }
-          sel_colorvals.push(Math.round(map_vals[0]*prec)/prec); 
+          sel_colorvals.push(map_vals[0]); 
           
           let bp = Array.from(sel_colorvals).sort((a, b) => a - b);
           app.bp0 = bp[0];
@@ -384,7 +383,7 @@ async function drawMapFeatures(queryMapData=true) {
       geoLayer = L.geoJSON(cleanFeatures, {
         style: function(feat) {
           let color = getColorFromVal(
-            Math.round(feat['metric']*prec)/prec,
+            feat['metric'],
             sel_colorvals,
             sel_colors,
             sel_binsflag
