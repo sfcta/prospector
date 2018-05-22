@@ -23,6 +23,10 @@ const FRAC_COLS = ['champ_link_count','speed_std_dev','tnc_pickups','tnc_dropoff
                   'obs_tti','obs_pti80','obs_bti80','obs_pti95','obs_bti95','tti','pti80','bti80','pti95','bti95'];
 const INT_COLS = ['dt'];
 const DISCRETE_VAR_LIMIT = 10;
+const MISSING_COLOR = '#ccd';
+const MIN_BWIDTH = 2;
+const MAX_BWIDTH = 10;
+const DEF_BWIDTH = 4;
 
 const VIZ_LIST = ['ALOS', 'TSPD', 'TRLB', 'ATRAT'];
 const VIZ_INFO = {
@@ -78,7 +82,7 @@ const VIZ_INFO = {
     POST_UNITS: '',
   },
 };
-const MISSING_COLOR = '#ccd';
+
 
 let sel_colorvals, sel_colors, sel_binsflag;
 let init_selected_metric = 'delay_per_mile';
@@ -87,6 +91,7 @@ let daily_metric_list = ['vhd','vmt','vht','pcemt','vol','inrix_vol','obs_vhd','
                           'tnc_tot_vol','tnc_inserv_avg_vol','tnc_outserv_avg_vol','tnc_pickups','tnc_dropoffs',
                           'tnc_pudo','tnc_pudo_avg','tnc_pickups_avg','tnc_dropoffs_avg',
                           'tnc_pickups_per_mile','tnc_dropoffs_per_mile','tnc_pudo_per_mile'];
+let bwidth_metric_list = ['vol','inrix_vol','vmt','pcemt'];
 
 let init_selectedViz = VIZ_LIST[0];
 let data_view = VIZ_INFO[init_selectedViz]['VIEW'];
@@ -131,7 +136,7 @@ async function initialPrep() {
 }
 
 async function fetchMapFeatures() {
-  const geo_url = API_SERVER + GEO_VIEW + '?select=tmc,geometry';
+  const geo_url = API_SERVER + GEO_VIEW + '?select=tmc,geometry,street,direction,intersec';
 
   try {
     let resp = await fetch(geo_url);
@@ -242,13 +247,20 @@ infoPanel.update = function(geo) {
   infoPanel._div.className = 'info-panel';
   let metric_val = null;
   if (geo.metric !== null) metric_val = Math.round(geo.metric*100)/100;
+  let bwmetric_val = null;
+  if (geo.bwmetric !== null) bwmetric_val = Math.round(geo.bwmetric*100)/100;
   if (geo) {
     this._div.innerHTML =
       '<b>TMC ID: </b>' + `${geo.tmc}<br/>` +
+      '<b>STREET: </b>' + `${geo.street}<br/>` +
+      '<b>DIRECTION: </b>' + `${geo.direction}<br/>` +
+      '<b>INTERSECTION: </b>' + `${geo.intersec}<br/><hr>` +
+      
       `<b>${app.selected_metric.toUpperCase()}</b>` + 
       (app.pct_check? '<b> PCT_DIFF: </b>':'<b>: </b>') + 
-      `${metric_val}` + 
-      ((app.pct_check && app.comp_check && metric_val !== null)? '%':'');
+      `${metric_val.toLocaleString()}` + 
+      ((app.pct_check && app.comp_check && metric_val !== null)? '%':'') + 
+      (app.bwidth_check? `<br/><b>${app.selected_bwidth.toUpperCase()}</b>` + '<b>: </b>' + bwmetric_val.toLocaleString():'');
   }
 
   infoPanelTimeout = setTimeout(function() {
@@ -262,6 +274,7 @@ infoPanel.addTo(mymap);
 
 async function getMapData(scen) {
   let data_url = API_SERVER + DATA_VIEW + '?select=tmc,scenario,' + app.selected_metric + 
+                ',' + app.selected_bwidth + 
                 '&tod=eq.' + app.selected_timep;
   let resp = await fetch(data_url);
   let jsonData = await resp.json();
@@ -275,6 +288,7 @@ async function getMapData(scen) {
 
 let base_lookup, comp_lookup;
 let map_vals;
+let bwidth_vals;
 async function drawMapFeatures(queryMapData=true) {
 
   // create a clean copy of the feature Json
@@ -291,8 +305,17 @@ async function drawMapFeatures(queryMapData=true) {
       }
       
       let map_metric;
+      let bwidth_metric;
       map_vals = [];
+      bwidth_vals = [];
       for (let feat of cleanFeatures) {
+        bwidth_metric = null;
+        if (app.bwidth_check && base_lookup.hasOwnProperty(feat.tmc)) {
+          bwidth_metric = base_lookup[feat.tmc][app.selected_bwidth];
+          if (bwidth_metric !== null) bwidth_vals.push(bwidth_metric);
+        }
+        feat['bwmetric'] = bwidth_metric;
+        
         map_metric = null;
         if (app.comp_check) {
           if (base_lookup.hasOwnProperty(feat.tmc) && comp_lookup.hasOwnProperty(feat.tmc)) {
@@ -314,7 +337,18 @@ async function drawMapFeatures(queryMapData=true) {
         }
         feat['metric'] = map_metric;
       }
-      map_vals = map_vals.sort((a, b) => a - b);      
+      map_vals = map_vals.sort((a, b) => a - b);  
+      bwidth_vals = bwidth_vals.sort((a, b) => a - b); 
+
+      if (app.bwidth_check) {
+        for (let feat of cleanFeatures) {
+          if (feat['bwmetric'] !== null) {
+            feat['bwmetric_scaled'] = (feat['bwmetric']-bwidth_vals[0])*(MAX_BWIDTH-MIN_BWIDTH)/(bwidth_vals[bwidth_vals.length-1]-bwidth_vals[0])+MIN_BWIDTH;
+            feat['bwmetric_scaled'] = Math.round(feat['bwmetric_scaled']*100)/100;
+          }
+        }
+      }
+      
     }
     
     if (map_vals.length > 0) {
@@ -381,16 +415,7 @@ async function drawMapFeatures(queryMapData=true) {
       if (geoLayer) mymap.removeLayer(geoLayer);
       if (mapLegend) mymap.removeControl(mapLegend);
       geoLayer = L.geoJSON(cleanFeatures, {
-        style: function(feat) {
-          let color = getColorFromVal(
-            feat['metric'],
-            sel_colorvals,
-            sel_colors,
-            sel_binsflag
-          );
-          if (!color) color = MISSING_COLOR;
-          return { color: color, weight: 4, opacity: 1.0 };
-        },
+        style: styleByMetricColor,
         onEachFeature: function(feature, layer) {
           layer.on({
             mouseover: hoverFeature,
@@ -422,13 +447,17 @@ async function drawMapFeatures(queryMapData=true) {
 
 function styleByMetricColor(feat) {
   let color = getColorFromVal(
-    feat['metric'],
-    sel_colorvals,
-    sel_colors,
-    sel_binsflag
-  );
+              feat['metric'],
+              sel_colorvals,
+              sel_colors,
+              sel_binsflag
+              );
   if (!color) color = MISSING_COLOR;
-  return { color: color, weight: 4, opacity: 1.0 };
+  if (!app.bwidth_check) {
+    return { color: color, weight: DEF_BWIDTH, opacity: 1.0 };
+  } else {
+    return { color: color, weight: feat['bwmetric_scaled'], opacity: 1.0 };
+  }
 }
 
 let infoPanelTimeout;
@@ -742,6 +771,9 @@ function getMetricOptions() {
       for (let entry of daily_metric_list) {
         metric_options_daily.push({text: entry, value: entry});
       }
+      for (let entry of bwidth_metric_list) {
+        app.bwidth_options.push({text: entry, value: entry});
+      }      
     });
 }
 
@@ -825,6 +857,9 @@ function colorschemeChanged(thing) {
   app.selected_colorscheme = thing;
   drawMapFeatures(false);
 }
+function bwidthChanged(thing) {
+  drawMapFeatures(false);
+}
 
 function getColorMode(cscheme) {
   if (app.modeMap.hasOwnProperty(cscheme.toString())) {
@@ -849,6 +884,7 @@ let app = new Vue({
     isUpdActive: false,
     comp_check: false,
     pct_check: false,
+    bwidth_check: true,
     custom_check: false,
     custom_disable: false,
     bp0: 0.0,
@@ -873,6 +909,9 @@ let app = new Vue({
     metric_options: [
     {text: '', value: ''},
     ],
+
+    selected_bwidth: bwidth_metric_list[0],
+    bwidth_options: [],    
     
     selected_colorscheme: ['#ffffcc','#3f324f'],
     color_options: [
@@ -909,6 +948,7 @@ let app = new Vue({
     selected_scenario: selectionChanged,
     selected_timep: seltimepChanged,
     selected_metric: selectionChanged,
+    selected_bwidth: selectionChanged,
     selected_breaks: selectionChanged,
     comp_check: selectionChanged,
     pct_check: selectionChanged,
@@ -920,7 +960,7 @@ let app = new Vue({
     bp3: bp3Changed,
     bp4: bp4Changed,
     custom_check: customBreakPoints,
-    
+    bwidth_check: bwidthChanged,
   },
   methods: {
     updateMap: updateMap,

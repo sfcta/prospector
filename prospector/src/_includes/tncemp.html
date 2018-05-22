@@ -20,7 +20,7 @@
            </div>
 
           <div id="picker">
-            <h5 style="margin-top:80px">CHOOSE BASE SCENARIO:</h5>
+            <h5 style="margin-top:60px">CHOOSE BASE SCENARIO:</h5>
             <select v-model="selected_scenario">
               <option v-for="option in scen_options" v-bind:value="option.value">
                 ${option.text}
@@ -50,7 +50,17 @@
                 ${option.text}
               </option>
             </select>
-     
+            
+            <br>
+            <input type="checkbox" id="bwidth_checkbox" v-model="bwidth_check" style="margin-top:15px">
+            <label for="bwidth_checkbox"><b>&nbsp;&nbsp;CHOOSE BAND-WIDTH METRIC:</b></label>
+            <br>
+            <select v-model="selected_bwidth" v-bind:disabled="!bwidth_check">
+              <option v-for="option in bwidth_options" v-bind:value="option.value">
+                ${option.text}
+              </option>
+            </select>
+            
             <hr/>
             
             <h5 style="margin-top:80px">CHOOSE BREAKS:</h5>
