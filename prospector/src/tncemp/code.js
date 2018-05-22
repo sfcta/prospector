@@ -87,7 +87,7 @@ const VIZ_INFO = {
 let sel_colorvals, sel_colors, sel_binsflag;
 let init_selected_metric = 'delay_per_mile';
 let metric_options_all, metric_options_daily; 
-let daily_metric_list = ['vhd','vmt','vht','pcemt','vol','inrix_vol','obs_vhd','obs_vht','fixed_effects',
+let daily_metric_list = ['vhd','vmt','vht','pcemt','vol','inrix_vol','obs_vhd','obs_vht','speed','fixed_effects',
                           'tnc_tot_vol','tnc_inserv_avg_vol','tnc_outserv_avg_vol','tnc_pickups','tnc_dropoffs',
                           'tnc_pudo','tnc_pudo_avg','tnc_pickups_avg','tnc_dropoffs_avg',
                           'tnc_pickups_per_mile','tnc_dropoffs_per_mile','tnc_pudo_per_mile'];
