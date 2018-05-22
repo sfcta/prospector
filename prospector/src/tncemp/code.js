@@ -246,9 +246,9 @@ infoPanel.update = function(geo) {
   infoPanel._div.innerHTML = '';
   infoPanel._div.className = 'info-panel';
   let metric_val = null;
-  if (geo.metric !== null) metric_val = Math.round(geo.metric*100)/100;
+  if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
   let bwmetric_val = null;
-  if (geo.bwmetric !== null) bwmetric_val = Math.round(geo.bwmetric*100)/100;
+  if (geo.bwmetric !== null) bwmetric_val = (Math.round(geo.bwmetric*100)/100).toLocaleString();
   if (geo) {
     this._div.innerHTML =
       '<b>TMC ID: </b>' + `${geo.tmc}<br/>` +
@@ -258,9 +258,9 @@ infoPanel.update = function(geo) {
       
       `<b>${app.selected_metric.toUpperCase()}</b>` + 
       (app.pct_check? '<b> PCT_DIFF: </b>':'<b>: </b>') + 
-      `${metric_val.toLocaleString()}` + 
+      `${metric_val}` + 
       ((app.pct_check && app.comp_check && metric_val !== null)? '%':'') + 
-      (app.bwidth_check? `<br/><b>${app.selected_bwidth.toUpperCase()}</b>` + '<b>: </b>' + bwmetric_val.toLocaleString():'');
+      (app.bwidth_check? `<br/><b>${app.selected_bwidth.toUpperCase()}</b>` + '<b>: </b>' + bwmetric_val:'');
   }
 
   infoPanelTimeout = setTimeout(function() {
@@ -345,6 +345,8 @@ async function drawMapFeatures(queryMapData=true) {
           if (feat['bwmetric'] !== null) {
             feat['bwmetric_scaled'] = (feat['bwmetric']-bwidth_vals[0])*(MAX_BWIDTH-MIN_BWIDTH)/(bwidth_vals[bwidth_vals.length-1]-bwidth_vals[0])+MIN_BWIDTH;
             feat['bwmetric_scaled'] = Math.round(feat['bwmetric_scaled']*100)/100;
+          } else {
+            feat['bwmetric_scaled'] = null;
           }
         }
       }
