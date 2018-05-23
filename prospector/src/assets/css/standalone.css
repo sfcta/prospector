@@ -16,8 +16,21 @@
   height:100%;
 }
 
+#slide-panel {
+  position: absolute;
+  right: 400px;
+  top: 500px;
+  z-index: 15;
+  height:100%;
+}
+
+.shrunken {
+  margin-right: -394px;
+}
+
 #sfmap {
   height:100%;
+  margin-right: 0px;
 }
 
   
