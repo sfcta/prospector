@@ -28,7 +28,7 @@
            </div>
 
           <div id="picker">
-            <h5 style="margin-top:60px">CHOOSE BASE SCENARIO:</h5>
+            <h5 style="margin-top:20px">CHOOSE BASE SCENARIO:</h5>
             <select v-model="selected_scenario">
               <option v-for="option in scen_options" v-bind:value="option.value">
                 ${option.text}
@@ -71,7 +71,7 @@
             
             <hr/>
             
-            <h5 style="margin-top:80px">CHOOSE BREAKS:</h5>
+            <h5 style="margin-top:20px">CHOOSE BREAKS:</h5>
             <select v-model="selected_breaks">
               <option v-for="option in break_options" v-bind:value="option.value">
                 ${option.text}
@@ -102,8 +102,26 @@
             </select>            
 
             <h5 style="margin-top:25px">FREQUENCY DISTRIBUTION</h5>
-            <div id="dist-chart" style="max-height: 250px">
+            <div id="dist-chart" style="height: 200px">
             </div>
+            
+            <hr/>
+            
+            <input type="checkbox" id="bwcustom_checkbox" v-model="bwcustom_check" v-bind:disabled="bwcustom_disable" style="margin-top:15px">
+            <label for="bwcustom_checkbox"><b>&nbsp;&nbsp;CHOOSE CUSTOM BANDWIDTH</b></label>
+            <br>
+            <input v-model.number="bwbp0" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488;margin-top:5px">
+            <input v-model.number.lazy="bwbp1" type="number" step="any" v-bind:disabled="!bwcustom_check" style="width:55px;">
+            <input v-model.number.lazy="bwbp2" type="number" step="any" v-bind:disabled="!bwcustom_check" style="width:55px;">
+            <input v-model.number.lazy="bwbp3" type="number" step="any" v-bind:disabled="!bwcustom_check" style="width:55px;">
+            <input v-model.number.lazy="bwbp4" type="number" step="any" v-bind:disabled="!bwcustom_check" style="width:55px;">
+            <input v-model.number="bwbp5" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488">  
+            
+            <button v-on:click="bwUpdateMap"
+                    v-bind:class="{ active: isBWUpdActive, yellow: isBWUpdActive}"
+                     class="mini ui grey button"
+                    v-bind:disabled="!bwcustom_check" style="margin-top:10px">
+                     Update Map!</button>
             
           </div>
       </div>

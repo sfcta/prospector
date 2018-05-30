@@ -131,6 +131,28 @@ function getLegHTML2(vals, colors, bins=true, postunits=''){
   return ret;
 }
 
+function getBWLegHTML(vals, widths){
+  let ret = '';
+  for (var i = 0; i < vals.length-1; i++) {
+    ret += 
+        '<p class="legend-row"><i style="margin-top: 7px;background: #000;width: 30px;height:' + widths[i] + 'px"></i> '
+        + vals[i] 
+        + ' &ndash; ' + vals[i + 1]
+        + (vals[i + 2] ? '<br>' : '')
+        + '</p>';
+  }
+  return ret;
+}
+
+function getQuantiles(x, n){
+  let retval = [];
+  for(var i = 1; i <= n; i++) {
+    retval.push(x[Math.floor(x.length*1/i)-1]);
+  }
+  retval.push(x[0]);
+  return retval;
+}
+
 let colorFunc = {
   'distance': getDistColor,
 };
@@ -146,4 +168,6 @@ module.exports = {
   getColorFromVal2: getColorFromVal2,
   getLegHTML: getLegHTML,
   getLegHTML2: getLegHTML2,
+  getBWLegHTML: getBWLegHTML,
+  getQuantiles: getQuantiles,
 };

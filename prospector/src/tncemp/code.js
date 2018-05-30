@@ -9,6 +9,8 @@ var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
 let getLegHTML = maplib.getLegHTML2;
 let getColorFromVal = maplib.getColorFromVal2;
+let getBWLegHTML = maplib.getBWLegHTML;
+let getQuantiles = maplib.getQuantiles;
 let mymap = maplib.sfmap;
 mymap.setView([37.76889, -122.440997], 13);
 
@@ -27,6 +29,14 @@ const MISSING_COLOR = '#ccd';
 const MIN_BWIDTH = 2;
 const MAX_BWIDTH = 10;
 const DEF_BWIDTH = 4;
+const BWIDTH_MAP = {
+  1: DEF_BWIDTH,
+  2: DEF_BWIDTH,
+  3: [2.5, 5],
+  4: [1.6, 3.2, 4.8],
+  5: [1.25, 2.5, 3.75, 5],
+  6: [1, 2, 3, 4, 5]
+};
 
 const VIZ_LIST = ['ALOS', 'TSPD', 'TRLB', 'ATRAT'];
 const VIZ_INFO = {
@@ -85,6 +95,7 @@ const VIZ_INFO = {
 
 
 let sel_colorvals, sel_colors, sel_binsflag;
+let sel_bwvals;
 let init_selected_metric = 'delay_per_mile';
 let metric_options_all, metric_options_daily; 
 let daily_metric_list = ['vhd','vmt','vht','pcemt','vol','inrix_vol','obs_vhd','obs_vht','speed','fixed_effects',
@@ -311,7 +322,7 @@ async function drawMapFeatures(queryMapData=true) {
       for (let feat of cleanFeatures) {
         bwidth_metric = null;
         if (app.bwidth_check && base_lookup.hasOwnProperty(feat.tmc)) {
-          bwidth_metric = base_lookup[feat.tmc][app.selected_bwidth];
+          bwidth_metric = Math.round(base_lookup[feat.tmc][app.selected_bwidth]);
           if (bwidth_metric !== null) bwidth_vals.push(bwidth_metric);
         }
         feat['bwmetric'] = bwidth_metric;
@@ -339,23 +350,12 @@ async function drawMapFeatures(queryMapData=true) {
       }
       map_vals = map_vals.sort((a, b) => a - b);  
       bwidth_vals = bwidth_vals.sort((a, b) => a - b); 
-
-      if (app.bwidth_check) {
-        for (let feat of cleanFeatures) {
-          if (feat['bwmetric'] !== null) {
-            feat['bwmetric_scaled'] = (feat['bwmetric']-bwidth_vals[0])*(MAX_BWIDTH-MIN_BWIDTH)/(bwidth_vals[bwidth_vals.length-1]-bwidth_vals[0])+MIN_BWIDTH;
-            feat['bwmetric_scaled'] = Math.round(feat['bwmetric_scaled']*100)/100;
-          } else {
-            feat['bwmetric_scaled'] = null;
-          }
-        }
-      }
-      
     }
     
     if (map_vals.length > 0) {
       let color_func;
       let sel_colorvals2;
+      let bp;
       
       if (queryMapData) {
         sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
@@ -376,15 +376,11 @@ async function drawMapFeatures(queryMapData=true) {
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
           sel_colorvals2 = sel_colorvals.slice(0);
           app.custom_disable = true;
-        } else{
+        } else {
           app.custom_disable = false;
-          sel_colorvals = [];
-          for(var i = 1; i <= app.selected_breaks; i++) {
-            sel_colorvals.push(map_vals[Math.floor(map_vals.length*1/i)-1]);
-          }
-          sel_colorvals.push(map_vals[0]); 
+          sel_colorvals = getQuantiles(map_vals, app.selected_breaks);
           
-          let bp = Array.from(sel_colorvals).sort((a, b) => a - b);
+          bp = Array.from(sel_colorvals).sort((a, b) => a - b);
           app.bp0 = bp[0];
           app.bp5 = bp[bp.length-1];
           app.bp1 = bp[1];
@@ -400,13 +396,49 @@ async function drawMapFeatures(queryMapData=true) {
           sel_binsflag = true; 
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
           sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
-        }        
+        }
+
+        app.bwcustom_disable = false;
+        sel_bwvals = getQuantiles(bwidth_vals, 5);
+        bp = Array.from(sel_bwvals).sort((a, b) => a - b);
+        app.bwbp0 = bp[0];
+        app.bwbp1 = bp[1];
+        app.bwbp2 = bp[2];
+        app.bwbp3 = bp[3];
+        app.bwbp4 = bp[4];
+        app.bwbp5 = bp[5];
+        sel_bwvals = Array.from(new Set(sel_bwvals)).sort((a, b) => a - b); 
       } else {
         sel_colorvals = new Set([app.bp0, app.bp1, app.bp2, app.bp3, app.bp4, app.bp5]);
         sel_colorvals = Array.from(sel_colorvals).sort((a, b) => a - b);
         sel_binsflag = true; 
         color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
         sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
+        
+        sel_bwvals = new Set([app.bwbp0, app.bwbp1, app.bwbp2, app.bwbp3, app.bwbp4, app.bwbp5]);
+        sel_bwvals = Array.from(sel_bwvals).sort((a, b) => a - b);
+      }
+
+      let bw_widths;
+      if (app.bwidth_check) {
+        bw_widths = BWIDTH_MAP[sel_bwvals.length]; 
+        for (let feat of cleanFeatures) {
+          if (feat['bwmetric'] !== null) {
+            if (sel_bwvals.length <= 2){
+              feat['bwmetric_scaled'] = bw_widths;
+            } else {
+              for (var i = 0; i < sel_bwvals.length-1; i++) {
+                if (feat['bwmetric'] <= sel_bwvals[i + 1]) {
+                  feat['bwmetric_scaled'] = bw_widths[i];
+                  break;
+                }
+              }
+            }
+            //feat['bwmetric_scaled'] = (feat['bwmetric']-bwidth_vals[0])*(MAX_BWIDTH-MIN_BWIDTH)/(bwidth_vals[bwidth_vals.length-1]-bwidth_vals[0])+MIN_BWIDTH;
+          } else {
+            feat['bwmetric_scaled'] = null;
+          }
+        }
       }
       
       sel_colors = [];
@@ -436,7 +468,12 @@ async function drawMapFeatures(queryMapData=true) {
           sel_binsflag,
           (app.pct_check && app.comp_check)? '%': ''
         );
-        div.innerHTML = '<h4>' + sel_metric.toUpperCase() + (app.pct_check? ' PCT_DIFF':'') +  '</h4>' + legHTML;
+        legHTML = '<h4>' + sel_metric.toUpperCase() + (app.pct_check? ' PCT_DIFF':'') +  '</h4>' + legHTML;
+        if (app.bwidth_check) {
+          legHTML += '<hr/>' + '<h4>' + app.selected_bwidth.toUpperCase() +  '</h4>';
+          legHTML += getBWLegHTML(sel_bwvals, bw_widths);
+        }
+        div.innerHTML = legHTML;
         return div;
       };
       mapLegend.addTo(mymap);
@@ -843,6 +880,26 @@ function bp4Changed(thing) {
   if (thing > app.bp5) app.bp4 = app.bp5;
   app.isUpdActive = true;
 }
+function bwbp1Changed(thing) {
+  if (thing < app.bwbp0) app.bwbp1 = app.bwbp0;
+  if (thing > app.bwbp2) app.bwbp2 = thing;
+  app.isBWUpdActive = true;
+}
+function bwbp2Changed(thing) {
+  if (thing < app.bwbp1) app.bwbp1 = thing;
+  if (thing > app.bwbp3) app.bwbp3 = thing;
+  app.isBWUpdActive = true;
+}
+function bwbp3Changed(thing) {
+  if (thing < app.bwbp2) app.bwbp2 = thing;
+  if (thing > app.bwbp4) app.bwbp4 = thing;
+  app.isBWUpdActive = true;
+}
+function bwbp4Changed(thing) {
+  if (thing < app.bwbp3) app.bwbp3 = thing;
+  if (thing > app.bwbp5) app.bwbp4 = app.bwbp5;
+  app.isBWUpdActive = true;
+}
 
 function updateMap(thing) {
   app.isUpdActive = false;
@@ -855,13 +912,28 @@ function customBreakPoints(thing) {
     drawMapFeatures();
   }
 }
+function customBWBreakPoints(thing) {
+  if(thing) {
+    app.isBWUpdActive = false;
+  } else {
+    drawMapFeatures();
+  }
+}
+
 function colorschemeChanged(thing) {
   app.selected_colorscheme = thing;
   drawMapFeatures(false);
 }
+
 function bwidthChanged(thing) {
+  app.bwcustom_disable = !thing;
   drawMapFeatures(false);
 }
+function bwUpdateMap(thing) {
+  app.isBWUpdActive = false;
+  drawMapFeatures(false);
+}
+
 
 function getColorMode(cscheme) {
   if (app.modeMap.hasOwnProperty(cscheme.toString())) {
@@ -896,6 +968,16 @@ let app = new Vue({
     bp3: 0.0,
     bp4: 0.0,
     bp5: 0.0,
+    
+    isBWUpdActive: false,
+    bwcustom_check: false,
+    bwcustom_disable: false,
+    bwbp0: 0.0,
+    bwbp1: 0.0,
+    bwbp2: 0.0,
+    bwbp3: 0.0,
+    bwbp4: 0.0,
+    bwbp5: 0.0,
     
     selected_comp_scenario: null,
     selected_scenario: null,
@@ -962,11 +1044,17 @@ let app = new Vue({
     bp2: bp2Changed,
     bp3: bp3Changed,
     bp4: bp4Changed,
+    bwbp1: bwbp1Changed,
+    bwbp2: bwbp2Changed,
+    bwbp3: bwbp3Changed,
+    bwbp4: bwbp4Changed,
     custom_check: customBreakPoints,
+    bwcustom_check: customBWBreakPoints,
     bwidth_check: bwidthChanged,
   },
   methods: {
     updateMap: updateMap,
+    bwUpdateMap: bwUpdateMap,
     clickToggleHelp: clickToggleHelp,
     clickedShowHide: clickedShowHide,
     clickViz: clickViz,
