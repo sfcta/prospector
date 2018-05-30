@@ -27,11 +27,12 @@ h5 {margin-top:4px; margin-bottom: 4px;}
   height:100%;
   background-color:#888;
   overflow:auto;
+
 }
 
 #panel {
   display:table;
-  position: absolute;
+  position:absolute;
   top:0;
   right:0;
   bottom:0;
@@ -41,7 +42,6 @@ h5 {margin-top:4px; margin-bottom: 4px;}
   background-color:#444;
   float: right;
 }
-
 
 #header {
   display:table-row;
@@ -98,7 +98,7 @@ p.hint {color:#777; text-align:right; margin-right:24px; margin-top:-20px;}
 
 #sfmap {
   height:800px;
-  margin-right: 320px;
+  margin-right: 0px;
   z-index:0;
 }
 
