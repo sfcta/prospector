@@ -7,7 +7,7 @@ import Cookies from 'js-cookie';
 
 let api_server = 'http://api.sfcta.org/api/switrs_viz3';
 let api_totals = 'http://api.sfcta.org/api/switrs_totals2';
-let api_geo = 'https://api.sfcta.org/api/coc';
+let api_geo = 'https://api.sfcta.org/api/coc2017';
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
 let size = 1;
