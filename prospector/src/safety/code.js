@@ -55,7 +55,7 @@ infopanel.update = function(geo, popupText) {
 		  `${popupText}`;
 	}
 	infopanelTimeout = setTimeout(function() {
-		infopanel._div.className = 'info-panel-hide';
+		infopanel._div.className = 'info-panel-hide-2';
 		collisionLayer.resetStyle(oldHoverTarget);
 	}, 3000);
 };
