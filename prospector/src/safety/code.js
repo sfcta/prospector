@@ -41,14 +41,14 @@ let infopanel = L.control();
 
 //Add a hidden infopanel layer
 infopanel.onAdd = function(map) {
-	this._div = L.DomUtil.create('div', 'info-panel-hide');
+	this._div = L.DomUtil.create('div', 'info-panel-hide-2');
 	return this._div;
 };
 
 //Allow the hidden infopanel layer to input info given from popupText and then hide after a certain amount of time.
 infopanel.update = function(geo, popupText) {
 	infopanel._div.innerHTML = '';
-	infopanel._div.className = 'info-panel'
+	infopanel._div.className = 'info-panel-2'
 
 	if (geo) {
 		this._div.innerHTML =

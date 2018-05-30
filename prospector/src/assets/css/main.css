@@ -275,3 +275,25 @@ table { border: 0px; }
     opacity: 0;
     transition: visibility 0s 0.5s, opacity 0.5s linear;
 }
+
+.info-panel-2 {
+    padding: 6px 8px;
+    margin: 46px 8px;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+
+.info-panel-hide-2 {
+    padding: 6px 8px;
+    margin: 46px 8px;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s 0.5s, opacity 0.5s linear;
+}
