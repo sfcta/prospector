@@ -1,6 +1,14 @@
-<div id="container2">
+<div id="container">
 
-  <div id="panel">
+  <div id="slide-panel" v-bind:class="{ shrunken: isPanelHidden}" style="top:0px;">
+    <button class="ui tiny green icon button"
+            v-on:click="clickedShowHide">
+            <i class="angle double icon"
+            v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
+    </button>
+  </div> 
+
+  <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
       <hr/>
       <h3 class="apptitle">SF Collisions Data from SWITRS</h3>
       <div id="helpbar">
@@ -18,7 +26,7 @@
         <hr/>
       </div>
 
-      <div id="picker">
+      <div>
         <div style="height:70px;font-size:1px;">
           <h4>CHOOSE TYPE:</h4>
           <button class="mini ui grey button"
@@ -87,7 +95,7 @@
   <div id="helpbox" v-show="showHelp" class="ui segment">
         <h2 style="margin-bottom:0px;">Bicycle and Pedestrian Collision Data</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
-        This data is the observed collisions in San Francisco thanks to the SWITRS database.
+        This data is the observed pedestrian and bicycle collisions in San Francisco thanks to the SWITRS database.
 
         <ul>
         <li>Collision locations are snapped to the nearest intersection.</li>
@@ -100,7 +108,8 @@
         <ul>
         <li>Select a collision type and severity to display it on the map for all years.</li>
         <li>Move the year slider to map historic data.</li>
-        <li>Click on an intersection to update the chart with historic data for the intersection.</li>
+        <li>Click on an intersection to update the chart with historic data for the clicked on intersection.</li>
+        <li>Click the arrow on the top right to hide the side panel.</li>
         </ul>
 
         <div style="margin-top:20px;">

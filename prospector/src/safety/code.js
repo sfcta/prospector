@@ -7,7 +7,7 @@ import Cookies from 'js-cookie';
 
 let api_server = 'http://api.sfcta.org/api/switrs_viz3';
 let api_totals = 'http://api.sfcta.org/api/switrs_totals2';
-let api_geo = 'https://api.sfcta.org/api/coc';
+let api_geo = 'https://api.sfcta.org/api/coc2017';
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
 let size = 1;
@@ -30,6 +30,7 @@ let cocLayer;
 let mapLegend;
 let _cocSegments;
 let allJSONData;
+let popUpChart = null;
 
 //Initialization of selective aspects
 let popSelIntersection;
@@ -40,21 +41,21 @@ let infopanel = L.control();
 
 //Add a hidden infopanel layer
 infopanel.onAdd = function(map) {
-	this._div = L.DomUtil.create('div', 'info-panel-hide');
+	this._div = L.DomUtil.create('div', 'info-panel-hide-2');
 	return this._div;
 };
 
 //Allow the hidden infopanel layer to input info given from popupText and then hide after a certain amount of time.
 infopanel.update = function(geo, popupText) {
 	infopanel._div.innerHTML = '';
-	infopanel._div.className = 'info-panel'
+	infopanel._div.className = 'info-panel-2'
 
 	if (geo) {
 		this._div.innerHTML =
 		  `${popupText}`;
 	}
 	infopanelTimeout = setTimeout(function() {
-		infopanel._div.className = 'info-panel-hide';
+		infopanel._div.className = 'info-panel-hide-2';
 		collisionLayer.resetStyle(oldHoverTarget);
 	}, 3000);
 };
@@ -182,7 +183,7 @@ function getSWITRSinfo() {
   if (app.sliderValue === "All Years") {
 	queryurl = api_totals;
   } else {
-	let url = api_server + '?select=st_asgeojson,year,biccol,pedcol,bickill,pedkill,street_names,bicinj,pedinj,ambiccol,pmbiccol,ampedcol,pmpedcol,ambickill,pmbickill,ampedkill,pmpedkill,ambicinj,pmbicinj,ampedinj,pmpedinj';
+	let url = api_server + '?select=st_asgeojson,year,biccol,pedcol,bickill,pedkill,street_names,bicinj,pedinj';
 	queryurl = url + '&year=eq.' + app.sliderValue;
   }
 
@@ -405,10 +406,19 @@ function clickedOnFeature(e) {
   selectedIntersection = e.target;
   selectedIntersection.bringToFront();
   selectedIntersection.setStyle(styles.popup);
+  
+  let popUpChartEl = document.getElementById("popupchart");
+  if (popUpChartEl) {
+    popUpChartEl.parentNode.removeChild(popUpChartEl);
+    popUpChart = null;
+  }
 
   //Fix streetname for readability and change title of chart
   let intersectionName = selectedIntersection.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and');
   app.chartTitle = 'All collisions at ' + intersectionName + ':';
+  if (app.isPanelHidden === true){
+    intersectionName += "<hr/>" + '<div id="popupchart" style="width: 250px; height:200px;"></div>'; 
+  }
 
   popSelIntersection = L.popup()
     .setLatLng(e.latlng)
@@ -428,7 +438,9 @@ function clickedOnFeature(e) {
 
   selectedData = buildChartDataFromJson(jsonData);
   createChart();
-
+  if (app.isPanelHidden === true){
+    createPopUpChart();
+  }
 }
 
 //This function gets the data needed in the right format for the chart
@@ -463,7 +475,7 @@ function createChart() {
   //get a ymax for intersections that have almost no collisions as 4, else the max amount of collisions at the intersection.
   let intersectionName;
   if (selectedIntersection.feature.street_names.length>56){
-      intersectionName = selectedIntersection.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and').substr(0,50);
+    intersectionName = selectedIntersection.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and').substr(0,50);
   } else if (selectedIntersection.feature.street_names.length == 54){
     intersectionName = selectedIntersection.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and').substr(0,32);
   } else {  
@@ -543,6 +555,87 @@ function createChart() {
       parseTime: false,
   });
   }
+}
+
+function createPopUpChart() {
+    let intersectionName;
+    if (selectedIntersection.feature.street_names.length>56){
+      intersectionName = selectedIntersection.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and').substr(0,50);
+    } else if (selectedIntersection.feature.street_names.length == 54){
+      intersectionName = selectedIntersection.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and').substr(0,32);
+    } else {  
+      intersectionName = selectedIntersection.feature.street_names.replace(/'/g, "").replace('[', "").replace(']', "").replace(/,/g, ' and');
+    }
+    
+    let chartLabel;
+    let chartKey;
+    let barColor;
+    let chartMax;
+    let popUpChartTitle;
+    let popUpSubTitle;
+    if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
+      chartLabel = ['Bicycle Collisions'];
+	  chartKey = ['biccols'];
+	  barColor = ["#13ae38"];
+	  chartMax = 12;
+	  popUpChartTitle = 'All Bike Collisions :';
+	  popUpSubTitle = intersectionName;
+    } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
+      chartLabel = ['Bicycle Injuries'];
+	  chartKey = ['bicinjs'];
+	  barColor = ["#1279c6"];
+	  chartMax = 12;
+	  popUpChartTitle = 'All Bike Injuries :';
+	  popUpSubTitle = intersectionName;
+    } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
+      chartLabel = ['Bicycle Deaths'];
+	  chartKey = ['bickills'];
+	  barColor = ["#f56100",];
+	  chartMax = 12;
+	  popUpChartTitle = 'Fatal Bike Collisions :';
+	  popUpSubTitle = intersectionName;
+    } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
+	  chartLabel = ['Pedestrian Collisions'];
+	  chartKey = ['pedcols'];
+	  barColor = ["#13ae38"];
+	  chartMax = 12;
+	  popUpChartTitle = 'All Pedestrian Collisions :';
+	  popUpSubTitle = intersectionName;
+    } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
+      chartLabel = ['Pedestrian Injuries'];
+	  chartKey = ['pedinjs'];
+	  barColor = ["#1279c6",];
+	  chartMax = 12;
+	  popUpChartTitle = 'Non-fatal Pedestrian Collisions :';
+	  popUpSubTitle = intersectionName;
+    } else {
+      chartLabel = ['Pedestrian Deaths'];
+	  chartKey = ['pedkills'];
+	  barColor = ["#f56100",];
+	  chartMax = 12;
+	  popUpChartTitle = 'Fatal Pedestrian Collisions :';
+	  popUpSubTitle = intersectionName;
+    }
+    
+    popUpChart = new Morris.Bar({
+    // ID of the element in which to draw the chart.
+      element: 'popupchart',
+      data: selectedData,
+      stacked: true,
+    // The name of the data record attribute that contains x-values.
+      xkey: 'year',
+    // A list of names of data record attributes that contain y-values.
+      ykeys: chartKey,
+      ymax: chartMax,
+      labels: chartLabel,
+      barColors: barColor,
+      xLabels: "Year",
+      xLabelAngle: 60,
+      xLabelFormat: dateFmt,
+      yLabelFormat: yFmt,
+      hideHover: 'true',
+      parseTime: false,
+    })
 }
 
 //Formatting for the y variable
@@ -949,6 +1042,7 @@ let app = new Vue({
     isAMactive: false,
     isPMactive: false,
     isAllDayactive: true,
+    isPanelHidden: false,
     sliderValue: 0,
     timeSlider: timeSlider,
     checkedNames: []
@@ -1005,6 +1099,29 @@ let helpPanel = new Vue({
     });
   }}
 );
+
+let slideapp = new Vue({
+  el: '#slide-panel',
+  delimiters: ['${', '}'],
+  data: {
+    isPanelHidden: false,
+  },
+  methods: {
+    clickedShowHide: clickedShowHide,
+  },
+});
+
+function clickedShowHide(e) {
+  slideapp.isPanelHidden = !slideapp.isPanelHidden;
+  app.isPanelHidden = slideapp.isPanelHidden;
+  if (popSelIntersection) mymap.removeLayer(popSelIntersection);
+  // leaflet map needs to be force-recentered, and it is slow.
+  for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
+    setTimeout(function() {
+      mymap.invalidateSize()
+    }, delay)
+  }
+}
 // Ready to go! Read some data.
 _cocSegments = fetchCocGeometry();
 updateSliderData();
