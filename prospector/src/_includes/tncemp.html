@@ -111,10 +111,10 @@
             <label for="bwcustom_checkbox"><b>&nbsp;&nbsp;CHOOSE CUSTOM BANDWIDTH</b></label>
             <br>
             <input v-model.number="bwbp0" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488;margin-top:5px">
-            <input v-model.number.lazy="bwbp1" type="number" step="any" v-bind:disabled="!bwcustom_check" style="width:55px;">
-            <input v-model.number.lazy="bwbp2" type="number" step="any" v-bind:disabled="!bwcustom_check" style="width:55px;">
-            <input v-model.number.lazy="bwbp3" type="number" step="any" v-bind:disabled="!bwcustom_check" style="width:55px;">
-            <input v-model.number.lazy="bwbp4" type="number" step="any" v-bind:disabled="!bwcustom_check" style="width:55px;">
+            <input v-model.number.lazy="bwbp1" type="number" step="any" v-bind:disabled="!bwcustom_check || bwcustom_disable" style="width:55px;">
+            <input v-model.number.lazy="bwbp2" type="number" step="any" v-bind:disabled="!bwcustom_check || bwcustom_disable" style="width:55px;">
+            <input v-model.number.lazy="bwbp3" type="number" step="any" v-bind:disabled="!bwcustom_check || bwcustom_disable" style="width:55px;">
+            <input v-model.number.lazy="bwbp4" type="number" step="any" v-bind:disabled="!bwcustom_check || bwcustom_disable" style="width:55px;">
             <input v-model.number="bwbp5" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488">  
             
             <button v-on:click="bwUpdateMap"
