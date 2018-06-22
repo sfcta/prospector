@@ -135,9 +135,8 @@ function getBWLegHTML(vals, widths){
   for (var i = 0; i < vals.length-1; i++) {
     ret += 
         '<p class="legend-row"><i style="margin-top: 7px;background: #000;width: 30px;height:' + widths[i] + 'px"></i> '
-        + vals[i] 
-        + ' &ndash; ' + vals[i + 1]
-        + (vals[i + 2] ? '<br>' : '')
+        + (i==0 ? 'less than ' : ((i==vals.length-2)? (vals[i] + ' or more') : (vals[i] + ' &ndash; '))) 
+        + ((i==vals.length-2)? '' : (vals[i + 1] + '<br>'))
         + '</p>';
   }
   return ret;
