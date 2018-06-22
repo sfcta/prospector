@@ -18,12 +18,17 @@ mymap.setView([37.76889, -122.440997], 13);
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'tmc_trueshp';
 const DATA_VIEW = 'tmcemp';
-const EXCLUDE_COLS = ['tmc','geometry','geom','tod','modifiedtmc','scenario'];
+const EXCLUDE_COLS = ['tmc','geometry','geom','gid','street','direction','intersec','tod','modifiedtmc','scenario'];
+/*
 const FRAC_COLS = ['champ_link_count','speed_std_dev','tnc_pickups','tnc_dropoffs','tnc_pickups_avg','tnc_dropoffs_avg','tnc_pudo_avg',
                   'tt','ff_time','inrix_time','tnc_pudo','speed',
                   'vht','vhd','obs_vht','obs_vhd','delay_per_mile',
                   'obs_tti','obs_pti80','obs_bti80','obs_pti95','obs_bti95','tti','pti80','bti80','pti95','bti95'];
-const INT_COLS = ['dt'];
+*/
+const FRAC_COLS = ['speed','time','vol','vmt','vhd','vht','pti80','pti80_vmt',
+                    'obs_speed','obs_time','obs_vmt','obs_vhd','obs_vht','obs_pti80','obs_pti80_vmt'];
+
+const INT_COLS = ['dt','at','ft2'];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ccd';
 const MIN_BWIDTH = 2;
@@ -37,6 +42,12 @@ const BWIDTH_MAP = {
   5: [1.25, 2.5, 3.75, 5],
   6: [1, 2, 3, 4, 5]
 };
+
+const CUSTOM_BP_DICT = {
+  'speed': {'base':[12, 20, 30, 45], 'diff':[-3, -2, -1, -0.5], 'pctdiff':[-20, -10, -5, 0]}
+}
+
+const METRIC_UNITS = {'speed':'mph'};
 
 const VIZ_LIST = ['ALOS', 'TSPD', 'TRLB', 'ATRAT'];
 const VIZ_INFO = {
@@ -98,11 +109,8 @@ let sel_colorvals, sel_colors, sel_binsflag;
 let sel_bwvals;
 let init_selected_metric = 'delay_per_mile';
 let metric_options_all, metric_options_daily; 
-let daily_metric_list = ['vhd','vmt','vht','pcemt','vol','inrix_vol','obs_vhd','obs_vht','speed','fixed_effects',
-                          'tnc_tot_vol','tnc_inserv_avg_vol','tnc_outserv_avg_vol','tnc_pickups','tnc_dropoffs',
-                          'tnc_pudo','tnc_pudo_avg','tnc_pickups_avg','tnc_dropoffs_avg',
-                          'tnc_pickups_per_mile','tnc_dropoffs_per_mile','tnc_pudo_per_mile'];
-let bwidth_metric_list = ['vol','inrix_vol','vmt','pcemt'];
+let daily_metric_list = ['vol','speed','vmt','vht','vhd','obs_vhd','obs_vht'];
+let bwidth_metric_list = ['vol','vmt'];
 
 let init_selectedViz = VIZ_LIST[0];
 let data_view = VIZ_INFO[init_selectedViz]['VIEW'];
@@ -321,7 +329,7 @@ async function drawMapFeatures(queryMapData=true) {
       bwidth_vals = [];
       for (let feat of cleanFeatures) {
         bwidth_metric = null;
-        if (app.bwidth_check && base_lookup.hasOwnProperty(feat.tmc)) {
+        if (base_lookup.hasOwnProperty(feat.tmc)) {
           bwidth_metric = Math.round(base_lookup[feat.tmc][app.selected_bwidth]);
           if (bwidth_metric !== null) bwidth_vals.push(bwidth_metric);
         }
@@ -375,23 +383,58 @@ async function drawMapFeatures(queryMapData=true) {
           sel_binsflag = false;
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
           sel_colorvals2 = sel_colorvals.slice(0);
+          
           app.custom_disable = true;
+          app.bp0 = 0;
+          app.bp1 = 0;
+          app.bp2 = 0;
+          app.bp3 = 0;
+          app.bp4 = 0;
+          app.bp5 = 1;
+          
         } else {
           app.custom_disable = false;
-          sel_colorvals = getQuantiles(map_vals, app.selected_breaks);
           
+          let mode = 'base';
+          if (app.comp_check){
+            if(app.pct_check){
+              mode = 'pctdiff';
+            } else {
+              mode = 'diff';
+            }
+          }
+          let custom_bps;
+          if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)){
+            custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
+            sel_colorvals = [map_vals[0]];
+            for (var i = 0; i < custom_bps.length; i++) {
+              if (custom_bps[i]>map_vals[0] && custom_bps[i]<map_vals[map_vals.length-1]) sel_colorvals.push(custom_bps[i]);
+            }
+            sel_colorvals.push(map_vals[map_vals.length-1]);
+            app.custom_check = true;
+          } else {
+            sel_colorvals = getQuantiles(map_vals, app.selected_breaks);
+          }
           bp = Array.from(sel_colorvals).sort((a, b) => a - b);
           app.bp0 = bp[0];
           app.bp5 = bp[bp.length-1];
-          app.bp1 = bp[1];
-          app.bp4 = bp[bp.length-2];
-          if (app.selected_breaks==3) {
-            app.bp2 = app.bp3 = bp[2];
+          if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)){
+            app.bp1 = custom_bps[0];
+            app.bp2 = custom_bps[1];
+            app.bp3 = custom_bps[2];
+            app.bp4 = custom_bps[3];
           } else {
-            app.bp2 = bp[2];
-            app.bp3 = bp[3];
+            app.bp1 = bp[1];
+            app.bp4 = bp[bp.length-2];
+            if (app.selected_breaks==3) {
+              app.bp2 = app.bp3 = bp[2];
+            } else {
+              app.bp2 = bp[2];
+              app.bp3 = bp[3];
+            }
           }
           
+
           sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
           sel_binsflag = true; 
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
@@ -468,7 +511,8 @@ async function drawMapFeatures(queryMapData=true) {
           sel_binsflag,
           (app.pct_check && app.comp_check)? '%': ''
         );
-        legHTML = '<h4>' + sel_metric.toUpperCase() + (app.pct_check? ' PCT_DIFF':'') +  '</h4>' + legHTML;
+        legHTML = '<h4>' + sel_metric.toUpperCase() + (app.pct_check? ' PCT_DIFF': (METRIC_UNITS.hasOwnProperty(sel_metric)? (' (' + METRIC_UNITS[sel_metric] + ')') : '')) +
+                  '</h4>' + legHTML;
         if (app.bwidth_check) {
           legHTML += '<hr/>' + '<h4>' + app.selected_bwidth.toUpperCase() +  '</h4>';
           legHTML += getBWLegHTML(sel_bwvals, bw_widths);
@@ -738,7 +782,8 @@ function seltimepChanged(thing) {
     if (thing=='Daily') {
       app.metric_options = metric_options_daily;
       if (!daily_metric_list.includes(app.selected_metric)) {
-        app.selected_metric = daily_metric_list[0];
+        //app.selected_metric = daily_metric_list[0];
+        app.selected_metric = 'speed';
       }
     } else {
       app.metric_options = metric_options_all;
@@ -749,11 +794,14 @@ function seltimepChanged(thing) {
 
 function optionsChanged(thing) {
   if (app.scen_options.length > 0 && app.time_options.length > 0) {
-    app.selected_scenario = app.scen_options[app.scen_options.length - 1].value;
-    app.selected_comp_scenario = app.scen_options[0].value;
+    //app.selected_scenario = app.scen_options[app.scen_options.length - 1].value;
+    //app.selected_comp_scenario = app.scen_options[0].value;
+    app.selected_scenario = '2016 No TNC';
+    app.selected_comp_scenario = '2016 TNC';
     app.selected_timep = 'Daily';
     app.metric_options = metric_options_daily;
-    app.selected_metric = daily_metric_list[0];
+    //app.selected_metric = daily_metric_list[0];
+    app.selected_metric = 'speed';
   }
 }
 
@@ -957,9 +1005,9 @@ let app = new Vue({
     vizinfo: VIZ_INFO,
     isPanelHidden: false,
     isUpdActive: false,
-    comp_check: false,
+    comp_check: true,
     pct_check: false,
-    bwidth_check: true,
+    bwidth_check: false,
     custom_check: false,
     custom_disable: false,
     bp0: 0.0,
@@ -971,7 +1019,7 @@ let app = new Vue({
     
     isBWUpdActive: false,
     bwcustom_check: false,
-    bwcustom_disable: false,
+    bwcustom_disable: true,
     bwbp0: 0.0,
     bwbp1: 0.0,
     bwbp2: 0.0,
@@ -998,7 +1046,7 @@ let app = new Vue({
     selected_bwidth: bwidth_metric_list[0],
     bwidth_options: [],    
     
-    selected_colorscheme: ['#ffffcc','#3f324f'],
+    selected_colorscheme: ['Red','Yellow','Green'],
     color_options: [
     //{text: 'Yellow-Purple', value: ['#ebbe5e','#3f324f']},
     //{text: 'Cream-Purple', value: ['#ffffcc','#663399']},
