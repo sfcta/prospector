@@ -114,9 +114,8 @@ function getLegHTML2(vals, colors, bins=true, postunits=''){
     for (var i = 0; i < vals.length-1; i++) {
       ret += 
           '<p class="legend-row"><i style="background:' + colors[i] + '"></i> '
-          + vals[i] + postunits 
-          + ' &ndash; ' + vals[i + 1] + postunits
-          + (vals[i + 2] ? '<br>' : '')
+          + (i==0 ? 'less than ' : ((i==vals.length-2)? (vals[i] + postunits + ' or more') : (vals[i] + postunits + ' &ndash; '))) 
+          + ((i==vals.length-2)? '' : (vals[i + 1] + postunits + '<br>'))
           + '</p>';
     }
   } else{
