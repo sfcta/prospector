@@ -55,14 +55,14 @@ function getColorByBin(x, bins, colors){
 
 function getColorFromVal(x, vals, colors, bins=true){
   if (x==null) return null;
-  
+
   if(bins){
     for (var i=0; i < vals.length; i++){
       if (x <= vals[i]) return colors[i];
     }
     return colors[i];
   } else{
-    return colors[vals.indexOf(x)]; 
+    return colors[vals.indexOf(x)];
   }
 }
 
@@ -88,9 +88,9 @@ function getLegHTML(vals, colors, bins=true, postunits=''){
   if(bins){
     // loop through our bin intervals and generate a label with a colored square for each interval
     for (var i = 0; i < vals.length; i++) {
-      ret += 
-          '<p class="legend-row"><i style="background:' + colors[i+1] + '"></i> '
-          + vals[i] + postunits 
+      ret +=
+          '<p class="legend-row"><div style="background:' + colors[i+1] + '">&nbsp;&nbsp;</div> '
+          + vals[i] + postunits
           + (vals[i + 1] ? ' &ndash; ' + vals[i + 1] + postunits + '<br>' : '+')
           + '</p>';
     }
@@ -154,7 +154,7 @@ function getQuantiles(x, n){
 let colorFunc = {
   'distance': getDistColor,
 };
-  
+
 module.exports = {
   sfmap: sfmap,
   iconOrig: iconOrig,
