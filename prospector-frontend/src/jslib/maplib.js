@@ -1,3 +1,21 @@
+'''
+SFCTA PROSPECTOR: Data visualization platform.
+
+Copyright (C) 2018 San Francisco County Transportation Authority
+and respective authors. See Git history for individual contributions.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the Apache License version 2.0, as published
+by the Apache Foundation, or any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the Apache License for more details.
+
+You should have received a copy of the Apache License along with
+this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
+'''
 
 let theme = "light";
 let sfmap = L.map('sfmap').setView([37.77, -122.42], 12);
@@ -68,17 +86,17 @@ function getColorFromVal(x, vals, colors, bins=true){
 
 function getColorFromVal2(x, vals, colors, bins=true){
   if (x==null) return null;
-  
+
   if(bins){
     if (x < vals[0] || x > vals[vals.length-1]) {
       return null;
     } else {
       for (var i=1; i < vals.length; i++){
         if (x <= vals[i]) return colors[i-1];
-      }      
+      }
     }
   } else{
-    return colors[vals.indexOf(x)]; 
+    return colors[vals.indexOf(x)];
   }
 }
 
@@ -112,9 +130,9 @@ function getLegHTML2(vals, colors, bins=true, postunits=''){
   if(bins){
     // loop through our bin intervals and generate a label with a colored square for each interval
     for (var i = 0; i < vals.length-1; i++) {
-      ret += 
+      ret +=
           '<p class="legend-row"><i style="background:' + colors[i] + '"></i> '
-          + (i==0 ? 'less than ' : ((i==vals.length-2)? (vals[i] + postunits + ' or more') : (vals[i] + postunits + ' &ndash; '))) 
+          + (i==0 ? 'less than ' : ((i==vals.length-2)? (vals[i] + postunits + ' or more') : (vals[i] + postunits + ' &ndash; ')))
           + ((i==vals.length-2)? '' : (vals[i + 1] + postunits + '<br>'))
           + '</p>';
     }
@@ -133,9 +151,9 @@ function getLegHTML2(vals, colors, bins=true, postunits=''){
 function getBWLegHTML(vals, widths){
   let ret = '';
   for (var i = 0; i < vals.length-1; i++) {
-    ret += 
+    ret +=
         '<p class="legend-row"><i style="margin-top: 7px;background: #000;width: 30px;height:' + widths[i] + 'px"></i> '
-        + (i==0 ? 'less than ' : ((i==vals.length-2)? (vals[i] + ' or more') : (vals[i] + ' &ndash; '))) 
+        + (i==0 ? 'less than ' : ((i==vals.length-2)? (vals[i] + ' or more') : (vals[i] + ' &ndash; ')))
         + ((i==vals.length-2)? '' : (vals[i + 1] + '<br>'))
         + '</p>';
   }

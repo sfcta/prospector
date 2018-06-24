@@ -1,5 +1,24 @@
 'use strict';
 
+'''
+SFCTA PROSPECTOR: Data visualization platform.
+
+Copyright (C) 2018 San Francisco County Transportation Authority
+and respective authors. See Git history for individual contributions.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the Apache License version 2.0, as published
+by the Apache Foundation, or any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the Apache License for more details.
+
+You should have received a copy of the Apache License along with
+this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
+'''
+
 // Use npm and babel to support IE11/Safari
 import 'babel-polyfill';
 import 'isomorphic-fetch';
@@ -61,7 +80,7 @@ info.update = function (props, seltaz=['',''], odind) {
     pref = 'To Destination TAZ: ';
     suff = 'From Origin TAZ: ';
   }
-  this._div.innerHTML = '<h4>Information</h4>' +  
+  this._div.innerHTML = '<h4>Information</h4>' +
       '<b>' + pref + seltaz[0] + '</b>, Neighborhood: ' + seltaz[1] + '<br/>' +
       (props ?
       '<b>' + suff + props.taz + '</b>, Neighborhood: ' + props.nhood + '<br/> <b>Distance: ' + props.distance + ' miles</b>'
@@ -78,7 +97,7 @@ legend.onAdd = function (map) {
 legend.addTo(mymap);
 
 function queryServer() {
-  
+
   let dataurl = api_server + app.tableSelVal.label + '?';
   let urlparams = app.dirSel==app.dirOrig? 'otaz' : 'dtaz';
   urlparams += '=eq.' + app.tazSelVal.value;
@@ -100,9 +119,9 @@ let segmentLos = {};
 
 function styleByColorFunc(feat) {
   let color = maplib.getColorByBin(feat.distance, DISTANCE_BINS, DISTANCE_COLORS);
-  return {fillColor: color, 
+  return {fillColor: color,
           fillOpacity: 0.65,
-          weight: 0.4, 
+          weight: 0.4,
           opacity: 1.0,
           color: 'black'};
 }
@@ -123,16 +142,16 @@ function addGeoLayer(jsonData){
     onEachFeature: function(feature, layer) {
       layer.on({
                 mouseover: highlightFeature,
-                mouseout: resetHighlight,  
+                mouseout: resetHighlight,
                 click : clickedOnFeature
       });
     }
   });
-  
+
   geoLayer.addTo(mymap);
-  
-  
-  
+
+
+
   /*
 
   if (mymap.segmentLayer) {
@@ -140,8 +159,8 @@ function addGeoLayer(jsonData){
     mymap.removeLayer(segmentLayer);
     segmentLayer = null;
   }
-  
-  
+
+
   console.log(jsonData);*/
 }
 
@@ -156,18 +175,18 @@ function updateOptionsData() {
   fetch(api_server + GEO_VIEW + '?select=geometry,taz,centroid,county,nhood').then((resp) => resp.json()).then(function(jsonData) {
     for (let entry of jsonData) {
 	  tazSelOptions.push({label:entry.taz.toString(), value:entry.taz});
-    
+
     //add a few attributes for geoJSON mapping
     entry.type = 'Feature';
     entry.geometry = JSON.parse(entry.geometry);
-    
+
     geoFeatures[entry.taz] = entry;
     geoIds.push(entry.taz);
     }
 	  app.tazSelOptions = tazSelOptions;
     app.tazSelVal = {'label':'608',value:608};
   });
-  
+
   let tableSelOptions = [];
   fetch(api_server + TABLES_VIEW).then((resp) => resp.json()).then(function(jsonData) {
     for (let entry of jsonData) {
@@ -176,7 +195,7 @@ function updateOptionsData() {
 	  app.tableSelOptions = tableSelOptions;
     app.tableSelVal = tableSelOptions[0];
   });
-    
+
 }
 
 // ------
@@ -188,7 +207,7 @@ function getTAZCentroid(centroid_txt){
 }
 
 function usrOptionChanged(thing) {
-  
+
   // this occurs if an already selected item is selected again
   if(app.tazSelVal===null){
     app.tazSelVal = app.copytazSelVal;
@@ -202,7 +221,7 @@ function usrOptionChanged(thing) {
       //make a copies because of a bug in vue-select
       app.copytazSelVal = {value:app.tazSelVal.value, label:app.tazSelVal.label};
       app.copytableSelVal = {label:app.tableSelVal.label};
-      
+
       let cen_coords = getTAZCentroid(geoFeatures[app.tazSelVal.value].centroid);
       if (tazMarker) tazMarker.remove();
       tazMarker = new L.marker(cen_coords, {icon: app.dirSel==app.dirOrig? iconOrig : iconDest}).addTo(mymap);
@@ -212,7 +231,7 @@ function usrOptionChanged(thing) {
       queryServer();
     }
   }
-  
+
 }
 
 
@@ -226,7 +245,7 @@ let app = new Vue({
     tazSelOptions: [],
     tazSelVal: null,
     copytazSelVal: null,
-    
+
     tableSelOptions: [],
     tableSelVal: {label:''},
     copytableSelVal: null,

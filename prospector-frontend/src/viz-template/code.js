@@ -1,5 +1,24 @@
 'use strict';
 
+'''
+SFCTA PROSPECTOR: Data visualization platform.
+
+Copyright (C) 2018 San Francisco County Transportation Authority
+and respective authors. See Git history for individual contributions.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the Apache License version 2.0, as published
+by the Apache Foundation, or any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the Apache License for more details.
+
+You should have received a copy of the Apache License along with
+this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
+'''
+
 // Use npm and babel to support IE11/Safari
 import 'babel-polyfill';
 import 'isomorphic-fetch';
