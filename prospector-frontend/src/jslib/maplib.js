@@ -1,4 +1,4 @@
-'''
+/*
 SFCTA PROSPECTOR: Data visualization platform.
 
 Copyright (C) 2018 San Francisco County Transportation Authority
@@ -15,7 +15,7 @@ See the Apache License for more details.
 
 You should have received a copy of the Apache License along with
 this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
-'''
+*/
 
 let theme = "light";
 let sfmap = L.map('sfmap').setView([37.77, -122.42], 12);
