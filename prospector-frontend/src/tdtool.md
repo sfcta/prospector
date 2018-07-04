@@ -1,8 +1,11 @@
 ---
-layout: page
+layout: standalone
 title: Travel Demand Tool
 thumbnail: scrnshot.png
-css: main.css
+css:
+  - '/assets/css/main.css'
+  - '/assets/css/standalone.css'
+
 ---
 
 {% include tdt.html %}

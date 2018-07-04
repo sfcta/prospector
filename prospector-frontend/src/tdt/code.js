@@ -21,7 +21,6 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 
 // Must use npm and babel to support IE11/Safari
 import 'isomorphic-fetch';
-import vueSlider from 'vue-slider-component';
 import Cookies from 'js-cookie';
 
 var maplib = require('../jslib/maplib');
@@ -33,7 +32,6 @@ mymap.setView([37.76889, -122.440997], 13);
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW1 = 'tia_dist12';
-const GEO_VIEW2 = 'tmc_trueshp';
 
 let color_styles = [{ normal  : {"color": "#39f", "weight":3,  "opacity": 0.5, "dashArray": '5 5'},
                     selected: {"color": "#33f",    "weight":4, "opacity": 0.5, "dashArray": '5 5' },},
@@ -91,11 +89,70 @@ function addGeoLayer(jsonData, i){
     }
   });
   geolyr.addTo(mymap);
-  return geolyr
+  return geolyr;
 }
 
+function updateMap(thing){
+}
+function pickAU(thing){
+}
+function pickTR(thing){
+}
+
+let app = new Vue({
+  el: '#panel',
+  delimiters: ['${', '}'],
+  data: {
+    isAUActive: true,
+    isTRActive: false,
+    address: null,
+  },
+  /*
+  watch: {
+    address: updateMap,
+  },
+  */
+  methods: {
+    clickToggleHelp: clickToggleHelp,
+    pickAU: pickAU,
+    pickTR: pickTR,
+    updateMap: updateMap,
+  },
+});
+
+// eat some cookies -- so we can hide the help permanently
+let cookieShowHelp = Cookies.get('showHelp');
+function clickToggleHelp() {
+  helpPanel.showHelp = !helpPanel.showHelp;
+
+  // and save it for next time
+  if (helpPanel.showHelp) {
+    Cookies.remove('showHelp');
+  } else {
+    Cookies.set('showHelp', 'false', { expires: 365 });
+  }
+}
+
+let helpPanel = new Vue({
+  el: '#helpbox',
+  data: {
+    showHelp: cookieShowHelp == undefined,
+  },
+  methods: {
+    clickToggleHelp: clickToggleHelp,
+  },
+  mounted: function() {
+    document.addEventListener('keydown', e => {
+      if (this.showHelp && e.keyCode == 27) {
+        clickToggleHelp();
+      }
+    });
+  },
+});
+
 geoLayer_tmcseg = queryServer(API_SERVER+GEO_VIEW1, 0);
-geoLayer_tmcshp = queryServer(API_SERVER+GEO_VIEW2, 1);
+
+
 
 
 
