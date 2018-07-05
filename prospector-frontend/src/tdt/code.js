@@ -33,6 +33,9 @@ mymap.setView([37.76889, -122.440997], 13);
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW1 = 'tia_dist12';
 
+//const GEO_VIEW2 = 'tmc_trueshp';
+
+
 let color_styles = [{ normal  : {"color": "#39f", "weight":3,  "opacity": 0.5, "dashArray": '5 5'},
                     selected: {"color": "#33f",    "weight":4, "opacity": 0.5, "dashArray": '5 5' },},
                     { normal  : {"color": "#3c6", "weight":4,  "opacity": 1.0, },
@@ -66,6 +69,18 @@ function queryServer(url, i){
     console.log("err: "+error);
   });
 }
+
+//add a new component called button-counter
+Vue.component('button-counter', {
+  data: function () {
+    return {
+      count: 0
+    }
+  },
+  template: '<button v-on:click="count++">You clicked me {{ count }} times.</button>'
+})
+
+
 
 function addGeoLayer(jsonData, i){
   for (let segment of jsonData) {
@@ -152,6 +167,7 @@ let helpPanel = new Vue({
 
 geoLayer_tmcseg = queryServer(API_SERVER+GEO_VIEW1, 0);
 
+//geoLayer_tmcshp = queryServer(API_SERVER+GEO_VIEW2, 1);
 
 
 
