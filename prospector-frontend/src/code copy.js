@@ -32,7 +32,6 @@ mymap.setView([37.76889, -122.440997], 13);
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW1 = 'tia_dist12';
-const PLANNING_GEOCODER_baseurl = 'http://sfplanninggis.org/cpc_geocode/?search='
 
 //const GEO_VIEW2 = 'tmc_trueshp';
 
@@ -54,7 +53,7 @@ info.onAdd = function (map) {
 };
 info.update = function (props) {
   this._div.innerHTML = '<h4>Information</h4>' +
-      '<b> District Name: ' +
+      '<b> TMC ID: ' +
       (props ?
       '<b>' + props.tmc + '</b>': 'Hover over a TMC');
 };
@@ -70,6 +69,7 @@ function queryServer(url, i){
     console.log("err: "+error);
   });
 }
+
 
 
 
@@ -99,24 +99,8 @@ function addGeoLayer(jsonData, i){
   return geolyr;
 }
 
-//this is the button on click and geocoder function, for some reason it 
-//seems to log everything as a success...
-function updateMap(address) {
-  var address = document.getElementById("searchbox").value
-  alert(address)
-  $.ajax(
-    {url: PLANNING_GEOCODER_baseurl+ address, 
-      success: function (data) {
-        alert("done!")
-        console.log(data)
-        addGeoLayer(data, 0);
-      }
-    });
-
+function updateMap(thing){
 }
-
-  
-
 function pickAU(thing){
 }
 function pickTR(thing){
