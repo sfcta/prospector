@@ -5,7 +5,7 @@
   <div id="panel">
       <div id="preheader">
         <hr/>
-        <h3 class="apptitle">TRAVEL DEMAND TOOL-helllllllooooo</h3>
+        <h3 class="apptitle">TRAVEL DEMAND TOOL</h3>
         <div id="helpbar">
             <button class="ui mini right labeled icon violet button"
                     v-on:click="clickToggleHelp">
@@ -58,6 +58,15 @@
                     v-bind:class="{ active: isTRActive, yellow: isTRActive }"
                      class="mini ui grey button">
                      Transit</button>
+            <h5>CHOOSE DIRECTION:</h5>
+            <button v-on:click="pickOutbound"
+                    v-bind:class="{ active: isOutbound, yellow: isOutbound}"
+                     class="mini ui grey button">
+                     Outbound</button>
+            <button v-on:click="pickInbound"
+                    v-bind:class="{ active: isInbound, yellow: isInbound }"
+                     class="mini ui grey button">
+                     Inbound</button>
         </div>
             <br>
 
