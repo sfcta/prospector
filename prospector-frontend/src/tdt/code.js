@@ -32,6 +32,9 @@ let styles = maplib.styles;
 let getLegHTML = maplib.getLegHTML;
 let mymap = maplib.sfmap;
 var numeral = require('numeral');
+var leafletPip = require('@mapbox/leaflet-pip');
+//leafletPip.bassackwards = true;
+
 mymap.setView([37.76889, -122.440997], 13);
 let theBaseLayer = maplib.baselayer; //not sure if this will work
 
@@ -64,6 +67,7 @@ selected: {"color": "#34784b", "weight":5, "opacity": 1.0, },}
 let address_geoLyr;
 let addressGroup;
 let districts;
+let districts_lyr;
 
 //some other global variables
 let addressDistrictNum = 1; //will be defined in a point in polygon related function, which should be
@@ -137,6 +141,7 @@ function queryServer(url){
     })
     .catch(function(error) {
       console.log("err: "+error);
+      alert("Cannot find this address");
     });
   })
   return promise
@@ -149,6 +154,8 @@ function queryServer(url){
 function planningJson2geojson(json) {
   //converts the response json of the planning geocoder into a geojson format that is readable by leaflet
   //allows this data to be added to a geoLayer and drawn on the map
+
+  //find out how to properly alert the user if the address is incorrect
   let geoCodeJson = {};
   geoCodeJson['blklot'] = json.features[0].attributes.blklot;
   geoCodeJson['type'] = 'Feature';
@@ -199,7 +206,7 @@ function addGeoLayer(geoJsonData, i){
   return geolyr;
 }
 
-function updateMap(thing) {
+function updateMap() {
   //this function that runs when the "search" button is pressed. it does the following:
   // 1. sets the value of input based on the user input
   // 2. calls the planning geocoder via and ajax request and geocodes a given address
@@ -212,8 +219,7 @@ function updateMap(thing) {
   //address_district = 1; //hard coded for now, will become point in polygon function
   let geocodedJson = queryServer(PLANNING_GEOCODER_baseurl+input, 0) //data has got to the geocoder
     .then(function(geocodedJson) { //after queryServer returns the data, do this:
-      let geoJson = planningJson2geojson(geocodedJson);
-      //addGeoLayer(geoJson, 1); //takes in a list of geoJson objects and draws them
+      let geoJson = planningJson2geojson(geocodedJson); //this is the polygon
       address_geoLyr = L.geoJSON(geoJson,{ //this makes a geoJSON layer from geojson data, which is input
         style: color_styles[1].normal, //this is hardcoded to blue
         onEachFeature: function(feature, layer) { //function that will be called on each created feature layer
@@ -232,10 +238,12 @@ function updateMap(thing) {
           });
         }
       });
-      //mymap.removeLayer(districts);
-      
+      assignDistrict(geoJson);  
+    
       address_geoLyr.addTo(mymap); //adds the geoLayer to the map
       address_geoLyr.bringToFront();
+      
+
 
 
       //address_geoLyr.bringToFront();
@@ -244,76 +252,22 @@ function updateMap(thing) {
   }
 
 
-
-
-
-
-
-//leave this here for now in case queryPlanningGeocoder introduces issues
-//   $.ajax(
-//     {url: PLANNING_GEOCODER_baseurl+ input,
-//       dataType: 'json', //features is populated when the addres is legit. 
-//       success: function (data) {
-//         console.log("sent data to geocoder") 
-
-//         if (data['error']) { 
-//           console.error('Geocode failed: ' + data['error'].message);
-//           return;
-//         }
-//           if (data.features && data.features.length > 0) { //does the data have a features
-//             // key and is is not empty. json is a dictionary. is has names and value pairs
-//             let geoJson = planningJson2geojson(data); 
-//             console.log(geoJson);
-//               //this is the exact line of the error
-//               let address_geoLyr = L.geoJSON(geoJson,{ //this makes a geoJSON layer from
-//                 //geojson data. it requires geojson as input 
-//                 style: color_styles[0].normal, //this is hardcoded to blue
-//                 onEachFeature: function(feature, layer) {
-//                   layer.on({
-//                     mouseover: function(e){
-//                       e.target.setStyle(color_styles[i].selected);
-//                       e.target.bringToFront();
-//                       info.update(e.target.feature);
-//                     },
-//                     mouseout: function(e){
-//                       geolyr.resetStyle(e.target);
-//                       info.update(null);
-//                     },
-//                   });
-//                 }
-//               });
-//               address_geoLyr.addTo(mymap);
-//             }
-//             else {
-//               console.log("failed geocoding");
-//               alert("sorry, couldnt find " + input);
-//             }
-
-//           }
-//         });
-
-// }
-
-
+//button functions
 function pickAU(thing){
   modeSelect = "auto";
-  console.log(modeSelect);
 }
 function pickTR(thing){
   modeSelect = "transit";
-  console.log(modeSelect);
 
 }
 
 function pickInbound(thing) {
   directionSelect = "inbound";
-  console.log(directionSelect);
 
 }
 
 function pickOutbound(thing) {
   directionSelect = "outbound";
-  console.log(directionSelect);
 
 
 }
@@ -378,19 +332,33 @@ let helpPanel = new Vue({
   },
 });
 
-function colorDistricts() {
-  queryServer(API_SERVER+TRIP_DISTRIBUTION)
-  .then(function(ddist) { //districts is a json object, after queryServer returns the data, do this: 
-    let to_ = ddist.filter(val => val.direction == "outbound"); //
-    let to_dist1 = to_.filter(val => val.dist == 1);
-    let to_dist1_transit = to_dist1.filter(val => val.mode == "transit");
-    let to_dist1_transit_work = to_dist1_transit.filter(val => val.purpose == "work");
-    //write a function called filter districts that assigns certain variables and then is 
-    //passed into ddist.filter(function)
-    console.log(to_dist1_transit_work);
-  })
+function assignDistrict(address) {
+//convert the address geojson to leaflet polygon
+let addressPolygon = L.polygon(address.geometry.coordinates[0]);
+//find the centroid of the address polygon
+let centroid = addressPolygon.getBounds().getCenter(); 
+let centroidArray = [centroid.lat, centroid.lng]; //reformat so that the lat/lon labels are correct
+//find out which districts contain the point
+let criticalDistrict = leafletPip.pointInLayer(centroidArray, districts_lyr);
+return criticalDistrict;
+
 
 }
+
+// function colorDistricts() {
+//   //should redo this with local data
+//   queryServer(API_SERVER+TRIP_DISTRIBUTION)
+//   .then(function(ddist) { //districts is a json object, after queryServer returns the data, do this: 
+//     let to_ = ddist.filter(val => val.direction == "outbound"); //
+//     let to_dist1 = to_.filter(val => val.dist == 1);
+//     let to_dist1_transit = to_dist1.filter(val => val.mode == "transit");
+//     let to_dist1_transit_work = to_dist1_transit.filter(val => val.purpose == "work");
+//     //write a function called filter districts that assigns certain variables and then is 
+//     //passed into ddist.filter(function)
+//     console.log(to_dist1_transit_work);
+//   })
+
+// }
 
 
 function drawDistricts() {
@@ -406,30 +374,19 @@ function drawDistricts() {
     //calls json2geojson function to convert json data response to geojson
     ctaJson2geojson(segment);
   }
-    let districts_lyr = addGeoLayer(geoDistricts, 0); //takes in a list of geoJson objects and draws them
+    districts_lyr = addGeoLayer(geoDistricts, 0); //takes in a list of geoJson objects and draws them
     
   //})
 }
 
+//save the geoDistricts data locally
 queryServer(CTA_API_SERVER + DISTRICTS_URL)
 .then(function(data) {
   geoDistricts = data;
   drawDistricts();
 })
 
-//colorDistricts();
 
-//some layer groups
-// var baseMaps = {
-//     "baselayer": theBaseLayer,
-// };
-
-// var overlays = {
-//     "Addresses": address_geoLyr,
-//     "Districts": districts
-// };
-
-//L.control.layers(baseMaps, null).addTo(map); //this is throwing an error because its undefined
 
 
 
