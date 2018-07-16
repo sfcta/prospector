@@ -50,8 +50,8 @@ let distributionData;
 queryServer(CTA_API_SERVER + TRIP_DISTRIBUTION)
 .then(function(data) {
   distributionData = data;
-
 })
+
 
 
 
@@ -70,12 +70,13 @@ let districts;
 let districts_lyr;
 
 //some other global variables
-let addressDistrictNum = 1; //will be defined in a point in polygon related function, which should be
+let addressDistrictNum; //will be defined in a point in polygon related function, which should be
 //called in update map and saved. want this to be null until someone puts in an address
-let modeSelect = "transit"; //the default should correspond to what is seen visually. should never be null 
+let modeSelect; //the default should correspond to what is seen visually. should never be null 
 //because it will throw an error if a user doesn't press a button before mousing over
-let directionSelect = "outbound";
-
+//let directionSelect = "outbound";
+let landUse = "Off"; //hardcoded to residential land use
+let purpose = "work"; //hardcoded to other trip type
 
 
 //creating the tooltip functionality and putting it on the map
@@ -96,33 +97,45 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
   }
   else if (addressDistrictNum == null) {
     this._div.innerHTML = '<h4>Information</h4>' +
-    '<b> District: '+ hoverDistrict.distname + 'input an address </b>'
+    '<b> Input an address to see trip distribution for: '+ hoverDistrict.distname +  '</b>' 
+  }
+
+  else if (modeSelect == null) {
+    this._div.innerHTML = '<h4>Information</h4>' +
+    '<b> Select a mode to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
   }
   else {
     let referenceDistrictProp = "prop_dist" + hoverDistrict.dist; //the name of the value that stores the 
     //relevant proportion from address district to hover district
-    let filtered_data = filterDistributionData(modeSelect, addressDistrictNum, "outbound"); //hard coded for now, make a direction button just like mode
-    console.log(modeSelect);
+    let filtered_data = filterDistributionData(modeSelect, addressDistrictNum, landUse, purpose); //hard coded for now, make a direction button just like mode
+    console.log(filtered_data);
 
-    let proportion = filtered_data[0][referenceDistrictProp];
-    //some formatting of the proportion
-    //var myNumeral = numeral(1000);
-    var proportion_format = numeral(proportion).format('0.0%');
+    let proportion_outbound = numeral(filtered_data[0][referenceDistrictProp]).format('0.0%'); 
+    let proportion_inbound = numeral(filtered_data[1][referenceDistrictProp]).format('0.0%');
+    
+
 
     this._div.innerHTML = '<h4>Information</h4>' +
-    '<b> Proportion of trips from district '+ addressDistrictNum.toString() + ' to district '+ hoverDistrict.dist.toString()+ ': ' + 
-    proportion_format +' </b>'
+    '<b> Proportion of outbound trips from district '+ addressDistrictNum.toString() + ' to district '+ hoverDistrict.dist.toString()+ ': ' + 
+    proportion_outbound +' </b>' +
+    '<br><b> Proportion of inbound trips to district '+ hoverDistrict.dist.toString() + ' from district '+ addressDistrictNum.toString()+ ': ' + 
+    proportion_inbound +' </b></br>'
   }
   
 };
 info.addTo(mymap);
 
-function filterDistributionData(mode, districtNum, direction) { //district num for now is the address distnum
+function filterDistributionData(mode, districtNum, landUse, purpose) { 
 //this function filters the whole distributionData json object according to a few given parameters
-  console.log(mode + " in filter distribution data");
+  //console.log(mode + " in filter distribution data");
   return distributionData.filter(function(piece){ //functions job is given one object tell me if i need it
+    if (mode = "transit") {
+      return piece.mode == "transit" && piece.dist == districtNum && landUse == piece.landuse && purpose == piece.purpose;
+    } 
+    else {
+      return piece.mode !== "transit" && piece.dist == districtNum && landUse == piece.landuse && purpose == piece.purpose;
 
-    return piece.mode == mode && piece.direction == direction && piece.dist == districtNum;
+    }
   //this returns a filtered json object that includes only the components of the original json
   //that are the given mode, direction and district number
 });
@@ -216,7 +229,6 @@ function updateMap() {
   // 6. throws an error if the user input is invalid
 
   let input = app.address; // app.address is the user input. app refers to the VUE object below that handles
-  //address_district = 1; //hard coded for now, will become point in polygon function
   let geocodedJson = queryServer(PLANNING_GEOCODER_baseurl+input, 0) //data has got to the geocoder
     .then(function(geocodedJson) { //after queryServer returns the data, do this:
       let geoJson = planningJson2geojson(geocodedJson); //this is the polygon
@@ -228,7 +240,7 @@ function updateMap() {
               e.target.setStyle(color_styles[1].selected);
               e.target.bringToFront();
               
-              //info.update(e.target.feature);
+              info.update(e.target.feature);
             },
             mouseout: function(e){
 
@@ -238,7 +250,9 @@ function updateMap() {
           });
         }
       });
-      assignDistrict(geoJson);  
+      assignDistrict(geoJson);
+      addressDistrictNum = assignDistrict(geoJson)[0].feature.dist; 
+      console.log(addressDistrictNum); //this is printing out, but info.update is not registering it as defined
     
       address_geoLyr.addTo(mymap); //adds the geoLayer to the map
       address_geoLyr.bringToFront();
@@ -261,16 +275,14 @@ function pickTR(thing){
 
 }
 
-function pickInbound(thing) {
-  directionSelect = "inbound";
+// function pickInbound(thing) {
+//   directionSelect = "inbound";
 
-}
+// }
 
-function pickOutbound(thing) {
-  directionSelect = "outbound";
-
-
-}
+// function pickOutbound(thing) {
+//   directionSelect = "outbound";
+// }
 
 
 // Vue object connects what is done in the user interface html to the javascript. All the buttons
@@ -297,8 +309,8 @@ let app = new Vue({
     pickAU: pickAU,
     pickTR: pickTR,
     updateMap: updateMap,
-    pickInbound: pickInbound,
-    pickOutbound: pickOutbound,
+    //pickInbound: pickInbound,
+    //pickOutbound: pickOutbound,
   },
 });
 
@@ -384,6 +396,7 @@ queryServer(CTA_API_SERVER + DISTRICTS_URL)
 .then(function(data) {
   geoDistricts = data;
   drawDistricts();
+  console.log(geoDistricts);
 })
 
 
