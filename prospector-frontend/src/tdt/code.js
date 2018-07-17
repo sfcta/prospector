@@ -36,7 +36,6 @@ var leafletPip = require('@mapbox/leaflet-pip');
 //leafletPip.bassackwards = true;
 
 mymap.setView([37.76889, -122.440997], 13);
-let theBaseLayer = maplib.baselayer; //not sure if this will work
 
 
 // some important global variables.
@@ -195,12 +194,30 @@ function ctaJson2geojson(json) {
 function addGeoLayer(geoJsonData, i){
   let geolyr = L.geoJSON(geoJsonData,{ //this makes a geoJSON layer from
     //geojson data, which is required input. i is the style input
-    style: color_styles[i].normal,
+    style: function coloring(feature) {
+      let num = feature.dist;
+      console.log(num);
+
+      if (num == 1) {
+        return {color: "orange"};
+      }
+      else if (num == 2) {
+        return {color: "red"};
+      }
+      else if (num == 3) {
+        return {color: "yellow"};
+      }
+      else if (num == 8) {
+        return {color: "green"};
+      }
+
+    },
+    //color_styles[i].normal,
 
     onEachFeature: function(feature, layer) { //need to figure out exactly what this is all doing
       layer.on({
         mouseover: function(e){
-          e.target.setStyle(color_styles[i].selected);
+          e.target.setStyle();
           e.target.bringToFront(); 
           if (address_geoLyr) {
             address_geoLyr.bringToFront();
@@ -208,7 +225,7 @@ function addGeoLayer(geoJsonData, i){
           info.update(e.target.feature);
         },
         mouseout: function(e){
-          geolyr.resetStyle(e.target);
+          //geolyr.resetStyle(e.target);
           //info.update("peace out");
         },
       });
@@ -250,10 +267,8 @@ function updateMap() {
           });
         }
       });
-      assignDistrict(geoJson);
-      addressDistrictNum = assignDistrict(geoJson)[0].feature.dist; 
-      console.log(addressDistrictNum); //this is printing out, but info.update is not registering it as defined
-    
+      assignDistrict(geoJson, address_geoLyr, input);
+
       address_geoLyr.addTo(mymap); //adds the geoLayer to the map
       address_geoLyr.bringToFront();
       
@@ -344,16 +359,19 @@ let helpPanel = new Vue({
   },
 });
 
-function assignDistrict(address) {
-//convert the address geojson to leaflet polygon
-let addressPolygon = L.polygon(address.geometry.coordinates[0]);
-//find the centroid of the address polygon
-let centroid = addressPolygon.getBounds().getCenter(); 
-let centroidArray = [centroid.lat, centroid.lng]; //reformat so that the lat/lon labels are correct
-//find out which districts contain the point
-let criticalDistrict = leafletPip.pointInLayer(centroidArray, districts_lyr);
-return criticalDistrict;
+function assignDistrict(address, geoLayer, tooltipLabel) {
+  //convert the address geojson to leaflet polygon
+  geoLayer.bindTooltip(tooltipLabel, {permanent: true, sticky:true}).addTo(mymap);
 
+  let addressPolygon = L.polygon(address.geometry.coordinates[0]);
+  //find the centroid of the address polygon
+  let centroid = addressPolygon.getBounds().getCenter(); 
+  let centroidArray = [centroid.lat, centroid.lng]; //reformat so that the lat/lon labels are correct
+  //find out which districts contain the point
+  let criticalDistrict = leafletPip.pointInLayer(centroidArray, districts_lyr);
+  addressDistrictNum = criticalDistrict[0].feature.dist;
+
+  return criticalDistrict;
 
 }
 
@@ -377,16 +395,26 @@ function drawDistricts() {
   //if it turns out that most of cta's data is in lists of json, change this
   //function to be more flexible by taking in the url suffix as a parameter and
   //changing the name to be "draw sfcta data" or something like that
-
-
-  //calls the sfcta api with a specified url- calls queryServer
-  //queryServer(API_SERVER+DISTRICTS_URL) //dont put a semi colon here!
-  //.then(function(districts) { //after queryServer returns the data, do this:
-    for (let segment of geoDistricts) { // in a for loop bc sfcta api returns a list of json for this one
+  let districtName;
+    for (let district of geoDistricts) { // in a for loop bc sfcta api returns a list of json for this one
     //calls json2geojson function to convert json data response to geojson
-    ctaJson2geojson(segment);
+    ctaJson2geojson(district);
+    districtName = district.distname;
+    //console.log(districtName);
+
   }
     districts_lyr = addGeoLayer(geoDistricts, 0); //takes in a list of geoJson objects and draws them
+    //console.log(districts_lyr);
+
+    //goal is to add a label to each of the geodistricts. it is adding them with the below function but they are 
+    //all added to the same place instead of being distributed amongst their layers
+    districts_lyr.eachLayer(function(layer) {
+      //console.log(layer);
+      districts_lyr.bindTooltip(layer.feature.distname, {offset: [layer.feature._bounds, layer.feature._bounds], permanent: true, sticky:true}).addTo(mymap);
+    });
+    //districts_lyr.bindTooltip(districtName, {permanent: true, sticky:true}).addTo(mymap);
+
+
     
   //})
 }
@@ -395,8 +423,8 @@ function drawDistricts() {
 queryServer(CTA_API_SERVER + DISTRICTS_URL)
 .then(function(data) {
   geoDistricts = data;
+  //console.log(geoDistricts);
   drawDistricts();
-  console.log(geoDistricts);
 })
 
 
