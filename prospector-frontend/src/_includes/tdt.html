@@ -50,23 +50,55 @@
         <div class="pickers">
 
             <h5>CHOOSE MODE:</h5>
-            <button v-on:click="pickAU"
-                    v-bind:class="{ active: isAUActive, yellow: isAUActive}"
+            <button v-on:click="pickAU" 
+                    v-bind:class="{ active: isAUActive}"
                      class="mini ui grey button">
                      All Auto</button>
             <button v-on:click="pickTR"
-                    v-bind:class="{ active: isTRActive, yellow: isTRActive }"
+                    v-bind:class="{ active: isTRActive}"
                      class="mini ui grey button">
                      Transit</button>
-            <!-- <h5>CHOOSE DIRECTION:</h5>
-            <button v-on:click="pickOutbound"
-                    v-bind:class="{ active: isOutbound, yellow: isOutbound}"
+            <button v-on:click="pickShared2"
+                    v-bind:class="{ active: isShared2Active}"
                      class="mini ui grey button">
-                     Outbound</button>
-            <button v-on:click="pickInbound"
-                    v-bind:class="{ active: isInbound, yellow: isInbound }"
+                     Shared Ride 2</button>
+            <button v-on:click="pickShared3"
+                    v-bind:class="{ active: isShared3Active}"
                      class="mini ui grey button">
-                     Inbound</button> -->
+                     Shared Ride 3</button>
+            <button v-on:click="pickTNCTaxi"
+                    v-bind:class="{ active: isTNCActive}"
+                     class="mini ui grey button">
+                     Taxi/TNC</button>
+
+
+
+
+            <h5>CHOOSE LAND USE:</h5>
+            <button v-on:click="pickOffice"
+                    v-bind:class="{ active: isOffice}"
+                     class="mini ui grey button">
+                     Office</button>
+            <button v-on:click="pickRes"
+                    v-bind:class="{ active: isRes}"
+                     class="mini ui grey button">
+                     Residential</button>
+            <button v-on:click="pickRet"
+                    v-bind:class="{ active: isRet, yellow: isRet }"
+                     class="mini ui grey button">
+                     Retail</button>
+
+
+            <h5>CHOOSE TRIP PURPOSE:</h5>
+            <button v-on:click="pickWork"
+                    v-bind:class="{ active: isWork, green: isWork}"
+                     class="mini ui grey button">
+                     Office</button>
+            <button v-on:click="pickOther"
+                    v-bind:class="{ active: isOther, yellow: isOther}"
+                     class="mini ui grey button">
+                     Residential</button>
+            
         </div>
             <br>
 

@@ -75,8 +75,8 @@ let addressDistrictNum; //will be defined in a point in polygon related function
 let modeSelect; //the default should correspond to what is seen visually. should never be null 
 //because it will throw an error if a user doesn't press a button before mousing over
 //let directionSelect = "outbound";
-let landUse = "Off"; //hardcoded to residential land use
-let purpose = "work"; //hardcoded to other trip type
+let landUseSelect = "Off"; //hardcoded to office land use
+let tripPurposeSelect = "work"; //hardcoded to work trip type
 
 
 //creating the tooltip functionality and putting it on the map
@@ -104,16 +104,26 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
     this._div.innerHTML = '<h4>Information</h4>' +
     '<b> Select a mode to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
   }
+
+  else if (landUseSelect == null) {
+    this._div.innerHTML = '<h4>Information</h4>' +
+    '<b> Select a land use to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
+  }
+
+  else if (tripPurposeSelect == null) {
+    this._div.innerHTML = '<h4>Information</h4>' +
+    '<b> Select a trip purpose to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
+  }
   else {
     let referenceDistrictProp = "prop_dist" + hoverDistrict.dist; //the name of the value that stores the 
     //relevant proportion from address district to hover district
-    let filtered_data = filterDistributionData(modeSelect, addressDistrictNum, landUse, purpose); //hard coded for now, make a direction button just like mode
+    let filtered_data = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect); //hard coded for now, make a direction button just like mode
     console.log(filtered_data);
 
     let proportion_outbound = numeral(filtered_data[0][referenceDistrictProp]).format('0.0%'); 
     let proportion_inbound = numeral(filtered_data[1][referenceDistrictProp]).format('0.0%');
     
-
+    colorDistricts(referenceDistrictProp, filtered_data);
 
     this._div.innerHTML = '<h4>Information</h4>' +
     '<b> Proportion of outbound trips from district '+ addressDistrictNum.toString() + ' to district '+ hoverDistrict.dist.toString()+ ': ' + 
@@ -127,15 +137,15 @@ info.addTo(mymap);
 
 function filterDistributionData(mode, districtNum, landUse, purpose) { 
 //this function filters the whole distributionData json object according to a few given parameters
-  //console.log(mode + " in filter distribution data");
+  console.log(mode + " selected");
+  console.log(landUse + " selected");
+  console.log(purpose + " selected");
+  console.log("the address is in district " + districtNum);
   return distributionData.filter(function(piece){ //functions job is given one object tell me if i need it
-    if (mode = "transit") {
-      return piece.mode == "transit" && piece.dist == districtNum && landUse == piece.landuse && purpose == piece.purpose;
-    } 
-    else {
-      return piece.mode !== "transit" && piece.dist == districtNum && landUse == piece.landuse && purpose == piece.purpose;
-
-    }
+    
+      return piece.mode == mode && piece.dist == districtNum && landUse == piece.landuse && purpose == piece.purpose;
+     
+    
   //this returns a filtered json object that includes only the components of the original json
   //that are the given mode, direction and district number
 });
@@ -202,7 +212,7 @@ function addGeoLayer(geoJsonData, styleParam){
     onEachFeature: function(feature, layer) { //need to figure out exactly what this is all doing
       layer.on({
         mouseover: function(e){
-          e.target.setStyle();
+          e.target.setStyle(color_styles[0].selected);
           e.target.bringToFront(); 
           if (address_geoLyr) {
             address_geoLyr.bringToFront();
@@ -211,6 +221,8 @@ function addGeoLayer(geoJsonData, styleParam){
         },
         mouseout: function(e){
           //geolyr.resetStyle(e.target);
+          e.target.setStyle(color_styles[0].normal);
+
           //info.update("peace out");
         },
       });
@@ -256,7 +268,7 @@ function updateMap() {
         assignDistrict(geoJson, address_geoLyr, input);
       address_geoLyr.addTo(mymap); //adds the geoLayer to the map
       address_geoLyr.bringToFront();
-      colorDistricts(); //this will restyle the districts according to their relevant colors, and it will only do so 
+      //colorDistricts(); //this will restyle the districts according to their relevant colors, and it will only do so 
       //if the returned json is valid (meaning a valid address has been inputted)
     }
     else {
@@ -268,10 +280,50 @@ function updateMap() {
 
 //button functions
 function pickAU(thing){
-  modeSelect = "all auto";
+  modeSelect = "drive_alone";
 }
 function pickTR(thing){
   modeSelect = "transit";
+
+}
+
+function pickShared2(thing){
+  modeSelect = "shared_ride_2";
+
+}
+
+function pickShared3(thing){
+  modeSelect = "shared_ride_3";
+
+}
+
+function pickTNCTaxi(thing){
+  modeSelect = "taxi";
+
+}
+
+function pickRes(thing){
+  landUseSelect = "Res";
+
+}
+
+function pickOffice(thing){
+  landUseSelect = "Off";
+
+}
+
+function pickRet(thing){
+  landUseSelect = "Ret";
+
+}
+
+function pickWork(thing){
+  tripPurposeSelect = "work";
+
+}
+
+function pickOther(thing){
+  tripPurposeSelect = "other";
 
 }
 
@@ -283,10 +335,17 @@ let app = new Vue({
   delimiters: ['${', '}'],
   data: {
     isAUActive: false,
-    isTRActive: true,
+    isTRActive: false,
     address: null,
-    isInbound: false,
-    isOutbound: true,
+    isOffice: false,
+    isRes: false,
+    isRet: false,
+    isWork: false,
+    isOther: false,
+    isShared2Active: false,
+    isShared3Active: false,
+    isTNCActive: false,
+
   },
   /* this is for if you want to search directly from the box without the button, watch is
   // for detecting changes, sometimes it is not a button, it could be a checkbox or something
@@ -300,8 +359,15 @@ let app = new Vue({
     pickAU: pickAU,
     pickTR: pickTR,
     updateMap: updateMap,
-    //pickInbound: pickInbound,
-    //pickOutbound: pickOutbound,
+    pickOffice: pickOffice,
+    pickRes: pickRes,
+    pickRet: pickRet,
+    pickWork: pickWork,
+    pickOther: pickOther,
+    pickTNCTaxi: pickTNCTaxi,
+    pickShared3: pickShared3,
+    pickShared2: pickShared2,
+  
   },
 });
 
@@ -351,45 +417,50 @@ function assignDistrict(address, geoLayer, tooltipLabel) {
 
 }
 
-function colorDistricts() {
-
-
+function colorDistricts(referenceDistrictProp, filtered_data) {
   districts_lyr.eachLayer(function(district) {
     let dist = district.feature.dist; //as a test I'll first color code by district number to keep things simple
-    console.log(dist);
-
-        // Your function that determines a fill color for a particular
-        // property name and value.
         var myFillColor;
-        if (dist == 1) {
+
+        
+
+        
+
+        if (filtered_data[0][referenceDistrictProp] > .05) {
           myFillColor = "red";
         }
-        else if (dist == 2) {
+        else if (filtered_data[0][referenceDistrictProp] >.1) {
           myFillColor = "yellow";
         }
-        else if (dist == 3) {
-          myFillColor = "green";
-        }
-        else if (dist == 4) {
-          myFillColor = "blue";
-        }
-        else if (dist == 5) {
-          myFillColor = "orange";
-        }
-        else if (dist == 6) {
-          myFillColor = "yellow";
-        }
-        else if (dist == 7) {
-          myFillColor = "green";
-        }
-        else if (dist == 8) {
-          myFillColor = "red";
-        }
+        // else {
+        //   myFillColor = "green";
+        // }
+        // else if (dist == 2) {
+        //   myFillColor = "yellow";
+        // }
+        // else if (dist == 3) {
+        //   myFillColor = "green";
+        // }
+        // else if (dist == 4) {
+        //   myFillColor = "blue";
+        // }
+        // else if (dist == 5) {
+        //   myFillColor = "orange";
+        // }
+        // else if (dist == 6) {
+        //   myFillColor = "yellow";
+        // }
+        // else if (dist == 7) {
+        //   myFillColor = "green";
+        // }
+        // else if (dist == 8) {
+        //   myFillColor = "red";
+        // }
 
         district.setStyle({
           fillColor: myFillColor,
           fillOpacity: 0.4,
-          color: "#33f",
+          color: "#39f",
           weight: 3
         });
       });
