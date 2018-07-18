@@ -49,6 +49,7 @@ let distributionData;
 queryServer(CTA_API_SERVER + TRIP_DISTRIBUTION)
 .then(function(data) {
   distributionData = data;
+  //console.log(distributionData);
 })
 
 
@@ -153,7 +154,7 @@ function queryServer(url){
     })
     .catch(function(error) {
       console.log("err: "+error);
-      alert("Cannot find this address");
+      alert("Cannot query server");
     });
   })
   return promise
@@ -168,6 +169,7 @@ function planningJson2geojson(json) {
   //allows this data to be added to a geoLayer and drawn on the map
 
   //find out how to properly alert the user if the address is incorrect
+  
   let geoCodeJson = {};
   geoCodeJson['blklot'] = json.features[0].attributes.blklot;
   geoCodeJson['type'] = 'Feature';
@@ -176,6 +178,8 @@ function planningJson2geojson(json) {
   geoCodeJson['geometry']['coordinates'] = [json.features[0].geometry.rings];
   //console.log(geoCodeJson);
   return geoCodeJson;
+  
+  
 }
 
 
@@ -191,28 +195,25 @@ function ctaJson2geojson(json) {
 
 
 
-function addGeoLayer(geoJsonData, i){
+function addGeoLayer(geoJsonData, styleParam){
   let geolyr = L.geoJSON(geoJsonData,{ //this makes a geoJSON layer from
     //geojson data, which is required input. i is the style input
-    style: function coloring(feature) {
-      let num = feature.dist;
-      console.log(num);
+    style: color_styles[0].normal,
+    //function coloring(feature) { //want to apply the style function to the geodistrict features
+    //   let num = feature.dist;
+    //   if (styleParam == 1){
+    //     if (distributionData[0].num) {
+    //       return {color: "orange"};
+    //     }
+    //     else if (num == 2) {
+    //       return {color: "red"};
+    //     }
 
-      if (num == 1) {
-        return {color: "orange"};
-      }
-      else if (num == 2) {
-        return {color: "red"};
-      }
-      else if (num == 3) {
-        return {color: "yellow"};
-      }
-      else if (num == 8) {
-        return {color: "green"};
-      }
+    //   }
+    //   else if (styleParam == 0) {
+    //     return {color_styles[0].normal};
+    //   }
 
-    },
-    //color_styles[i].normal,
 
     onEachFeature: function(feature, layer) { //need to figure out exactly what this is all doing
       layer.on({
@@ -248,13 +249,14 @@ function updateMap() {
   let input = app.address; // app.address is the user input. app refers to the VUE object below that handles
   let geocodedJson = queryServer(PLANNING_GEOCODER_baseurl+input, 0) //data has got to the geocoder
     .then(function(geocodedJson) { //after queryServer returns the data, do this:
-      let geoJson = planningJson2geojson(geocodedJson); //this is the polygon
-      address_geoLyr = L.geoJSON(geoJson,{ //this makes a geoJSON layer from geojson data, which is input
+      if (geocodedJson.features.length !== 0) { //why is this even going to planningJson2geojson?
+        let geoJson = planningJson2geojson(geocodedJson); //this is the polygon
+        address_geoLyr = L.geoJSON(geoJson,{ //this makes a geoJSON layer from geojson data, which is input
         style: color_styles[1].normal, //this is hardcoded to blue
         onEachFeature: function(feature, layer) { //function that will be called on each created feature layer
           layer.on({
             mouseover: function(e){
-              e.target.setStyle(color_styles[1].selected);
+              e.target.setStyle(color_styles[0].selected);
               e.target.bringToFront();
               
               info.update(e.target.feature);
@@ -267,17 +269,14 @@ function updateMap() {
           });
         }
       });
-      assignDistrict(geoJson, address_geoLyr, input);
-
+        assignDistrict(geoJson, address_geoLyr, input);
       address_geoLyr.addTo(mymap); //adds the geoLayer to the map
       address_geoLyr.bringToFront();
-      
-
-
-
-      //address_geoLyr.bringToFront();
-    })
-
+    }
+    else {
+      alert("cant geocode");
+    }
+  })
   }
 
 
@@ -289,15 +288,6 @@ function pickTR(thing){
   modeSelect = "transit";
 
 }
-
-// function pickInbound(thing) {
-//   directionSelect = "inbound";
-
-// }
-
-// function pickOutbound(thing) {
-//   directionSelect = "outbound";
-// }
 
 
 // Vue object connects what is done in the user interface html to the javascript. All the buttons
@@ -403,14 +393,15 @@ function drawDistricts() {
     //console.log(districtName);
 
   }
-    districts_lyr = addGeoLayer(geoDistricts, 0); //takes in a list of geoJson objects and draws them
+    districts_lyr = addGeoLayer(geoDistricts); //takes in a list of geoJson objects and draws them
     //console.log(districts_lyr);
 
     //goal is to add a label to each of the geodistricts. it is adding them with the below function but they are 
     //all added to the same place instead of being distributed amongst their layers
+    //i think eventually i may want to move this to update map so that it does it with the statistics
     districts_lyr.eachLayer(function(layer) {
       //console.log(layer);
-      districts_lyr.bindTooltip(layer.feature.distname, {offset: [layer.feature._bounds, layer.feature._bounds], permanent: true, sticky:true}).addTo(mymap);
+      districts_lyr.bindTooltip(layer.feature.distname, {offset: [50, 50], permanent: true, sticky:true}).addTo(mymap);
     });
     //districts_lyr.bindTooltip(districtName, {permanent: true, sticky:true}).addTo(mymap);
 
