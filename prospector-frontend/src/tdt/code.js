@@ -198,23 +198,7 @@ function ctaJson2geojson(json) {
 function addGeoLayer(geoJsonData, styleParam){
   let geolyr = L.geoJSON(geoJsonData,{ //this makes a geoJSON layer from
     //geojson data, which is required input. i is the style input
-    style: color_styles[0].normal,
-    //function coloring(feature) { //want to apply the style function to the geodistrict features
-    //   let num = feature.dist;
-    //   if (styleParam == 1){
-    //     if (distributionData[0].num) {
-    //       return {color: "orange"};
-    //     }
-    //     else if (num == 2) {
-    //       return {color: "red"};
-    //     }
-
-    //   }
-    //   else if (styleParam == 0) {
-    //     return {color_styles[0].normal};
-    //   }
-
-
+    style: color_styles[0].normal, //this is how the districts are styled at first before the address input
     onEachFeature: function(feature, layer) { //need to figure out exactly what this is all doing
       layer.on({
         mouseover: function(e){
@@ -249,14 +233,14 @@ function updateMap() {
   let input = app.address; // app.address is the user input. app refers to the VUE object below that handles
   let geocodedJson = queryServer(PLANNING_GEOCODER_baseurl+input, 0) //data has got to the geocoder
     .then(function(geocodedJson) { //after queryServer returns the data, do this:
-      if (geocodedJson.features.length !== 0) { //why is this even going to planningJson2geojson?
+      if (geocodedJson.features.length !== 0) { //checks if the server returns meaningful json (as opposed to empty)
         let geoJson = planningJson2geojson(geocodedJson); //this is the polygon
         address_geoLyr = L.geoJSON(geoJson,{ //this makes a geoJSON layer from geojson data, which is input
         style: color_styles[1].normal, //this is hardcoded to blue
         onEachFeature: function(feature, layer) { //function that will be called on each created feature layer
           layer.on({
             mouseover: function(e){
-              e.target.setStyle(color_styles[0].selected);
+              e.target.setStyle(color_styles[1].selected);
               e.target.bringToFront();
               
               info.update(e.target.feature);
@@ -272,9 +256,11 @@ function updateMap() {
         assignDistrict(geoJson, address_geoLyr, input);
       address_geoLyr.addTo(mymap); //adds the geoLayer to the map
       address_geoLyr.bringToFront();
+      colorDistricts(); //this will restyle the districts according to their relevant colors, and it will only do so 
+      //if the returned json is valid (meaning a valid address has been inputted)
     }
     else {
-      alert("cant geocode");
+      alert("The address is invalid or is outside the city limits of San Francisco. Enter another address.");
     }
   })
   }
@@ -282,7 +268,7 @@ function updateMap() {
 
 //button functions
 function pickAU(thing){
-  modeSelect = "auto";
+  modeSelect = "all auto";
 }
 function pickTR(thing){
   modeSelect = "transit";
@@ -365,20 +351,52 @@ function assignDistrict(address, geoLayer, tooltipLabel) {
 
 }
 
-// function colorDistricts() {
-//   //should redo this with local data
-//   queryServer(API_SERVER+TRIP_DISTRIBUTION)
-//   .then(function(ddist) { //districts is a json object, after queryServer returns the data, do this: 
-//     let to_ = ddist.filter(val => val.direction == "outbound"); //
-//     let to_dist1 = to_.filter(val => val.dist == 1);
-//     let to_dist1_transit = to_dist1.filter(val => val.mode == "transit");
-//     let to_dist1_transit_work = to_dist1_transit.filter(val => val.purpose == "work");
-//     //write a function called filter districts that assigns certain variables and then is 
-//     //passed into ddist.filter(function)
-//     console.log(to_dist1_transit_work);
-//   })
+function colorDistricts() {
 
-// }
+
+  districts_lyr.eachLayer(function(district) {
+    let dist = district.feature.dist; //as a test I'll first color code by district number to keep things simple
+    console.log(dist);
+
+        // Your function that determines a fill color for a particular
+        // property name and value.
+        var myFillColor;
+        if (dist == 1) {
+          myFillColor = "red";
+        }
+        else if (dist == 2) {
+          myFillColor = "yellow";
+        }
+        else if (dist == 3) {
+          myFillColor = "green";
+        }
+        else if (dist == 4) {
+          myFillColor = "blue";
+        }
+        else if (dist == 5) {
+          myFillColor = "orange";
+        }
+        else if (dist == 6) {
+          myFillColor = "yellow";
+        }
+        else if (dist == 7) {
+          myFillColor = "green";
+        }
+        else if (dist == 8) {
+          myFillColor = "red";
+        }
+
+        district.setStyle({
+          fillColor: myFillColor,
+          fillOpacity: 0.4,
+          color: "#33f",
+          weight: 3
+        });
+      });
+}
+
+
+
 
 
 function drawDistricts() {
