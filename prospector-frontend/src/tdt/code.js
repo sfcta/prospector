@@ -60,7 +60,9 @@ queryServer(CTA_API_SERVER + TRIP_DISTRIBUTION)
 let color_styles = [{ normal  : {"color": "#39f", "weight":3,  "opacity": 0.5, "dashArray": '5 5'},
 selected: {"color": "#33f",    "weight":4, "opacity": 0.5, "dashArray": '5 5' },},
 { normal  : {"fillColor": "#8B0000 ", "fillOpacity": 0.8 },
-selected: {"color": "#34784b", "weight":5, "opacity": 1.0, },}
+selected: {"color": "#34784b", "weight":5, "opacity": 1.0, },},
+{normal: {"fillColor": "#000", "fillOpacity": 0.8, },
+selected: {"color": "#000", "weight":5, "opacity": 1.0,},}
 ];
 
 //some global geolayer variables
@@ -78,6 +80,7 @@ let modeSelect; //the default should correspond to what is seen visually. should
 let landUseSelect; //hardcoded to office land use
 let tripPurposeSelect; //hardcoded to work trip type
 let referenceDistrictProp;
+let colorDistrictOutput;
 
 
 //creating the tooltip functionality and putting it on the map
@@ -119,7 +122,7 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
     referenceDistrictProp = "prop_dist" + hoverDistrict.dist; //the name of the value that stores the 
     //relevant proportion from address district to hover district
     let filtered_data = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect); //hard coded for now, make a direction button just like mode
-    console.log(filtered_data);
+    //console.log(filtered_data);
 
     let proportion_outbound = numeral(filtered_data[0][referenceDistrictProp]).format('0.0%'); 
     let proportion_inbound = numeral(filtered_data[1][referenceDistrictProp]).format('0.0%');
@@ -130,7 +133,7 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
     proportion_outbound +' </b>' +
     '<br><b> Proportion of inbound trips to district '+ hoverDistrict.dist.toString() + ' from district '+ addressDistrictNum.toString()+ ': ' + 
     proportion_inbound +' </b></br>'
-    colorDistricts(referenceDistrictProp, filtered_data);
+    //colorDistricts(referenceDistrictProp, filtered_data);
 
   }
   
@@ -213,15 +216,35 @@ function ctaJson2geojson(json) {
 
 
 
-function addGeoLayer(geoJsonData, styleParam){
+function addGeoLayer(geoJsonData){
   let geolyr = L.geoJSON(geoJsonData,{ //this makes a geoJSON layer from
     //geojson data, which is required input. i is the style input
-    style: color_styles[0].normal, //this is how the districts are styled at first before the address input
+    style: function(feature) {
+       switch (feature.dist) { //should be the district name
+         case 1: return {color: "#000"};
+         case 2:   return {color: "#CD5C5C"};
+         case 3:   return {color: "#1B4F72"};
+         case 4:   return {color: "#76448A"};
+         case 5:   return {color: "#BA4A00"};
+         case 6:   return {color: "#196F3D"};
+         case 7:   return {color: "#34495E"};
+         case 8:   return {color: "#0E6655"};
+         case 9:   return {color: "#9A7D0A"};
+         case 10:   return {color: "#641E16"};
+         case 11:   return {color: "#D68910"};
+         case 12:   return {color: "#0000ff"};
+       }
+
+     }, 
     onEachFeature: function(feature, layer) { //need to figure out exactly what this is all doing
       layer.on({
         mouseover: function(e){
-          e.target.setStyle(color_styles[0].selected);
+          //e.target.setStyle(color_styles[0].selected);
           e.target.bringToFront(); 
+          console.log(feature);
+
+          //e.target.setStyle(colorDistricts(feature, referenceDistrictProp));
+
           if (address_geoLyr) {
             address_geoLyr.bringToFront();
           }
@@ -258,11 +281,15 @@ function updateMap() {
         address_geoLyr = L.geoJSON(geoJson,{ //this makes a geoJSON layer from geojson data, which is input
         style: color_styles[1].normal, //this is hardcoded to blue
         onEachFeature: function(feature, layer) { //function that will be called on each created feature layer
+          //try calling colorDisticts here?
+          // let returnedColor = colorDistricts(feature, referenceDistrictProp);
+          // feature.setStyle(returnedColor);
           layer.on({
+
             mouseover: function(e){
+
               e.target.setStyle(color_styles[1].selected);
               e.target.bringToFront();
-              
               info.update(e.target.feature);
             },
             mouseout: function(e){
@@ -273,9 +300,12 @@ function updateMap() {
           });
         }
       });
-        assignDistrict(geoJson, address_geoLyr, input);
+      assignDistrict(geoJson, address_geoLyr, input);
       address_geoLyr.addTo(mymap); //adds the geoLayer to the map
       address_geoLyr.bringToFront();
+      districts_lyr.resetStyle(function(feature){
+        
+      })
       //colorDistricts(); //this will restyle the districts according to their relevant colors, and it will only do so 
       //if the returned json is valid (meaning a valid address has been inputted)
     }
@@ -436,44 +466,51 @@ function assignDistrict(address, geoLayer, tooltipLabel) {
 
 }
 
-function colorDistricts(referenceDistrictProp, filtered_data) {
-  districts_lyr.eachLayer(function(featureInstanceLayer) {
-    //console.log(featureInstanceLayer); //ok so this is logging all of them...because eachLayer iterates over all of them at once
-    //let dist = featureInstanceLayer.feature.dist; //as a test I'll first color code by district number to keep things simple
-    //console.log(dist);
-    let outbound_prop = filtered_data[0][referenceDistrictProp];
-    console.log(outbound_prop);
-    let myFillColor;
+function colorDistricts(feature, referenceDistrictProp) {
+  console.log(feature.dist);
+  //colorDistrictOutput = color_styles[2].normal;
 
-    //this will paint individual districts on mouseover of any of them
-    // if (dist == 1) {
-    //   myFillColor = "red";
-    // }
-    // else if (dist == 2) {
-    //   myFillColor = "green";
-    // }
-    // else if (dist == 8) {
-    //   myFillColor = "yellow";
-    // }
+   switch (feature.dist) { //should be the district name
+     case 1: return {color: "#000"};
+     case 2:   return {color: "#CD5C5C"};
+     case 3:   return {color: "#1B4F72"};
+     case 4:   return {color: "#76448A"};
+     case 5:   return {color: "#BA4A00"};
+     case 6:   return {color: "#196F3D"};
+     case 7:   return {color: "#34495E"};
+     case 8:   return {color: "#0E6655"};
+     case 9:   return {color: "#9A7D0A"};
+     case 10:   return {color: "#641E16"};
+     case 11:   return {color: "#D68910"};
+     case 12:   return {color: "#0000ff"};
+   }
 
-    if (outbound_prop > .1) {
-          //console.log(filtered_data[0][referenceDistrictProp]); //this is logging the same thing 12 times, so for every district. 
-          //but it only does it when i mouse over a district that fulfills the if statement- i think?
-          myFillColor = "red";
-        }
-        
-        else if (outbound_prop >.02) {
-          myFillColor = "green";
-        }
+ }
 
-        featureInstanceLayer.setStyle({
-          fillColor: myFillColor,
-          fillOpacity: 0.4,
-          color: "#39f",
-          weight: 3
-        });
-      });
-}
+
+
+
+
+
+//     //console.log(featureInstanceLayer); //ok so this is logging all of them...because eachLayer iterates over all of them at once
+//     let dist = featureInstanceLayer.feature.dist; //as a test I'll first color code by district number to keep things simple
+//     console.log(dist);
+//     //let outbound_prop = filtered_data[0][referenceDistrictProp];
+//     //console.log(outbound_prop);
+
+//     //this will paint individual districts on mouseover of any of them
+//     if (dist == 1) {
+//       return "red";
+//     }
+//     else if (dist == 2) {
+//       return "green";
+//     }
+//     else if (dist == 8) {
+//       return "yellow";
+//     }
+//   }
+
+
 
 
 
