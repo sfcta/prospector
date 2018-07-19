@@ -35,7 +35,7 @@ var numeral = require('numeral');
 var leafletPip = require('@mapbox/leaflet-pip');
 //leafletPip.bassackwards = true;
 
-mymap.setView([37.76889, -122.440997], 13);
+mymap.setView([37.76889, -122.440997], 12);
 
 
 // some important global variables.
@@ -75,8 +75,9 @@ let addressDistrictNum; //will be defined in a point in polygon related function
 let modeSelect; //the default should correspond to what is seen visually. should never be null 
 //because it will throw an error if a user doesn't press a button before mousing over
 //let directionSelect = "outbound";
-let landUseSelect = "Off"; //hardcoded to office land use
-let tripPurposeSelect = "work"; //hardcoded to work trip type
+let landUseSelect; //hardcoded to office land use
+let tripPurposeSelect; //hardcoded to work trip type
+let referenceDistrictProp;
 
 
 //creating the tooltip functionality and putting it on the map
@@ -115,7 +116,7 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
     '<b> Select a trip purpose to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
   }
   else {
-    let referenceDistrictProp = "prop_dist" + hoverDistrict.dist; //the name of the value that stores the 
+    referenceDistrictProp = "prop_dist" + hoverDistrict.dist; //the name of the value that stores the 
     //relevant proportion from address district to hover district
     let filtered_data = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect); //hard coded for now, make a direction button just like mode
     console.log(filtered_data);
@@ -123,13 +124,14 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
     let proportion_outbound = numeral(filtered_data[0][referenceDistrictProp]).format('0.0%'); 
     let proportion_inbound = numeral(filtered_data[1][referenceDistrictProp]).format('0.0%');
     
-    colorDistricts(referenceDistrictProp, filtered_data);
 
     this._div.innerHTML = '<h4>Information</h4>' +
     '<b> Proportion of outbound trips from district '+ addressDistrictNum.toString() + ' to district '+ hoverDistrict.dist.toString()+ ': ' + 
     proportion_outbound +' </b>' +
     '<br><b> Proportion of inbound trips to district '+ hoverDistrict.dist.toString() + ' from district '+ addressDistrictNum.toString()+ ': ' + 
     proportion_inbound +' </b></br>'
+    colorDistricts(referenceDistrictProp, filtered_data);
+
   }
   
 };
@@ -137,17 +139,23 @@ info.addTo(mymap);
 
 function filterDistributionData(mode, districtNum, landUse, purpose) { 
 //this function filters the whole distributionData json object according to a few given parameters
-  console.log(mode + " selected");
-  console.log(landUse + " selected");
-  console.log(purpose + " selected");
-  console.log("the address is in district " + districtNum);
-  return distributionData.filter(function(piece){ //functions job is given one object tell me if i need it
-    
-      return piece.mode == mode && piece.dist == districtNum && landUse == piece.landuse && purpose == piece.purpose;
-     
-    
-  //this returns a filtered json object that includes only the components of the original json
+// console.log(mode + " selected");
+// console.log(landUse + " selected");
+// console.log(purpose + " selected");
+// console.log("the address is in district " + districtNum);
+return distributionData.filter(function(piece){ 
+    //for now the input will either be transit or all auto, which is everything that is not transit
+
+    //this returns a filtered json object that includes only the components of the original json
   //that are the given mode, direction and district number
+  if (modeSelect == "transit") {
+
+    return piece.mode == "transit" && piece.dist == districtNum && landUse == piece.landuse && purpose == piece.purpose;
+  }
+  else if (modeSelect !== "transit") {
+    return piece.mode !== "transit" && piece.dist == districtNum && landUse == piece.landuse && purpose == piece.purpose;
+
+  }
 });
 
 
@@ -280,50 +288,61 @@ function updateMap() {
 
 //button functions
 function pickAU(thing){
-  modeSelect = "drive_alone";
+  modeSelect = "all auto";
+  //modeSelect = "drive_alone";
+
+  console.log("all auto selected");
+
 }
 function pickTR(thing){
   modeSelect = "transit";
+  console.log("transit selected");
+
 
 }
 
-function pickShared2(thing){
-  modeSelect = "shared_ride_2";
+// function pickShared2(thing){
+//   modeSelect = "shared_ride_2";
 
-}
+// }
 
-function pickShared3(thing){
-  modeSelect = "shared_ride_3";
+// function pickShared3(thing){
+//   modeSelect = "shared_ride_3";
 
-}
+// }
 
-function pickTNCTaxi(thing){
-  modeSelect = "taxi";
+// function pickTaxi(thing){
+//   modeSelect = "taxi";
 
-}
+// }
 
 function pickRes(thing){
   landUseSelect = "Res";
+  console.log("res selected");
 
 }
 
 function pickOffice(thing){
   landUseSelect = "Off";
+  console.log("off selected");
 
 }
 
 function pickRet(thing){
   landUseSelect = "Ret";
+  console.log("ret selected");
 
 }
 
 function pickWork(thing){
   tripPurposeSelect = "work";
+  console.log("work selected");
 
 }
 
 function pickOther(thing){
   tripPurposeSelect = "other";
+  console.log("other/nonwork selected");
 
 }
 
@@ -342,9 +361,9 @@ let app = new Vue({
     isRet: false,
     isWork: false,
     isOther: false,
-    isShared2Active: false,
-    isShared3Active: false,
-    isTNCActive: false,
+    // isShared2Active: false,
+    // isShared3Active: false,
+    // isTaxiActive: false,
 
   },
   /* this is for if you want to search directly from the box without the button, watch is
@@ -364,10 +383,10 @@ let app = new Vue({
     pickRet: pickRet,
     pickWork: pickWork,
     pickOther: pickOther,
-    pickTNCTaxi: pickTNCTaxi,
-    pickShared3: pickShared3,
-    pickShared2: pickShared2,
-  
+    // pickTaxi: pickTaxi,
+    // pickShared3: pickShared3,
+    // pickShared2: pickShared2,
+
   },
 });
 
@@ -418,46 +437,36 @@ function assignDistrict(address, geoLayer, tooltipLabel) {
 }
 
 function colorDistricts(referenceDistrictProp, filtered_data) {
-  districts_lyr.eachLayer(function(district) {
-    let dist = district.feature.dist; //as a test I'll first color code by district number to keep things simple
-        var myFillColor;
+  districts_lyr.eachLayer(function(featureInstanceLayer) {
+    //console.log(featureInstanceLayer); //ok so this is logging all of them...because eachLayer iterates over all of them at once
+    //let dist = featureInstanceLayer.feature.dist; //as a test I'll first color code by district number to keep things simple
+    //console.log(dist);
+    let outbound_prop = filtered_data[0][referenceDistrictProp];
+    console.log(outbound_prop);
+    let myFillColor;
 
-        
+    //this will paint individual districts on mouseover of any of them
+    // if (dist == 1) {
+    //   myFillColor = "red";
+    // }
+    // else if (dist == 2) {
+    //   myFillColor = "green";
+    // }
+    // else if (dist == 8) {
+    //   myFillColor = "yellow";
+    // }
 
-        
-
-        if (filtered_data[0][referenceDistrictProp] > .05) {
+    if (outbound_prop > .1) {
+          //console.log(filtered_data[0][referenceDistrictProp]); //this is logging the same thing 12 times, so for every district. 
+          //but it only does it when i mouse over a district that fulfills the if statement- i think?
           myFillColor = "red";
         }
-        else if (filtered_data[0][referenceDistrictProp] >.1) {
-          myFillColor = "yellow";
+        
+        else if (outbound_prop >.02) {
+          myFillColor = "green";
         }
-        // else {
-        //   myFillColor = "green";
-        // }
-        // else if (dist == 2) {
-        //   myFillColor = "yellow";
-        // }
-        // else if (dist == 3) {
-        //   myFillColor = "green";
-        // }
-        // else if (dist == 4) {
-        //   myFillColor = "blue";
-        // }
-        // else if (dist == 5) {
-        //   myFillColor = "orange";
-        // }
-        // else if (dist == 6) {
-        //   myFillColor = "yellow";
-        // }
-        // else if (dist == 7) {
-        //   myFillColor = "green";
-        // }
-        // else if (dist == 8) {
-        //   myFillColor = "red";
-        // }
 
-        district.setStyle({
+        featureInstanceLayer.setStyle({
           fillColor: myFillColor,
           fillOpacity: 0.4,
           color: "#39f",
@@ -489,7 +498,6 @@ function drawDistricts() {
     //all added to the same place instead of being distributed amongst their layers
     //i think eventually i may want to move this to update map so that it does it with the statistics
     districts_lyr.eachLayer(function(layer) {
-      //console.log(layer);
       districts_lyr.bindTooltip(layer.feature.distname, {offset: [50, 50], permanent: true, sticky:true}).addTo(mymap);
     });
     //districts_lyr.bindTooltip(districtName, {permanent: true, sticky:true}).addTo(mymap);

@@ -58,7 +58,7 @@
                     v-bind:class="{ active: isTRActive}"
                      class="mini ui grey button">
                      Transit</button>
-            <button v-on:click="pickShared2"
+            <!-- <button v-on:click="pickShared2"
                     v-bind:class="{ active: isShared2Active}"
                      class="mini ui grey button">
                      Shared Ride 2</button>
@@ -66,10 +66,10 @@
                     v-bind:class="{ active: isShared3Active}"
                      class="mini ui grey button">
                      Shared Ride 3</button>
-            <button v-on:click="pickTNCTaxi"
-                    v-bind:class="{ active: isTNCActive}"
+            <button v-on:click="pickTaxi"
+                    v-bind:class="{ active: isTaxiActive}"
                      class="mini ui grey button">
-                     Taxi/TNC</button>
+                     Taxi</button> -->
 
 
 
@@ -93,11 +93,11 @@
             <button v-on:click="pickWork"
                     v-bind:class="{ active: isWork, green: isWork}"
                      class="mini ui grey button">
-                     Office</button>
+                     Work</button>
             <button v-on:click="pickOther"
                     v-bind:class="{ active: isOther, yellow: isOther}"
                      class="mini ui grey button">
-                     Residential</button>
+                     Non Work</button>
             
         </div>
             <br>
