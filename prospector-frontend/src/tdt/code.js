@@ -66,6 +66,7 @@ let address_geoLyr;
 let addressGroup;
 let districts;
 let districts_lyr;
+let markers = []; //this is the list of all the district markers
 
 //some other global variables
 let addressDistrictNum; 
@@ -75,6 +76,9 @@ let landUseSelect;
 let tripPurposeSelect; 
 let referenceDistrictProp;
 let colorDistrictOutput;
+let namePopup;
+//let districtMarker;
+let propPopup;
 
 //let proportion_outbound;
 //let proportion_inbound;
@@ -150,9 +154,27 @@ function getFilteredData(hoverDistrict) {
   let filtered_data = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect); //hard coded for now, make a direction button just like mode
   let proportion_outbound = filtered_data[0][referenceDistrictProp];
   let proportion_inbound = filtered_data[1][referenceDistrictProp];
+
+
+  // districtMarker.on('mouseover', function(){
+  //     districtMarker.popup.setContent(proportion_outbound +", "+ proportion_inbound); //this reset isnt working
+  //   });
+  // console.log(districtMarker._popup.getContent()); //this is always printing outer mission hills
+
+  //districtPopup.setContent(proportion_outbound +", "+ proportion_inbound);
   return [proportion_outbound, proportion_inbound];
 
 }
+
+// function updatePropMarker(hoverDistrict){
+//   let hoverPolygon = L.polygon(hoverDistrict.geometry.coordinates[0]);
+//     let hoverCentroid = hoverPolygon.getBounds().getCenter();
+//     let hoverCentroidArray = [hoverCentroid.lng, hoverCentroid.lat];
+//   propPopup = L.popup()
+//     .setLatLng(hoverCentroidArray)
+//     .setContent("prop out: "+ proportion_outbound)
+//     //return propPopup;
+// }
 
 
 
@@ -239,12 +261,15 @@ function updateMap() {
         address_geoLyr = L.geoJSON(geoJson,{ //this makes a geoJSON layer from geojson data, which is input
         style: color_styles[1].normal, //this is hardcoded to blue
         onEachFeature: function(feature, layer) { 
+          
           layer.on({
             mouseover: function(e){
               e.target.setStyle(color_styles[1].selected);
               e.target.bringToFront();
-              getFilteredData(e.target.feature); //gets the filtered data according to various parameters
-              info.update(e.target.feature); //updates the info box with text
+              //getFilteredData(e.target.feature); //gets the filtered data according to various parameters
+              //console.log("is it logging?");
+              //info.update(e.target.feature); //updates the info box with text
+
             },
             mouseout: function(e){
               address_geoLyr.resetStyle(e.target);
@@ -252,16 +277,23 @@ function updateMap() {
           });
         }
       });
-        assignDistrict(geoJson, address_geoLyr, input);
+      assignDistrict(geoJson, address_geoLyr, input);
       address_geoLyr.addTo(mymap); //adds the geoLayer to the map
       address_geoLyr.bringToFront();
+      for (let districtMarker in markers) {
+        districtMarker.namePopup.setContent("something new");
+      }
+      // districtMarker._popup.setContent(function(feature){ //district marker must only be doing it for one polygon
+      //   console.log("hello");
+      //   return "something new"
+      // });
+
 
       districts_lyr.setStyle(function(feature){
-        console.log(getFilteredData(feature)[0]);
 
         if (getFilteredData(feature)[0]< .02) {
           return {"color": "#000",  "fillColor":'#000', "weight":4, "opacity": 1 }
-          
+
         }
         else if (getFilteredData(feature)[0] < .05) {
           return {"color": "#CD5C5C",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 };
@@ -448,8 +480,13 @@ function drawDistricts() {
     let districtPolygon = L.polygon(district.geometry.coordinates[0]);
     let districtCentroid = districtPolygon.getBounds().getCenter();
     let districtCentroidArray = [districtCentroid.lng, districtCentroid.lat]; //reformat so that the lat/lon labels are correct
-
-    let marker = L.marker(districtCentroidArray, {draggable: true}).addTo(mymap).bindPopup(districtName).openPopup();
+    namePopup = L.popup()
+    .setLatLng(districtCentroidArray)
+    .setContent(districtName)
+    //.openOn(mymap);
+    
+    let districtMarker = L.marker(districtCentroidArray, {draggable: true}).addTo(mymap).bindPopup(namePopup.getContent());
+    markers.push(districtMarker);
   }
     districts_lyr = addGeoLayer(geoDistricts); //takes in a list of geoJson objects and draws them
   }
