@@ -261,7 +261,7 @@ function updateMap() {
 
         if (getFilteredData(feature)[0]< .02) {
           return {"color": "#000",  "fillColor":'#000', "weight":4, "opacity": 1 }
-         
+          
         }
         else if (getFilteredData(feature)[0] < .05) {
           return {"color": "#CD5C5C",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 };
@@ -424,7 +424,7 @@ let helpPanel = new Vue({
 
 function assignDistrict(address, geoLayer, tooltipLabel) {
   //convert the address geojson to leaflet polygon
-  geoLayer.bindTooltip(tooltipLabel, {permanent: true, sticky:true}).addTo(mymap);
+  //geoLayer.bindTooltip(tooltipLabel, {permanent: true, sticky:true}).addTo(mymap);
 
   let addressPolygon = L.polygon(address.geometry.coordinates[0]);
   //find the centroid of the address polygon
@@ -440,25 +440,18 @@ function assignDistrict(address, geoLayer, tooltipLabel) {
 
 
 function drawDistricts() {
-  //if it turns out that most of cta's data is in lists of json, change this
-  //function to be more flexible by taking in the url suffix as a parameter and
-  //changing the name to be "draw sfcta data" or something like that
   let districtName;
     for (let district of geoDistricts) { // in a for loop bc sfcta api returns a list of json for this one
     //calls json2geojson function to convert json data response to geojson
     ctaJson2geojson(district);
     districtName = district.distname;
-    //console.log(districtName);
+    let districtPolygon = L.polygon(district.geometry.coordinates[0]);
+    let districtCentroid = districtPolygon.getBounds().getCenter();
+    let districtCentroidArray = [districtCentroid.lng, districtCentroid.lat]; //reformat so that the lat/lon labels are correct
 
+    let marker = L.marker(districtCentroidArray, {draggable: true}).addTo(mymap).bindPopup(districtName).openPopup();
   }
     districts_lyr = addGeoLayer(geoDistricts); //takes in a list of geoJson objects and draws them
-
-    //goal is to add a label to each of the geodistricts. it is adding them with the below function but they are 
-    //all added to the same place instead of being distributed amongst their layers
-    //i think eventually i may want to move this to update map so that it does it with the statistics
-    districts_lyr.eachLayer(function(layer) {
-      districts_lyr.bindTooltip(layer.feature.distname, {offset: [50, 50], permanent: true, sticky:true}).addTo(mymap);
-    });
   }
 
 //save the geoDistricts data locally
