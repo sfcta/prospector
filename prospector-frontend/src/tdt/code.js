@@ -38,7 +38,7 @@ var leafletPip = require('@mapbox/leaflet-pip');
 mymap.setView([37.76889, -122.440997], 12);
 
 
-// some important global variables.
+// some important constant variables.
 const CTA_API_SERVER = 'https://api.sfcta.org/api/';
 const DISTRICTS_URL = 'tia_dist12';
 const TRIP_DISTRIBUTION = 'tia_distribution';
@@ -51,14 +51,10 @@ queryServer(CTA_API_SERVER + TRIP_DISTRIBUTION)
   distributionData = data;
   //console.log(distributionData);
 })
+//"dashArray": '5 5'
 
-
-
-
-
-//still figuring out the specifics of these color styles. I think they are in hex?
-let color_styles = [{ normal  : {"color": "#39f", "weight":3,  "opacity": 0.5, "dashArray": '5 5'},
-selected: {"color": "#33f",    "weight":4, "opacity": 0.5, "dashArray": '5 5' },},
+let color_styles = [{ normal  : {"color": "#39f", "weight":3,  "opacity": 0.5},
+selected: {"color": "#33f",    "weight":4, "opacity": 0.5 },},
 { normal  : {"fillColor": "#8B0000 ", "fillOpacity": 0.8 },
 selected: {"color": "#34784b", "weight":5, "opacity": 1.0, },},
 {normal: {"fillColor": "#000", "fillOpacity": 0.8, },
@@ -72,15 +68,17 @@ let districts;
 let districts_lyr;
 
 //some other global variables
-let addressDistrictNum; //will be defined in a point in polygon related function, which should be
-//called in update map and saved. want this to be null until someone puts in an address
-let modeSelect; //the default should correspond to what is seen visually. should never be null 
-//because it will throw an error if a user doesn't press a button before mousing over
+let addressDistrictNum; 
+let modeSelect; 
 //let directionSelect = "outbound";
-let landUseSelect; //hardcoded to office land use
-let tripPurposeSelect; //hardcoded to work trip type
+let landUseSelect; 
+let tripPurposeSelect; 
 let referenceDistrictProp;
 let colorDistrictOutput;
+
+//let proportion_outbound;
+//let proportion_inbound;
+
 
 
 //creating the tooltip functionality and putting it on the map
@@ -118,49 +116,41 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
     this._div.innerHTML = '<h4>Information</h4>' +
     '<b> Select a trip purpose to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
   }
-  else {
-    referenceDistrictProp = "prop_dist" + hoverDistrict.dist; //the name of the value that stores the 
-    //relevant proportion from address district to hover district
-    let filtered_data = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect); //hard coded for now, make a direction button just like mode
-    //console.log(filtered_data);
-
-    let proportion_outbound = numeral(filtered_data[0][referenceDistrictProp]).format('0.0%'); 
-    let proportion_inbound = numeral(filtered_data[1][referenceDistrictProp]).format('0.0%');
-    
-
+  else { 
     this._div.innerHTML = '<h4>Information</h4>' +
     '<b> Proportion of outbound trips from district '+ addressDistrictNum.toString() + ' to district '+ hoverDistrict.dist.toString()+ ': ' + 
-    proportion_outbound +' </b>' +
+    numeral(getFilteredData(hoverDistrict)[0]).format('0.0%') +' </b>' +
     '<br><b> Proportion of inbound trips to district '+ hoverDistrict.dist.toString() + ' from district '+ addressDistrictNum.toString()+ ': ' + 
-    proportion_inbound +' </b></br>'
+    numeral(getFilteredData(hoverDistrict)[1]).format('0.0%') +' </b></br>'
     //colorDistricts(referenceDistrictProp, filtered_data);
-
   }
-  
 };
 info.addTo(mymap);
 
+//should filterDistributionData and getFilteredData be combined into one function? probably...
+
 function filterDistributionData(mode, districtNum, landUse, purpose) { 
 //this function filters the whole distributionData json object according to a few given parameters
-// console.log(mode + " selected");
-// console.log(landUse + " selected");
-// console.log(purpose + " selected");
-// console.log("the address is in district " + districtNum);
 return distributionData.filter(function(piece){ 
     //for now the input will either be transit or all auto, which is everything that is not transit
-
     //this returns a filtered json object that includes only the components of the original json
   //that are the given mode, direction and district number
   if (modeSelect == "transit") {
-
     return piece.mode == "transit" && piece.dist == districtNum && landUse == piece.landuse && purpose == piece.purpose;
   }
   else if (modeSelect !== "transit") {
     return piece.mode !== "transit" && piece.dist == districtNum && landUse == piece.landuse && purpose == piece.purpose;
-
   }
 });
+}
 
+function getFilteredData(hoverDistrict) {
+  referenceDistrictProp = "prop_dist" + hoverDistrict.dist; //the name of the value that stores the 
+  //relevant proportion from address district to hover district
+  let filtered_data = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect); //hard coded for now, make a direction button just like mode
+  let proportion_outbound = filtered_data[0][referenceDistrictProp];
+  let proportion_inbound = filtered_data[1][referenceDistrictProp];
+  return [proportion_outbound, proportion_inbound];
 
 }
 
@@ -182,15 +172,9 @@ function queryServer(url){
 }
 
 
-
-
-
 function planningJson2geojson(json) {
   //converts the response json of the planning geocoder into a geojson format that is readable by leaflet
-  //allows this data to be added to a geoLayer and drawn on the map
-
-  //find out how to properly alert the user if the address is incorrect
-  
+  //allows this data to be added to a geoLayer and drawn on the map  
   let geoCodeJson = {};
   geoCodeJson['blklot'] = json.features[0].attributes.blklot;
   geoCodeJson['type'] = 'Feature';
@@ -198,12 +182,9 @@ function planningJson2geojson(json) {
   geoCodeJson['geometry']['type'] = 'MultiPolygon';
   geoCodeJson['geometry']['coordinates'] = [json.features[0].geometry.rings];
   //console.log(geoCodeJson);
-  return geoCodeJson;
-  
+  return geoCodeJson;  
   
 }
-
-
 
 
 function ctaJson2geojson(json) {
@@ -214,37 +195,15 @@ function ctaJson2geojson(json) {
   
 }
 
-
-
 function addGeoLayer(geoJsonData){
   let geolyr = L.geoJSON(geoJsonData,{ //this makes a geoJSON layer from
     //geojson data, which is required input. i is the style input
-    style: function(feature) {
-       switch (feature.dist) { //should be the district name
-         case 1: return {color: "#000"};
-         case 2:   return {color: "#CD5C5C"};
-         case 3:   return {color: "#1B4F72"};
-         case 4:   return {color: "#76448A"};
-         case 5:   return {color: "#BA4A00"};
-         case 6:   return {color: "#196F3D"};
-         case 7:   return {color: "#34495E"};
-         case 8:   return {color: "#0E6655"};
-         case 9:   return {color: "#9A7D0A"};
-         case 10:   return {color: "#641E16"};
-         case 11:   return {color: "#D68910"};
-         case 12:   return {color: "#0000ff"};
-       }
-
-     }, 
+    style: color_styles[0].normal, 
     onEachFeature: function(feature, layer) { //need to figure out exactly what this is all doing
       layer.on({
         mouseover: function(e){
           //e.target.setStyle(color_styles[0].selected);
           e.target.bringToFront(); 
-          console.log(feature);
-
-          //e.target.setStyle(colorDistricts(feature, referenceDistrictProp));
-
           if (address_geoLyr) {
             address_geoLyr.bringToFront();
           }
@@ -252,14 +211,13 @@ function addGeoLayer(geoJsonData){
         },
         mouseout: function(e){
           //geolyr.resetStyle(e.target);
-          e.target.setStyle(color_styles[0].normal);
+          //e.target.setStyle(color_styles[0].normal);
+          //is there a way where i can do highlighting with both of these different color paradigms?
 
-          //info.update("peace out");
         },
       });
     }
   });
-  //geolyr.bringToFront();
   geolyr.addTo(mymap); //draws the created layer on the map
   return geolyr;
 }
@@ -280,34 +238,48 @@ function updateMap() {
         let geoJson = planningJson2geojson(geocodedJson); //this is the polygon
         address_geoLyr = L.geoJSON(geoJson,{ //this makes a geoJSON layer from geojson data, which is input
         style: color_styles[1].normal, //this is hardcoded to blue
-        onEachFeature: function(feature, layer) { //function that will be called on each created feature layer
-          //try calling colorDisticts here?
-          // let returnedColor = colorDistricts(feature, referenceDistrictProp);
-          // feature.setStyle(returnedColor);
+        onEachFeature: function(feature, layer) { 
           layer.on({
-
             mouseover: function(e){
-
               e.target.setStyle(color_styles[1].selected);
               e.target.bringToFront();
-              info.update(e.target.feature);
+              getFilteredData(e.target.feature); //gets the filtered data according to various parameters
+              info.update(e.target.feature); //updates the info box with text
             },
             mouseout: function(e){
-
               address_geoLyr.resetStyle(e.target);
-              //info.update(null);
             },
           });
         }
       });
-      assignDistrict(geoJson, address_geoLyr, input);
+        assignDistrict(geoJson, address_geoLyr, input);
       address_geoLyr.addTo(mymap); //adds the geoLayer to the map
       address_geoLyr.bringToFront();
-      districts_lyr.resetStyle(function(feature){
+
+      districts_lyr.setStyle(function(feature){
+        console.log(getFilteredData(feature)[0]);
+
+        if (getFilteredData(feature)[0]< .02) {
+          return {"color": "#000",  "fillColor":'#000', "weight":4, "opacity": 1 }
+         
+        }
+        else if (getFilteredData(feature)[0] < .05) {
+          return {"color": "#CD5C5C",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 };
+        }
+        else if (getFilteredData(feature)[0] < .07){
+          return {"color": "#CD5C5C",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 }
+        }
+        else if (getFilteredData(feature)[0] < .1){
+          return {"color": "#76448A",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 }
+
+        }
+        else if (getFilteredData(feature)[0] < .5) {
+          return {"color": "#BA4A00",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 }
+
+        }
+
         
-      })
-      //colorDistricts(); //this will restyle the districts according to their relevant colors, and it will only do so 
-      //if the returned json is valid (meaning a valid address has been inputted)
+      });
     }
     else {
       alert("The address is invalid or is outside the city limits of San Francisco. Enter another address.");
@@ -466,55 +438,6 @@ function assignDistrict(address, geoLayer, tooltipLabel) {
 
 }
 
-function colorDistricts(feature, referenceDistrictProp) {
-  console.log(feature.dist);
-  //colorDistrictOutput = color_styles[2].normal;
-
-   switch (feature.dist) { //should be the district name
-     case 1: return {color: "#000"};
-     case 2:   return {color: "#CD5C5C"};
-     case 3:   return {color: "#1B4F72"};
-     case 4:   return {color: "#76448A"};
-     case 5:   return {color: "#BA4A00"};
-     case 6:   return {color: "#196F3D"};
-     case 7:   return {color: "#34495E"};
-     case 8:   return {color: "#0E6655"};
-     case 9:   return {color: "#9A7D0A"};
-     case 10:   return {color: "#641E16"};
-     case 11:   return {color: "#D68910"};
-     case 12:   return {color: "#0000ff"};
-   }
-
- }
-
-
-
-
-
-
-//     //console.log(featureInstanceLayer); //ok so this is logging all of them...because eachLayer iterates over all of them at once
-//     let dist = featureInstanceLayer.feature.dist; //as a test I'll first color code by district number to keep things simple
-//     console.log(dist);
-//     //let outbound_prop = filtered_data[0][referenceDistrictProp];
-//     //console.log(outbound_prop);
-
-//     //this will paint individual districts on mouseover of any of them
-//     if (dist == 1) {
-//       return "red";
-//     }
-//     else if (dist == 2) {
-//       return "green";
-//     }
-//     else if (dist == 8) {
-//       return "yellow";
-//     }
-//   }
-
-
-
-
-
-
 
 function drawDistricts() {
   //if it turns out that most of cta's data is in lists of json, change this
@@ -529,7 +452,6 @@ function drawDistricts() {
 
   }
     districts_lyr = addGeoLayer(geoDistricts); //takes in a list of geoJson objects and draws them
-    //console.log(districts_lyr);
 
     //goal is to add a label to each of the geodistricts. it is adding them with the below function but they are 
     //all added to the same place instead of being distributed amongst their layers
@@ -537,12 +459,7 @@ function drawDistricts() {
     districts_lyr.eachLayer(function(layer) {
       districts_lyr.bindTooltip(layer.feature.distname, {offset: [50, 50], permanent: true, sticky:true}).addTo(mymap);
     });
-    //districts_lyr.bindTooltip(districtName, {permanent: true, sticky:true}).addTo(mymap);
-
-
-    
-  //})
-}
+  }
 
 //save the geoDistricts data locally
 queryServer(CTA_API_SERVER + DISTRICTS_URL)
