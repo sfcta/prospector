@@ -79,6 +79,7 @@ let colorDistrictOutput;
 let namePopup;
 //let districtMarker;
 let propPopup;
+let max_outbound;
 
 //let proportion_outbound;
 //let proportion_inbound;
@@ -149,19 +150,15 @@ return distributionData.filter(function(piece){
 }
 
 function getFilteredData(hoverDistrict) {
+
   referenceDistrictProp = "prop_dist" + hoverDistrict.dist; //the name of the value that stores the 
   //relevant proportion from address district to hover district
   let filtered_data = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect); //hard coded for now, make a direction button just like mode
   let proportion_outbound = filtered_data[0][referenceDistrictProp];
   let proportion_inbound = filtered_data[1][referenceDistrictProp];
+  
 
 
-  // districtMarker.on('mouseover', function(){
-  //     districtMarker.popup.setContent(proportion_outbound +", "+ proportion_inbound); //this reset isnt working
-  //   });
-  // console.log(districtMarker._popup.getContent()); //this is always printing outer mission hills
-
-  //districtPopup.setContent(proportion_outbound +", "+ proportion_inbound);
   return [proportion_outbound, proportion_inbound];
 
 }
@@ -244,7 +241,19 @@ function addGeoLayer(geoJsonData){
   return geolyr;
 }
 
-function updateMap() {
+async function getMax() {
+  let outbounds = [];
+  let filtered_json_object = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect)[0];
+  for (let district of geoDistricts) {
+    let propName = "prop_dist" + district.dist;
+    outbounds.push(filtered_json_object[propName]);
+
+  }
+  return Math.ceil((Math.max(outbounds))*100);
+
+}
+
+async function updateMap() {
   //this function that runs when the "search" button is pressed. it does the following:
   // 1. sets the value of input based on the user input
   // 2. calls the planning geocoder via and ajax request and geocodes a given address
@@ -261,7 +270,7 @@ function updateMap() {
         address_geoLyr = L.geoJSON(geoJson,{ //this makes a geoJSON layer from geojson data, which is input
         style: color_styles[1].normal, //this is hardcoded to blue
         onEachFeature: function(feature, layer) { 
-          
+
           layer.on({
             mouseover: function(e){
               e.target.setStyle(color_styles[1].selected);
@@ -277,41 +286,51 @@ function updateMap() {
           });
         }
       });
-      assignDistrict(geoJson, address_geoLyr, input);
+        assignDistrict(geoJson, address_geoLyr, input);
       address_geoLyr.addTo(mymap); //adds the geoLayer to the map
       address_geoLyr.bringToFront();
-      for (let districtMarker in markers) {
-        districtMarker.namePopup.setContent("something new");
-      }
+      // for (let districtMarker in markers) {
+      //   districtMarker.namePopup.setContent("something new");
+      // }
       // districtMarker._popup.setContent(function(feature){ //district marker must only be doing it for one polygon
       //   console.log("hello");
       //   return "something new"
       // });
 
-
+      max_outbound = await getMax();
       districts_lyr.setStyle(function(feature){
+        console.log(max_outbound);
+        let color_func = chroma.scale(['yellow', 'red']).domain([0, max_outbound]);
+        // scale(0.25);
+        // scale(0.5);
+        // scale(0.75);
+        let proportion_outbound = getFilteredData(feature)[0]*100;
+        console.log(proportion_outbound);
+        return {'fillColor': color_func(proportion_outbound)};
 
-        if (getFilteredData(feature)[0]< .02) {
-          return {"color": "#000",  "fillColor":'#000', "weight":4, "opacity": 1 }
+        // if (proportion_outbound< .02) {
+        //   return 
+        //   //{"color": "#000",  "fillColor":'#000', "weight":4, "opacity": 1 }
 
-        }
-        else if (getFilteredData(feature)[0] < .05) {
-          return {"color": "#CD5C5C",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 };
-        }
-        else if (getFilteredData(feature)[0] < .07){
-          return {"color": "#CD5C5C",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 }
-        }
-        else if (getFilteredData(feature)[0] < .1){
-          return {"color": "#76448A",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 }
+        // }
+        // else if (proportion_outbound < .05) {
+        //   return {"color": "#CD5C5C",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 };
+        // }
+        // else if (proportion_outbound < .07){
+        //   return {"color": "#CD5C5C",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 }
+        // }
+        // else if (proportion_outbound < .1){
+        //   return {"color": "#76448A",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 }
 
-        }
-        else if (getFilteredData(feature)[0] < .5) {
-          return {"color": "#BA4A00",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 }
+        // }
+        // else if (proportion_outbound < .5) {
+        //   return {"color": "#BA4A00",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 }
 
-        }
+        // }
 
         
-      });
+      }
+      );
     }
     else {
       alert("The address is invalid or is outside the city limits of San Francisco. Enter another address.");
