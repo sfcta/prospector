@@ -380,8 +380,16 @@ function pickTR(thing){
 // }
 
 function pickRes(thing){
+  let numstudio = app.numstudio;
+  let num1 = app.num_1bed;
+  let num2 = app.num_2bed;
+  let num3 = app.num_3bed;
   landUseSelect = "Res";
   console.log("res selected");
+  console.log(num1);
+  console.log(num2);
+  console.log(num3);
+
   app.isRes = true;
   app.isRet = false;
   app.isOffice = false;
@@ -390,8 +398,12 @@ function pickRes(thing){
 }
 
 function pickOffice(thing){
+  let off_sqft = app.off_sqft;
+
   landUseSelect = "Off";
   console.log("off selected");
+  console.log(off_sqft);
+
   app.isOffice = true;
   app.isRes = false;
   app.isRet = false;
@@ -400,8 +412,10 @@ function pickOffice(thing){
 }
 
 function pickRet(thing){
+  let ret_sqft = app.ret_sqft;
   landUseSelect = "Ret";
   console.log("ret selected");
+  console.log(ret_sqft);
   app.isRet = true;
   app.isRes = false;
   app.isOffice = false;
@@ -441,6 +455,13 @@ let app = new Vue({
     isRet: false,
     isWork: false,
     isOther: false,
+    off_sqft: null,
+    ret_sqft: null,
+    //res_sqft: null,
+    num_studio: null,
+    num_1bed: null,
+    num_2bed: null,
+    num_3bed: null,
     // isShared2Active: false,
     // isShared3Active: false,
     // isTaxiActive: false,
