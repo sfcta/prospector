@@ -51,11 +51,11 @@
 
             <h5>CHOOSE MODE:</h5>
             <button v-on:click="pickAU" 
-                    v-bind:class="{ active: isAUActive}"
+                    v-bind:class="{ active: isAUActive, yellow: isAUActive}"
                      class="mini ui grey button">
                      All Auto</button>
             <button v-on:click="pickTR"
-                    v-bind:class="{ active: isTRActive}"
+                    v-bind:class="{ active: isTRActive, yellow: isTRActive}"
                      class="mini ui grey button">
                      Transit</button>
             <!-- <button v-on:click="pickShared2"
@@ -76,11 +76,11 @@
 
             <h5>CHOOSE LAND USE:</h5>
             <button v-on:click="pickOffice"
-                    v-bind:class="{ active: isOffice}"
+                    v-bind:class="{ active: isOffice, yellow: isOffice}"
                      class="mini ui grey button">
                      Office</button>
             <button v-on:click="pickRes"
-                    v-bind:class="{ active: isRes}"
+                    v-bind:class="{ active: isRes, yellow:isRes}"
                      class="mini ui grey button">
                      Residential</button>
             <button v-on:click="pickRet"
@@ -91,7 +91,7 @@
 
             <h5>CHOOSE TRIP PURPOSE:</h5>
             <button v-on:click="pickWork"
-                    v-bind:class="{ active: isWork, green: isWork}"
+                    v-bind:class="{ active: isWork, yellow: isWork}"
                      class="mini ui grey button">
                      Work</button>
             <button v-on:click="pickOther"

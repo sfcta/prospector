@@ -154,6 +154,7 @@ function getFilteredData(hoverDistrict) {
   referenceDistrictProp = "prop_dist" + hoverDistrict.dist; //the name of the value that stores the 
   //relevant proportion from address district to hover district
   let filtered_data = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect); //hard coded for now, make a direction button just like mode
+  console.log(filtered_data);
   let proportion_outbound = filtered_data[0][referenceDistrictProp];
   let proportion_inbound = filtered_data[1][referenceDistrictProp];
   
@@ -241,19 +242,23 @@ function addGeoLayer(geoJsonData){
   return geolyr;
 }
 
-async function getMax() {
+function getMax() {
   let outbounds = [];
   let filtered_json_object = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect)[0];
+  //let outbound_prop = getFilteredData(feature)[0];
   for (let district of geoDistricts) {
     let propName = "prop_dist" + district.dist;
     outbounds.push(filtered_json_object[propName]);
 
   }
-  return Math.ceil((Math.max(outbounds))*100);
+  // console.log(Math.ceil(Math.max.apply(null, outbounds)));
+  // return Math.ceil(Math.max.apply(null, outbounds));
+  console.log(Math.max.apply(null, outbounds));
+  return Math.max.apply(null, outbounds);
 
 }
 
-async function updateMap() {
+function updateMap() {
   //this function that runs when the "search" button is pressed. it does the following:
   // 1. sets the value of input based on the user input
   // 2. calls the planning geocoder via and ajax request and geocodes a given address
@@ -297,20 +302,19 @@ async function updateMap() {
       //   return "something new"
       // });
 
-      max_outbound = await getMax();
       districts_lyr.setStyle(function(feature){
-        console.log(max_outbound);
-        let color_func = chroma.scale(['yellow', 'red']).domain([0, max_outbound]);
-        // scale(0.25);
-        // scale(0.5);
-        // scale(0.75);
-        let proportion_outbound = getFilteredData(feature)[0]*100;
-        console.log(proportion_outbound);
-        return {'fillColor': color_func(proportion_outbound)};
+        //console.log(getMax());
+        let color_func = chroma.scale(['blue', 'red']).domain([0, getMax()]);
+        //console.log(color_func(0.25));
+        //console.log(color_func(0.5));
+        console.log(getMax());
+        let proportion_outbound = getFilteredData(feature)[0];
+        //console.log(proportion_outbound);
+        //console.log(color_func(proportion_outbound));
+        return {'fillColor': color_func(proportion_outbound), fillOpacity:0.6};
 
         // if (proportion_outbound< .02) {
-        //   return 
-        //   //{"color": "#000",  "fillColor":'#000', "weight":4, "opacity": 1 }
+        //   return {"color": "#000",  "fillColor":'#000', "weight":4, "opacity": 1 }
 
         // }
         // else if (proportion_outbound < .05) {
@@ -343,12 +347,18 @@ async function updateMap() {
 function pickAU(thing){
   modeSelect = "all auto";
   //modeSelect = "drive_alone";
+  app.isAUActive = true;
+  app.isTRActive = false;
+
 
   console.log("all auto selected");
 
 }
 function pickTR(thing){
   modeSelect = "transit";
+  app.isTRActive = true;
+  app.isAUActive = false;
+
   console.log("transit selected");
 
 
@@ -372,30 +382,47 @@ function pickTR(thing){
 function pickRes(thing){
   landUseSelect = "Res";
   console.log("res selected");
+  app.isRes = true;
+  app.isRet = false;
+  app.isOffice = false;
+
 
 }
 
 function pickOffice(thing){
   landUseSelect = "Off";
   console.log("off selected");
+  app.isOffice = true;
+  app.isRes = false;
+  app.isRet = false;
+
 
 }
 
 function pickRet(thing){
   landUseSelect = "Ret";
   console.log("ret selected");
+  app.isRet = true;
+  app.isRes = false;
+  app.isOffice = false;
 
 }
 
 function pickWork(thing){
   tripPurposeSelect = "work";
   console.log("work selected");
+  app.isWork = true;
+  app.isOther = false;
+
 
 }
 
 function pickOther(thing){
   tripPurposeSelect = "other";
   console.log("other/nonwork selected");
+  app.isOther = true;
+  app.isWork = false;
+
 
 }
 
@@ -475,7 +502,7 @@ let helpPanel = new Vue({
 
 function assignDistrict(address, geoLayer, tooltipLabel) {
   //convert the address geojson to leaflet polygon
-  //geoLayer.bindTooltip(tooltipLabel, {permanent: true, sticky:true}).addTo(mymap);
+  geoLayer.bindTooltip(tooltipLabel, {permanent: true, sticky:true}).addTo(mymap);
 
   let addressPolygon = L.polygon(address.geometry.coordinates[0]);
   //find the centroid of the address polygon
