@@ -87,7 +87,7 @@ let max_outbound;
 
 
 //creating the tooltip functionality and putting it on the map
-let info = L.control(); //control refers to tool tip like objects
+let info = L.control(); 
 info.onAdd = function (map) {
   this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
   this.update();
@@ -236,6 +236,7 @@ function addGeoLayer(geoJsonData){
 
         },
       });
+
     }
   });
   geolyr.addTo(mymap); //draws the created layer on the map
@@ -491,6 +492,26 @@ let app = new Vue({
   },
 });
 
+// not sure if this is needed
+//let details = new Vue({
+//   el: '#details',
+//   data: {
+//     //isHidden: false
+//     isRes: false,
+//     isRet: false,
+//     isOther: false,
+//     isOffice: false,
+//   },
+//   methods: {
+//     pickOffice: pickOffice,
+//     pickRes: pickRes,
+//     pickRet: pickRet,
+//     pickOther: pickOther,
+
+//   }
+
+// })
+
 // eat some cookies -- so we can hide the help permanently
 let cookieShowHelp = Cookies.get('showHelp');
 function clickToggleHelp() {
@@ -547,13 +568,17 @@ function drawDistricts() {
     let districtPolygon = L.polygon(district.geometry.coordinates[0]);
     let districtCentroid = districtPolygon.getBounds().getCenter();
     let districtCentroidArray = [districtCentroid.lng, districtCentroid.lat]; //reformat so that the lat/lon labels are correct
+    //let districtTooltip = districtPolygon.bindTooltip("test", {offset: [50,100], permanent:true}).openOn(mymap);
+
+   //these don't look awesome but i think given that tooltip can't be bound to polygon it is the best way to go.
+   //I can change the markers so that they are less noticeable
     namePopup = L.popup()
     .setLatLng(districtCentroidArray)
     .setContent(districtName)
-    //.openOn(mymap);
-    
+    .openOn(mymap);
     let districtMarker = L.marker(districtCentroidArray, {draggable: true}).addTo(mymap).bindPopup(namePopup.getContent());
     markers.push(districtMarker);
+
   }
     districts_lyr = addGeoLayer(geoDistricts); //takes in a list of geoJson objects and draws them
   }
