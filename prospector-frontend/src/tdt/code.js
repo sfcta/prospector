@@ -71,18 +71,14 @@ let markers = []; //this is the list of all the district markers
 //some other global variables
 let addressDistrictNum; 
 let modeSelect; 
-//let directionSelect = "outbound";
 let landUseSelect; 
 let tripPurposeSelect; 
 let referenceDistrictProp;
 let colorDistrictOutput;
 let namePopup;
-//let districtMarker;
 let propPopup;
 let max_outbound;
 
-//let proportion_outbound;
-//let proportion_inbound;
 
 
 
@@ -164,17 +160,6 @@ function getFilteredData(hoverDistrict) {
 
 }
 
-// function updatePropMarker(hoverDistrict){
-//   let hoverPolygon = L.polygon(hoverDistrict.geometry.coordinates[0]);
-//     let hoverCentroid = hoverPolygon.getBounds().getCenter();
-//     let hoverCentroidArray = [hoverCentroid.lng, hoverCentroid.lat];
-//   propPopup = L.popup()
-//     .setLatLng(hoverCentroidArray)
-//     .setContent("prop out: "+ proportion_outbound)
-//     //return propPopup;
-// }
-
-
 
 function queryServer(url){
   var promise = new Promise(function(resolve, reject) {
@@ -219,7 +204,7 @@ function addGeoLayer(geoJsonData){
   let geolyr = L.geoJSON(geoJsonData,{ //this makes a geoJSON layer from
     //geojson data, which is required input. i is the style input
     style: color_styles[0].normal, 
-    onEachFeature: function(feature, layer) { //need to figure out exactly what this is all doing
+    onEachFeature: function(feature, layer) { 
       layer.on({
         mouseover: function(e){
           //e.target.setStyle(color_styles[0].selected);
@@ -245,29 +230,19 @@ function addGeoLayer(geoJsonData){
 function getMax() {
   let outbounds = [];
   let filtered_json_object = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect)[0];
-  //let outbound_prop = getFilteredData(feature)[0];
   for (let district of geoDistricts) {
     let propName = "prop_dist" + district.dist;
     outbounds.push(filtered_json_object[propName]);
 
   }
-  // console.log(Math.ceil(Math.max.apply(null, outbounds)));
-  // return Math.ceil(Math.max.apply(null, outbounds));
   console.log(Math.max.apply(null, outbounds));
   return Math.max.apply(null, outbounds);
 
 }
 
 function updateMap() {
-  //this function that runs when the "search" button is pressed. it does the following:
-  // 1. sets the value of input based on the user input
-  // 2. calls the planning geocoder via and ajax request and geocodes a given address
-  // 3. calls the geojson converter (planningJson2geojson) and converts the response to readable geojson
-  // 4. creates a geoLayer from this geojson data
-  // 5. adds this layer to the map (lyr.addTo(map))
-  // 6. throws an error if the user input is invalid
-
   let input = app.address; // app.address is the user input. app refers to the VUE object below that handles
+  console.log(app.address);
   let geocodedJson = queryServer(PLANNING_GEOCODER_baseurl+input, 0) //data has got to the geocoder
     .then(function(geocodedJson) { //after queryServer returns the data, do this:
       if (geocodedJson.features.length !== 0) { //checks if the server returns meaningful json (as opposed to empty)
@@ -294,45 +269,13 @@ function updateMap() {
         assignDistrict(geoJson, address_geoLyr, input);
       address_geoLyr.addTo(mymap); //adds the geoLayer to the map
       address_geoLyr.bringToFront();
-      // for (let districtMarker in markers) {
-      //   districtMarker.namePopup.setContent("something new");
-      // }
-      // districtMarker._popup.setContent(function(feature){ //district marker must only be doing it for one polygon
-      //   console.log("hello");
-      //   return "something new"
-      // });
+     
 
       districts_lyr.setStyle(function(feature){
-        //console.log(getMax());
         let color_func = chroma.scale(['blue', 'red']).domain([0, getMax()]);
-        //console.log(color_func(0.25));
-        //console.log(color_func(0.5));
         console.log(getMax());
         let proportion_outbound = getFilteredData(feature)[0];
-        //console.log(proportion_outbound);
-        //console.log(color_func(proportion_outbound));
-        return {'fillColor': color_func(proportion_outbound), fillOpacity:0.6};
-
-        // if (proportion_outbound< .02) {
-        //   return {"color": "#000",  "fillColor":'#000', "weight":4, "opacity": 1 }
-
-        // }
-        // else if (proportion_outbound < .05) {
-        //   return {"color": "#CD5C5C",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 };
-        // }
-        // else if (proportion_outbound < .07){
-        //   return {"color": "#CD5C5C",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 }
-        // }
-        // else if (proportion_outbound < .1){
-        //   return {"color": "#76448A",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 }
-
-        // }
-        // else if (proportion_outbound < .5) {
-        //   return {"color": "#BA4A00",  "fillColor":'#CD5C5C', "weight":4, "opacity": 1 }
-
-        // }
-
-        
+        return {'fillColor': color_func(proportion_outbound), fillOpacity:0.6};     
       }
       );
     }
@@ -346,9 +289,9 @@ function updateMap() {
 //button functions
 function pickAU(thing){
   modeSelect = "all auto";
-  //modeSelect = "drive_alone";
   app.isAUActive = true;
   app.isTRActive = false;
+  app.isTaxiTNCActive = false;
 
 
   console.log("all auto selected");
@@ -358,52 +301,55 @@ function pickTR(thing){
   modeSelect = "transit";
   app.isTRActive = true;
   app.isAUActive = false;
-
+  app.isTaxiTNCActive = false;
   console.log("transit selected");
+
+}
+
+
+function pickTaxiTNC(thing){
+  modeSelect = "taxiTNC";
+  app.isTaxiTNCActive = true;
+  app.isAUActive = false;
+  app.isTRActive = false;
+  console.log("taxi/tnc selected");
 
 
 }
 
-// function pickShared2(thing){
-//   modeSelect = "shared_ride_2";
-
-// }
-
-// function pickShared3(thing){
-//   modeSelect = "shared_ride_3";
-
-// }
-
-// function pickTaxi(thing){
-//   modeSelect = "taxi";
-
-// }
+function getInputs(thing){
+  if (app.isRes == true) {
+    let num_studios = app.num_studios;
+    let num_1bed = app.num_1bed;
+    let num_2bed = app.num_2bed;
+    let num_3bed = app.num_3bed;
+    console.log(num_studios);
+    console.log(num_1bed);
+    console.log(num_2bed);
+    console.log(num_3bed);
+    
+  }
+  else if (app.isRet == true) {
+    let ret_sqft = app.ret_sqft;
+    console.log(ret_sqft);
+  }
+  else if (app.isOffice == true) {
+    let off_sqft = app.off_sqft;
+    console.log(off_sqft);
+  }
+  
+}
 
 function pickRes(thing){
-  let numstudio = app.numstudio;
-  let num1 = app.num_1bed;
-  let num2 = app.num_2bed;
-  let num3 = app.num_3bed;
   landUseSelect = "Res";
-  console.log("res selected");
-  console.log(num1);
-  console.log(num2);
-  console.log(num3);
-
   app.isRes = true;
   app.isRet = false;
   app.isOffice = false;
 
-
 }
 
 function pickOffice(thing){
-  let off_sqft = app.off_sqft;
-
   landUseSelect = "Off";
-  console.log("off selected");
-  console.log(off_sqft);
-
   app.isOffice = true;
   app.isRes = false;
   app.isRet = false;
@@ -412,10 +358,7 @@ function pickOffice(thing){
 }
 
 function pickRet(thing){
-  let ret_sqft = app.ret_sqft;
   landUseSelect = "Ret";
-  console.log("ret selected");
-  console.log(ret_sqft);
   app.isRet = true;
   app.isRes = false;
   app.isOffice = false;
@@ -442,7 +385,7 @@ function pickOther(thing){
 
 
 // Vue object connects what is done in the user interface html to the javascript. All the buttons
-// in the right side panel are connected here. 'data': provides
+// in the right side panel are connected here. 
 let app = new Vue({
   el: '#panel', //element is 'el' the whole right side of the map
   delimiters: ['${', '}'],
@@ -458,22 +401,29 @@ let app = new Vue({
     off_sqft: null,
     ret_sqft: null,
     //res_sqft: null,
-    num_studio: null,
+    num_studios: null,
     num_1bed: null,
     num_2bed: null,
     num_3bed: null,
     // isShared2Active: false,
     // isShared3Active: false,
-    // isTaxiActive: false,
+    isTaxiTNCActive: false,
+    inputs: false,
 
   },
-  /* this is for if you want to search directly from the box without the button, watch is
+   //this is for if you want to search directly from the box without the button, watch is
   // for detecting changes, sometimes it is not a button, it could be a checkbox or something
   // that isn't as straightforward as buttons, use watch
   watch: {
-    address: updateMap,
+    num_studios: getInputs,
+    num_1bed: getInputs,
+    num_2bed: getInputs,
+    num_3bed: getInputs,
+    off_sqft: getInputs,
+    ret_sqft: getInputs,
+
   },
-  */
+  
   methods: {
     clickToggleHelp: clickToggleHelp,
     pickAU: pickAU,
@@ -484,9 +434,8 @@ let app = new Vue({
     pickRet: pickRet,
     pickWork: pickWork,
     pickOther: pickOther,
-    // pickTaxi: pickTaxi,
-    // pickShared3: pickShared3,
-    // pickShared2: pickShared2,
+    pickTaxiTNC: pickTaxiTNC,
+    getInputs: getInputs,
 
   },
 });
