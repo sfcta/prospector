@@ -42,6 +42,7 @@ mymap.setView([37.76889, -122.440997], 12);
 const CTA_API_SERVER = 'https://api.sfcta.org/api/';
 const DISTRICTS_URL = 'tia_dist12';
 const TRIP_DISTRIBUTION = 'tia_distribution';
+const TRIP_GEN_RTS = 'tia_tripgen';
 const PLANNING_GEOCODER_baseurl = 'http://sfplanninggis.org/cpc_geocode/?search=';
 
 let geoDistricts;
@@ -51,7 +52,13 @@ queryServer(CTA_API_SERVER + TRIP_DISTRIBUTION)
   distributionData = data;
   //console.log(distributionData);
 })
-//"dashArray": '5 5'
+
+let tripGenRates;
+queryServer(CTA_API_SERVER + TRIP_GEN_RTS)
+.then(function(data) {
+  tripGenRates = data;
+  //console.log(tripGenRates);
+})
 
 let color_styles = [{ normal  : {"color": "#39f", "weight":3,  "opacity": 0.5},
 selected: {"color": "#33f",    "weight":4, "opacity": 0.5 },},
@@ -135,13 +142,9 @@ function filterDistributionData(mode, districtNum, landUse, purpose) {
 return distributionData.filter(function(piece){ 
     //for now the input will either be transit or all auto, which is everything that is not transit
     //this returns a filtered json object that includes only the components of the original json
-  //that are the given mode, direction and district number
-  if (modeSelect == "transit") {
-    return piece.mode == "transit" && piece.dist == districtNum && landUse == piece.landuse && purpose == piece.purpose;
-  }
-  else if (modeSelect !== "transit") {
-    return piece.mode !== "transit" && piece.dist == districtNum && landUse == piece.landuse && purpose == piece.purpose;
-  }
+  //that are the given mode, direction and district number 
+  return piece.mode == modeSelect && piece.dist == districtNum && landUse == piece.landuse && purpose == piece.purpose;
+  
 });
 }
 
@@ -235,14 +238,12 @@ function getMax() {
     outbounds.push(filtered_json_object[propName]);
 
   }
-  console.log(Math.max.apply(null, outbounds));
   return Math.max.apply(null, outbounds);
 
 }
 
 function updateMap() {
   let input = app.address; // app.address is the user input. app refers to the VUE object below that handles
-  console.log(app.address);
   let geocodedJson = queryServer(PLANNING_GEOCODER_baseurl+input, 0) //data has got to the geocoder
     .then(function(geocodedJson) { //after queryServer returns the data, do this:
       if (geocodedJson.features.length !== 0) { //checks if the server returns meaningful json (as opposed to empty)
@@ -273,7 +274,6 @@ function updateMap() {
 
       districts_lyr.setStyle(function(feature){
         let color_func = chroma.scale(['blue', 'red']).domain([0, getMax()]);
-        console.log(getMax());
         let proportion_outbound = getFilteredData(feature)[0];
         return {'fillColor': color_func(proportion_outbound), fillOpacity:0.6};     
       }
@@ -288,13 +288,13 @@ function updateMap() {
 
 //button functions
 function pickAU(thing){
-  modeSelect = "all auto";
+  modeSelect = "auto";
   app.isAUActive = true;
   app.isTRActive = false;
   app.isTaxiTNCActive = false;
 
 
-  console.log("all auto selected");
+  console.log("auto selected");
 
 }
 function pickTR(thing){
