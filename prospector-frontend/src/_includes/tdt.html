@@ -24,7 +24,6 @@
 
   <div class="pickers">
   <input v-model="address" placeholder="Search for address or click on map"/>
-  <button v-on:click="updateMap" class="mini ui grey button">Search</button>
 
     <h5>CHOOSE MODE:</h5>
     <button v-on:click="pickAU" 
@@ -69,20 +68,20 @@ class="mini ui grey button"> Non Work</button>
   <div id="panel">
     <template v-if="isRet">
     <h4>ENTER RETAIL SQUARE FOOTAGE: </h4>
-    <input v-model="ret_sqft" placeholder="Enter a number" key="retail-footage"></template>
+    <input v-model.number = "ret_sqft" placeholder="Enter a number" type = "number" key="retail-footage"></template>
     <template v-else-if="isOffice">
      <h4>ENTER OFFICE SQUARE FOOTAGE: </h4>
-     <input v-model="off_sqft" placeholder="Enter a number" key="office-footage"></template>
+     <input v-model.number="off_sqft" placeholder="Enter a number" type = "number" key="office-footage"></template>
      <template v-else-if="isRes">
       <h4>ENTER BEDROOMS BY TYPE: </h4>
       <label>Number of Studios:  </label>
-      <input v-model="num_studios" placeholder="Enter a number" key="num-studios">
+      <input v-model.number = "num_studios" placeholder="Enter a number" type = "number" key="num-studios">
       <br><br><label>Number of One Bedrooms:  </label>
-      <input v-model="num_1bed" placeholder="Enter a number" key="num-1bed">
+      <input v-model.number = "num_1bed" placeholder="Enter a number" type = "number" key="num-1bed">
       <br><br><label>Number of 2 bedrooms:  </label>
-      <input v-model="num_2bed" placeholder="Enter a number" key="num-2bed">
+      <input v-model.number = "num_2bed" placeholder="Enter a number" type = "number" key="num-2bed">
       <br><br><label>Number of 3 bedrooms:  </label>
-      <input v-model="num_3bed" placeholder="Enter a number" key="num-3bed"></template>
+      <input v-model.number = "num_3bed" placeholder="Enter a number" type = "number" key="num-3bed"></template>
       
     </div>
 
@@ -93,6 +92,8 @@ class="mini ui grey button"> Non Work</button>
 
 
 <div id="download">
+  <button v-on:click="updateMap" class="small ui right labeled icon floated green button">Update Map</button>
+
   <br><br><button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')" 
   class="small ui right labeled icon floated yellow button"
   style="margin-right:5px"><i class="icon download"></i>Download data (.zip)</button></div>

@@ -50,14 +50,12 @@ let distributionData;
 queryServer(CTA_API_SERVER + TRIP_DISTRIBUTION)
 .then(function(data) {
   distributionData = data;
-  //console.log(distributionData);
 })
 
 let tripGenRates;
 queryServer(CTA_API_SERVER + TRIP_GEN_RTS)
 .then(function(data) {
   tripGenRates = data;
-  //console.log(tripGenRates);
 })
 
 let color_styles = [{ normal  : {"color": "#39f", "weight":3,  "opacity": 0.5},
@@ -85,6 +83,7 @@ let colorDistrictOutput;
 let namePopup;
 let propPopup;
 let max_outbound;
+let total_person_trips_PM = 0;
 
 
 
@@ -153,7 +152,6 @@ function getFilteredData(hoverDistrict) {
   referenceDistrictProp = "prop_dist" + hoverDistrict.dist; //the name of the value that stores the 
   //relevant proportion from address district to hover district
   let filtered_data = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect); //hard coded for now, make a direction button just like mode
-  console.log(filtered_data);
   let proportion_outbound = filtered_data[0][referenceDistrictProp];
   let proportion_inbound = filtered_data[1][referenceDistrictProp];
   
@@ -189,7 +187,6 @@ function planningJson2geojson(json) {
   geoCodeJson['geometry'] = {};
   geoCodeJson['geometry']['type'] = 'MultiPolygon';
   geoCodeJson['geometry']['coordinates'] = [json.features[0].geometry.rings];
-  //console.log(geoCodeJson);
   return geoCodeJson;  
   
 }
@@ -244,6 +241,8 @@ function getMax() {
 
 function updateMap() {
   let input = app.address; // app.address is the user input. app refers to the VUE object below that handles
+  console.log(total_person_trips_PM);
+
   let geocodedJson = queryServer(PLANNING_GEOCODER_baseurl+input, 0) //data has got to the geocoder
     .then(function(geocodedJson) { //after queryServer returns the data, do this:
       if (geocodedJson.features.length !== 0) { //checks if the server returns meaningful json (as opposed to empty)
@@ -257,7 +256,6 @@ function updateMap() {
               e.target.setStyle(color_styles[1].selected);
               e.target.bringToFront();
               //getFilteredData(e.target.feature); //gets the filtered data according to various parameters
-              //console.log("is it logging?");
               //info.update(e.target.feature); //updates the info box with text
 
             },
@@ -317,26 +315,35 @@ function pickTaxiTNC(thing){
 
 }
 
-function getInputs(thing){
+function getPersonTrips(thing){
+  let res_persontrips_PM;
+  let ret_persontrips_PM; 
+  let off_persontrips_PM;
+  
+
   if (app.isRes == true) {
     let num_studios = app.num_studios;
     let num_1bed = app.num_1bed;
     let num_2bed = app.num_2bed;
-    let num_3bed = app.num_3bed;
-    console.log(num_studios);
-    console.log(num_1bed);
-    console.log(num_2bed);
-    console.log(num_3bed);
+    let num_3bed = app.num_3bed; 
+    let tot_num_bedrooms = num_studios + num_1bed + (2*num_2bed) + (3*num_3bed); //these are added together as strings
+    res_persontrips_PM = (tripGenRates[1].pkhr_rate)*tot_num_bedrooms;
+    total_person_trips_PM = total_person_trips_PM+res_persontrips_PM;
+
     
   }
   else if (app.isRet == true) {
     let ret_sqft = app.ret_sqft;
-    console.log(ret_sqft);
+    ret_persontrips_PM = (ret_sqft/1000)*(tripGenRates[3].pkhr_rate);
+    total_person_trips_PM = total_person_trips_PM+ret_persontrips_PM;
+    
   }
   else if (app.isOffice == true) {
     let off_sqft = app.off_sqft;
-    console.log(off_sqft);
+    off_persontrips_PM = (off_sqft/1000)*(tripGenRates[0].pkhr_rate);
+    total_person_trips_PM = total_person_trips_PM+ off_persontrips_PM;
   }
+
   
 }
 
@@ -398,13 +405,13 @@ let app = new Vue({
     isRet: false,
     isWork: false,
     isOther: false,
-    off_sqft: null,
-    ret_sqft: null,
-    //res_sqft: null,
-    num_studios: null,
-    num_1bed: null,
-    num_2bed: null,
-    num_3bed: null,
+    off_sqft: 0,
+    ret_sqft: 0,
+    res_sqft: 0,
+    num_studios: 0,
+    num_1bed: 0,
+    num_2bed: 0,
+    num_3bed: 0,
     // isShared2Active: false,
     // isShared3Active: false,
     isTaxiTNCActive: false,
@@ -415,12 +422,12 @@ let app = new Vue({
   // for detecting changes, sometimes it is not a button, it could be a checkbox or something
   // that isn't as straightforward as buttons, use watch
   watch: {
-    num_studios: getInputs,
-    num_1bed: getInputs,
-    num_2bed: getInputs,
-    num_3bed: getInputs,
-    off_sqft: getInputs,
-    ret_sqft: getInputs,
+    num_studios: getPersonTrips,
+    num_1bed: getPersonTrips,
+    num_2bed: getPersonTrips,
+    num_3bed: getPersonTrips,
+    off_sqft: getPersonTrips,
+    ret_sqft: getPersonTrips,
 
   },
   
@@ -435,7 +442,7 @@ let app = new Vue({
     pickWork: pickWork,
     pickOther: pickOther,
     pickTaxiTNC: pickTaxiTNC,
-    getInputs: getInputs,
+    getPersonTrips: getPersonTrips,
 
   },
 });
