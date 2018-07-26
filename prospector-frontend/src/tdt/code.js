@@ -27,6 +27,11 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 import 'isomorphic-fetch';
 import Cookies from 'js-cookie';
 
+//import App from './App'
+
+import VueInputAutowidth from 'vue-input-autowidth'
+Vue.use(VueInputAutowidth);
+
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
 let getLegHTML = maplib.getLegHTML;
@@ -50,12 +55,14 @@ let distributionData;
 queryServer(CTA_API_SERVER + TRIP_DISTRIBUTION)
 .then(function(data) {
   distributionData = data;
+  console.log(distributionData);
 })
 
 let tripGenRates;
 queryServer(CTA_API_SERVER + TRIP_GEN_RTS)
 .then(function(data) {
   tripGenRates = data;
+  console.log(tripGenRates);
 })
 
 let color_styles = [{ normal  : {"color": "#39f", "weight":3,  "opacity": 0.5},
@@ -90,11 +97,20 @@ let total_person_trips_PM = 0;
 
 //creating the tooltip functionality and putting it on the map
 let info = L.control(); //control refers to tool tip like objects
+// let info2 = L.control(); //control refers to tool tip like objects
+
 info.onAdd = function (map) {
   this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
   this.update();
   return this._div;
 };
+
+// info2.onAdd = function (map) {
+//   this._div = L.DomUtil.create('div', 'info2'); // create a div with a class "info"
+//   this.update();
+//   return this._div;
+// }; 
+
 info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target defned in updateMap
   if (addressDistrictNum == null && hoverDistrict == null) {
     this._div.innerHTML = '<h4>Information</h4>' +
@@ -129,10 +145,10 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
     numeral(getFilteredData(hoverDistrict)[0]).format('0.0%') +' </b>' +
     '<br><b> Proportion of inbound trips to district '+ hoverDistrict.dist.toString() + ' from district '+ addressDistrictNum.toString()+ ': ' + 
     numeral(getFilteredData(hoverDistrict)[1]).format('0.0%') +' </b></br>'
-    //colorDistricts(referenceDistrictProp, filtered_data);
   }
 };
 info.addTo(mymap);
+// info2.addTo(mymap);
 
 //should filterDistributionData and getFilteredData be combined into one function? probably...
 
@@ -268,14 +284,17 @@ function updateMap() {
         assignDistrict(geoJson, address_geoLyr, input);
       address_geoLyr.addTo(mymap); //adds the geoLayer to the map
       address_geoLyr.bringToFront();
-     
+
 
       districts_lyr.setStyle(function(feature){
         let color_func = chroma.scale(['blue', 'red']).domain([0, getMax()]);
         let proportion_outbound = getFilteredData(feature)[0];
         return {'fillColor': color_func(proportion_outbound), fillOpacity:0.6};     
-      }
-      );
+      });
+      // for (let marker of markers) {
+      //   marker.bindTooltip(total_person_trips_PM.toString()); //make this content non-satic, based on calculation. needs to be a string
+      //   //console.log(marker);
+      // }
     }
     else {
       alert("The address is invalid or is outside the city limits of San Francisco. Enter another address.");
@@ -319,6 +338,9 @@ function getPersonTrips(thing){
   let res_persontrips_PM;
   let ret_persontrips_PM; 
   let off_persontrips_PM;
+  let rest_persontrips_PM;
+  let sup_persontrips_PM;
+
   
 
   if (app.isRes == true) {
@@ -340,9 +362,22 @@ function getPersonTrips(thing){
   }
   else if (app.isOffice == true) {
     let off_sqft = app.off_sqft;
+
     off_persontrips_PM = (off_sqft/1000)*(tripGenRates[0].pkhr_rate);
     total_person_trips_PM = total_person_trips_PM+ off_persontrips_PM;
   }
+  else if (app.isRestaurant == true) {
+    let rest_sqft = app.rest_sqft;
+    rest_persontrips_PM = (rest_sqft/1000)*(tripGenRates[6].pkhr_rate); //using composite rate
+    total_person_trips_PM = total_person_trips_PM+ rest_persontrips_PM;
+  }
+  else if (app.isSupermarket == true) {
+    let sup_sqft = app.sup_sqft;
+
+    sup_persontrips_PM = (sup_sqft/1000)*(tripGenRates[4].pkhr_rate); //check rate
+    total_person_trips_PM = total_person_trips_PM+ sup_persontrips_PM;
+  }
+
 
   
 }
@@ -352,6 +387,9 @@ function pickRes(thing){
   app.isRes = true;
   app.isRet = false;
   app.isOffice = false;
+  app.isRestaurant = false;
+  app.isSupermarket = false;
+
 
 }
 
@@ -360,6 +398,9 @@ function pickOffice(thing){
   app.isOffice = true;
   app.isRes = false;
   app.isRet = false;
+  app.isRestaurant = false;
+  app.isSupermarket = false;
+
 
 
 }
@@ -369,7 +410,31 @@ function pickRet(thing){
   app.isRet = true;
   app.isRes = false;
   app.isOffice = false;
+  app.isRestaurant = false;
+  app.isSupermarket = false;
 
+
+}
+
+function pickRestaurant(thing){
+  landUseSelect = "Restaurant";
+  app.isRestaurant = true;
+  app.isRet = false;
+  app.isRes = false;
+  app.isOffice = false;
+  app.isSupermarket = false;
+  console.log("picked rest")
+
+}
+
+function pickSupermarket(thing){
+  landUseSelect = "Supermarket";
+  app.isSupermarket = true;
+  app.isRestaurant = false;
+  app.isRet = false;
+  app.isRes = false;
+  app.isOffice = false;
+  console.log("picked sup")
 }
 
 function pickWork(thing){
@@ -403,17 +468,19 @@ let app = new Vue({
     isOffice: false,
     isRes: false,
     isRet: false,
+    isRestaurant: false,
+    isSupermarket: false,
     isWork: false,
     isOther: false,
     off_sqft: 0,
     ret_sqft: 0,
     res_sqft: 0,
+    rest_sqft: 0,
+    sup_sqft: 0,
     num_studios: 0,
     num_1bed: 0,
     num_2bed: 0,
     num_3bed: 0,
-    // isShared2Active: false,
-    // isShared3Active: false,
     isTaxiTNCActive: false,
     inputs: false,
 
@@ -428,6 +495,8 @@ let app = new Vue({
     num_3bed: getPersonTrips,
     off_sqft: getPersonTrips,
     ret_sqft: getPersonTrips,
+    rest_sqft: getPersonTrips,
+    sup_sqft: getPersonTrips,
 
   },
   
@@ -439,10 +508,13 @@ let app = new Vue({
     pickOffice: pickOffice,
     pickRes: pickRes,
     pickRet: pickRet,
+    pickRestaurant: pickRestaurant,
+    pickSupermarket: pickSupermarket,
     pickWork: pickWork,
     pickOther: pickOther,
     pickTaxiTNC: pickTaxiTNC,
     getPersonTrips: getPersonTrips,
+
 
   },
 });
@@ -479,7 +551,9 @@ let helpPanel = new Vue({
 
 function assignDistrict(address, geoLayer, tooltipLabel) {
   //convert the address geojson to leaflet polygon
-  geoLayer.bindTooltip(tooltipLabel, {permanent: true, sticky:true}).addTo(mymap);
+  geoLayer.bindTooltip(tooltipLabel, {permanent: true, sticky:true, className: 'myCSSClass'}).addTo(mymap);
+
+ 
 
   let addressPolygon = L.polygon(address.geometry.coordinates[0]);
   //find the centroid of the address polygon
@@ -489,6 +563,8 @@ function assignDistrict(address, geoLayer, tooltipLabel) {
   let criticalDistrict = leafletPip.pointInLayer(centroidArray, districts_lyr);
   addressDistrictNum = criticalDistrict[0].feature.dist;
 
+  addressPlaceType = criticalDistrict[0].feature.place_type;
+  document.getElementById("district_PT").innerHTML = addressPlaceType;
   return criticalDistrict;
 
 }
@@ -496,20 +572,37 @@ function assignDistrict(address, geoLayer, tooltipLabel) {
 
 function drawDistricts() {
   let districtName;
+  let tooltip_positions = {
+    1: [37.799981, -122.412459],
+    2: [37.775795, -122.407478],
+    3: [37.789693, -122.441499],
+    4: [37.760652, -122.400000],
+    5: [37.737820, -122.445233],
+    6: [37.730118, -122.389315],
+    7: [37.776303, -122.499615],
+    8: [37.745433, -122.498202],
+    9: [37.825639, -122.371648],
+    10: [37.596137, -122.403582],
+    11: [37.810595, -122.288403],
+    12: [37.835095, -122.493132] }; //this will be a dictionary of 12 lat/lon coordinate arrays that correspond in order to the districts
     for (let district of geoDistricts) { // in a for loop bc sfcta api returns a list of json for this one
     //calls json2geojson function to convert json data response to geojson
     ctaJson2geojson(district);
     districtName = district.distname;
     let districtPolygon = L.polygon(district.geometry.coordinates[0]);
-    let districtCentroid = districtPolygon.getBounds().getCenter();
-    let districtCentroidArray = [districtCentroid.lng, districtCentroid.lat]; //reformat so that the lat/lon labels are correct
-    namePopup = L.popup()
-    .setLatLng(districtCentroidArray)
-    .setContent(districtName)
-    //.openOn(mymap);
+    //let districtCentroid = districtPolygon.getBounds().getCenter();
+    //let districtCentroidArray = [districtCentroid.lng, districtCentroid.lat]; //reformat so that the lat/lon labels are correct
+    // namePopup = L.popup()
+    // .setLatLng(districtCentroidArray)
+    // .setContent(districtName)
+    // //.openOn(mymap);
+
+    //change districtCentoidArray to manual lat lons -> work on finding ones that are good UI
     
-    let districtMarker = L.marker(districtCentroidArray, {draggable: true}).addTo(mymap).bindPopup(namePopup.getContent());
-    markers.push(districtMarker);
+    let districtMarker = L.circleMarker(tooltip_positions[district.dist], {color: 'blue', radius: 6}).addTo(mymap).bindTooltip(districtName, {permanent:true, sticky: true});
+    //console.log(tooltip_positions[district.dist]);
+
+    markers.push(districtMarker); //this will only be used if i want to change their contents
   }
     districts_lyr = addGeoLayer(geoDistricts); //takes in a list of geoJson objects and draws them
   }
@@ -518,7 +611,7 @@ function drawDistricts() {
 queryServer(CTA_API_SERVER + DISTRICTS_URL)
 .then(function(data) {
   geoDistricts = data;
-  //console.log(geoDistricts);
+  console.log(geoDistricts);
   drawDistricts();
 })
 

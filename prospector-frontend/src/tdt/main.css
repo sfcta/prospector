@@ -276,3 +276,15 @@ table { border: 0px; }
     opacity: 0;
     transition: visibility 0s 0.5s, opacity 0.5s linear;
 }
+
+
+.myCSSClass {
+  background: green;
+  border: 5px solid cyan
+}
+.leaflet-tooltip-left.myCSSClass::before {
+  border-left-color: cyan;
+}
+.leaflet-tooltip-right.myCSSClass::before {
+  border-right-color: cyan;
+}

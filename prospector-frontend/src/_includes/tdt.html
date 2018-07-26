@@ -21,11 +21,66 @@
     <hr/>
   </div>
 <!-- </div> -->
+<h5>1. ENTER AN ADDRESS:</h5>
+<input v-model="address" class="fix"
+      type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}" placeholder="Search for address or click on map"/>
+<h1>"the value for number is: " <span id="district_PT"></span></h1>
+<!-- <label>something else <span id="district_PT"></span></label>
+ -->
+
+<h5>2. CHOOSE LAND USE:</h5>
+<div id="vizbuttons" class="ui vertical buttons">
+  <button v-on:click="pickRes"
+  v-bind:class="{ active: isRes, yellow:isRes}"
+  class="mini ui grey button">Residential</button>
+  <button v-on:click="pickOffice"
+  v-bind:class="{ active: isOffice, yellow: isOffice}"
+  class="mini ui grey button">Office</button>
+  <button v-on:click="pickRet"
+  v-bind:class="{ active: isRet, yellow: isRet }"
+  class="mini ui grey button">Retail</button>
+  <button v-on:click="pickRestaurant"
+  v-bind:class="{ active: isRestaurant, yellow: isRestaurant }"
+  class="mini ui grey button">Restaurant</button>
+  <button v-on:click="pickSupermarket"
+  v-bind:class="{ active: isSupermarket, yellow: isSupermarket }"
+  class="mini ui grey button">Supermarket</button>
+</div>
+
+<br>
+<br>
+
+<div id="panel">
+    <template v-if="isRet">
+    <h4>ENTER RETAIL SQUARE FOOTAGE: </h4>
+    <input v-model.number = "ret_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="retail-footage"></template>
+    <template v-else-if="isOffice">
+     <h4>ENTER OFFICE SQUARE FOOTAGE: </h4>
+     <input v-model.number="off_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="office-footage"></template>
+     <template v-else-if="isRes">
+      <h4>ENTER BEDROOMS BY TYPE: </h4>
+      <label>Number of Studios:  </label>
+      <input v-model.number = "num_studios" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-studios">
+      <br><br><label>Number of One Bedrooms:  </label>
+      <input v-model.number = "num_1bed" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-1bed">
+      <br><br><label>Number of 2 bedrooms:  </label>
+      <input v-model.number = "num_2bed" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-2bed">
+      <br><br><label>Number of 3 bedrooms:  </label>
+      <input v-model.number = "num_3bed" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-3bed"></template>
+      <template v-else-if="isRestaurant">
+      <h4>ENTER RESTAURANT SQUARE FOOTAGE: </h4>
+      <input v-model.number="rest_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="rest-footage"></template>
+      <template v-else-if="isSupermarket">
+      <h4>ENTER SUPERMARKET SQUARE FOOTAGE: </h4>
+      <input v-model.number="sup_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="sup-footage"></template>
+      <br>
+      <br></div>
+
+    <br>
+    <br>
 
   <div class="pickers">
-  <input v-model="address" placeholder="Search for address or click on map"/>
-
-    <h5>CHOOSE MODE:</h5>
+    <h5>3. CHOOSE MODE:</h5>
     <button v-on:click="pickAU" 
     v-bind:class="{ active: isAUActive, yellow: isAUActive}"
     class="mini ui grey button">
@@ -39,7 +94,10 @@ Transit</button>
   class="mini ui grey button">
 TaxiTNC</button>
 
-<h5>CHOOSE TRIP PURPOSE:</h5>
+<br>
+
+
+<h5>4. CHOOSE TRIP PURPOSE:</h5>
 <button v-on:click="pickWork"
 v-bind:class="{ active: isWork, yellow: isWork}"
 class="mini ui grey button">Work</button>
@@ -49,41 +107,9 @@ class="mini ui grey button"> Non Work</button>
 
 
 
-<h5>CHOOSE LAND USE:</h5>
-<div id="vizbuttons" class="ui vertical buttons">
-  <button v-on:click="pickRes"
-  v-bind:class="{ active: isRes, yellow:isRes}"
-  class="mini ui grey button">Residential</button>
-  <button v-on:click="pickOffice"
-  v-bind:class="{ active: isOffice, yellow: isOffice}"
-  class="mini ui grey button">Office</button>
-  <button v-on:click="pickRet"
-  v-bind:class="{ active: isRet, yellow: isRet }"
-  class="mini ui grey button">Retail</button></div>
-
 
  <br>
- <br>
 
-  <div id="panel">
-    <template v-if="isRet">
-    <h4>ENTER RETAIL SQUARE FOOTAGE: </h4>
-    <input v-model.number = "ret_sqft" placeholder="Enter a number" type = "number" key="retail-footage"></template>
-    <template v-else-if="isOffice">
-     <h4>ENTER OFFICE SQUARE FOOTAGE: </h4>
-     <input v-model.number="off_sqft" placeholder="Enter a number" type = "number" key="office-footage"></template>
-     <template v-else-if="isRes">
-      <h4>ENTER BEDROOMS BY TYPE: </h4>
-      <label>Number of Studios:  </label>
-      <input v-model.number = "num_studios" placeholder="Enter a number" type = "number" key="num-studios">
-      <br><br><label>Number of One Bedrooms:  </label>
-      <input v-model.number = "num_1bed" placeholder="Enter a number" type = "number" key="num-1bed">
-      <br><br><label>Number of 2 bedrooms:  </label>
-      <input v-model.number = "num_2bed" placeholder="Enter a number" type = "number" key="num-2bed">
-      <br><br><label>Number of 3 bedrooms:  </label>
-      <input v-model.number = "num_3bed" placeholder="Enter a number" type = "number" key="num-3bed"></template>
-      
-    </div>
 
 
 
@@ -92,12 +118,12 @@ class="mini ui grey button"> Non Work</button>
 
 
 <div id="download">
-  <button v-on:click="updateMap" class="small ui right labeled icon floated green button">Update Map</button>
-
-  <br><br><button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')" 
-  class="small ui right labeled icon floated yellow button"
-  style="margin-right:5px"><i class="icon download"></i>Download data (.zip)</button></div>
-
+  <button v-on:click="updateMap" class="small ui right labeled icon floated green button" 
+  style="margin-right:5px">
+    Update Map
+    <i class="material-icons">face</i>
+  </button>
+</div>
 </div>
 
 <br>

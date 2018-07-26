@@ -33,7 +33,9 @@
     "js-cookie": "^2.1.4",
     "jszip": "^3.1.3",
     "lodash": "^4.17.4",
+    "material-design-icons": "^3.0.1",
     "numeral": "^2.0.6",
+    "vue-input-autowidth": "^1.0.2",
     "vue-select": "^2.2.0",
     "vue-slider-component": "^2.2.7"
   }
