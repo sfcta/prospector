@@ -22,6 +22,7 @@
   </div>
 <!-- </div> -->
 <h5>1. ENTER AN ADDRESS:</h5>
+
 <input v-model="address" class="fix"
       type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}" placeholder="Search for address or click on map"/>
 &nbsp;&nbsp;<label>Place Type: ${placetype} </label>
@@ -47,15 +48,16 @@
   v-bind:class="{ active: isSupermarket, yellow: isSupermarket }"
   class="mini ui grey button">Sup</button>
 
-<!-- <div class="ui dropdown">
-  <input type="hidden" name="gender">
-  <i class="dropdown icon"></i>
-  <div class="default text">Gender</div>
-  <div class="menu">
-    <div class="item" data-value="male">Male</div>
-    <div class="item" data-value="female">Female</div>
-  </div>
-</div> -->
+ <!-- <select class="ui search selection dropdown" id="search-select">
+  <option value="">Land Use</option>
+  <option value="pickRes">Residential</option>
+  <option value="pickOffice">Office</option>
+  <option value="pickRet">Retail</option>
+  <option value="pickRestaurant">Restaurant</option>
+  <option value="pickSupermarket">SuperMarket</option>
+  
+</select> -->
+
 
 
 </div>

@@ -55,14 +55,14 @@ let distributionData;
 queryServer(CTA_API_SERVER + TRIP_DISTRIBUTION)
 .then(function(data) {
   distributionData = data;
-  console.log(distributionData);
+  //console.log(distributionData);
 })
 
 let tripGenRates;
 queryServer(CTA_API_SERVER + TRIP_GEN_RTS)
 .then(function(data) {
   tripGenRates = data;
-  console.log(tripGenRates);
+  //console.log(tripGenRates);
 })
 
 let color_styles = [{ normal  : {"color": "#39f", "weight":3,  "opacity": 0.5},
@@ -94,6 +94,7 @@ let propPopup;
 let max_outbound;
 let total_person_trips_PM= 0;
 let total_person_trips_daily =0;
+
 
 
 
@@ -138,36 +139,73 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
     this._div.innerHTML = '<h4>Information</h4>' +
     '<b> Select a trip purpose to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
   }
-  else { 
-    this._div.innerHTML = '<h4>Information</h4>' +
-    '<b> Proportion of outbound trips from district '+ addressDistrictNum.toString() + ' to district '+ hoverDistrict.dist.toString()+ ': ' + 
-    numeral(getDistProps(hoverDistrict)[0]).format('0.0%') +' </b>' +
-    '<br><b> Proportion of inbound trips to district '+ hoverDistrict.dist.toString() + ' from district '+ addressDistrictNum.toString()+ ': ' + 
-    numeral(getDistProps(hoverDistrict)[1]).format('0.0%') +' </b></br>'
+  else {
+    if (tripDirectionSelect = "outbound"){
+      this._div.innerHTML = '<h4>Person Trips</h4>' +
+    '<b>' + getFilteredPersonTrips()*getDistProps(hoverDistrict)+ ' person trips from district ' + addressDistrictNum.toString()+ ' to '+ hoverDistrict.dist.toString() +'</b>';
+    } 
+    else if (tripDirectionSelect = "inbound"){
+      this._div.innerHTML = '<h4>Person Trips</h4>' +
+    '<b>' + getFilteredPersonTrips()*getDistProps(hoverDistrict)+ ' to district ' + hoverDistrict.dist.toString()+ ' to '+ addressDistrictNum.toString() +'</b>';
+    }
   }
 };
 info.addTo(mymap);
 // info2.addTo(mymap);
 
+function checkInputs(mode, districtNum, landUse, purpose, direction) {
+  //this function is a hot mess!
+
+  // console.log(mode);
+  // console.log(districtNum);
+  // console.log(landUse);
+  // console.log(purpose);
+  // console.log(direction);
+  try {
+    if (mode !== null && landUse !== null && purpose !== null && direction !== null){
+      return true;
+
+    }
+    // else if (mode == null) throw "mode";
+    // else if (landUse == null) throw "land use";
+    // else if (purpose == null) throw "trip purpose";
+    // else if (direction == null) throw "direction";
+    else if (mode == null) return false;
+    else if (landUse == null) return false;
+    else if (purpose == null) return false;
+    else if (direction == null) return false;
+
+
+  }
+  catch (error) { //its never getting here
+      alert("Please enter a " + error);
+      console.log(error)
+      return false;
+    }
+
+
+
+}
+
 //should filterDistributionData and getDistProps be combined into one function? probably...
 
-function filterDistributionData(mode, districtNum, landUse, purpose, direction, time) { 
+function filterDistributionData(mode, districtNum, landUse, purpose, direction) { 
   //returns a json object or list of json objects that fit given parameters
-    try {
-    if (mode == null) throw "mode";
-    //if (landUse == null) throw "land use";
-    if (purpose == null) throw "trip purpose";
-    if (direction == null) throw "direction";
-    if (time == null) throw "time of day";
+    // try {
+    // if (mode == null) throw "mode";
+    // if (landUse == null) throw "land use";
+    // if (purpose == null) throw "trip purpose";
+    // if (direction == null) throw "direction";
+    // if (time == null) throw "time of day";
     //if (districtNum == null) throw "district";
     return distributionData.filter(function(piece){ 
-      return piece.mode == mode && piece.dist == districtNum && piece.landuse == landuse && piece.purpose == purpose &&
-      piece.direction == direction && piece.time == time;
+      return piece.mode == mode && piece.dist == districtNum && piece.landuse == landUse && piece.purpose == purpose &&
+      piece.direction == direction;
     }); 
-  }
-    catch (error) {
-      alert("Please enter a " + error);
-    }
+  // }
+    // catch (error) {
+    //   alert("Please enter a " + error);
+    // }
 
   }
 
@@ -177,14 +215,13 @@ function getDistProps(hoverDistrict) {
 
   referenceDistrictProp = "prop_dist" + hoverDistrict.dist; //the name of the value that stores the 
   //relevant proportion from address district to hover district
-  let filtered_data = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect); //hard coded for now, make a direction button just like mode
-  let proportion_outbound = filtered_data[0][referenceDistrictProp];
-  let proportion_inbound = filtered_data[1][referenceDistrictProp];
+
+  //what I'd like to do here is proceed only if all the inputs are nonnull
+  if (checkInputs(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect, tripDirectionSelect)){
+    return filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect, tripDirectionSelect)[0][referenceDistrictProp]; 
+  }
   
-
-
-  return [proportion_outbound, proportion_inbound];
-
+  
 }
 
 
@@ -238,7 +275,7 @@ function addGeoLayer(geoJsonData){
           if (address_geoLyr) {
             address_geoLyr.bringToFront();
           }
-          info.update(e.target.feature);
+          info.update(e.target.feature); 
         },
         mouseout: function(e){
           //geolyr.resetStyle(e.target);
@@ -254,33 +291,31 @@ function addGeoLayer(geoJsonData){
 }
 
 function getMax() {
-  let outbounds = [];
-  //the issue here is I'm calling [0] on a null object. need some way to include in the try statment to not even get here
-  if (filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect, 
-    tripDirectionSelect, timePeriodSelect) !== null){
-    let filtered_json_object_outbounds = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, 
-      tripPurposeSelect, tripDirectionSelect, timePeriodSelect)[0];
-    console.log(filtered_json_object_outbounds);
-    let filtered_json_object_inbounds = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect, 
-      tripDirectionSelect, timePeriodSelect)[1];
+  let distributions = [];
+  
+  if (checkInputs(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect, tripDirectionSelect)== true) {
+    let filtered_json_object = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, 
+      tripPurposeSelect, tripDirectionSelect);
+
     for (let district of geoDistricts) {
-    let propName = "prop_dist" + district.dist;
-    outbounds.push(filtered_json_object_outbounds[propName]);
-
+      let propName = "prop_dist" + district.dist; 
+      distributions.push(filtered_json_object[0][propName]); //this call is resulting in an array of undefined objects
+    }
+    return Math.max.apply(null, distributions);
   }
-  return Math.max.apply(null, outbounds);
-  }
-
-  
-  
-
+  else {
+    console.log("in get max without all the inputs") //why is it even getting here?
+  } 
 }
 
+  
+  
 function updateMap() {
   let input = app.address; // app.address is the user input. app refers to the VUE object below that handles
+  
   console.log(input);
-  console.log(filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect, tripDirectionSelect, timePeriodSelect));
-  getPersonTrips(); //this runs the function that calculates person trips generated based on the given rates and parameters
+   
+  getFilteredPersonTrips(); //this runs the function that calculates person trips generated based on the given rates and parameters
   let geocodedJson = queryServer(PLANNING_GEOCODER_baseurl+input, 0) //data has got to the geocoder
     .then(function(geocodedJson) { //after queryServer returns the data, do this:
       if (geocodedJson.features.length !== 0) { //checks if the server returns meaningful json (as opposed to empty)
@@ -293,8 +328,8 @@ function updateMap() {
             mouseover: function(e){
               e.target.setStyle(color_styles[1].selected);
               e.target.bringToFront();
-              //getDistProps(e.target.feature); //gets the filtered data according to various parameters
-              //info.update(e.target.feature); //updates the info box with text
+              getDistProps(e.target.feature); //gets the filtered data according to various parameters
+              info.update(e.target.feature); //this sends the hovered over district info to the info.update function
 
             },
             mouseout: function(e){
@@ -310,7 +345,8 @@ function updateMap() {
 
       districts_lyr.setStyle(function(feature){
         let color_func = chroma.scale(['blue', 'red']).domain([0, getMax()]);
-        let proportion_outbound = getDistProps(feature)[0];
+        //let color_func = chroma.scale(['blue', 'red']).domain([0, 100]);
+        let proportion_outbound = getDistProps(feature); //maybe this isn't quite right?
         return {'fillColor': color_func(proportion_outbound), fillOpacity:0.6};     
       });
       // for (let marker of markers) {
@@ -342,6 +378,8 @@ function pickTR(thing){
   app.isAUActive = false;
   app.isTaxiTNCActive = false;
   console.log("transit selected");
+  // $('#search-select')
+  // .dropdown();
 
 }
 
@@ -356,7 +394,7 @@ function pickTaxiTNC(thing){
 
 }
 
-function getPersonTrips(thing){
+function getFilteredPersonTrips(){
   let res_persontrips_PM;
   let ret_persontrips_PM; 
   let off_persontrips_PM;
@@ -376,66 +414,79 @@ function getPersonTrips(thing){
   let off_sqft = app.off_sqft;
   let rest_sqft = app.rest_sqft;
   let sup_sqft = app.sup_sqft;
-
-  //console.log(app.isRes); //this is true iff there is an input 
+  //let multiplier = getDistProps(hoverDistrict);
 
 
   if (app.isRes == true && app.isPM ==true) {
     res_persontrips_PM = (tripGenRates[1].pkhr_rate)*tot_num_bedrooms;
     total_person_trips_PM = total_person_trips_PM+res_persontrips_PM;
-    console.log(total_person_trips_PM); //isRes is not defined in this function?? this is printing as null
+    console.log("PM trips: " + total_person_trips_PM); //isRes is not defined in this function?? this is printing as null
+    return total_person_trips_PM;
   }
     
   else if (app.isRes == true && app.isDaily == true) {
     res_persontrips_daily = (tripGenRates[1].daily_rate)*tot_num_bedrooms;
     total_person_trips_daily = total_person_trips_daily+res_persontrips_daily;
     console.log(total_person_trips_daily);  
+    return total_person_trips_daily;
   }
 
   else if (app.isRet == true && app.isPM ==true) {
   ret_persontrips_PM = (ret_sqft/1000)*(tripGenRates[3].pkhr_rate);
   total_person_trips_PM = total_person_trips_PM+ret_persontrips_PM;
-  console.log(total_person_trips_PM);
+  console.log("PM trips: "+ total_person_trips_PM);
+  return total_person_trips_PM;
+
   }
     
   else if (app.isRet == true && app.isDaily == true) {
     ret_persontrips_daily = (tripGenRates[3].daily_rate)*tot_num_bedrooms;
     total_person_trips_daily = total_person_trips_daily+ret_persontrips_daily; 
-    console.log(total_person_trips_daily);    
+    console.log("daily trips: " + total_person_trips_daily);  
+    return total_person_trips_daily;  
   }
 
   else if (app.isOffice == true && app.isPM ==true) {
     off_persontrips_PM = (off_sqft/1000)*(tripGenRates[0].pkhr_rate);
     total_person_trips_PM = total_person_trips_PM+ off_persontrips_PM;
-    console.log(total_person_trips_PM);
+    console.log("PM trips: "+ total_person_trips_PM);
+    return total_person_trips_PM;
+
   } 
 
   else if (app.isOffice == true && app.isDaily ==true) {
     off_persontrips_daily = (off_sqft/1000)*(tripGenRates[0].daily_rate);
     total_person_trips_daily = total_person_trips_daily+ off_persontrips_daily;
-    console.log(total_person_trips_daily);   
+    console.log("daily trips: "+ total_person_trips_daily); 
+    return total_person_trips_daily;  
   }
 
   else if (app.isRestaurant == true && app.isPM ==true) {
     rest_persontrips_PM = (rest_sqft/1000)*(tripGenRates[6].pkhr_rate); //using composite rate
     total_person_trips_PM = total_person_trips_PM+ rest_persontrips_PM;
-    console.log(total_person_trips_PM);
+    console.log("PM trips: "+ total_person_trips_PM);
+    return total_person_trips_PM;
+
   }
   else if (app.isRestaurant == true && app.isDaily == true) {
     rest_persontrips_daily = (rest_sqft/1000)*(tripGenRates[6].daily_rate); //using composite rate
     total_person_trips_daily = total_person_trips_daily+ rest_persontrips_daily;   
-    console.log(total_person_trips_daily);   
+    console.log("daily trips: "+ total_person_trips_daily);
+    return total_person_trips_daily;   
 
   }
   else if (app.isSupermarket == true && app.isPM ==true) {
     sup_persontrips_PM = (sup_sqft/1000)*(tripGenRates[4].pkhr_rate); //check rate
     total_person_trips_PM = total_person_trips_PM+ sup_persontrips_PM;
-    console.log(total_person_trips_PM);
+    console.log("PM trips: " + total_person_trips_PM);
+    return total_person_trips_PM;
+
   }
   else if (app.isSupermarket == true && app.isDaily == true) {
     sup_persontrips_daily = (sup_sqft/1000)*(tripGenRates[4].daily_rate); //check rate
     total_person_trips_daily = total_person_trips_daily+ sup_persontrips_daily;
-    console.log(total_person_trips_daily);   
+    console.log("daily trips: " + total_person_trips_daily);   
+    return total_person_trips_daily;
 
   }
   else {
@@ -443,12 +494,22 @@ function getPersonTrips(thing){
     
 
   }
+
+
 }
 
-function getTripDist(){
-  //i want to get the number of person trips calculated by getPerson trips for the differents times depending on what the user has
-  //inputted. Then I want to multiple this by the proportions in the filtered data for each district
-}
+// function getTripDist(hoverDistrict){
+//   //i want to get the number of person trips calculated by getPerson trips for the differents times depending on what the user has
+//   //inputted. Then I want to multiple this by the proportions in the filtered data for each district
+
+//   //i think all I need to do here is get the result from getPerson trips and multiply by the proportions from the filtered
+//   //json object
+//   let multiplier = getDistProps(hoverDistrict);
+//   personTripsFiltered_PM = total_person_trips_PM
+//   personTripsFiltered_daily = 
+// //should this even be its own function?
+
+// }
 
 function pickRes(thing){
   landUseSelect = "Res";
@@ -629,14 +690,14 @@ let app = new Vue({
   // for detecting changes, sometimes it is not a button, it could be a checkbox or something
   // that isn't as straightforward as buttons, use watch
   watch: {
-    num_studios: getPersonTrips,
-    num_1bed: getPersonTrips,
-    num_2bed: getPersonTrips,
-    num_3bed: getPersonTrips,
-    off_sqft: getPersonTrips,
-    ret_sqft: getPersonTrips,
-    rest_sqft: getPersonTrips,
-    sup_sqft: getPersonTrips,
+    // num_studios: getPersonTrips,
+    // num_1bed: getPersonTrips,
+    // num_2bed: getPersonTrips,
+    // num_3bed: getPersonTrips,
+    // off_sqft: getPersonTrips,
+    // ret_sqft: getPersonTrips,
+    // rest_sqft: getPersonTrips,
+    // sup_sqft: getPersonTrips,
 
   },
   
@@ -660,7 +721,7 @@ let app = new Vue({
     pickDaily: pickDaily,
     pickPM: pickPM,
     pickCombined: pickCombined,
-    getPersonTrips: getPersonTrips,
+    getFilteredPersonTrips: getFilteredPersonTrips,
 
 
   },
@@ -758,7 +819,7 @@ function drawDistricts() {
 queryServer(CTA_API_SERVER + DISTRICTS_URL)
 .then(function(data) {
   geoDistricts = data;
-  console.log(geoDistricts);
+  //console.log(geoDistricts);
   drawDistricts();
 })
 
