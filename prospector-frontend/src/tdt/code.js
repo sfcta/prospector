@@ -85,12 +85,15 @@ let addressDistrictNum;
 let modeSelect; 
 let landUseSelect; 
 let tripPurposeSelect; 
+let tripDirectionSelect;
+let timePeriodSelect;
 let referenceDistrictProp;
 let colorDistrictOutput;
 let namePopup;
 let propPopup;
 let max_outbound;
-let total_person_trips_PM = 0;
+let total_person_trips_PM= 0;
+let total_person_trips_daily =0;
 
 
 
@@ -105,11 +108,7 @@ info.onAdd = function (map) {
   return this._div;
 };
 
-// info2.onAdd = function (map) {
-//   this._div = L.DomUtil.create('div', 'info2'); // create a div with a class "info"
-//   this.update();
-//   return this._div;
-// }; 
+ 
 
 info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target defned in updateMap
   if (addressDistrictNum == null && hoverDistrict == null) {
@@ -142,28 +141,39 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
   else { 
     this._div.innerHTML = '<h4>Information</h4>' +
     '<b> Proportion of outbound trips from district '+ addressDistrictNum.toString() + ' to district '+ hoverDistrict.dist.toString()+ ': ' + 
-    numeral(getFilteredData(hoverDistrict)[0]).format('0.0%') +' </b>' +
+    numeral(getDistProps(hoverDistrict)[0]).format('0.0%') +' </b>' +
     '<br><b> Proportion of inbound trips to district '+ hoverDistrict.dist.toString() + ' from district '+ addressDistrictNum.toString()+ ': ' + 
-    numeral(getFilteredData(hoverDistrict)[1]).format('0.0%') +' </b></br>'
+    numeral(getDistProps(hoverDistrict)[1]).format('0.0%') +' </b></br>'
   }
 };
 info.addTo(mymap);
 // info2.addTo(mymap);
 
-//should filterDistributionData and getFilteredData be combined into one function? probably...
+//should filterDistributionData and getDistProps be combined into one function? probably...
 
-function filterDistributionData(mode, districtNum, landUse, purpose) { 
-//this function filters the whole distributionData json object according to a few given parameters
-return distributionData.filter(function(piece){ 
-    //for now the input will either be transit or all auto, which is everything that is not transit
-    //this returns a filtered json object that includes only the components of the original json
-  //that are the given mode, direction and district number 
-  return piece.mode == modeSelect && piece.dist == districtNum && landUse == piece.landuse && purpose == piece.purpose;
-  
-});
-}
+function filterDistributionData(mode, districtNum, landUse, purpose, direction, time) { 
+  //returns a json object or list of json objects that fit given parameters
+    try {
+    if (mode == null) throw "mode";
+    //if (landUse == null) throw "land use";
+    if (purpose == null) throw "trip purpose";
+    if (direction == null) throw "direction";
+    if (time == null) throw "time of day";
+    //if (districtNum == null) throw "district";
+    return distributionData.filter(function(piece){ 
+      return piece.mode == mode && piece.dist == districtNum && piece.landuse == landuse && piece.purpose == purpose &&
+      piece.direction == direction && piece.time == time;
+    }); 
+  }
+    catch (error) {
+      alert("Please enter a " + error);
+    }
 
-function getFilteredData(hoverDistrict) {
+  }
+
+
+
+function getDistProps(hoverDistrict) {
 
   referenceDistrictProp = "prop_dist" + hoverDistrict.dist; //the name of the value that stores the 
   //relevant proportion from address district to hover district
@@ -245,20 +255,32 @@ function addGeoLayer(geoJsonData){
 
 function getMax() {
   let outbounds = [];
-  let filtered_json_object = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect)[0];
-  for (let district of geoDistricts) {
+  //the issue here is I'm calling [0] on a null object. need some way to include in the try statment to not even get here
+  if (filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect, 
+    tripDirectionSelect, timePeriodSelect) !== null){
+    let filtered_json_object_outbounds = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, 
+      tripPurposeSelect, tripDirectionSelect, timePeriodSelect)[0];
+    console.log(filtered_json_object_outbounds);
+    let filtered_json_object_inbounds = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect, 
+      tripDirectionSelect, timePeriodSelect)[1];
+    for (let district of geoDistricts) {
     let propName = "prop_dist" + district.dist;
-    outbounds.push(filtered_json_object[propName]);
+    outbounds.push(filtered_json_object_outbounds[propName]);
 
   }
   return Math.max.apply(null, outbounds);
+  }
+
+  
+  
 
 }
 
 function updateMap() {
   let input = app.address; // app.address is the user input. app refers to the VUE object below that handles
-  console.log(total_person_trips_PM);
-
+  console.log(input);
+  console.log(filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect, tripDirectionSelect, timePeriodSelect));
+  getPersonTrips(); //this runs the function that calculates person trips generated based on the given rates and parameters
   let geocodedJson = queryServer(PLANNING_GEOCODER_baseurl+input, 0) //data has got to the geocoder
     .then(function(geocodedJson) { //after queryServer returns the data, do this:
       if (geocodedJson.features.length !== 0) { //checks if the server returns meaningful json (as opposed to empty)
@@ -271,7 +293,7 @@ function updateMap() {
             mouseover: function(e){
               e.target.setStyle(color_styles[1].selected);
               e.target.bringToFront();
-              //getFilteredData(e.target.feature); //gets the filtered data according to various parameters
+              //getDistProps(e.target.feature); //gets the filtered data according to various parameters
               //info.update(e.target.feature); //updates the info box with text
 
             },
@@ -288,7 +310,7 @@ function updateMap() {
 
       districts_lyr.setStyle(function(feature){
         let color_func = chroma.scale(['blue', 'red']).domain([0, getMax()]);
-        let proportion_outbound = getFilteredData(feature)[0];
+        let proportion_outbound = getDistProps(feature)[0];
         return {'fillColor': color_func(proportion_outbound), fillOpacity:0.6};     
       });
       // for (let marker of markers) {
@@ -340,46 +362,92 @@ function getPersonTrips(thing){
   let off_persontrips_PM;
   let rest_persontrips_PM;
   let sup_persontrips_PM;
+  let res_persontrips_daily;
+  let ret_persontrips_daily; 
+  let off_persontrips_daily;
+  let rest_persontrips_daily;
+  let sup_persontrips_daily;
+  let num_studios = app.num_studios;
+  let num_1bed = app.num_1bed;
+  let num_2bed = app.num_2bed;
+  let num_3bed = app.num_3bed;
+  let tot_num_bedrooms = num_studios + num_1bed + (2*app.num_2bed) + (3*app.num_3bed); //these are added together as strings
+  let ret_sqft = app.ret_sqft;
+  let off_sqft = app.off_sqft;
+  let rest_sqft = app.rest_sqft;
+  let sup_sqft = app.sup_sqft;
 
-  
+  //console.log(app.isRes); //this is true iff there is an input 
 
-  if (app.isRes == true) {
-    let num_studios = app.num_studios;
-    let num_1bed = app.num_1bed;
-    let num_2bed = app.num_2bed;
-    let num_3bed = app.num_3bed; 
-    let tot_num_bedrooms = num_studios + num_1bed + (2*num_2bed) + (3*num_3bed); //these are added together as strings
+
+  if (app.isRes == true && app.isPM ==true) {
     res_persontrips_PM = (tripGenRates[1].pkhr_rate)*tot_num_bedrooms;
     total_person_trips_PM = total_person_trips_PM+res_persontrips_PM;
-
-    
+    console.log(total_person_trips_PM); //isRes is not defined in this function?? this is printing as null
   }
-  else if (app.isRet == true) {
-    let ret_sqft = app.ret_sqft;
-    ret_persontrips_PM = (ret_sqft/1000)*(tripGenRates[3].pkhr_rate);
-    total_person_trips_PM = total_person_trips_PM+ret_persontrips_PM;
     
+  else if (app.isRes == true && app.isDaily == true) {
+    res_persontrips_daily = (tripGenRates[1].daily_rate)*tot_num_bedrooms;
+    total_person_trips_daily = total_person_trips_daily+res_persontrips_daily;
+    console.log(total_person_trips_daily);  
   }
-  else if (app.isOffice == true) {
-    let off_sqft = app.off_sqft;
 
+  else if (app.isRet == true && app.isPM ==true) {
+  ret_persontrips_PM = (ret_sqft/1000)*(tripGenRates[3].pkhr_rate);
+  total_person_trips_PM = total_person_trips_PM+ret_persontrips_PM;
+  console.log(total_person_trips_PM);
+  }
+    
+  else if (app.isRet == true && app.isDaily == true) {
+    ret_persontrips_daily = (tripGenRates[3].daily_rate)*tot_num_bedrooms;
+    total_person_trips_daily = total_person_trips_daily+ret_persontrips_daily; 
+    console.log(total_person_trips_daily);    
+  }
+
+  else if (app.isOffice == true && app.isPM ==true) {
     off_persontrips_PM = (off_sqft/1000)*(tripGenRates[0].pkhr_rate);
     total_person_trips_PM = total_person_trips_PM+ off_persontrips_PM;
+    console.log(total_person_trips_PM);
+  } 
+
+  else if (app.isOffice == true && app.isDaily ==true) {
+    off_persontrips_daily = (off_sqft/1000)*(tripGenRates[0].daily_rate);
+    total_person_trips_daily = total_person_trips_daily+ off_persontrips_daily;
+    console.log(total_person_trips_daily);   
   }
-  else if (app.isRestaurant == true) {
-    let rest_sqft = app.rest_sqft;
+
+  else if (app.isRestaurant == true && app.isPM ==true) {
     rest_persontrips_PM = (rest_sqft/1000)*(tripGenRates[6].pkhr_rate); //using composite rate
     total_person_trips_PM = total_person_trips_PM+ rest_persontrips_PM;
+    console.log(total_person_trips_PM);
   }
-  else if (app.isSupermarket == true) {
-    let sup_sqft = app.sup_sqft;
+  else if (app.isRestaurant == true && app.isDaily == true) {
+    rest_persontrips_daily = (rest_sqft/1000)*(tripGenRates[6].daily_rate); //using composite rate
+    total_person_trips_daily = total_person_trips_daily+ rest_persontrips_daily;   
+    console.log(total_person_trips_daily);   
 
+  }
+  else if (app.isSupermarket == true && app.isPM ==true) {
     sup_persontrips_PM = (sup_sqft/1000)*(tripGenRates[4].pkhr_rate); //check rate
     total_person_trips_PM = total_person_trips_PM+ sup_persontrips_PM;
+    console.log(total_person_trips_PM);
   }
+  else if (app.isSupermarket == true && app.isDaily == true) {
+    sup_persontrips_daily = (sup_sqft/1000)*(tripGenRates[4].daily_rate); //check rate
+    total_person_trips_daily = total_person_trips_daily+ sup_persontrips_daily;
+    console.log(total_person_trips_daily);   
 
+  }
+  else {
+    console.log("at else")
+    
 
-  
+  }
+}
+
+function getTripDist(){
+  //i want to get the number of person trips calculated by getPerson trips for the differents times depending on what the user has
+  //inputted. Then I want to multiple this by the proportions in the filtered data for each district
 }
 
 function pickRes(thing){
@@ -389,6 +457,7 @@ function pickRes(thing){
   app.isOffice = false;
   app.isRestaurant = false;
   app.isSupermarket = false;
+  console.log("picked res");
 
 
 }
@@ -400,6 +469,8 @@ function pickOffice(thing){
   app.isRet = false;
   app.isRestaurant = false;
   app.isSupermarket = false;
+  console.log("picked office");
+
 
 
 
@@ -442,6 +513,7 @@ function pickWork(thing){
   console.log("work selected");
   app.isWork = true;
   app.isOther = false;
+  app.isAll = false;
 
 
 }
@@ -451,9 +523,69 @@ function pickOther(thing){
   console.log("other/nonwork selected");
   app.isOther = true;
   app.isWork = false;
+  app.isAll = false;
 
 
 }
+
+function pickAll(thing){
+  tripPurposeSelect = "all";
+  console.log("all selected");
+  app.isOther = false;
+  app.isWork = false;
+  app.isAll = true;
+
+
+}
+
+function pickInbound(thing){
+  tripDirectionSelect = "inbound";
+  console.log("inbound selected");
+  app.isInbound = true;
+  app.isOutbound = false;
+  app.isBoth = false;
+}
+
+function pickOutbound(thing){
+  tripDirectionSelect = "outbound";
+  console.log("outbound selected");
+  app.isInbound = false;
+  app.isOutbound = true;
+  app.isBoth = false;
+}
+
+function pickBoth(thing){
+  tripDirectionSelect = "both";
+  console.log("both selected");
+  app.isInbound = false;
+  app.isOutbound = false;
+  app.isBoth = true;
+}
+
+function pickPM(thing){
+  timePeriodSelect = "PM";
+  console.log("PM selected");
+  app.isPM = true;
+  app.isDaily = false;
+  app.isCombined = false;
+}
+
+function pickDaily(thing){
+  timePeriodSelect = "daily";
+  console.log("daily selected");
+  app.isPM = false;
+  app.isDaily = true;
+  app.isCombined = false;
+}
+
+function pickCombined(thing){
+  timePeriodSelect = "combined";
+  console.log("Combined selected");
+  app.isPM = false;
+  app.isDaily = false;
+  app.isCombined = true;
+}
+
 
 
 // Vue object connects what is done in the user interface html to the javascript. All the buttons
@@ -472,6 +604,13 @@ let app = new Vue({
     isSupermarket: false,
     isWork: false,
     isOther: false,
+    isAll: false,
+    isInbound: false,
+    isOutbound: false,
+    isBoth: false,
+    isDaily: false,
+    isPM: false,
+    isCombined: false,
     off_sqft: 0,
     ret_sqft: 0,
     res_sqft: 0,
@@ -483,6 +622,7 @@ let app = new Vue({
     num_3bed: 0,
     isTaxiTNCActive: false,
     inputs: false,
+    placetype: '',
 
   },
    //this is for if you want to search directly from the box without the button, watch is
@@ -512,7 +652,14 @@ let app = new Vue({
     pickSupermarket: pickSupermarket,
     pickWork: pickWork,
     pickOther: pickOther,
+    pickAll: pickAll,
+    pickInbound: pickInbound,
+    pickOutbound: pickOutbound,
+    pickBoth: pickBoth,
     pickTaxiTNC: pickTaxiTNC,
+    pickDaily: pickDaily,
+    pickPM: pickPM,
+    pickCombined: pickCombined,
     getPersonTrips: getPersonTrips,
 
 
@@ -551,9 +698,9 @@ let helpPanel = new Vue({
 
 function assignDistrict(address, geoLayer, tooltipLabel) {
   //convert the address geojson to leaflet polygon
-  geoLayer.bindTooltip(tooltipLabel, {permanent: true, sticky:true, className: 'myCSSClass'}).addTo(mymap);
+  geoLayer.bindTooltip(tooltipLabel, {permanent: true, sticky:true, }).addTo(mymap);
 
- 
+
 
   let addressPolygon = L.polygon(address.geometry.coordinates[0]);
   //find the centroid of the address polygon
@@ -563,8 +710,8 @@ function assignDistrict(address, geoLayer, tooltipLabel) {
   let criticalDistrict = leafletPip.pointInLayer(centroidArray, districts_lyr);
   addressDistrictNum = criticalDistrict[0].feature.dist;
 
-  addressPlaceType = criticalDistrict[0].feature.place_type;
-  document.getElementById("district_PT").innerHTML = addressPlaceType;
+  app.placetype = criticalDistrict[0].feature.place_type;
+  //document.getElementById("district_PT").innerHTML = addressPlaceType;
   return criticalDistrict;
 
 }
@@ -614,6 +761,60 @@ queryServer(CTA_API_SERVER + DISTRICTS_URL)
   console.log(geoDistricts);
   drawDistricts();
 })
+
+//this is the downloading part
+
+window.downloadCSV = function(){
+  let data, filename, link;
+  let csv = convertArrayOfObjectsToCSV({
+            data: tripGenRates
+        });
+  if (csv == null) return;
+  filename = 'export.csv';
+  if (!csv.match(/^data:text\/csv/i)) {
+            csv = 'data:text/csv;charset=utf-8,' + csv;
+        }
+  data = encodeURI(csv);
+  link = document.createElement('a');
+  link.style.display = 'none';
+  link.setAttribute('href', data);
+  document.body.appendChild(link);
+  link.setAttribute('download', filename);
+  link.click();
+  document.body.removeChild(link);
+};
+
+function convertArrayOfObjectsToCSV(args) {
+  var result, ctr, keys, columnDelimiter, lineDelimiter, data;
+
+  data = args.data || null;
+  if (data == null || !data.length) {
+      return null;
+  }
+
+  columnDelimiter = args.columnDelimiter || ',';
+  lineDelimiter = args.lineDelimiter || '\n';
+
+  keys = Object.keys(data[0]);
+
+  result = '';
+  result += keys.join(columnDelimiter);
+  result += lineDelimiter;
+
+  data.forEach(function(item) {
+      ctr = 0;
+      keys.forEach(function(key) {
+          if (ctr > 0) result += columnDelimiter;
+
+          result += item[key];
+          ctr++;
+      });
+      result += lineDelimiter;
+  });
+
+  return result;
+}
+
 
 
 
