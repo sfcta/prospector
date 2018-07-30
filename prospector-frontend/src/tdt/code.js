@@ -140,52 +140,26 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
     '<b> Select a trip purpose to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
   }
   else {
-    if (tripDirectionSelect = "outbound"){
+    console.log(getFilteredPersonTrips());
+    console.log(getDistProps(hoverDistrict)); //this is null?
+    if (tripDirectionSelect == "outbound"){
       this._div.innerHTML = '<h4>Person Trips</h4>' +
     '<b>' + getFilteredPersonTrips()*getDistProps(hoverDistrict)+ ' person trips from district ' + addressDistrictNum.toString()+ ' to '+ hoverDistrict.dist.toString() +'</b>';
     } 
-    else if (tripDirectionSelect = "inbound"){
+    else if (tripDirectionSelect == "inbound"){
       this._div.innerHTML = '<h4>Person Trips</h4>' +
-    '<b>' + getFilteredPersonTrips()*getDistProps(hoverDistrict)+ ' to district ' + hoverDistrict.dist.toString()+ ' to '+ addressDistrictNum.toString() +'</b>';
+    '<b>' + getFilteredPersonTrips()*getDistProps(hoverDistrict)+ ' to district ' + hoverDistrict.dist.toString()+ ' from '+ addressDistrictNum.toString() +'</b>';
     }
   }
 };
 info.addTo(mymap);
 // info2.addTo(mymap);
 
-function checkInputs(mode, districtNum, landUse, purpose, direction) {
-  //this function is a hot mess!
-
-  // console.log(mode);
-  // console.log(districtNum);
-  // console.log(landUse);
-  // console.log(purpose);
-  // console.log(direction);
-  try {
-    if (mode !== null && landUse !== null && purpose !== null && direction !== null){
-      return true;
-
-    }
-    // else if (mode == null) throw "mode";
-    // else if (landUse == null) throw "land use";
-    // else if (purpose == null) throw "trip purpose";
-    // else if (direction == null) throw "direction";
-    else if (mode == null) return false;
-    else if (landUse == null) return false;
-    else if (purpose == null) return false;
-    else if (direction == null) return false;
-
-
-  }
-  catch (error) { //its never getting here
-      alert("Please enter a " + error);
-      console.log(error)
-      return false;
-    }
-
-
-
-}
+// function checkInputs(mode, districtNum, landUse, purpose, direction) {
+//   //in javascript undefined != null. Here i'm checking if the inputs are undefined, meaning the global variables
+//   //have been declared but not initialized 
+//   return (mode && landUse && purpose && direction && districtNum)
+// }
 
 //should filterDistributionData and getDistProps be combined into one function? probably...
 
@@ -216,8 +190,12 @@ function getDistProps(hoverDistrict) {
   referenceDistrictProp = "prop_dist" + hoverDistrict.dist; //the name of the value that stores the 
   //relevant proportion from address district to hover district
 
-  //what I'd like to do here is proceed only if all the inputs are nonnull
-  if (checkInputs(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect, tripDirectionSelect)){
+  console.log(landUseSelect);
+  console.log(tripDirectionSelect);
+  console.log(tripPurposeSelect);
+  console.log(addressDistrictNum);
+  console.log(modeSelect);
+  if (modeSelect && landUseSelect && tripPurposeSelect && tripDirectionSelect && addressDistrictNum){
     return filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect, tripDirectionSelect)[0][referenceDistrictProp]; 
   }
   
@@ -292,21 +270,17 @@ function addGeoLayer(geoJsonData){
 
 function getMax() {
   let distributions = [];
-  
-  if (checkInputs(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect, tripDirectionSelect)== true) {
-    let filtered_json_object = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, 
-      tripPurposeSelect, tripDirectionSelect);
+  let filtered_json_object = filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, 
+    tripPurposeSelect, tripDirectionSelect);
 
-    for (let district of geoDistricts) {
-      let propName = "prop_dist" + district.dist; 
+  for (let district of geoDistricts) {
+    let propName = "prop_dist" + district.dist; 
       distributions.push(filtered_json_object[0][propName]); //this call is resulting in an array of undefined objects
     }
     return Math.max.apply(null, distributions);
-  }
-  else {
-    console.log("in get max without all the inputs") //why is it even getting here?
-  } 
 }
+  
+
 
   
   
@@ -314,11 +288,15 @@ function updateMap() {
   let input = app.address; // app.address is the user input. app refers to the VUE object below that handles
   
   console.log(input);
+
+  //check if inputs are null, catch the error, alert what the error is and return so as not to run anything in the rest of the function
+
    
-  getFilteredPersonTrips(); //this runs the function that calculates person trips generated based on the given rates and parameters
   let geocodedJson = queryServer(PLANNING_GEOCODER_baseurl+input, 0) //data has got to the geocoder
     .then(function(geocodedJson) { //after queryServer returns the data, do this:
-      if (geocodedJson.features.length !== 0) { //checks if the server returns meaningful json (as opposed to empty)
+      if (geocodedJson.features.length !== 0 && modeSelect && landUseSelect && tripPurposeSelect && 
+        tripDirectionSelect) {
+  
         let geoJson = planningJson2geojson(geocodedJson); //this is the polygon
         address_geoLyr = L.geoJSON(geoJson,{ //this makes a geoJSON layer from geojson data, which is input
         style: color_styles[1].normal, //this is hardcoded to blue
@@ -328,7 +306,7 @@ function updateMap() {
             mouseover: function(e){
               e.target.setStyle(color_styles[1].selected);
               e.target.bringToFront();
-              getDistProps(e.target.feature); //gets the filtered data according to various parameters
+              //getDistProps(e.target.feature); //gets the filtered data according to trip direction, address/district num, trip type, mode
               info.update(e.target.feature); //this sends the hovered over district info to the info.update function
 
             },
@@ -338,15 +316,17 @@ function updateMap() {
           });
         }
       });
-        assignDistrict(geoJson, address_geoLyr, input);
+      assignDistrict(geoJson, address_geoLyr, input);
       address_geoLyr.addTo(mymap); //adds the geoLayer to the map
       address_geoLyr.bringToFront();
 
 
       districts_lyr.setStyle(function(feature){
+
+      //only do this if everyone is defined- data validation
         let color_func = chroma.scale(['blue', 'red']).domain([0, getMax()]);
         //let color_func = chroma.scale(['blue', 'red']).domain([0, 100]);
-        let proportion_outbound = getDistProps(feature); //maybe this isn't quite right?
+        let proportion_outbound = getDistProps(feature); //any more than 12 times the alert is not being caused by this
         return {'fillColor': color_func(proportion_outbound), fillOpacity:0.6};     
       });
       // for (let marker of markers) {
@@ -355,7 +335,12 @@ function updateMap() {
       // }
     }
     else {
-      alert("The address is invalid or is outside the city limits of San Francisco. Enter another address.");
+      alert("The address is invalid or is outside the city limits of San Francisco. Enter another address. or some other inputs is wrong");
+      console.log(timePeriodSelect);
+      //console.log(hoverDistrict);
+      console.log(tripDirectionSelect);
+      console.log(addressDistrictNum);
+      console.log(tripPurposeSelect);
     }
   })
   }
@@ -369,7 +354,7 @@ function pickAU(thing){
   app.isTaxiTNCActive = false;
 
 
-  console.log("auto selected");
+  //console.log("auto selected");
 
 }
 function pickTR(thing){
@@ -377,7 +362,7 @@ function pickTR(thing){
   app.isTRActive = true;
   app.isAUActive = false;
   app.isTaxiTNCActive = false;
-  console.log("transit selected");
+  //console.log("transit selected");
   // $('#search-select')
   // .dropdown();
 
@@ -389,7 +374,7 @@ function pickTaxiTNC(thing){
   app.isTaxiTNCActive = true;
   app.isAUActive = false;
   app.isTRActive = false;
-  console.log("taxi/tnc selected");
+  //console.log("taxi/tnc selected");
 
 
 }
@@ -518,7 +503,7 @@ function pickRes(thing){
   app.isOffice = false;
   app.isRestaurant = false;
   app.isSupermarket = false;
-  console.log("picked res");
+  //console.log("picked res");
 
 
 }
@@ -530,7 +515,7 @@ function pickOffice(thing){
   app.isRet = false;
   app.isRestaurant = false;
   app.isSupermarket = false;
-  console.log("picked office");
+  //console.log("picked office");
 
 
 
@@ -555,7 +540,7 @@ function pickRestaurant(thing){
   app.isRes = false;
   app.isOffice = false;
   app.isSupermarket = false;
-  console.log("picked rest")
+  //console.log("picked rest")
 
 }
 
@@ -566,12 +551,12 @@ function pickSupermarket(thing){
   app.isRet = false;
   app.isRes = false;
   app.isOffice = false;
-  console.log("picked sup")
+  //console.log("picked sup")
 }
 
 function pickWork(thing){
   tripPurposeSelect = "work";
-  console.log("work selected");
+  //console.log("work selected");
   app.isWork = true;
   app.isOther = false;
   app.isAll = false;
@@ -581,7 +566,7 @@ function pickWork(thing){
 
 function pickOther(thing){
   tripPurposeSelect = "other";
-  console.log("other/nonwork selected");
+  //console.log("other/nonwork selected");
   app.isOther = true;
   app.isWork = false;
   app.isAll = false;
@@ -591,7 +576,7 @@ function pickOther(thing){
 
 function pickAll(thing){
   tripPurposeSelect = "all";
-  console.log("all selected");
+  //console.log("all selected");
   app.isOther = false;
   app.isWork = false;
   app.isAll = true;
@@ -601,7 +586,7 @@ function pickAll(thing){
 
 function pickInbound(thing){
   tripDirectionSelect = "inbound";
-  console.log("inbound selected");
+  //console.log("inbound selected");
   app.isInbound = true;
   app.isOutbound = false;
   app.isBoth = false;
@@ -609,7 +594,7 @@ function pickInbound(thing){
 
 function pickOutbound(thing){
   tripDirectionSelect = "outbound";
-  console.log("outbound selected");
+  //console.log("outbound selected");
   app.isInbound = false;
   app.isOutbound = true;
   app.isBoth = false;
@@ -617,7 +602,7 @@ function pickOutbound(thing){
 
 function pickBoth(thing){
   tripDirectionSelect = "both";
-  console.log("both selected");
+  //console.log("both selected");
   app.isInbound = false;
   app.isOutbound = false;
   app.isBoth = true;
@@ -625,7 +610,7 @@ function pickBoth(thing){
 
 function pickPM(thing){
   timePeriodSelect = "PM";
-  console.log("PM selected");
+  //console.log("PM selected");
   app.isPM = true;
   app.isDaily = false;
   app.isCombined = false;
@@ -633,7 +618,7 @@ function pickPM(thing){
 
 function pickDaily(thing){
   timePeriodSelect = "daily";
-  console.log("daily selected");
+  //console.log("daily selected");
   app.isPM = false;
   app.isDaily = true;
   app.isCombined = false;
@@ -641,7 +626,7 @@ function pickDaily(thing){
 
 function pickCombined(thing){
   timePeriodSelect = "combined";
-  console.log("Combined selected");
+  //console.log("Combined selected");
   app.isPM = false;
   app.isDaily = false;
   app.isCombined = true;
