@@ -143,15 +143,15 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
     
     if (tripDirectionSelect == "outbound"){
       this._div.innerHTML = '<h4>Person Trips</h4>' +
-    '<b>' + numeral(getFilteredPersonTrips(hoverDistrict)).format(0,0)+ ' outbound person trips from district ' + addressDistrictNum.toString()+ ' to '+ hoverDistrict.dist.toString() +'</b>';
+    '<b>' + numeral(getFilteredPersonTrips(hoverDistrict)).format(0,0.0)+ ' outbound person trips from district ' + addressDistrictNum.toString()+ ' to '+ hoverDistrict.dist.toString() +'</b>';
     } 
     else if (tripDirectionSelect == "inbound"){
       this._div.innerHTML = '<h4>Person Trips</h4>' +
-    '<b>' + numeral(getFilteredPersonTrips(hoverDistrict)).format(0,0)+ ' inbound person trips to district ' + hoverDistrict.dist.toString()+ ' from '+ addressDistrictNum.toString() +'</b>';
+    '<b>' + numeral(getFilteredPersonTrips(hoverDistrict)).format(0,0.0)+ ' inbound person trips to district ' + hoverDistrict.dist.toString()+ ' from '+ addressDistrictNum.toString() +'</b>';
     }
     else if (tripDirectionSelect == "both"){
       this._div.innerHTML = '<h4>Person Trips</h4>' +
-    '<b>' + numeral(getFilteredPersonTrips(hoverDistrict)).format(0,0)+ ' total person trips between district ' + hoverDistrict.dist.toString()+ ' and '+ addressDistrictNum.toString() +'</b>';
+    '<b>' + numeral(getFilteredPersonTrips(hoverDistrict)).format(0,0.0)+ ' total person trips between district ' + hoverDistrict.dist.toString()+ ' and '+ addressDistrictNum.toString() +'</b>';
     }
 
 
@@ -177,6 +177,7 @@ function getDistProps(hoverDistrict) {
   if (modeSelect && landUseSelect && tripPurposeSelect && tripDirectionSelect && addressDistrictNum){
     return filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect, tripDirectionSelect)[0][referenceDistrictProp]; 
   }
+  
   
   
 }
@@ -313,9 +314,8 @@ function updateMap() {
 
       //only do this if everyone is defined- data validation
         let color_func = chroma.scale(['blue', 'red']).domain([0, getMax()]);
-        //let color_func = chroma.scale(['blue', 'red']).domain([0, 100]);
-        let proportion_outbound = getDistProps(feature); //any more than 12 times the alert is not being caused by this
-        return {'fillColor': color_func(proportion_outbound), fillOpacity:0.6};     
+        let direction_proportion = getDistProps(feature); 
+        return {'fillColor': color_func(direction_proportion), fillOpacity:0.6};     
       });
       // for (let marker of markers) {
       //   marker.bindTooltip(total_person_trips_PM.toString()); //make this content non-satic, based on calculation. needs to be a string
@@ -324,11 +324,7 @@ function updateMap() {
     }
     else {
       alert("The address is invalid or is outside the city limits of San Francisco. Enter another address. or some other inputs is wrong");
-      //console.log(timePeriodSelect);
-      //console.log(hoverDistrict);
-      // console.log(tripDirectionSelect);
-      // console.log(addressDistrictNum);
-      // console.log(tripPurposeSelect);
+    
     }
     //input = "";
     //console.log(input)
@@ -381,7 +377,7 @@ function getFilteredPersonTrips(hoverDistrict){
   let off_sqft = app.off_sqft;
   let rest_sqft = app.rest_sqft;
   let sup_sqft = app.sup_sqft;
-  let totals_array = [];
+  //let totals_array = [];
 
 
   if (app.isPM ==true) {
@@ -390,10 +386,19 @@ function getFilteredPersonTrips(hoverDistrict){
     off_persontrips_PM = (off_sqft/1000)*(tripGenRates[0].pkhr_rate)*getDistProps(hoverDistrict);
     rest_persontrips_PM = ((rest_sqft/1000)*(tripGenRates[6].pkhr_rate))*getDistProps(hoverDistrict);
     sup_persontrips_PM = ((sup_sqft/1000)*(tripGenRates[4].pkhr_rate))*getDistProps(hoverDistrict); //check rate
+    console.log(filterDistributionData(modeSelect, addressDistrictNum, landUseSelect, tripPurposeSelect, tripDirectionSelect));
+    // console.log(rest_sqft);
+    // console.log("rest: " + rest_persontrips_PM);
+    // console.log(tot_num_bedrooms);
+    // console.log("res: " +res_persontrips_PM);
+    // console.log(off_sqft);
+    // console.log("off: "+ off_persontrips_PM);
+    // console.log(sup_sqft);
+    // console.log("sup: "+ sup_persontrips_PM);
+    // console.log(ret_sqft);
+    // console.log("ret: "+ ret_persontrips_PM);
+    //yay! this is correctly adding them together
     console.log(res_persontrips_PM+ret_persontrips_PM+off_persontrips_PM+rest_persontrips_PM+sup_persontrips_PM);
-    console.log("rest: " + rest_persontrips_PM);
-    console.log("res: " +res_persontrips_PM);
-    console.log("off: "+ off_persontrips_PM);
     return (res_persontrips_PM+ret_persontrips_PM+off_persontrips_PM+rest_persontrips_PM+sup_persontrips_PM);
   }
 
@@ -410,17 +415,6 @@ function getFilteredPersonTrips(hoverDistrict){
 
   
 }
-
-
-
-  //right now this isn't a true total since its only adding the total for each case and each hoverDistrict
-  // const arrSum = arr => arr.reduce((a,b) => a + b, 0);
-  // let total_person_trips = arrSum(totals_array);
-  // console.log("total person trips: " + total_person_trips);
-  // console.log(totals_array); //this is only totaling the one in quesiton
-   //still not returning a true total
-
-
 
 
 
@@ -538,38 +532,30 @@ function pickBoth(thing){
 }
 
 function pickPM(thing){
-  // if (timePeriodSelect == "PM"){
-  //   timePeriodSelect = null;
-  // }
-  // else {
-    timePeriodSelect = "PM";
-  // }
+  
+  timePeriodSelect = "PM";
+  
   console.log(timePeriodSelect);
   app.isPM = true;
   app.isDaily = false;
-  app.isCombined = false;
+  // app.isCombined = false;
 }
 
-function pickDaily(thing){
-  // if (timePeriodSelect == "daily"){
-  //   timePeriodSelect = null;
-  // }
-  // else {
+function pickDaily(thing){  
   timePeriodSelect = "daily";
-  // }
-  //console.log("daily selected");
+  
   app.isPM = false;
   app.isDaily = true;
-  app.isCombined = false;
+  // app.isCombined = false;
 }
 
-function pickCombined(thing){
-  timePeriodSelect = "combined";
-  //console.log("Combined selected");
-  app.isPM = false;
-  app.isDaily = false;
-  app.isCombined = true;
-}
+// function pickCombined(thing){
+//   timePeriodSelect = "combined";
+//   //console.log("Combined selected");
+//   app.isPM = false;
+//   app.isDaily = false;
+//   app.isCombined = true;
+// }
 
 
 
@@ -614,14 +600,7 @@ let app = new Vue({
   // for detecting changes, sometimes it is not a button, it could be a checkbox or something
   // that isn't as straightforward as buttons, use watch
   watch: {
-    // num_studios: getPersonTrips,
-    // num_1bed: getPersonTrips,
-    // num_2bed: getPersonTrips,
-    // num_3bed: getPersonTrips,
-    // off_sqft: getPersonTrips,
-    // ret_sqft: getPersonTrips,
-    // rest_sqft: getPersonTrips,
-    // sup_sqft: getPersonTrips,
+    
 
   },
   
@@ -644,7 +623,7 @@ let app = new Vue({
     pickTaxiTNC: pickTaxiTNC,
     pickDaily: pickDaily,
     pickPM: pickPM,
-    pickCombined: pickCombined,
+    // pickCombined: pickCombined,
     getFilteredPersonTrips: getFilteredPersonTrips,
 
 
