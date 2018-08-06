@@ -7,13 +7,13 @@
  -->      <!-- <hr/> -->
       <h3 class="apptitle">TRAVEL DEMAND TOOL</h3>
       <div id="helpbar">
-        <button class="ui mini right labeled icon yellow button"
+        <button class="ui mini right labeled icon violet button"
         v-on:click="clickToggleHelp">
         <i class="help circle icon"></i>
         What is this?
       </button>
       &nbsp;
-      <button class="ui mini right labeled icon yellow button"
+      <button class="ui mini right labeled icon violet button"
       v-on:click="this.window.open('http://sf-planning.org/','_blank')">
       <i class="arrow right icon"></i>
       Learn More
@@ -38,23 +38,23 @@
 <!-- <div id="vizbuttons" class="ui vertical buttons"> -->
   <div>
   <button v-on:click="pickRes"
-  v-bind:class="{ active: isResidential, yellow:isResidential}"
-  class="mini ui inverted yellow icon button">Residential</button>
+  v-bind:class="{ active: isResidential, blue:isResidential}"
+  class="mini ui inverted blue icon button">Residential</button>
   <button v-on:click="pickOffice"
-  v-bind:class="{ active: isOffice, yellow: isOffice}"
-  class="mini ui inverted yellow icon button">Office</button>
+  v-bind:class="{ active: isOffice, blue: isOffice}"
+  class="mini ui inverted blue icon button">Office</button>
   <button v-on:click="pickRet"
-  v-bind:class="{ active: isRetail, yellow: isRetail }"
-  class="mini ui inverted yellow icon button">Retail</button>
+  v-bind:class="{ active: isRetail, blue: isRetail }"
+  class="mini ui inverted blue icon button">Retail</button>
   <button v-on:click="pickRestaurant"
-  v-bind:class="{ active: isRestaurant, yellow: isRestaurant }"
-  class="mini ui inverted yellow icon button">Restaurant</button>
+  v-bind:class="{ active: isRestaurant, blue: isRestaurant }"
+  class="mini ui inverted blue icon button">Restaurant</button>
   <button v-on:click="pickSupermarket"
-  v-bind:class="{ active: isSupermarket, yellow: isSupermarket }"
-  class="mini ui inverted yellow icon button">Supermarket</button>
+  v-bind:class="{ active: isSupermarket, blue: isSupermarket }"
+  class="mini ui inverted blue icon button">Supermarket</button>
   <button v-on:click="pickHotel"
-  v-bind:class="{ active: isHotel, yellow: isHotel}"
-  class="mini ui inverted yellow icon button">Hotel</button>
+  v-bind:class="{ active: isHotel, blue: isHotel}"
+  class="mini ui inverted blue icon button">Hotel</button>
 
 
 
@@ -114,16 +114,16 @@
   <div class="pickers">
     <h5>3. CHOOSE MODE:</h5>
     <button v-on:click="pickAU" 
-    v-bind:class="{ active: isAUActive, yellow: isAUActive}"
-    class="mini ui inverted white icon button"><i class="icon car"></i>
+    v-bind:class="{ active: isAUActive, white: isAUActive}"
+    class="tiny ui inverted white icon button"><i class="icon car"></i>
   All Auto</button>
   <button v-on:click="pickTR"
-  v-bind:class="{ active: isTRActive, yellow: isTRActive}"
-  class="mini ui inverted white icon button"><i class="icon bus"></i>
+  v-bind:class="{ active: isTRActive, white: isTRActive}"
+  class="tiny ui inverted white icon button"><i class="icon bus"></i>
 Transit</button>
 <button v-on:click="pickTaxiTNC"
-  v-bind:class="{ active: isTaxiTNCActive, yellow: isTaxiTNCActive}"
-  class="mini ui inverted white icon button"><i class="icon taxi"></i>
+  v-bind:class="{ active: isTaxiTNCActive, white: isTaxiTNCActive}"
+  class="tiny ui inverted white icon button"><i class="icon taxi"></i>
 TaxiTNC</button>
 
 <br>
@@ -131,50 +131,47 @@ TaxiTNC</button>
 
 <h5>4. CHOOSE TRIP PURPOSE:</h5>
 <button v-on:click="pickWork"
-v-bind:class="{ active: isWork, yellow: isWork}"
-class="mini ui inverted white icon button">Work</button>
+v-bind:class="{ active: isWork, white: isWork}"
+class="tiny ui inverted white icon button">Work</button>
 <button v-on:click="pickOther"
-v-bind:class="{ active: isOther, yellow: isOther}"
-class="mini ui inverted white icon button"> Non Work</button>
+v-bind:class="{ active: isOther, white: isOther}"
+class="tiny ui inverted white icon button"> Non Work</button>
 <button v-on:click="pickAll"
-v-bind:class="{ active: isAll, yellow: isAll}"
-class="mini ui inverted white icon button"> Total</button>
+v-bind:class="{ active: isAll, white: isAll}"
+class="tiny ui inverted white icon button"> Total</button>
 
  <br>
 
  <h5>5. CHOOSE DIRECTION:</h5>
 <button v-on:click="pickInbound"
-v-bind:class="{ active: isInbound, yellow: isInbound}"
-class="mini ui inverted red icon button"><i class="icon compress"></i>Inbound</button>
+v-bind:class="{ active: isInbound, white: isInbound}"
+class="tiny ui inverted red icon button"><i class="icon compress"></i>Inbound</button>
 <button v-on:click="pickOutbound"
-v-bind:class="{ active: isOutbound, yellow: isOutbound}"
-class="mini ui inverted blue icon button"><i class="icon expand"></i>Outbound</button>
+v-bind:class="{ active: isOutbound, white: isOutbound}"
+class="tiny ui inverted blue icon button"><i class="icon expand"></i>Outbound</button>
 <button v-on:click="pickBoth"
-v-bind:class="{ active: isBoth, yellow: isBoth}"
-class="mini ui inverted grey icon button"> Total</button>
+v-bind:class="{ active: isBoth, white: isBoth}"
+class="tiny ui inverted grey icon button"> Total</button>
 
 <br>
 
 <h5>5. CHOOSE TIME PERIOD:</h5>
 <button v-on:click="pickDaily"
-v-bind:class="{ active: isDaily, yellow: isDaily}"
-class="mini ui inverted white icon button">Daily</button>
+v-bind:class="{ active: isDaily, white: isDaily}"
+class="tiny ui inverted white icon button">Daily</button>
 <button v-on:click="pickPM"
-v-bind:class="{ active: isPM, yellow: isPM}"
-class="mini ui inverted white icon button"> PM Peak</button>
+v-bind:class="{ active: isPM, white: isPM}"
+class="tiny ui inverted white icon button"> PM Peak</button>
 
-<!-- <button v-on:click="pickCombined"
-v-bind:class="{ active: isCombined, yellow: isCombined}"
-class="mini ui inverted white icon button"> Total</button> -->
 
 <br>
 <br>
 
 <div id="download">
-  <button v-on:click="updateMap" class="small ui right labeled icon floated green button" 
+  <button v-on:click="updateMap" class="tiny ui right labeled icon floated green button" 
   style="margin-right:5px"><i class="icon arrow circle right"></i>Update
   </button>
-  <button v-on:click="clearAllInputs" class="small ui right labeled icon floated red button" 
+  <button v-on:click="clearAllInputs" class="tiny ui right labeled icon floated yellow button" 
   style="margin-right:5px"><i class="icon ban"></i>Clear Inputs
   </button>
 </div>
