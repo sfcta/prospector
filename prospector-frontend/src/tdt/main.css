@@ -277,6 +277,11 @@ table { border: 0px; }
     transition: visibility 0s 0.5s, opacity 0.5s linear;
 }
 
+/*.ui.color1.button {
+  background-color: #871A64;
+  color: #871A64;
+}*/
+
 
 .myCSSClass {
   background: green;

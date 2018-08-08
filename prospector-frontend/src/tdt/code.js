@@ -95,8 +95,8 @@ selected: {"color": "#33f",    "weight":4, "opacity": 0.5 },},
 selected: {"color": "#34784b", "weight":5, "opacity": 1.0, },},
 {normal: {"fillColor": "#000", "fillOpacity": 0.8, },
 selected: {"color": "#000", "weight":5, "opacity": 1.0,},},
-{normal: {"fillColor": "#2986CE", "fillOpacity": 0.2, },
-selected: {"color": "#2986CE", "weight":2, "opacity": 0.8,},},
+{normal: {"color": "#5AC9FD", "fillColor": "#43C1FC", "fillOpacity": 0.2, "weight":3, "opacity": 1,},
+selected: {"color": "#43C1FC", "weight":2, "opacity": 1,},},
 ];
 
 //some global geolayer variables
@@ -171,11 +171,11 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
     } 
     else if (tripDirectionSelect == "inbound"){
       this._div.innerHTML = '<h4>Person Trips</h4>' +
-      '<b>' + numeral(districtPersonTrips[hoverDistrict.dist]["total"]).format('0,0.0')+ ' inbound person trips to ' + hoverDistrict.distname.toString()+ ' from '+ addressDistrictName.toString() +'</b>';
+      '<b>' + numeral(districtPersonTrips[hoverDistrict.dist]["total"]).format('0,0.0')+ ' inbound person trips to ' + hoverDistrict.distname.toString()+ ' from '+ address +'</b>';
     }
     else if (tripDirectionSelect == "both"){
       this._div.innerHTML = '<h4>Person Trips</h4>' +
-      '<b>' + numeral(districtPersonTrips[hoverDistrict.dist]["total"]).format('0,0.0')+ ' total person trips between ' + hoverDistrict.distname.toString()+ ' and '+ addressDistrictName.toString() +'</b>';
+      '<b>' + numeral(districtPersonTrips[hoverDistrict.dist]["total"]).format('0,0.0')+ ' total person trips between ' + hoverDistrict.distname.toString()+ ' and '+ address +'</b>';
     }
 
 
@@ -244,8 +244,8 @@ function addGeoLayer(geoJsonData){
     onEachFeature: function(feature, layer) { 
       layer.on({
         mouseover: function(e){
-          //e.target.setStyle(color_styles[0].selected);
-          //e.target.bringToFront(); 
+          //e.target.setStyle(color_styles[3].normal);
+          e.target.bringToFront(); 
           if (districtMarker){
             districtMarker.unbindTooltip();
             mymap.removeLayer(districtMarker);
@@ -279,12 +279,6 @@ function getMax() {
   if (modeSelect && landUseCheck && tripPurposeSelect && tripDirectionSelect && addressDistrictNum && timePeriodSelect
     && filterDistributionData(modeSelect, addressDistrictNum, "Retail", //these are hardcoded pending decision at meeting
     tripPurposeSelect, tripDirectionSelect).length !== 0){ //not sure if this last check is correct
-    // let filtered_json_object = filterDistributionData(modeSelect, addressDistrictNum, "Retail", 
-    //   tripPurposeSelect, tripDirectionSelect);
-  // for (let district of geoDistricts) {
-  //   let propName = "prop_dist" + district.dist; 
-  //     distributions.push(filtered_json_object[0][propName]); //this call is resulting in an array of undefined objects
-  //   }
   for (let key of Object.keys(districtPersonTrips)){
     distributions.push(districtPersonTrips[key]["total"]);
   }
@@ -314,11 +308,8 @@ function getDistProps(district, landUse) {
   let referenceDistrict = "trips_dist" + district.dist;
 
   if (modeSelect && landUseCheck==true && tripPurposeSelect && tripDirectionSelect && addressDistrictNum){
-    //console.log("from getDistProps " + filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, tripDirectionSelect)[0][referenceDistrictProp]);
     return filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, tripDirectionSelect)[0][referenceDistrictProp]; 
-    //return filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, tripDirectionSelect)[0][referenceDistrict];
-    // console.log(referenceDistrictProp);
-    // console.log(filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, tripDirectionSelect)[0][referenceDistrictProp]);
+    
   }
   else {
     console.log("whats goin' on?");
@@ -381,7 +372,7 @@ function updateMap() {
 
           layer.on({
             mouseover: function(e){
-              e.target.setStyle(color_styles[1].selected);
+              //e.target.setStyle(color_styles[1].selected);
               //e.target.bringToFront();
 
             },
@@ -403,11 +394,11 @@ function updateMap() {
       districts_lyr.setStyle(function(feature){
 
       //only do this if everyone is defined- data validation
-      let color_func = chroma.scale(['#2986CE', 'red']).domain([0, getMax()]);
+      let color_func = chroma.scale(['#4575b4', '#91bfdb', '#e0f3f8', '#ffffbf', '#fee090', '#fc8d59', '#d73027']).domain([0, getMax()]);
       //console.log(districtPersonTrips[feature.dist]);
         let tot_person_trips = districtPersonTrips[feature.dist]["total"];
         //console.log(tot_person_trips);
-        return {'fillColor': color_func(tot_person_trips), fillOpacity:0.6};     
+        return {'color': '#444444', 'weight': 2, 'fillColor': color_func(tot_person_trips), fillOpacity:0.6};     
       });
     
   
@@ -442,14 +433,13 @@ function updateMap() {
   }
 
 let trgen_download; //an array of dictionaries -> "a list of json"
-let tdist_download; 
+let tdist_download;
+let modesplit_download; 
 
   function createDownloadObjects() {
     trgen_download = []; 
     tdist_download = [];
-    //modesplit_download =[];
-
-    //this only does it for the daily
+    modesplit_download = [];
 
     let tmp_dwld;
     let tot_bedrooms = app.num_studios+app.num_1bed+2*app.num_2bed+3*app.num_3bed;
@@ -467,6 +457,13 @@ let tdist_download;
       tmp_dwld['PM_Person_Trips'] = (tot_bedrooms*app.res_tripgen_PM).toString();
       tot_pm += tot_bedrooms*app.res_tripgen_PM;
       trgen_download.push(tmp_dwld);
+
+      tmp_dwld = {};
+      tmp_dwld['Landuse'] = 'Residential';
+      tmp_dwld['transit modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["transit"].toString();
+      tmp_dwld['all auto modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["auto"].toString();
+      tmp_dwld['taxi modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["taxi"].toString();
+      modesplit_download.push(tmp_dwld);
 
       tmp_dwld = {};
       tmp_dwld['Landuse'] = 'Residential';
@@ -491,6 +488,13 @@ let tdist_download;
 
       tmp_dwld = {};
       tmp_dwld['Landuse'] = 'Office';
+      tmp_dwld['transit modesplit'] = filterModeSplitData("Office", app.placetype)[0]["transit"].toString();
+      tmp_dwld['all auto modesplit'] = filterModeSplitData("Office", app.placetype)[0]["auto"].toString();
+      tmp_dwld['taxi modesplit'] = filterModeSplitData("Office", app.placetype)[0]["taxi"].toString();
+      modesplit_download.push(tmp_dwld);
+
+      tmp_dwld = {};
+      tmp_dwld['Landuse'] = 'Office';
       for (let district of geoDistricts) {
         getFilteredPersonTrips(district);
         tmp_dwld[district.distname] = districtPersonTrips[district.dist]["Office"].toString();
@@ -509,6 +513,13 @@ let tdist_download;
       tmp_dwld['PM_Person_Trips'] = (app.ret_sqft*app.ret_tripgen_PM).toString();
       tot_pm += app.ret_sqft*app.ret_tripgen_PM;
       trgen_download.push(tmp_dwld);
+
+      tmp_dwld = {};
+      tmp_dwld['Landuse'] = 'Retail';
+      tmp_dwld['transit modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["transit"].toString();
+      tmp_dwld['all auto modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["auto"].toString();
+      tmp_dwld['taxi modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["taxi"].toString();
+      modesplit_download.push(tmp_dwld);
 
       tmp_dwld = {};
       tmp_dwld['Landuse'] = 'Retail';
@@ -533,6 +544,13 @@ let tdist_download;
 
       tmp_dwld = {};
       tmp_dwld['Landuse'] = 'Restaurant';
+      tmp_dwld['transit modesplit'] = filterModeSplitData("Restaurant", app.placetype)[0]["transit"].toString();
+      tmp_dwld['all auto modesplit'] = filterModeSplitData("Restaurant", app.placetype)[0]["auto"].toString();
+      tmp_dwld['taxi modesplit'] = filterModeSplitData("Restaurant", app.placetype)[0]["taxi"].toString();
+      modesplit_download.push(tmp_dwld);
+
+      tmp_dwld = {};
+      tmp_dwld['Landuse'] = 'Restaurant';
       for (let district of geoDistricts) {
         getFilteredPersonTrips(district);
         tmp_dwld[district.distname] = districtPersonTrips[district.dist]["Restaurant"].toString();
@@ -554,11 +572,21 @@ let tdist_download;
 
       tmp_dwld = {};
       tmp_dwld['Landuse'] = 'Hotel';
+      tmp_dwld['transit modesplit'] = filterModeSplitData("Hotel", app.placetype)[0]["transit"].toString();
+      tmp_dwld['all auto modesplit'] = filterModeSplitData("Hotel", app.placetype)[0]["auto"].toString();
+      tmp_dwld['taxi modesplit'] = filterModeSplitData("Hotel", app.placetype)[0]["taxi"].toString();
+      modesplit_download.push(tmp_dwld);
+
+      tmp_dwld = {};
+      tmp_dwld['Landuse'] = 'Hotel';
       for (let district of geoDistricts) {
         getFilteredPersonTrips(district);
         tmp_dwld[district.distname] = districtPersonTrips[district.dist]["Hotel"].toString();
       }
       tdist_download.push(tmp_dwld);
+
+  
+
     }
     if(app.sup_sqft>0) {
       tmp_dwld = {};
@@ -572,6 +600,13 @@ let tdist_download;
       tmp_dwld['PM_Person_Trips'] = (app.sup_sqft*app.sup_tripgen_PM).toString();
       tot_pm += app.sup_sqft*app.sup_tripgen_PM;
       trgen_download.push(tmp_dwld);
+
+      tmp_dwld = {};
+      tmp_dwld['Landuse'] = 'Supermarket';
+      tmp_dwld['transit modesplit'] = filterModeSplitData("Supermarket", app.placetype)[0]["transit"].toString();
+      tmp_dwld['all auto modesplit'] = filterModeSplitData("Supermarket", app.placetype)[0]["auto"].toString();
+      tmp_dwld['taxi modesplit'] = filterModeSplitData("Supermarket", app.placetype)[0]["taxi"].toString();
+      modesplit_download.push(tmp_dwld);
 
       tmp_dwld = {};
       tmp_dwld['Landuse'] = 'Supermarket';
@@ -762,6 +797,8 @@ function pickOffice(thing){
   app.isRestaurant = false;
   app.isSupermarket = false;
   app.isHotel = false;
+  //checkLandUseSelections()
+
 
 }
 
@@ -774,6 +811,7 @@ function pickRet(thing){
   app.isRestaurant = false;
   app.isSupermarket = false;
   app.isHotel = false;
+  //checkLandUseSelections();
 }
 
 function pickRestaurant(thing){
@@ -784,6 +822,7 @@ function pickRestaurant(thing){
   app.isOffice = false;
   app.isSupermarket = false;
   app.isHotel = false;  
+  //checkLandUseSelections();
 
 }
 
@@ -795,6 +834,7 @@ function pickHotel(thing){
   app.isResidential = false;
   app.isOffice = false;
   app.isSupermarket = false;
+  // checkLandUseSelections();
 }
 
 function pickSupermarket(thing){
@@ -805,6 +845,7 @@ function pickSupermarket(thing){
   app.isResidential = false;
   app.isOffice = false;
   app.isHotel = false;
+  //checkLandUseSelections();
   
 }
 
@@ -822,6 +863,7 @@ function pickOther(thing){
   app.isOther = true;
   app.isWork = false;
   app.isAll = false;
+  
 
 
 }
@@ -831,6 +873,7 @@ function pickAll(thing){
   app.isOther = false;
   app.isWork = false;
   app.isAll = true;
+
 }
 
 function pickInbound(thing){
@@ -867,8 +910,15 @@ function pickDaily(thing){
   app.isDaily = true;
 }
 
+function checkLandUseSelections() {
+    app.resSelected = ((app.num_1bed+ app.num_2bed+ app.num_3bed) >0);
+    app.offSelected = app.off_sqft > 0;
+    app.restSelected = app.rest_sqft > 0;
+    app.hotSelected = app.hot_sqft > 0;
+    app.supSelected = app.sup_sqft > 0;
+    app.retSelected = app.ret_sqft > 0;
 
-
+  }
 
 // Vue object connects what is done in the user interface html to the javascript. All the buttons
 // in the right side panel are connected here. 
@@ -894,7 +944,7 @@ let app = new Vue({
     isDaily: false,
     isPM: false,
     isCombined: false,
-    off_sqft: null,
+    off_sqft: 0,
     ret_sqft: 0,
     res_sqft: 0,
     rest_sqft: 0,
@@ -908,12 +958,29 @@ let app = new Vue({
     inputs: false,
     placetype: '',
     ret_tripgen_daily: '',
+    offSelected: false,
+    resSelected: false,
+    retSelected: false,
+    restSelected: false,
+    supSelected: false,
+    hotSelected: false,
+
 
   },
    //this is for if you want to search directly from the box without the button, watch is
   // for detecting changes, sometimes it is not a button, it could be a checkbox or something
   // that isn't as straightforward as buttons, use watch
   watch: {
+    off_sqft: checkLandUseSelections,
+    ret_sqft: checkLandUseSelections,
+    res_sqft: checkLandUseSelections,
+    rest_sqft: checkLandUseSelections,
+    sup_sqft: checkLandUseSelections,
+    hot_sqft: checkLandUseSelections,
+    num_1bed: checkLandUseSelections,
+    num_2bed: checkLandUseSelections,
+    num_3bed: checkLandUseSelections,
+
 
 
   },
@@ -1023,18 +1090,24 @@ queryServer(CTA_API_SERVER + DISTRICTS_URL)
 window.downloadCSV = function(){
   createDownloadObjects();
   let data, filename, link;
-  let csv = 'trip generation rates by land use and ime';
+  let csv = 'trip generation rates by land use and time';
   if (csv == null) return;
   csv += '\n'+ convertArrayOfObjectsToCSV({
             data: trgen_download
+        });
+
+  csv += '\n\n'+ 'mode split distribution';
+  csv += '\n' + convertArrayOfObjectsToCSV({
+            data: modesplit_download
         });
   
   csv += '\n\n '+ modeSelect+ ' person trips distribution by district';
   csv += '\n' + convertArrayOfObjectsToCSV({
             data: tdist_download
         });
-  
-  filename = 'export.csv';
+
+
+  filename = 'tdtool_dataexport.csv';
   if (!csv.match(/^data:text\/csv/i)) {
             csv = 'data:text/csv;charset=utf-8,' + csv;
         }

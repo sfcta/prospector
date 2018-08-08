@@ -36,24 +36,24 @@
 
 <h5>2. CHOOSE LAND USE:</h5>
 <!-- <div id="vizbuttons" class="ui vertical buttons"> -->
-  <div>
-  <button v-on:click="pickRes"
-  v-bind:class="{ active: isResidential, blue:isResidential}"
+  <div >
+  <button class = "ui toggle button" v-on:click="pickRes"
+  v-bind:class="{ active: resSelected, blue: resSelected }"
   class="mini ui inverted blue icon button">Residential</button>
-  <button v-on:click="pickOffice"
-  v-bind:class="{ active: isOffice, blue: isOffice}"
+  <button class = "ui toggle button" v-on:click="pickOffice"
+  v-bind:class="{ active: offSelected, blue: offSelected }"
   class="mini ui inverted blue icon button">Office</button>
   <button v-on:click="pickRet"
-  v-bind:class="{ active: isRetail, blue: isRetail }"
+  v-bind:class="{ active: retSelected, blue: retSelected }"
   class="mini ui inverted blue icon button">Retail</button>
   <button v-on:click="pickRestaurant"
-  v-bind:class="{ active: isRestaurant, blue: isRestaurant }"
+  v-bind:class="{ active: restSelected, blue: restSelected }"
   class="mini ui inverted blue icon button">Restaurant</button>
   <button v-on:click="pickSupermarket"
-  v-bind:class="{ active: isSupermarket, blue: isSupermarket }"
+  v-bind:class="{ active: supSelected, blue: supSelected }"
   class="mini ui inverted blue icon button">Supermarket</button>
   <button v-on:click="pickHotel"
-  v-bind:class="{ active: isHotel, blue: isHotel}"
+  v-bind:class="{ active: hotSelected, blue: hotSelected}"
   class="mini ui inverted blue icon button">Hotel</button>
 
 
@@ -122,7 +122,7 @@
 Transit</button>
 <button v-on:click="pickTaxiTNC"
   v-bind:class="{ active: isTaxiTNCActive, white: isTaxiTNCActive}"
-  class="tiny ui inverted white icon button"><i class="icon taxi"></i>
+  class="tiny inverted ui color1 icon button"><i class="icon taxi"></i>
 TaxiTNC</button>
 
 <br>
@@ -144,13 +144,13 @@ class="tiny ui inverted white icon button"> Total</button>
  <h5>5. CHOOSE DIRECTION:</h5>
 <button v-on:click="pickInbound"
 v-bind:class="{ active: isInbound, white: isInbound}"
-class="tiny ui inverted red icon button"><i class="icon compress"></i>Inbound</button>
+class="tiny ui inverted jellybean icon button"><i class="icon compress"></i>Inbound</button>
 <button v-on:click="pickOutbound"
 v-bind:class="{ active: isOutbound, white: isOutbound}"
-class="tiny ui inverted blue icon button"><i class="icon expand"></i>Outbound</button>
+class="tiny ui inverted jap_indigo icon button"><i class="icon expand"></i>Outbound</button>
 <button v-on:click="pickBoth"
 v-bind:class="{ active: isBoth, white: isBoth}"
-class="tiny ui inverted grey icon button"> Total</button>
+class="tiny ui inverted white icon button"> Total</button>
 
 <br>
 
