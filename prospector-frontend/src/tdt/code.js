@@ -95,8 +95,8 @@ selected: {"color": "#33f",    "weight":4, "opacity": 0.5 },},
 selected: {"color": "#34784b", "weight":5, "opacity": 1.0, },},
 {normal: {"fillColor": "#000", "fillOpacity": 0.8, },
 selected: {"color": "#000", "weight":5, "opacity": 1.0,},},
-{normal: {"color": "#5AC9FD", "fillColor": "#43C1FC", "fillOpacity": 0.2, "weight":3, "opacity": 1,},
-selected: {"color": "#43C1FC", "weight":2, "opacity": 1,},},
+{normal: {"color": "#5AC9FD", "fillColor": "#43C1FC", "fillOpacity": 0.3, "weight":3, "opacity": 1,},
+selected: {"color": "#43C1FC", "weight":1, "opacity": 1,},},
 ];
 
 //some global geolayer variables
@@ -138,20 +138,15 @@ return this._div;
 info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target defned in updateMap
   if (addressDistrictNum == null && hoverDistrict == null) {
     this._div.innerHTML = '<h4>Information</h4>' +
-    '<b> Input an address </b>'
+    '<b> Input project details </b>'
   }
   else if (hoverDistrict == null) {
     this._div.innerHTML = '<h4>Information</h4>' +
-    '<b> Trips from district '+ addressDistrictNum.toString() + ':hover over a district </b>'
+    '<b> "Hover over a district </b>'
   }
   else if (addressDistrictNum == null) {
     this._div.innerHTML = '<h4>Information</h4>' +
     '<b> Input an address to see trip distribution for: '+ hoverDistrict.distname +  '</b>' 
-  }
-
-  else if (modeSelect == null) {
-    this._div.innerHTML = '<h4>Information</h4>' +
-    '<b> Select a mode to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
   }
 
   else if (landUseCheck == false) {
@@ -159,23 +154,33 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
     '<b> Select a land use to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
   }
 
+  else if (modeSelect == null) {
+    this._div.innerHTML = '<h4>Information</h4>' +
+    '<b> Select a mode to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
+  }
+
   else if (tripPurposeSelect == null) {
     this._div.innerHTML = '<h4>Information</h4>' +
     '<b> Select a trip purpose to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
   }
+
+  
   else {
 
     if (tripDirectionSelect == "outbound"){
       this._div.innerHTML = '<h4>Person Trips</h4>' +
-      '<b>' + numeral(districtPersonTrips[hoverDistrict.dist]["total"]).format('0,0.0')+ ' outbound person trips from ' + address+ ' to '+ hoverDistrict.distname.toString() +'</b>';
+      '<b>' +Math.round(districtPersonTrips[hoverDistrict.dist]["total"])+ ' outbound person trips from ' + address+ ' to '+ hoverDistrict.distname.toString() + '</b>' +
+       '<b><br>' + " based on the proposed project land use inputs"+ '</b>';
     } 
     else if (tripDirectionSelect == "inbound"){
       this._div.innerHTML = '<h4>Person Trips</h4>' +
-      '<b>' + numeral(districtPersonTrips[hoverDistrict.dist]["total"]).format('0,0.0')+ ' inbound person trips to ' + hoverDistrict.distname.toString()+ ' from '+ address +'</b>';
+      '<b>' + Math.round(districtPersonTrips[hoverDistrict.dist]["total"])+ ' inbound person trips to ' + hoverDistrict.distname.toString()+ ' from '+ address + '</b>' +
+      '<b><br>' + " based on the proposed project land use inputs"+ '</b>';
     }
     else if (tripDirectionSelect == "both"){
       this._div.innerHTML = '<h4>Person Trips</h4>' +
-      '<b>' + numeral(districtPersonTrips[hoverDistrict.dist]["total"]).format('0,0.0')+ ' total person trips between ' + hoverDistrict.distname.toString()+ ' and '+ address +'</b>';
+      '<b>' + Math.round(districtPersonTrips[hoverDistrict.dist]["total"])+ ' total person trips between ' + hoverDistrict.distname.toString()+ ' and '+ address + '</b>' +
+      '<b><br>' + " based on the proposed project land use inputs"+ '</b>';
     }
 
 
@@ -394,11 +399,11 @@ function updateMap() {
       districts_lyr.setStyle(function(feature){
 
       //only do this if everyone is defined- data validation
-      let color_func = chroma.scale(['#4575b4', '#91bfdb', '#e0f3f8', '#ffffbf', '#fee090', '#fc8d59', '#d73027']).domain([0, getMax()]);
+      let color_func = chroma.scale(['#1C4459', 'FCCD70', '#FCBF49', 'D62828']).domain([0, getMax()]);
       //console.log(districtPersonTrips[feature.dist]);
         let tot_person_trips = districtPersonTrips[feature.dist]["total"];
-        //console.log(tot_person_trips);
-        return {'color': '#444444', 'weight': 2, 'fillColor': color_func(tot_person_trips), fillOpacity:0.6};     
+        console.log(tot_person_trips);
+        return {'color': '#444444', 'weight': 2, 'fillColor': color_func(tot_person_trips), fillOpacity:1};     
       });
     
   
@@ -648,19 +653,6 @@ function getFilteredPersonTrips(){
       personTrips["Supermarket"] = ((app.sup_sqft/1000)*(tripGenRates[4].pkhr_rate))*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail")*getDistProps(district, "Retail"); 
       personTrips["Hotel"] = ((app.hot_sqft/1000)*(tripGenRates[2].pkhr_rate))*filterModeSplitData("Hotel", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail")*getDistProps(district, "Retail");
     
-    // personTrips["Residential"] = ((tripGenRates[1].pkhr_rate)*tot_num_bedrooms)*filterModeSplitData("Residential", app.placetype)[0][modeSelect]*getDistProps(district, "Residential");
-    // personTrips["Retail"] = (app.ret_sqft)*(tripGenRates[3].pkhr_rate)*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDistProps(district, "Retail");
-    // personTrips["Office"] = (app.off_sqft)*(tripGenRates[0].pkhr_rate)*filterModeSplitData("Office", app.placetype)[0][modeSelect]*getDistProps(district, "Office");
-    // personTrips["Restaurant"] = ((app.rest_sqft)*(tripGenRates[6].pkhr_rate))*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDistProps(district, "Retail"); //rest and sup use retail distribution
-    // personTrips["Supermarket"] = ((app.sup_sqft)*(tripGenRates[4].pkhr_rate))*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDistProps(district, "Retail"); 
-    // personTrips["Hotel"] = ((app.hot_sqft)*(tripGenRates[2].pkhr_rate))*filterModeSplitData("Hotel", app.placetype)[0][modeSelect]*getDistProps(district, "Retail");
-    console.log(district);
-    console.log("trip gen: "+ (app.off_sqft/1000)*(tripGenRates[0].pkhr_rate));
-    console.log("outbound prop: " + getDirectionProps(district, "Office"));
-    console.log("modesplit: "+ filterModeSplitData("Office", app.placetype)[0][modeSelect]);
-    console.log("dist prop:"+ getDistProps(district, "Office"));
-    console.log(personTrips["Office"]);
-
     }
 
     else if (app.isDaily == true){
@@ -744,7 +736,8 @@ function getFilteredPersonTrips(){
   //app.inputs = false;
   app.placetype = '';
   //this doesn't seem to be doing anything
-  districts_lyr.resetStyle(color_styles[0].normal);
+  //districts_lyr.resetStyle(color_styles[0].normal);
+  districts_lyr.setStyle(color_styles[3].normal);
   if (address_geoLyr){
     mymap.removeLayer(address_geoLyr);
     //this works but removing the layer is not the ideal situation. I'd rather keep the layer and just recolor it.
@@ -760,6 +753,7 @@ function pickAU(thing){
   app.isAUActive = true;
   app.isTRActive = false;
   app.isTaxiTNCActive = false;
+  info.update();
 
 }
 function pickTR(thing){
@@ -767,6 +761,7 @@ function pickTR(thing){
   app.isTRActive = true;
   app.isAUActive = false;
   app.isTaxiTNCActive = false;
+  info.update();
 }
 
 
@@ -775,6 +770,7 @@ function pickTaxiTNC(thing){
   app.isTaxiTNCActive = true;
   app.isAUActive = false;
   app.isTRActive = false;
+  info.update();
 }
 
 function pickRes(thing){
@@ -863,6 +859,7 @@ function pickOther(thing){
   app.isOther = true;
   app.isWork = false;
   app.isAll = false;
+  info.update();
   
 
 
@@ -873,6 +870,7 @@ function pickAll(thing){
   app.isOther = false;
   app.isWork = false;
   app.isAll = true;
+  info.update();
 
 }
 
@@ -881,6 +879,7 @@ function pickInbound(thing){
   app.isInbound = true;
   app.isOutbound = false;
   app.isBoth = false;
+  info.update();
 }
 
 function pickOutbound(thing){
@@ -888,19 +887,23 @@ function pickOutbound(thing){
   app.isInbound = false;
   app.isOutbound = true;
   app.isBoth = false;
+  info.update();
 }
+
 
 function pickBoth(thing){
   tripDirectionSelect = "both";
   app.isInbound = false;
   app.isOutbound = false;
   app.isBoth = true;
+  info.update();
 }
 
 function pickPM(thing){
   timePeriodSelect = "PM";
   app.isPM = true;
   app.isDaily = false;
+  info.update();
 }
 
 function pickDaily(thing){  
@@ -908,6 +911,7 @@ function pickDaily(thing){
   
   app.isPM = false;
   app.isDaily = true;
+  info.update();
 }
 
 function checkLandUseSelections() {

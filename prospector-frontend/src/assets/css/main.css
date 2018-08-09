@@ -323,6 +323,17 @@ table { border: 0px; }
   color: #fff;
 }
 
+.myCSSClass {
+  background: green;
+  border: 2px solid cyan
+}
+.leaflet-tooltip-left.myCSSClass::before {
+  border-left-color: cyan;
+}
+.leaflet-tooltip-right.myCSSClass::before {
+  border-right-color: cyan;
+}
+
 
 
 
