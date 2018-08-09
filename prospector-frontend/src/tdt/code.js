@@ -59,6 +59,8 @@ queryServer(CTA_API_SERVER + TRIP_DISTRIBUTION)
 
 })
 
+let mapLegend;
+
 let modeSplits;
 queryServer(CTA_API_SERVER + MODE_SPLITS)
 .then(function(data){
@@ -95,7 +97,7 @@ selected: {"color": "#33f",    "weight":4, "opacity": 0.5 },},
 selected: {"color": "#34784b", "weight":5, "opacity": 1.0, },},
 {normal: {"fillColor": "#000", "fillOpacity": 0.8, },
 selected: {"color": "#000", "weight":5, "opacity": 1.0,},},
-{normal: {"color": "#5AC9FD", "fillColor": "#43C1FC", "fillOpacity": 0.3, "weight":3, "opacity": 1,},
+{normal: {"color": "#969696", "fillColor": "#969696", "fillOpacity": 0.3, "weight":2, "opacity": 1,},
 selected: {"color": "#43C1FC", "weight":1, "opacity": 1,},},
 ];
 
@@ -169,18 +171,18 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
 
     if (tripDirectionSelect == "outbound"){
       this._div.innerHTML = '<h4>Person Trips</h4>' +
-      '<b>' +Math.round(districtPersonTrips[hoverDistrict.dist]["total"])+ ' outbound person trips from ' + address+ ' to '+ hoverDistrict.distname.toString() + '</b>' +
-       '<b><br>' + " based on the proposed project land use inputs"+ '</b>';
+       +Math.round(districtPersonTrips[hoverDistrict.dist]["total"])+ ' outbound person trips for selected categories from ' +  address  + ' to ' + hoverDistrict.distname.toString()+
+       '<br>' + " based on the proposed project land use inputs"+ '</b>';
     } 
     else if (tripDirectionSelect == "inbound"){
       this._div.innerHTML = '<h4>Person Trips</h4>' +
-      '<b>' + Math.round(districtPersonTrips[hoverDistrict.dist]["total"])+ ' inbound person trips to ' + hoverDistrict.distname.toString()+ ' from '+ address + '</b>' +
-      '<b><br>' + " based on the proposed project land use inputs"+ '</b>';
+       + Math.round(districtPersonTrips[hoverDistrict.dist]["total"])+ ' inbound person trips for selected categories from ' + hoverDistrict.distname.toString() + ' to '+ address +
+      '<br>' + " based on the proposed project land use inputs"+ '</b>';
     }
     else if (tripDirectionSelect == "both"){
       this._div.innerHTML = '<h4>Person Trips</h4>' +
-      '<b>' + Math.round(districtPersonTrips[hoverDistrict.dist]["total"])+ ' total person trips between ' + hoverDistrict.distname.toString()+ ' and '+ address + '</b>' +
-      '<b><br>' + " based on the proposed project land use inputs"+ '</b>';
+       + Math.round(districtPersonTrips[hoverDistrict.dist]["total"])+ ' total person trips for selected categories between ' + hoverDistrict.distname.toString()+ ' and '+ address +
+      '<br>' + " based on the proposed project land use inputs";
     }
 
 
@@ -188,6 +190,33 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
   
 };
 info.addTo(mymap);
+
+function getLegendColor(d) { 
+  return   d > 500  ? '#08519c' :
+           d > 200  ? '#3182bd' :
+           d > 100  ? '#6baed6' :
+           d > 50   ? '#9ecae1' :
+           d > 20   ? '#c6dbef' :
+           d > 10   ? '#FFEDA0' :
+                      '#FFEDA0';
+}
+
+//this is not executing
+ mapLegend = L.control({ position: 'bottomright' });
+  mapLegend.onAdd = function(map) {
+    let div = div = L.DomUtil.create('div', 'info legend'),
+        grades = [10, 20, 50, 100, 200, 500],
+        labels = [];
+    for (var i = 1; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + getLegendColor(grades[i] + 1) + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    }
+    return div;
+  };
+
+  mapLegend.addTo(mymap);
+  console.log(mapLegend);
 
 
 function queryServer(url){
@@ -399,11 +428,11 @@ function updateMap() {
       districts_lyr.setStyle(function(feature){
 
       //only do this if everyone is defined- data validation
-      let color_func = chroma.scale(['#1C4459', 'FCCD70', '#FCBF49', 'D62828']).domain([0, getMax()]);
+      let color_func = chroma.scale(['#c6dbef', '#9ecae1', '#6baed6', '#3182bd', '#08519c']).domain([0, getMax()]);
       //console.log(districtPersonTrips[feature.dist]);
         let tot_person_trips = districtPersonTrips[feature.dist]["total"];
         console.log(tot_person_trips);
-        return {'color': '#444444', 'weight': 2, 'fillColor': color_func(tot_person_trips), fillOpacity:1};     
+        return {'color': '#444444', 'weight': 2, 'fillColor': color_func(tot_person_trips), fillOpacity:0.5};     
       });
     
   
@@ -991,6 +1020,7 @@ let app = new Vue({
   
   methods: {
     clickToggleHelp: clickToggleHelp,
+    clickToggleInstructions: clickToggleInstructions,
     pickAU: pickAU,
     pickTR: pickTR,
     updateMap: updateMap,
@@ -1043,6 +1073,36 @@ let helpPanel = new Vue({
     document.addEventListener('keydown', e => {
       if (this.showHelp && e.keyCode == 27) {
         clickToggleHelp();
+      }
+    });
+  },
+});
+
+
+let cookieInstructions = Cookies.get('showInstructions');
+function clickToggleInstructions() {
+  instructionsPanel.showInstructions = !instructionsPanel.showInstructions;
+
+  // and save it for next time
+  if (instructionsPanel.showInstructions) {
+    Cookies.remove('showInstructions');
+  } else {
+    Cookies.set('showInstructions', 'false', { expires: 365 });
+  }
+}
+
+let instructionsPanel = new Vue({
+  el: '#instructionsPanel',
+  data: {
+    showInstructions: cookieInstructions == undefined,
+  },
+  methods: {
+    clickToggleInstructions: clickToggleInstructions,
+  },
+  mounted: function() {
+    document.addEventListener('keydown', e => {
+      if (this.showInstructions && e.keyCode == 27) {
+        clickToggleInstructions();
       }
     });
   },

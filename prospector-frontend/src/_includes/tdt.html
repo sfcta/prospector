@@ -14,9 +14,9 @@
       </button>
       &nbsp;
       <button class="ui mini right labeled icon violet button"
-      v-on:click="this.window.open('http://sf-planning.org/transportation-impact-analysis-guidelines-environmental-review-update','_blank')">
+      v-on:click="clickToggleInstructions"> 
       <i class="arrow right icon"></i>
-      Learn More
+      How to Use this Tool
     </button>
     <hr/>
   </div>
@@ -239,6 +239,39 @@ class="tiny ui inverted white icon button"> PM Peak</button>
     style="margin-right:5px">
     Learn more&hellip;
   </button>
+
+</div>
+</div>
+</div>
+
+<div id="instructionsPanel" v-if="showInstructions" class="ui segment">
+  <div v-cloak> <!-- hides everything until Vue finished loading -->
+    <h2 style="margin-bottom:0px;">How to use this Tool</h2>
+    <hr style="margin-bottom:5px;margin-top:5px"/>
+    
+
+    <ul>
+      <li><b>Auto Level-of-Service (LOS)</b> grades road segments by vehicle delay with "A" describing free flow,
+      and "F" describing bumper-to-bumper conditions.</li>
+      <li><b>Transit Speed</b> reflects the average speeds including both when the buses are in motion as well as waiting at stops.</li>
+      <li><b>Transit Reliability</b> shows the variability in transit travel speeds. A lower percentage means transit speeds are more consistent.</li>
+      <li><b>Auto-Transit Speed Ratio</b> compares auto speeds to  to transit speeds, with lower values indicating where transit is more competitive with auto.
+      If the ratio is 1 then auto and transit travel times are equal.</li>
+    </ul>
+
+    <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
+    <hr style="margin-bottom:5px;margin-top:5px"/>
+    <ul>
+      <li>Select a metric to display it on the map for all segments, for the latest year (2017).</li>
+      <li>Move the year slider to map historic data.</li>
+      <li>Choose time period to display metric for AM or PM peak.</li>
+      <li>Click on a colored roadway segment on the map to see segment-specific trends.</li>
+    </ul>
+
+    <div style="margin-top:20px;">
+      <button v-on:click="clickToggleInstructions" class="small ui right floated violet button">
+        &nbsp;OK&nbsp;
+      </button>    
 
 </div>
 </div>
