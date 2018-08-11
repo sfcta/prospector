@@ -315,7 +315,7 @@ table { border: 0px; }
 
 .ui.topaz.button {
   background-color: #FCCD70;
-  color: #fff;
+  color: #FCCD70;
 }
 
 .ui.eggshell.button {
@@ -323,16 +323,25 @@ table { border: 0px; }
   color: #fff;
 }
 
-.myCSSClass {
-  background: green;
-  border: 2px solid cyan
+.ui.blueish.button {
+  /*background-color: #3182bd;*/
+  color: #3182bd;
+  /*border-color: #3182bd;*/
+
 }
-.leaflet-tooltip-left.myCSSClass::before {
+
+
+
+.myCSSClass {
+  background: #EBE8D2;
+/*  border: 2px solid cyan
+*/}
+/*.leaflet-tooltip-left.myCSSClass::before {
   border-left-color: cyan;
 }
 .leaflet-tooltip-right.myCSSClass::before {
   border-right-color: cyan;
-}
+}*/
 
 
 
