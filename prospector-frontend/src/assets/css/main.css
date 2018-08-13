@@ -333,13 +333,13 @@ table { border: 0px; }
 
 
 .myCSSClass {
-  background: #EBE8D2;
+  background: #ffffb2;
 /*  border: 2px solid cyan
 */}
 /*.leaflet-tooltip-left.myCSSClass::before {
   border-left-color: cyan;
-}
-.leaflet-tooltip-right.myCSSClass::before {
+}*/
+/*.leaflet-tooltip-right.myCSSClass::before {
   border-right-color: cyan;
 }*/
 

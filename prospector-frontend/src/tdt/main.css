@@ -283,13 +283,5 @@ table { border: 0px; }
 }*/
 
 
-.myCSSClass {
-  background: green;
-  border: 5px solid cyan
-}
-.leaflet-tooltip-left.myCSSClass::before {
-  border-left-color: cyan;
-}
-.leaflet-tooltip-right.myCSSClass::before {
-  border-right-color: cyan;
+border-right-color: cyan;
 }

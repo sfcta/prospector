@@ -91,7 +91,7 @@ let AVO_data;
 queryServer(CTA_API_SERVER + AVO_DATA)
 .then(function(data){
   AVO_data = data;
-  console.log(AVO_data);
+  
   
 })
 
@@ -169,34 +169,51 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
 
   
   else {
+    let text;
 
     if (tripDirectionSelect == "outbound"){
-      this._div.innerHTML = '<h4> Outbound trips</h4>' +
+
+      text = '<h4> Outbound trips</h4>' +
       'For selected categories based on the proposed project land use inputs'+
       '<br>' + 'from ' +  address  + ' to ' + hoverDistrict.distname.toString()+
-      '<br>' + "Person trips: "+ Math.round(districtPersonTrips[hoverDistrict.dist]["total"])+'</b>'+
-      '<br>' + "Vehicle trips: "+ Math.round(districtVehicleTrips[hoverDistrict.dist]["total"])+'</b>';
-
+      '<br>' + "Person trips: "+ Math.round(districtPersonTrips[hoverDistrict.dist]["total"])+'</b>';
       
-    } 
+      if (modeSelect !== "transit"){
+        text += '<br>' + "Vehicle trips: "+ Math.round(districtVehicleTrips[hoverDistrict.dist]["total"])+'</b>';
+        
+      }
+      this._div.innerHTML = text;
+    }
     else if (tripDirectionSelect == "inbound"){
-      this._div.innerHTML = '<h4>Inbound Trips</h4>' +
+
+      text = '<h4>Inbound Trips</h4>' +
       'For selected categories based on the proposed project land use inputs'+
       '<br>' + 'from ' +  address  + ' to ' + hoverDistrict.distname.toString()+
-      '<br>' + "Person trips: "+ Math.round(districtPersonTrips[hoverDistrict.dist]["total"])+'</b>'+
-      '<br>' + "Vehicle trips: "+ Math.round(districtVehicleTrips[hoverDistrict.dist]["total"])+'</b>';
-    }
-    else if (tripDirectionSelect == "both"){
-      this._div.innerHTML = '<h4>Total Trips</h4>' +
-      'For selected categories based on the proposed project land use inputs'+
-      '<br>' + 'from ' +  address  + ' to ' + hoverDistrict.distname.toString()+
-      '<br>' + "Person trips: "+ Math.round(districtPersonTrips[hoverDistrict.dist]["total"])+'</b>'+
-      '<br>' + "Vehicle trips: "+ Math.round(districtVehicleTrips[hoverDistrict.dist]["total"])+'</b>';
-    }
+      '<br>' + "Person trips: "+ Math.round(districtPersonTrips[hoverDistrict.dist]["total"])+'</b>';
+
+      if (modeSelect !== "transit"){
+       text += '<br>' + "Vehicle trips: "+ Math.round(districtVehicleTrips[hoverDistrict.dist]["total"])+'</b>';
+       
+     }
+     this._div.innerHTML = text;
+   }
+   else if (tripDirectionSelect == "both"){
+    text = '<h4>Total Trips</h4>' +
+    'For selected categories based on the proposed project land use inputs'+
+    '<br>' + 'from ' +  address  + ' to ' + hoverDistrict.distname.toString()+
+    '<br>' + "Person trips: "+ Math.round(districtPersonTrips[hoverDistrict.dist]["total"])+'</b>';
+
+    if (modeSelect !== "transit"){
+     text += '<br>' + "Vehicle trips: "+ Math.round(districtVehicleTrips[hoverDistrict.dist]["total"])+'</b>';
+     
+   }
+   this._div.innerHTML = text;
+
+ }
 
 
-  }
-  
+}
+
 };
 info.addTo(mymap);
 
@@ -213,7 +230,7 @@ function queryServer(url){
       resolve(jsonData)
     })
     .catch(function(error) {
-      console.log("err: "+error);
+
       alert("Cannot query server");
     });
   })
@@ -331,9 +348,6 @@ function getDistProps(district, landUse) {
     return filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, tripDirectionSelect)[0][referenceDistrictProp]; 
     
   }
-  else {
-    console.log("whats goin' on?");
-  }
   
 }
 
@@ -342,12 +356,11 @@ function getDirectionProps(district, landUse) {
   //let referenceDistrict = "trips_dist" + district.dist;
   
   if (modeSelect && landUseCheck==true && tripPurposeSelect && tripDirectionSelect && addressDistrictNum){
-    //console.log("from getDirectionProps: "+filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, tripDirectionSelect)[0][directionDistrictProp]);
     if (tripDirectionSelect == "both"){
       return 1; //I'm not sure if this is the right way to dea with the both directions. maybe need bhargav to add something to the API
     }
     else{
-      
+
 
       return (filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, 
         tripDirectionSelect)[0][directionDistrictProp]); 
@@ -355,9 +368,7 @@ function getDirectionProps(district, landUse) {
     }
     
   }
-  else {
-    console.log("whats goin' on?");
-  }
+  
 
 }
 
@@ -374,9 +385,9 @@ function filterModeSplitData(landUse, placetype){
 function filterAvoData(landUse, placetype){
   //trying to access the proportion that corresponds with a given land use, placetype and mode
   if (modeSelect && landUseCheck==true && app.placetype != ''){
-    return AVO_data.filter(function(piece){
-      return (piece.place_type == placetype && piece.landuse == landUse);
-    });
+    return AVO_data.filter(function(piece){                   //how to deal with land use?
+      return (piece.geography == "Place Type "+ app.placetype);
+    })[0][landUse];
     
   }
 }
@@ -440,37 +451,58 @@ function updateMap() {
       
       let trips = []
       districts_lyr.setStyle(function(feature){
-        color_func = chroma.scale(['#c6dbef', '#3182bd']).domain([0, getMax()], 5, 'quantiles');
+        //color_func = chroma.scale(['#c6dbef', '#bdd7e7' ,'#6baed6','#3182bd','#08519c']).domain([0, getMax()], 5, 'quantiles');
+        color_func = chroma.scale(['#eff3ff', '#bdd7e7' ,'#6baed6','#3182bd','#08519c']).domain([0, getMax()], 5, 'quantiles');
+
+        //#ffffe0 #ffd59b #ffa474 #f47461 #db4551 #b81b34 #8b0000
         let tot_person_trips = districtPersonTrips[feature.dist]["total"];
         trips.push(tot_person_trips);
 
         district_colors.push(color_func(tot_person_trips)); //these are not in order of increasing color saturation, theyre just inorder of 
         //what district is first. districts do seem to be being colored correctly, so its in the legend that it is wrong. perhaps I should
         //make a dictionary of the quantile labels and their corresponding colors?
-        return {'color': '#444444', 'weight': 2, 'fillColor': color_func(tot_person_trips), fillOpacity:0.5};     
+        if (trips.reduce((a, b) => a + b, 0) == 0){
+          return {'color': '#444444', 'weight': 2, 'fillColor': '#c6dbef', fillOpacity:0.6};
+        }
+        else{
+          return {'color': '#444444', 'weight': 2, 'fillColor': color_func(tot_person_trips), fillOpacity:0.6};
+        }
+             
       });
       
       trips.sort(function(a, b){return a - b});
       console.log(trips);
       
       let labels = [];
-      let quantiles = [0.2, 0.4, 0.6, 0.8, 1];
-      let breakpoints = []
-
       let colors = [];
-      for (let quantile of quantiles) {
-        let breakpoint = getQuantile(trips, quantile);
-        breakpoints.push(breakpoint)
-        labels.push("<" + breakpoint);
-        colors.push(color_func(breakpoint));
+      let breakpoints = chroma.limits(trips, 'q', 3);
+      let unique_breakpoints = breakpoints.filter((v, i, a) => a.indexOf(v) === i);
+      
+      for (let breakpoint of unique_breakpoints) {
+        if (breakpoint == 0){
+          labels.push(Math.round(breakpoint));
+        }
+        else{
+          labels.push("<=" + Math.round(breakpoint));
+        }
+        
+        
+        if (unique_breakpoints.reduce((a, b) => a + b, 0) == 0){
+          colors.push("#c6dbef"); 
+        }
+        else {
+          colors.push(color_func(breakpoint));
+
+        }
         
       }
-      //console.log(labels);
+      console.log(labels);
       console.log(breakpoints);
+      console.log(unique_breakpoints);
       console.log(colors);
 
-          
-    
+
+
       //building and styling the legend for the districts
       if (mapLegend) mymap.removeControl(mapLegend);
       mapLegend = L.control({ position: 'bottomright' });
@@ -524,7 +556,11 @@ function updateMap() {
     }
     
   })
-  }
+}
+
+
+
+
 
 let trgen_download; //an array of dictionaries -> "a list of json"
 let tdist_download;
@@ -536,6 +572,7 @@ function createDownloadObjects() {
   trgen_download = []; 
   tdist_download = [];
   modesplit_download = [];
+  tdist_vehicle_download = [];
 
   let tmp_dwld;
   
@@ -562,11 +599,11 @@ function createDownloadObjects() {
       tmp_dwld['taxi modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["taxi"].toString();
       modesplit_download.push(tmp_dwld);
       //create person trips object
-      let tmp_dwld_person = {};
-      tmp_dwld_person['Landuse'] = 'Residential';
+      tmp_dwld = {};
+      tmp_dwld['Landuse'] = 'Residential';
       for (let district of geoDistricts) {
         getFilteredPersonTrips(district);
-        tmp_dwld_person[district.distname] = districtPersonTrips[district.dist]["Residential"].toString();
+        tmp_dwld[district.distname] = districtPersonTrips[district.dist]["Residential"].toString();
       }
       tdist_download.push(tmp_dwld);
       //create vehicle trips object
@@ -576,7 +613,6 @@ function createDownloadObjects() {
         getFilteredPersonTrips(district);
         tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist]["Residential"].toString();
       }
-      tdist_person_download.push(tmp_dwld_person);
       tdist_vehicle_download.push(tmp_dwld_vehicle);
     }
     if(app.off_sqft>0) {
@@ -606,6 +642,15 @@ function createDownloadObjects() {
         tmp_dwld[district.distname] = districtPersonTrips[district.dist]["Office"].toString();
       }
       tdist_download.push(tmp_dwld);
+
+      let tmp_dwld_vehicle = {};
+      tmp_dwld_vehicle['Landuse'] = 'Office';
+      for (let district of geoDistricts) {
+        getFilteredPersonTrips(district);
+        tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist]["Office"].toString();
+      }
+      tdist_vehicle_download.push(tmp_dwld_vehicle);
+
     }
     if(app.ret_sqft>0) {
       tmp_dwld = {};
@@ -634,6 +679,14 @@ function createDownloadObjects() {
         tmp_dwld[district.distname] = districtPersonTrips[district.dist]["Retail"].toString();
       }
       tdist_download.push(tmp_dwld);
+
+      let tmp_dwld_vehicle = {};
+      tmp_dwld_vehicle['Landuse'] = 'Retail';
+      for (let district of geoDistricts) {
+        getFilteredPersonTrips(district);
+        tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist]["Retail"].toString();
+      }
+      tdist_vehicle_download.push(tmp_dwld_vehicle);
     }
     if(app.rest_sqft>0) {
       tmp_dwld = {};
@@ -662,6 +715,14 @@ function createDownloadObjects() {
         tmp_dwld[district.distname] = districtPersonTrips[district.dist]["Restaurant"].toString();
       }
       tdist_download.push(tmp_dwld);
+
+      let tmp_dwld_vehicle = {};
+      tmp_dwld_vehicle['Landuse'] = 'Restaurant';
+      for (let district of geoDistricts) {
+        getFilteredPersonTrips(district);
+        tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist]["Restaurant"].toString();
+      }
+      tdist_vehicle_download.push(tmp_dwld_vehicle);
     }
     if(app.hot_sqft>0) {
       tmp_dwld = {};
@@ -691,6 +752,13 @@ function createDownloadObjects() {
       }
       tdist_download.push(tmp_dwld);
 
+      let tmp_dwld_vehicle = {};
+      tmp_dwld_vehicle['Landuse'] = 'Hotel';
+      for (let district of geoDistricts) {
+        getFilteredPersonTrips(district);
+        tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist]["Hotel"].toString();
+      }
+      tdist_vehicle_download.push(tmp_dwld_vehicle);
 
 
     }
@@ -721,6 +789,14 @@ function createDownloadObjects() {
         tmp_dwld[district.distname] = districtPersonTrips[district.dist]["Supermarket"].toString();
       }
       tdist_download.push(tmp_dwld);
+
+      let tmp_dwld_vehicle = {};
+      tmp_dwld_vehicle['Landuse'] = 'Supermarket';
+      for (let district of geoDistricts) {
+        getFilteredPersonTrips(district);
+        tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist]["Supermarket"].toString();
+      }
+      tdist_vehicle_download.push(tmp_dwld_vehicle);
     }
     trgen_download.push({'Landuse':'Total','Amount':'','Unit':'','Daily_Person_Rate':'',
       'Daily_Person_Trips':tot_daily.toString(),'PM_Person_Rate':'',
@@ -737,16 +813,16 @@ function createDownloadObjects() {
 function roundingTripGen(number) {
   let increment = 110;
   let numbers = {
-  100: 10,
-  199: 20,
-  299: 30,
-  399: 40,
-  499: 50,
-  599: 60,
-  699: 70,
-  799: 80,
-  899: 90,
-  999: 100,};
+    100: 10,
+    199: 20,
+    299: 30,
+    399: 40,
+    499: 50,
+    599: 60,
+    699: 70,
+    799: 80,
+    899: 90,
+    999: 100,};
   //i think these instructions are a bit wrong, for the higher numbers. for now just test on numbers < 899
   for (var key in numbers){
     if (number < key){
@@ -761,7 +837,7 @@ function roundingTripGen(number) {
 
 let districtPersonTrips = {}; // {key = district number, value = person trips corresponding to this district}
 let districtVehicleTrips = {};
-let landUses = ["Residential", "Retail", "Office","Restaurant", "Supermarket"];
+//let landUses = ["Residential", "Retail", "Office","Restaurant", "Supermarket"];
 //I'm changing this function so that instead of taking in a hoverDistrict parameter, it calculates the number of person trips for all 12 districts
 //for all land uses and time periods
 function getFilteredPersonTrips(){
@@ -786,11 +862,11 @@ function getFilteredPersonTrips(){
       personTrips["Restaurant"] = roundingTripGen(((app.rest_sqft/1000)*(tripGenRates[6].pkhr_rate))*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail")*getDistProps(district, "Retail")); //rest and sup use retail distribution
       personTrips["Supermarket"] = roundingTripGen(((app.sup_sqft/1000)*(tripGenRates[4].pkhr_rate))*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail")*getDistProps(district, "Retail")); 
       personTrips["Hotel"] = roundingTripGen(((app.hot_sqft/1000)*(tripGenRates[2].pkhr_rate))*filterModeSplitData("Hotel", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail")*getDistProps(district, "Retail"));
-      vehicleTrips["Residential"] = personTrips["Residential"]/(filterAvoData("Residential", app.placetype));
-      vehicleTrips["Retail"] = personTrips["Retail"]/(filterAvoData("Retail", app.placetype));
-      vehicleTrips["Hotel"] = personTrips["Hotel"]/(filterAvoData("Hotel", app.placetype));
-      vehicleTrips["Office"] = personTrips["Office"]/(filterAvoData("Office", app.placetype));
-      vehicleTrips["Supermarket"] = personTrips["Supermarket"]/(filterAvoData("Supermarket", app.placetype));
+      vehicleTrips["Residential"] = personTrips["Residential"]/(filterAvoData("residential", app.placetype));
+      vehicleTrips["Retail"] = personTrips["Retail"]/(filterAvoData("retail", app.placetype));
+      vehicleTrips["Hotel"] = personTrips["Hotel"]/(filterAvoData("retail", app.placetype));
+      vehicleTrips["Office"] = personTrips["Office"]/(filterAvoData("office", app.placetype));
+      vehicleTrips["Supermarket"] = personTrips["Supermarket"]/(filterAvoData("retail", app.placetype));
     }
 
     else if (app.isDaily == true){
@@ -800,11 +876,11 @@ function getFilteredPersonTrips(){
       personTrips["Restaurant"] = roundingTripGen(((app.rest_sqft/1000)*(tripGenRates[6].daily_rate))*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail")*getDistProps(district, "Retail")); //rest and sup use retail distribution
       personTrips["Supermarket"] = roundingTripGen(((app.sup_sqft/1000)*(tripGenRates[4].daily_rate))*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail")*getDistProps(district, "Retail")); 
       personTrips["Hotel"] = roundingTripGen(((app.hot_sqft/1000)*(tripGenRates[2].daily_rate))*filterModeSplitData("Hotel", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail")*getDistProps(district, "Retail")); 
-      vehicleTrips["Residential"] = personTrips["Residential"]/(filterAvoData("Residential", app.placetype));
-      vehicleTrips["Retail"] = personTrips["Retail"]/(filterAvoData("Retail", app.placetype));
-      vehicleTrips["Hotel"] = personTrips["Hotel"]/(filterAvoData("Hotel", app.placetype));
-      vehicleTrips["Office"] = personTrips["Office"]/(filterAvoData("Office", app.placetype));
-      vehicleTrips["Supermarket"] = personTrips["Supermarket"]/(filterAvoData("Supermarket", app.placetype));
+      vehicleTrips["Residential"] = personTrips["Residential"]/(filterAvoData("residential", app.placetype));
+      vehicleTrips["Retail"] = personTrips["Retail"]/(filterAvoData("retail", app.placetype));
+      vehicleTrips["Hotel"] = personTrips["Hotel"]/(filterAvoData("retail", app.placetype));
+      vehicleTrips["Office"] = personTrips["Office"]/(filterAvoData("office", app.placetype));
+      vehicleTrips["Supermarket"] = personTrips["Supermarket"]/(filterAvoData("retail", app.placetype));
     }
   //still in the for each district for loop
   personTrips["total"] = (personTrips["Residential"]+personTrips["Retail"]+personTrips["Office"]+personTrips["Restaurant"]+personTrips["Supermarket"]+personTrips["Hotel"]);
@@ -813,32 +889,14 @@ function getFilteredPersonTrips(){
   vehicleTrips["total"] = vehicleTrips["Residential"] + vehicleTrips["Retail"]+ vehicleTrips["Hotel"] + 
   vehicleTrips["Office"] + vehicleTrips["Supermarket"];
   districtVehicleTrips[district.dist] = vehicleTrips;
+  console.log(filterAvoData("office", app.placetype));
+  console.log(filterAvoData("retail", app.placetype));
   console.log(districtVehicleTrips[district.dist]);
   
 }
 
 }
 
-
-
-// function checkHighlight(){
-//   if (!(app.num_1bed == 0 && app.num_2bed ==0 && app.num_3bed == 0)) {
-//     highlightRes = true;
-//   }
-//   if (!(ret_sqft == 0)){
-//     highlightRet = true;
-//   }
-//   if (!(off_sqft == 0)){
-//     highlightOff = true;
-//   }
-//   if (!(sup_sqft == 0)){
-//     highlightSup = true;
-//   }
-//   if (!(rest_sqft == 0)){
-//     highlightRest = true;
-//   }
-
-// }
 
 function clearAllInputs(){
   landUseCheck = false;
@@ -882,6 +940,7 @@ function clearAllInputs(){
   //this doesn't seem to be doing anything
   //districts_lyr.resetStyle(color_styles[0].normal);
   districts_lyr.setStyle(color_styles[3].normal);
+  if (mapLegend) mymap.removeControl(mapLegend);
   if (address_geoLyr){
     mymap.removeLayer(address_geoLyr);
     //this works but removing the layer is not the ideal situation. I'd rather keep the layer and just recolor it.
@@ -897,7 +956,7 @@ function pickAU(thing){
   app.isAUActive = true;
   app.isTRActive = false;
   app.isTaxiTNCActive = false;
-  info.update();
+  
 
 }
 function pickTR(thing){
@@ -905,7 +964,7 @@ function pickTR(thing){
   app.isTRActive = true;
   app.isAUActive = false;
   app.isTaxiTNCActive = false;
-  info.update();
+  
 }
 
 
@@ -914,7 +973,7 @@ function pickTaxiTNC(thing){
   app.isTaxiTNCActive = true;
   app.isAUActive = false;
   app.isTRActive = false;
-  info.update();
+  
 }
 
 function pickRes(thing){
@@ -974,7 +1033,6 @@ function pickHotel(thing){
   app.isResidential = false;
   app.isOffice = false;
   app.isSupermarket = false;
-  // checkLandUseSelections();
 }
 
 function pickSupermarket(thing){
@@ -985,7 +1043,6 @@ function pickSupermarket(thing){
   app.isResidential = false;
   app.isOffice = false;
   app.isHotel = false;
-  //checkLandUseSelections();
   
 }
 
@@ -995,7 +1052,6 @@ function pickWork(thing){
   app.isOther = false;
   app.isAll = false;
 
-
 }
 
 function pickOther(thing){
@@ -1003,10 +1059,7 @@ function pickOther(thing){
   app.isOther = true;
   app.isWork = false;
   app.isAll = false;
-  info.update();
   
-
-
 }
 
 function pickAll(thing){
@@ -1014,8 +1067,7 @@ function pickAll(thing){
   app.isOther = false;
   app.isWork = false;
   app.isAll = true;
-  info.update();
-
+  
 }
 
 function pickInbound(thing){
@@ -1023,7 +1075,7 @@ function pickInbound(thing){
   app.isInbound = true;
   app.isOutbound = false;
   app.isBoth = false;
-  info.update();
+
 }
 
 function pickOutbound(thing){
@@ -1031,7 +1083,7 @@ function pickOutbound(thing){
   app.isInbound = false;
   app.isOutbound = true;
   app.isBoth = false;
-  info.update();
+  
 }
 
 
@@ -1040,22 +1092,18 @@ function pickBoth(thing){
   app.isInbound = false;
   app.isOutbound = false;
   app.isBoth = true;
-  info.update();
 }
 
 function pickPM(thing){
   timePeriodSelect = "PM";
   app.isPM = true;
   app.isDaily = false;
-  info.update();
 }
 
 function pickDaily(thing){  
-  timePeriodSelect = "daily";
-  
+  timePeriodSelect = "daily";  
   app.isPM = false;
   app.isDaily = true;
-  info.update();
 }
 
 function checkLandUseSelections() {
@@ -1115,9 +1163,6 @@ let app = new Vue({
 
 
   },
-   //this is for if you want to search directly from the box without the button, watch is
-  // for detecting changes, sometimes it is not a button, it could be a checkbox or something
-  // that isn't as straightforward as buttons, use watch
   watch: {
     off_sqft: checkLandUseSelections,
     ret_sqft: checkLandUseSelections,
@@ -1128,8 +1173,6 @@ let app = new Vue({
     num_1bed: checkLandUseSelections,
     num_2bed: checkLandUseSelections,
     num_3bed: checkLandUseSelections,
-
-
 
   },
   
@@ -1257,7 +1300,7 @@ function drawDistricts() {
 queryServer(CTA_API_SERVER + DISTRICTS_URL)
 .then(function(data) {
   geoDistricts = data;
-  //console.log(geoDistricts);
+  
   drawDistricts();
 })
 
@@ -1281,7 +1324,7 @@ window.downloadCSV = function(){
   
   csv += '\n\n '+ modeSelect+ ' person trips distribution by district';
   csv += '\n' + convertArrayOfObjectsToCSV({
-    data: tdist_person_download
+    data: tdist_download
   });
 
   csv += '\n\n '+ modeSelect+ ' vehicle trips distribution by district';
