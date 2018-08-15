@@ -3,7 +3,7 @@ layout: standalone
 title: Travel Demand Tool
 thumbnail: scrnshot.png
 css:
-  - '/assets/css/main.css'
+  - '/tdt/main.css'
   - '/assets/css/standalone.css'
 
 ---

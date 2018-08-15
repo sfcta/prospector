@@ -298,50 +298,7 @@ table { border: 0px; }
     transition: visibility 0s 0.5s, opacity 0.5s linear;
 }
 
-.ui.jap_indigo.button {
-  background-color: #1C4459;
-  color: #fff;
-}
 
-.ui.jellybean.button {
-  background-color: #D94F4F;
-  color: #fff;
-}
-
-.ui.saffron.button {
-  background-color: #F7952D;
-  color: #fff;
-}
-
-.ui.topaz.button {
-  background-color: #FCCD70;
-  color: #FCCD70;
-}
-
-.ui.eggshell.button {
-  background-color: #EBE8D2;
-  color: #fff;
-}
-
-.ui.blueish.button {
-  /*background-color: #3182bd;*/
-  color: #3182bd;
-  /*border-color: #3182bd;*/
-
-}
-
-
-
-.myCSSClass {
-  background: #ffffb2;
-/*  border: 2px solid cyan
-*/}
-/*.leaflet-tooltip-left.myCSSClass::before {
-  border-left-color: cyan;
-}*/
-/*.leaflet-tooltip-right.myCSSClass::before {
-  border-right-color: cyan;
-}*/
 
 
 

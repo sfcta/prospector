@@ -105,6 +105,17 @@ p.hint {color:#777; text-align:right; margin-right:24px; margin-top:-20px;}
      box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
 }
 
+#instructionsBox {
+     position: absolute;
+     top:0;
+     left:0;
+     margin-top:8px;
+     margin-left: 8px;
+     width: 500px;
+     z-index:20;
+     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
+}
+
 #longchart {
   height:230px;
 }
@@ -284,4 +295,59 @@ table { border: 0px; }
 
 
 border-right-color: cyan;
+}
+
+
+.ui.jap_indigo.button {
+  background-color: #1C4459;
+  color: #fff;
+}
+
+.ui.jellybean.button {
+  background-color: #fb6a4a;
+  color: #fff;
+}
+
+.ui.saffron.button {
+  background-color: #F7952D;
+  color: #fff;
+}
+
+.ui.topaz.button {
+  background-color: #FCCD70;
+  color: #FCCD70;
+}
+
+.ui.eggshell.button {
+  background-color: #EBE8D2;
+  color: #fff;
+}
+
+.ui.blueish.button {
+  background-color: #74B3CE;
+  color: #ffff;
+  /*border-color: #3182bd;*/
+
+}
+
+
+.ui.greenish.button {
+  background-color: #4d9221;
+  color: #ffff;
+  /*border-color: #3182bd;*/
+
+}
+
+
+
+
+.myCSSClass {
+  background: #ffffb2;
+  border: 1px solid yellow
+}
+.leaflet-tooltip-left.myCSSClass:before {
+  border-left-color: yellow;
+}
+.leaflet-tooltip-right.myCSSClass:before {
+  border-right-color: yellow;
 }
