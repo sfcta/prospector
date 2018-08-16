@@ -106,16 +106,16 @@ type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}"
 
             <div class="pickers">
               <h5>3. CHOOSE MODE:</h5>
-              <button v-on:click="pickAU" 
-              v-bind:class="{ active: isAUActive, white: isAUActive}"
+              <button class = "ui toggle button" v-on:click="pickAU" 
+              v-bind:class="{ active: isAUActive, yellow: isAUActive}"
               class="tiny ui grey icon button"><i class="icon car"></i>
             All Auto</button>
-            <button v-on:click="pickTR"
-            v-bind:class="{ active: isTRActive, white: isTRActive}"
+            <button class = "ui toggle button" v-on:click="pickTR"
+            v-bind:class="{ active: isTRActive, yellow: isTRActive}"
             class="tiny ui grey icon button"><i class="icon bus"></i>
           Transit</button>
-          <button v-on:click="pickTaxiTNC"
-          v-bind:class="{ active: isTaxiTNCActive, white: isTaxiTNCActive}"
+          <button class = "ui toggle button" v-on:click="pickTaxiTNC"
+          v-bind:class="{ active: isTaxiTNCActive, yellow: isTaxiTNCActive}"
           class="tiny ui grey icon button"><i class="icon taxi"></i>
         TaxiTNC</button>
 
@@ -123,37 +123,37 @@ type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}"
 
 
         <h5>4. CHOOSE TRIP PURPOSE:</h5>
-        <button v-on:click="pickWork"
-        v-bind:class="{ active: isWork, white: isWork}"
+        <button class = "ui toggle button" v-on:click="pickWork"
+        v-bind:class="{ active: isWork, yellow: isWork}"
         class="tiny ui grey icon button">Work</button>
-        <button v-on:click="pickOther"
-        v-bind:class="{ active: isOther, white: isOther}"
+        <button class = "ui toggle button" v-on:click="pickOther"
+        v-bind:class="{ active: isOther, yellow: isOther}"
         class="tiny ui grey icon button"> Non Work</button>
-        <button v-on:click="pickAll"
-        v-bind:class="{ active: isAll, white: isAll}"
+        <button class = "ui toggle button" v-on:click="pickAll"
+        v-bind:class="{ active: isAll, yellow: isAll}"
         class="tiny ui grey icon button"> Total</button>
 
         <br>
 
         <h5>5. CHOOSE DIRECTION:</h5>
-        <button v-on:click="pickInbound"
-        v-bind:class="{ active: isInbound, white: isInbound}"
+        <button class = "ui toggle button" v-on:click="pickInbound"
+        v-bind:class="{ active: isInbound, yellow: isInbound}"
         class="tiny ui jellybean icon button"><i class="icon compress"></i>Inbound</button>
-        <button v-on:click="pickOutbound"
-        v-bind:class="{ active: isOutbound, white: isOutbound}"
+        <button class = "ui toggle button" v-on:click="pickOutbound"
+        v-bind:class="{ active: isOutbound, yellow: isOutbound}"
         class="tiny ui blue icon button"><i class="icon expand"></i>Outbound</button>
-        <button v-on:click="pickBoth"
-        v-bind:class="{ active: isBoth, white: isBoth}"
+        <button class = "ui toggle button" v-on:click="pickBoth"
+        v-bind:class="{ active: isBoth, yellow: isBoth}"
         class="tiny ui grey icon button"> Total</button>
 
         <br>
 
         <h5>6. CHOOSE TIME PERIOD:</h5>
-        <button v-on:click="pickDaily"
-        v-bind:class="{ active: isDaily, white: isDaily}"
+        <button class = "ui toggle button" v-on:click="pickDaily"
+        v-bind:class="{ active: isDaily, yellow: isDaily}"
         class="tiny ui grey icon button">Daily</button>
-        <button v-on:click="pickPM"
-        v-bind:class="{ active: isPM, white: isPM}"
+        <button class = "ui toggle button" v-on:click="pickPM"
+        v-bind:class="{ active: isPM, yellow: isPM}"
         class="tiny ui grey icon button"> PM Peak</button>
 
 
@@ -196,7 +196,7 @@ type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}"
   <div v-cloak> 
     <h2 style="margin-bottom:0px;">Trip generation, distribution and mode share</h2>
     <hr style="margin-bottom:5px;margin-top:5px"/>
-    This tool estimates  the number, type and common destinations of new trips that people would take to and from a new development project. The estimates are for daily and extended weekday PM peak hour (3 to 7 p.m.). The following are some key terms:
+    This tool estimates  the number, type and common destinations of new trips that people would take to and from a new development project. The estimates are for daily and for extended weekday PM peak hour (3 to 7 p.m.). The following are some key terms:
 
     <ul>
       <li><b>Trip Generation</b> The number of person trips that the tool estimates people would take to (inbound) and from (outbound) a new development project, by trip purpose (work, non-work, or total). </li>
@@ -223,14 +223,20 @@ type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}"
 
 <div id="instructionsBox" v-if="showInstructions" class="ui raised segment">
   <div v-cloak> 
-    <h2 style="margin-bottom:0px;">Trip generation, distribution and mode share</h2>
-    <hr style="margin-bottom:5px;margin-top:5px"/>
-    This tool estimates  the number, type and common destinations of new trips that people would take to and from a new development project. The estimates are for daily and extended weekday PM peak hour (3 to 7 p.m.). The following are some key terms:
+    <h2 style="margin-bottom:0px;">How to Use This Tool</h2>
+    <!-- <hr style="margin-bottom:5px;margin-top:5px"/> -->
 
     <ul>
-      <li><b>Trip Generation</b> The number of person trips that the tool estimates people would take to (inbound) and from (outbound) a new development project, by trip purpose (work, non-work, or total). </li>
-      <li><b>Ways People Travel</b> also known as mode split. The way or method people use to travel between destinations (e.g., walking, bicycling, transit, etc.). The tool estimates the percentages of transit, driving, or for-hire vehicle (i.e., taxi or transportation network company) people would take to (inbound) and from (outbound) a new development project, by trip purpose (work, non-work, or total). </li>
-      <li><b>Commmon Origins and Destinations</b> also known as trip distribution. The number of trips people would take to (inbound) and from (outbound) a new development project and another place (e.g., downtown), by trip purpose (work, non-work, or total). The tool distributes transit, driving, or for-hire vehicle trips into eight San Francisco neighborhoods, east bay, north bay, and south bay.</li></ul>
+      <li><b>Step 1: </b> Please enter the project address </li>
+      <li><b>Step 2: </b> Please select any/all (multiple selections are permitted here) the land use/s proposed and enter the associated values (e.g., number of units, gross square footage, etc.). </li>
+      <li><b>Step 3: </b> Please choose the way of travel (e.g., the tool will output all project generated transit person trips if you choose “Transit”).</li>
+      <li><b>Step 4: </b> Please select a trip purpose (e.g., the tool will output all project generated “Transit” person trips whose trip purpose is “coming to and from work” if you choose the “Work” purpose). </li>
+      <li><b>Step 5: </b> Please choose a trip direction (e.g., the tool will output all project generated “Transit” “Work” person trips that are traveling to the project site if you choose “Inbound”). </li>
+      <li><b>Step 6: </b> Please select time period of interest (e.g., the tool will output all project generated “Transit” “Work” person trips in the “Inbound” during the PM peak period if “PM Peak” is selected).</li>
+      <li><b>Step 7: </b> Click on “Update”. </li>
+      <li><b>Step 8: </b> Move your mouse cursor over the various neighborhoods on the map interface to see the results of your selections displayed on the upper right corner. </li>
+      <li><b>Step 9: </b> Click on the “Download Data” button in "What is this?" to retrieve the outputs in a spreadsheet form to save for your records. </li>
+      <li><b>Step 10: </b> Click on “Clear Inputs” to start over.  </li></ul>
 
 
     <div style="margin-top:20px;">
