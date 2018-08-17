@@ -181,7 +181,7 @@ infoTotals.update = function (hoverDistrict) { //hoverDistrict is the mouseover 
       let text;
       text = '<h4> Total Outbound trips</h4>' +
       timePeriodSelect +  ' ' + modeSelect+ ' ' + tripPurposeSelect + ' trips based on the proposed project land use inputs'+
-      '<br>' + 'Total person trips by  auto from ' + address + " is: " + totalPersonTripsByMode["auto"] + '</b>'+
+      '<br>' + 'Total ' + "person trips by  auto from" + address + " is: " + totalPersonTripsByMode["auto"]+ '</b>'+
       '<br>' + 'Total person trips by transit from ' + address + " is: " + totalPersonTripsByMode["transit"] + '</b>'+
       '<br>' + 'Total person trips by bike from ' + address + " is: " + totalPersonTripsByMode["bike"] + '</b>'+
       '<br>' + 'Total person trips by taxi from ' + address + " is: " + totalPersonTripsByMode["taxi"] + '</b>'+
@@ -221,7 +221,7 @@ let text;
     let text;
       text = '<h4> Total trips</h4>' +
       timePeriodSelect + ' ' + modeSelect+ ' ' + tripPurposeSelect + ' trips based on the proposed project land use inputs'+
-      '<br>' + 'Total person trips by auto to and from ' + address + " is: " + totalPersonTripsByMode["auto"] + '</b>'+
+      '<br>' + 'Total <b>person trips by auto</b> to and from ' + address + " is: " + totalPersonTripsByMode["auto"] + '</b>'+
       '<br>' + 'Total person trips by transit to and from ' + address + " is: " + totalPersonTripsByMode["transit"] + '</b>'+
       '<br>' + 'Total person trips by bike to and from ' + address + " is: " + totalPersonTripsByMode["bike"] + '</b>'+
       '<br>' + 'Total person trips by taxi to and from ' + address + " is: " + totalPersonTripsByMode["taxi"] + '</b>'+
@@ -451,21 +451,10 @@ function getDistProps(district, landUse) {
   if (modeSelect && landUseCheck==true && tripPurposeSelect && tripDirectionSelect && addressDistrictNum){
     //this returns a number not an object
     data = filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, tripDirectionSelect)[0][referenceDistrictProp];
-    console.log(filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, tripDirectionSelect));
-    console.log(data);
-
-    // if (!(data))  {
-    //   console.log("error empty distribution data");
-    //   //this logs both when the data is null and when it is =0, but i only want it to log when the data is null
-    // }
-    
+    //console.log(filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, tripDirectionSelect));
+    //console.log(data); 
     return data;
-    //if this function always returns something, then the colors will draw. if it doesn't, then the color function will get messed up
-    //and none of the districts will color.
-    
-
-  }
-   
+  }   
 }
     
 
@@ -675,6 +664,7 @@ let tdist_person_download;
 let tdist_vehicle_download;
 let total_person_dist;
 let total_vehicle_dist;
+let total_trips_download;
 
 function createDownloadObjects() {
   trgen_download = []; 
@@ -683,6 +673,7 @@ function createDownloadObjects() {
   tdist_vehicle_download = [];
   total_person_dist = 0;
   total_vehicle_dist = 0;
+  total_trips_download = [];
 
   let tmp_dwld;
   let tmp_dwld_vehicle;
@@ -692,6 +683,7 @@ function createDownloadObjects() {
   let tot_pm = 0;
 
     if(tot_bedrooms>0) { //if residential is activated
+      //trip gen rates
       tmp_dwld = {};
       tmp_dwld['Landuse'] = 'Residential';
       tmp_dwld['Amount'] = tot_bedrooms.toString();
@@ -704,13 +696,17 @@ function createDownloadObjects() {
       tot_pm += tot_bedrooms*app.res_tripgen_PM;
       trgen_download.push(tmp_dwld);
 
+      //mode split
       tmp_dwld = {};
       tmp_dwld['Landuse'] = 'Residential';
       tmp_dwld['transit modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["transit"].toString();
       tmp_dwld['all auto modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["auto"].toString();
       tmp_dwld['taxi modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["taxi"].toString();
+      tmp_dwld['walk modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["walk"].toString();
+      tmp_dwld['bike modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["bike"].toString();
       modesplit_download.push(tmp_dwld);
-      //create person trips object
+
+      //create person trips distribution
       tmp_dwld = {};
       tmp_dwld['Landuse'] = 'Residential';
       for (let district of geoDistricts) {
@@ -719,7 +715,8 @@ function createDownloadObjects() {
         total_person_dist += tmp_dwld[district.distname];
       }
       tdist_download.push(tmp_dwld);
-      //create vehicle trips object
+
+      //create vehicle trips distribution
       tmp_dwld_vehicle = {};
       tmp_dwld_vehicle['Landuse'] = 'Residential';
       for (let district of geoDistricts) {
@@ -728,6 +725,7 @@ function createDownloadObjects() {
         total_vehicle_dist += tmp_dwld_vehicle[district.distname];
       }
       tdist_vehicle_download.push(tmp_dwld_vehicle);
+      
     }
     if(app.off_sqft>0) {
       tmp_dwld = {};
@@ -735,11 +733,11 @@ function createDownloadObjects() {
       tmp_dwld['Amount'] = app.off_sqft.toString();
       tmp_dwld['Unit'] = 'Per 1k sqft.';
       tmp_dwld['Daily_Person_Rate'] = app.off_tripgen_daily.toString();
-      tmp_dwld['Daily_Person_Trips'] = (app.off_sqft*app.off_tripgen_daily).toString();
-      tot_daily += app.off_sqft*app.off_tripgen_daily;
+      tmp_dwld['Daily_Person_Trips'] = ((app.off_sqft/1000)*app.off_tripgen_daily).toString();
+      tot_daily += (app.off_sqft/1000)*app.off_tripgen_daily;
       tmp_dwld['PM_Person_Rate'] = app.off_tripgen_PM.toString();
-      tmp_dwld['PM_Person_Trips'] = (app.off_sqft*app.off_tripgen_PM).toString();
-      tot_pm += app.off_sqft*app.off_tripgen_PM;
+      tmp_dwld['PM_Person_Trips'] = ((app.off_sqft/1000)*app.off_tripgen_PM).toString();
+      tot_pm += (app.off_sqft/1000)*app.off_tripgen_PM;
       trgen_download.push(tmp_dwld);
 
       tmp_dwld = {};
@@ -747,6 +745,8 @@ function createDownloadObjects() {
       tmp_dwld['transit modesplit'] = filterModeSplitData("Office", app.placetype)[0]["transit"].toString();
       tmp_dwld['all auto modesplit'] = filterModeSplitData("Office", app.placetype)[0]["auto"].toString();
       tmp_dwld['taxi modesplit'] = filterModeSplitData("Office", app.placetype)[0]["taxi"].toString();
+      tmp_dwld['walk modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["walk"].toString();
+      tmp_dwld['bike modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["bike"].toString();
       modesplit_download.push(tmp_dwld);
 
       tmp_dwld = {};
@@ -774,11 +774,11 @@ function createDownloadObjects() {
       tmp_dwld['Amount'] = app.ret_sqft.toString();
       tmp_dwld['Unit'] = 'Per 1k sqft.';
       tmp_dwld['Daily_Person_Rate'] = app.ret_tripgen_daily.toString();
-      tmp_dwld['Daily_Person_Trips'] = (app.ret_sqft*app.ret_tripgen_daily).toString();
-      tot_daily += app.ret_sqft*app.ret_tripgen_daily;
+      tmp_dwld['Daily_Person_Trips'] = ((app.ret_sqft/1000)*app.ret_tripgen_daily).toString();
+      tot_daily += (app.ret_sqft/1000)*app.ret_tripgen_daily;
       tmp_dwld['PM_Person_Rate'] = app.ret_tripgen_PM.toString();
-      tmp_dwld['PM_Person_Trips'] = (app.ret_sqft*app.ret_tripgen_PM).toString();
-      tot_pm += app.ret_sqft*app.ret_tripgen_PM;
+      tmp_dwld['PM_Person_Trips'] = ((app.ret_sqft/1000)*app.ret_tripgen_PM).toString();
+      tot_pm += (app.ret_sqft/1000)*app.ret_tripgen_PM;
       trgen_download.push(tmp_dwld);
 
       tmp_dwld = {};
@@ -786,6 +786,8 @@ function createDownloadObjects() {
       tmp_dwld['transit modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["transit"].toString();
       tmp_dwld['all auto modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["auto"].toString();
       tmp_dwld['taxi modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["taxi"].toString();
+      tmp_dwld['walk modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["walk"].toString();
+      tmp_dwld['bike modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["bike"].toString();
       modesplit_download.push(tmp_dwld);
 
       tmp_dwld = {};
@@ -813,11 +815,11 @@ function createDownloadObjects() {
       tmp_dwld['Amount'] = app.rest_sqft.toString();
       tmp_dwld['Unit'] = 'Per 1k sqft.';
       tmp_dwld['Daily_Person_Rate'] = app.rest_tripgen_daily.toString();
-      tmp_dwld['Daily_Person_Trips'] = (app.rest_sqft*app.rest_tripgen_daily).toString();
-      tot_daily += app.ret_sqft*app.rest_tripgen_daily;
+      tmp_dwld['Daily_Person_Trips'] = ((app.rest_sqft/1000)*app.rest_tripgen_daily).toString();
+      tot_daily += (app.ret_sqft/1000)*app.rest_tripgen_daily;
       tmp_dwld['PM_Person_Rate'] = app.rest_tripgen_PM.toString();
-      tmp_dwld['PM_Person_Trips'] = (app.rest_sqft*app.rest_tripgen_PM).toString();
-      tot_pm += app.rest_sqft*app.rest_tripgen_PM;
+      tmp_dwld['PM_Person_Trips'] = ((app.rest_sqft/1000)*app.rest_tripgen_PM).toString();
+      tot_pm += (app.rest_sqft/1000)*app.rest_tripgen_PM;
       trgen_download.push(tmp_dwld);
 
       tmp_dwld = {};
@@ -825,6 +827,8 @@ function createDownloadObjects() {
       tmp_dwld['transit modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["transit"].toString();
       tmp_dwld['all auto modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["auto"].toString();
       tmp_dwld['taxi modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["taxi"].toString();
+      tmp_dwld['walk modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["walk"].toString();
+      tmp_dwld['bike modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["bike"].toString();
       modesplit_download.push(tmp_dwld);
 
       tmp_dwld = {};
@@ -851,11 +855,11 @@ function createDownloadObjects() {
       tmp_dwld['Amount'] = app.hot_sqft.toString();
       tmp_dwld['Unit'] = 'Per 1k sqft.';
       tmp_dwld['Daily_Person_Rate'] = app.hot_tripgen_daily.toString();
-      tmp_dwld['Daily_Person_Trips'] = (app.hot_sqft*app.hot_tripgen_daily).toString();
-      tot_daily += app.ret_sqft*app.hot_tripgen_daily;
+      tmp_dwld['Daily_Person_Trips'] = ((app.hot_sqft/1000)*app.hot_tripgen_daily).toString();
+      tot_daily += (app.ret_sqft/1000)*app.hot_tripgen_daily;
       tmp_dwld['PM_Person_Rate'] = app.hot_tripgen_PM.toString();
-      tmp_dwld['PM_Person_Trips'] = (app.hot_sqft*app.hot_tripgen_PM).toString();
-      tot_pm += app.hot_sqft*app.hot_tripgen_PM;
+      tmp_dwld['PM_Person_Trips'] = ((app.hot_sqft/1000)*app.hot_tripgen_PM).toString();
+      tot_pm += (app.hot_sqft/1000)*app.hot_tripgen_PM;
       trgen_download.push(tmp_dwld);
 
       tmp_dwld = {};
@@ -863,6 +867,8 @@ function createDownloadObjects() {
       tmp_dwld['transit modesplit'] = filterModeSplitData("Hotel", app.placetype)[0]["transit"].toString();
       tmp_dwld['all auto modesplit'] = filterModeSplitData("Hotel", app.placetype)[0]["auto"].toString();
       tmp_dwld['taxi modesplit'] = filterModeSplitData("Hotel", app.placetype)[0]["taxi"].toString();
+      tmp_dwld['walk modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["walk"].toString();
+      tmp_dwld['bike modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["bike"].toString();
       modesplit_download.push(tmp_dwld);
 
       tmp_dwld = {};
@@ -891,11 +897,11 @@ function createDownloadObjects() {
       tmp_dwld['Amount'] = app.sup_sqft.toString();
       tmp_dwld['Unit'] = 'Per 1k sqft.';
       tmp_dwld['Daily_Person_Rate'] = app.sup_tripgen_daily.toString();
-      tmp_dwld['Daily_Person_Trips'] = (app.sup_sqft*app.sup_tripgen_daily).toString();
-      tot_daily += app.ret_sqft*app.sup_tripgen_daily;
+      tmp_dwld['Daily_Person_Trips'] = ((app.sup_sqft/1000)*app.sup_tripgen_daily).toString();
+      tot_daily += (app.ret_sqft/1000)*app.sup_tripgen_daily;
       tmp_dwld['PM_Person_Rate'] = app.sup_tripgen_PM.toString();
-      tmp_dwld['PM_Person_Trips'] = (app.sup_sqft*app.sup_tripgen_PM).toString();
-      tot_pm += app.sup_sqft*app.sup_tripgen_PM;
+      tmp_dwld['PM_Person_Trips'] = ((app.sup_sqft/1000)*app.sup_tripgen_PM).toString();
+      tot_pm += (app.sup_sqft/1000)*app.sup_tripgen_PM;
       trgen_download.push(tmp_dwld);
 
       tmp_dwld = {};
@@ -903,6 +909,8 @@ function createDownloadObjects() {
       tmp_dwld['transit modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["transit"].toString();
       tmp_dwld['all auto modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["auto"].toString();
       tmp_dwld['taxi modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["taxi"].toString();
+      tmp_dwld['walk modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["walk"].toString();
+      tmp_dwld['bike modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["bike"].toString();
       modesplit_download.push(tmp_dwld);
 
       tmp_dwld = {};
@@ -948,6 +956,34 @@ function createDownloadObjects() {
     trgen_download.push({'Landuse':'Total','Amount':'','Unit':'','Daily_Person_Rate':'',
       'Daily_Person_Trips':tot_daily.toString(),'PM_Person_Rate':'',
       'PM_Person_Trips':tot_pm.toString()});
+
+    //total trips by mode split
+    tmp_dwld = {};
+    tmp_dwld["Mode"] = "Auto"
+    tmp_dwld["Total Person Trips"] = totalPersonTripsByMode["auto"];
+    tmp_dwld["Total Vehicle Trips"] = totalVehicleTripsByMode["auto"];
+    total_trips_download.push(tmp_dwld);
+    tmp_dwld = {};
+    tmp_dwld["Mode"] = "Transit"
+    tmp_dwld["Total Person Trips"] = totalPersonTripsByMode["transit"];
+    tmp_dwld["Total Vehicle Trips"] = totalVehicleTripsByMode["transit"];
+    total_trips_download.push(tmp_dwld);
+    tmp_dwld = {};
+    tmp_dwld["Mode"] = "Taxi"
+    tmp_dwld["Total Person Trips"] = totalPersonTripsByMode["taxi"];
+    tmp_dwld["Total Vehicle Trips"] = totalVehicleTripsByMode["taxi"];
+    total_trips_download.push(tmp_dwld);
+    tmp_dwld = {};
+    tmp_dwld["Mode"] = "Walk"
+    tmp_dwld["Total Person Trips"] = totalPersonTripsByMode["walk"];
+    tmp_dwld["Total Vehicle Trips"] = totalVehicleTripsByMode["walk"];
+    total_trips_download.push(tmp_dwld);
+    tmp_dwld = {};
+    tmp_dwld["Mode"] = "Bike"
+    tmp_dwld["Total Person Trips"] = totalPersonTripsByMode["bike"];
+    tmp_dwld["Total Vehicle Trips"] = totalVehicleTripsByMode["bike"];
+    total_trips_download.push(tmp_dwld);
+
   }
 
 
@@ -988,7 +1024,7 @@ function getTotalTrips(){
   let num_1bed = app.num_1bed;
   let num_2bed = app.num_2bed;
   let num_3bed = app.num_3bed;
-  let tot_num_bedrooms = num_studios + num_1bed + (2*app.num_2bed) + (3*app.num_3bed);
+  let tot_num_bedrooms = num_studios + num_1bed + (2*app.num_2bed) + (2*app.num_3bed);
   let totalPersonTrips = {};
   let totalVehicleTrips = {};
 
@@ -1563,26 +1599,34 @@ queryServer(CTA_API_SERVER + DISTRICTS_URL)
 window.downloadCSV = function(){
   createDownloadObjects();
   let data, filename, link;
-  let csv = 'trip generation rates by land use and time';
+  let csv = 'Total Trips Generated by Land Use and Time';
   if (csv == null) return;
   csv += '\n'+ convertArrayOfObjectsToCSV({
     data: trgen_download
   });
 
-  csv += '\n\n'+ 'mode split distribution';
+  csv += '\n\n'+ 'Mode Split Distribution';
   csv += '\n' + convertArrayOfObjectsToCSV({
     data: modesplit_download
   });
+
+  csv += '\n\n'+ 'Total '+ tripDirectionSelect + ' Trips by Mode';
+  csv += '\n' + convertArrayOfObjectsToCSV({
+    data: total_trips_download
+  });
   
-  csv += '\n\n '+ modeSelect+ ' person trips distribution by district';
+  csv += '\n\n '+ modeSelect+ ' Person Trips Distribution by District';
   csv += '\n' + convertArrayOfObjectsToCSV({
     data: tdist_download
   });
 
-  csv += '\n\n '+ modeSelect+ ' vehicle trips distribution by district';
+  csv += '\n\n '+ modeSelect+ ' Vehicle Trips Distribution by District';
   csv += '\n' + convertArrayOfObjectsToCSV({
     data: tdist_vehicle_download
   });
+
+
+  
 
 
 
