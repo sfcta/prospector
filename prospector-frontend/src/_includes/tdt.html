@@ -60,18 +60,24 @@ type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}"
 <br>
 
 <template v-if="isRetail">
-
+ 
   <label>Retail trip generation rate (daily): ${ret_tripgen_daily}</label>
   <br><label>Retail trip generation rate (PM peak): ${ret_tripgen_PM}</label>
   <h4>Enter retail square footage: </h4>
-  <input v-model.number = "ret_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="retail-footage"></template>
+  <input v-model.number = "ret_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="retail-footage">
+  <br>
+  <br></template>
   <template v-else-if="isOffice">
+   
     <label>Office trip generation rate (daily): ${off_tripgen_daily}</label>
     <br><label>Office trip generation rate (PM peak): ${off_tripgen_PM}</label>
 
     <h4>Enter office square footage: </h4>
-    <input v-model.number="off_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="office-footage"></template>
+    <input v-model.number="off_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="office-footage">
+    <br>
+    <br></template>
     <template v-else-if="isResidential">
+     
       <label>Residential trip generation rate (daily): ${res_tripgen_daily}</label>
       <br><label>Residential trip generation rate (PM peak): ${res_tripgen_PM}</label>
       <h4>Enter bedrooms by type: </h4>
@@ -82,27 +88,35 @@ type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}"
       <br><br><label>Number of 2 bedrooms:  </label>
       <input v-model.number = "num_2bed" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-2bed">
       <br><br><label>Number of 3 bedrooms:  </label>
-      <input v-model.number = "num_3bed" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-3bed"></template>
+      <input v-model.number = "num_3bed" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-3bed">
+      <br>
+      <br></template>
       <template v-else-if="isRestaurant">
+        
         <label>Restaurant trip generation rate (daily): ${rest_tripgen_daily}</label>
         <br><label>Restaurant trip generation rate (PM peak): ${rest_tripgen_PM}</label>
         <h4>Enter restaurant square footage: </h4>
-        <input v-model.number="rest_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="rest-footage"></template>
+        <input v-model.number="rest_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="rest-footage">
+        <br>
+        <br></template>
         <template v-else-if="isSupermarket">
+          
           <label>Supermarket trip generation rate (daily): ${sup_tripgen_daily}</label>
           <br><label>Supermarket trip generation rate (PM peak): ${sup_tripgen_PM}</label>
           <h4>Enter supermarket square footage: </h4>
-          <input v-model.number="sup_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="sup-footage"></template>
+          <input v-model.number="sup_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="sup-footage">
+          <br>
+          <br></template>
           <template v-else-if="isHotel">
+           
             <label>Hotel trip generation rate (daily): ${hot_tripgen_daily}</label>
             <br><label>Hotel trip generation rate (PM peak): ${hot_tripgen_PM}</label>
             <h4>Enter hotel square footage: </h4>
-            <input v-model.number="hot_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="hot-footage"></template>
+            <input v-model.number="hot_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="hot-footage">
             <br>
-            <br>
-
-            <br>
-            <br>
+            <br></template>
+            
+          
 
             <div class="pickers">
               <h5>3. CHOOSE MODE:</h5>
@@ -176,15 +190,22 @@ type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}"
   <div class="logo">
     <hr/>
     <table id="table-logo"><tr>
-      <td class="td-logo">
+      <!-- <td class="td-logo">
         <h4 class="agency"><b><a target="_blank" href="http://www.sfcta.org">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
-      </td>
+      </td> -->
       <td class="td-logo">
         <a class="agency-link" target="_blank" href="http://www.sfcta.org">
           <img class="img-logo" src="/assets/sfcta-logo-144.png" width="80">
         </a>
       </td>
+      <td class="planning-logo">
+        <a class="agency-link" target="_blank" href="http://sf-planning.org/">
+          <img class="img-logo" src="/assets/SFPlanning_Logo_Primary.png" width="180">
+        </a>
+      </td>
+      
     </tr></table>
+    
   </div>
 </div>
 
