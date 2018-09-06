@@ -1,123 +1,279 @@
+
+
 <div id="container">
 
   <div id="panel">
-      <div id="preheader">
-        <hr/>
-        <h3 class="apptitle">TRAVEL DEMAND TOOL</h3>
-        <div id="helpbar">
-            <button class="ui mini right labeled icon violet button"
-                    v-on:click="clickToggleHelp">
-                    <i class="help circle icon"></i>
-                    What is this?
-            </button>
-            &nbsp;
-            <button class="ui mini right labeled icon violet button"
-                    v-on:click="this.window.open('http://sf-planning.org/','_blank')">
-                    <i class="arrow right icon"></i>
-                    Learn More
-            </button>
-            <hr/>
-           </div>
+<!--     <div id="preheader">
+-->      <!-- <hr/> -->
+<h3 class="apptitle">TRAVEL DEMAND TOOL</h3>
+<div id="helpbar">
+  <button class="ui mini right labeled icon greenish button"
+  v-on:click="clickToggleHelp">
+  <i class="help circle icon"></i>
+  What is this?
+</button>
+&nbsp;
+<button class="ui mini right labeled icon greenish button"
+v-on:click="clickToggleInstructions"> 
+<i class="arrow right icon"></i>
+How to Use this Tool
+</button>
+<hr/>
+</div>
+<!-- </div> -->
+<h5>1. ENTER AN ADDRESS:</h5>
 
-          <div id="picker">
-            <div>
-              <input v-model="address" placeholder="Search for address or click on map">
-              <button v-on:click="updateMap"
-                      class="mini ui grey button">
-                      Search</button>
-            </div>
-          </div>
-      </div>
-      <div id="header">
-          <!--div id="stats-panel">
-            <hr style="margin-bottom:-5px;" />
-            <div id="chartinfo"><h3 style="font-size: 22px;">${chartTitle}</h3></div>
-            <div id="geoinfo"><h5>${chartSubtitle}</h5></div>
-            <div id="longchart">
-                <div class="ui active dimmer">
-                  <div class="ui text loader">Loading</div>
-                </div>
-            </div>
-          </div-->
-      </div>
+<input v-model="address" class="fix" append-icon= "icon taxi"
+type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}" placeholder="Search for address or click on map"/>
+      <!-- <v-text-field
+            label="outline"
+            placeholder="address"
+            outline
+            ></v-text-field> -->
+            &nbsp;&nbsp;<label>Place Type: ${placetype} </label>
+<!-- <label>something else <span id="district_PT"></span></label>
+-->
 
-      <div class="logo">
-        <div class="pickers">
+<h5>2. CHOOSE LAND USE:</h5>
+<div id="vizbuttons" class="ui vertical buttons">
+  <button class = "ui toggle button" v-on:click="pickRes"
+  v-bind:class="{ active: resSelected, blue: resSelected }"
+  class="ui blueish button">Residential</button>
+  <button class = "ui toggle button" v-on:click="pickOffice"
+  v-bind:class="{ active: offSelected, blue: offSelected }"
+  class="ui blueish button">Office</button>
+  <button v-on:click="pickRet"
+  v-bind:class="{ active: retSelected, blue: retSelected }"
+  class="ui blueish button">Retail</button>
+  <button v-on:click="pickRestaurant"
+  v-bind:class="{ active: restSelected, blue: restSelected }"
+  class="ui blueish button">Restaurant</button>
+  <button v-on:click="pickSupermarket"
+  v-bind:class="{ active: supSelected, blue: supSelected }"
+  class="ui blueish button">Supermarket</button>
+  <button v-on:click="pickHotel"
+  v-bind:class="{ active: hotSelected, blue: hotSelected}"
+  class="ui blueish button">Hotel</button>
+</div>
 
-            <h5>CHOOSE MODE:</h5>
-            <button v-on:click="pickAU"
-                    v-bind:class="{ active: isAUActive, yellow: isAUActive}"
-                     class="mini ui grey button">
-                     Auto</button>
-            <button v-on:click="pickTR"
-                    v-bind:class="{ active: isTRActive, yellow: isTRActive }"
-                     class="mini ui grey button">
-                     Transit</button>
-        </div>
+<br>
+<br>
+
+<template v-if="isRetail">
+ 
+  <label>Retail trip generation rate (daily): ${ret_tripgen_daily}</label>
+  <br><label>Retail trip generation rate (PM peak): ${ret_tripgen_PM}</label>
+  <h4>Enter retail square footage: </h4>
+  <input v-model.number = "ret_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="retail-footage">
+  <br>
+  <br></template>
+  <template v-else-if="isOffice">
+   
+    <label>Office trip generation rate (daily): ${off_tripgen_daily}</label>
+    <br><label>Office trip generation rate (PM peak): ${off_tripgen_PM}</label>
+
+    <h4>Enter office square footage: </h4>
+    <input v-model.number="off_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="office-footage">
+    <br>
+    <br></template>
+    <template v-else-if="isResidential">
+     
+      <label>Residential trip generation rate (daily): ${res_tripgen_daily}</label>
+      <br><label>Residential trip generation rate (PM peak): ${res_tripgen_PM}</label>
+      <h4>Enter bedrooms by type: </h4>
+      <label>Number of Studios:  </label>
+      <input v-model.number = "num_studios" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-studios">
+      <br><br><label>Number of One Bedrooms:  </label>
+      <input v-model.number = "num_1bed" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-1bed">
+      <br><br><label>Number of 2 bedrooms:  </label>
+      <input v-model.number = "num_2bed" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-2bed">
+      <br><br><label>Number of 3 bedrooms:  </label>
+      <input v-model.number = "num_3bed" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-3bed">
+      <br>
+      <br></template>
+      <template v-else-if="isRestaurant">
+        
+        <label>Restaurant trip generation rate (daily): ${rest_tripgen_daily}</label>
+        <br><label>Restaurant trip generation rate (PM peak): ${rest_tripgen_PM}</label>
+        <h4>Enter restaurant square footage: </h4>
+        <input v-model.number="rest_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="rest-footage">
+        <br>
+        <br></template>
+        <template v-else-if="isSupermarket">
+          
+          <label>Supermarket trip generation rate (daily): ${sup_tripgen_daily}</label>
+          <br><label>Supermarket trip generation rate (PM peak): ${sup_tripgen_PM}</label>
+          <h4>Enter supermarket square footage: </h4>
+          <input v-model.number="sup_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="sup-footage">
+          <br>
+          <br></template>
+          <template v-else-if="isHotel">
+           
+            <label>Hotel trip generation rate (daily): ${hot_tripgen_daily}</label>
+            <br><label>Hotel trip generation rate (PM peak): ${hot_tripgen_PM}</label>
+            <h4>Enter hotel square footage: </h4>
+            <input v-model.number="hot_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="hot-footage">
             <br>
+            <br></template>
+            
+          
 
-            <hr/>
+            <div class="pickers">
+              <h5>3. CHOOSE MODE:</h5>
+              <button class = "ui toggle button" v-on:click="pickAU" 
+              v-bind:class="{ active: isAUActive, yellow: isAUActive}"
+              class="tiny ui grey icon button"><i class="icon car"></i>
+            All Auto</button>
+            <button class = "ui toggle button" v-on:click="pickTR"
+            v-bind:class="{ active: isTRActive, yellow: isTRActive}"
+            class="tiny ui grey icon button"><i class="icon bus"></i>
+          Transit</button>
+          <button class = "ui toggle button" v-on:click="pickTaxiTNC"
+          v-bind:class="{ active: isTaxiTNCActive, yellow: isTaxiTNCActive}"
+          class="tiny ui grey icon button"><i class="icon taxi"></i>
+        TaxiTNC</button>
 
-            <table id="table-logo"><tr>
-              <td class="td-logo">
-                <h4 class="agency"><b><a target="_blank" href="http://www.sfcta.org">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
-              </td>
-              <td class="td-logo">
-                <a class="agency-link" target="_blank" href="http://www.sfcta.org">
-                  <img class="img-logo" src="/assets/sfcta-logo-144.png" width="80">
-                </a>
-              </td>
-            </tr></table>
-      </div>
+        <br>
+
+
+        <h5>4. CHOOSE TRIP PURPOSE:</h5>
+        <button class = "ui toggle button" v-on:click="pickWork"
+        v-bind:class="{ active: isWork, yellow: isWork}"
+        class="tiny ui grey icon button">Work</button>
+        <button class = "ui toggle button" v-on:click="pickOther"
+        v-bind:class="{ active: isOther, yellow: isOther}"
+        class="tiny ui grey icon button"> Non Work</button>
+        <button class = "ui toggle button" v-on:click="pickAll"
+        v-bind:class="{ active: isAll, yellow: isAll}"
+        class="tiny ui grey icon button"> Total</button>
+
+        <br>
+
+        <h5>5. CHOOSE DIRECTION:</h5>
+        <button class = "ui toggle button" v-on:click="pickInbound"
+        v-bind:class="{ active: isInbound, yellow: isInbound}"
+        class="tiny ui jellybean icon button"><i class="icon compress"></i>Inbound</button>
+        <button class = "ui toggle button" v-on:click="pickOutbound"
+        v-bind:class="{ active: isOutbound, yellow: isOutbound}"
+        class="tiny ui blue icon button"><i class="icon expand"></i>Outbound</button>
+        <button class = "ui toggle button" v-on:click="pickBoth"
+        v-bind:class="{ active: isBoth, yellow: isBoth}"
+        class="tiny ui grey icon button"> Total</button>
+
+        <br>
+
+        <h5>6. CHOOSE TIME PERIOD:</h5>
+        <button class = "ui toggle button" v-on:click="pickDaily"
+        v-bind:class="{ active: isDaily, yellow: isDaily}"
+        class="tiny ui grey icon button">Daily</button>
+        <button class = "ui toggle button" v-on:click="pickPM"
+        v-bind:class="{ active: isPM, yellow: isPM}"
+        class="tiny ui grey icon button"> PM Peak</button>
+
+
+        <br>
+        <br>
+
+        <div id="download">
+          <button v-on:click="updateMap" class="tiny ui right labeled icon floated greenish button" 
+          style="margin-right:5px"><i class="icon arrow circle right"></i>Update
+        </button>
+        <button v-on:click="clearAllInputs" class="tiny ui right labeled icon floated grey button" 
+        style="margin-right:5px"><i class="icon ban"></i>Clear Inputs
+      </button>
     </div>
-
-  <div id="helpbox" v-if="showHelp" class="ui segment">
-  <div v-cloak> <!-- hides everything until Vue finished loading -->
-        <h2 style="margin-bottom:0px;">Congestion in San Francisco</h2>
-        <hr style="margin-bottom:5px;margin-top:5px"/>
-        Use this tool to explore performance metrics for both automobiles and buses on major San Francisco streets and highways.
-        These are monitored every two years, in accordance with state law for San Francisco’s Congestion Management Program.
-
-        <ul>
-        <li><b>Auto Level-of-Service (LOS)</b> grades road segments by vehicle delay with "A" describing free flow,
-        and "F" describing bumper-to-bumper conditions.</li>
-        <li><b>Transit Speed</b> reflects the average speeds including both when the buses are in motion as well as waiting at stops.</li>
-        <li><b>Transit Reliability</b> shows the variability in transit travel speeds. A lower percentage means transit speeds are more consistent.</li>
-        <li><b>Auto-Transit Speed Ratio</b> compares auto speeds to  to transit speeds, with lower values indicating where transit is more competitive with auto.
-        If the ratio is 1 then auto and transit travel times are equal.</li>
-        </ul>
-
-        <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
-        <hr style="margin-bottom:5px;margin-top:5px"/>
-        <ul>
-        <li>Select a metric to display it on the map for all segments, for the latest year (2017).</li>
-        <li>Move the year slider to map historic data.</li>
-        <li>Choose time period to display metric for AM or PM peak.</li>
-        <li>Click on a colored roadway segment on the map to see segment-specific trends.</li>
-        </ul>
-
-        <div style="margin-top:20px;">
-          <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
-            &nbsp;OK&nbsp;
-          </button>
-
-          <button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')"
-                  class="small ui right labeled icon floated yellow button"
-                  style="margin-right:5px">
-                  <i class="icon download"></i>
-                  Download data (.zip)
-          </button>
-
-          <button v-on:click="this.window.open('http://sf-planning.org/','_blank')"
-                  class="small ui right floated basic violet button"
-                  style="margin-right:5px">
-                  Learn more&hellip;
-          </button>
-
-        </div>
-  </div>
   </div>
 
-  <div id="sfmap"></div>
+  <br>
+
+
+  <div class="logo">
+    <hr/>
+    <table id="table-logo"><tr>
+      <!-- <td class="td-logo">
+        <h4 class="agency"><b><a target="_blank" href="http://www.sfcta.org">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
+      </td> -->
+      <td class="td-logo">
+        <a class="agency-link" target="_blank" href="http://www.sfcta.org">
+          <img class="img-logo" src="/assets/sfcta-logo-144.png" width="80">
+        </a>
+      </td>
+      <td class="planning-logo">
+        <a class="agency-link" target="_blank" href="http://sf-planning.org/">
+          <img class="img-logo" src="/assets/SFPlanning_Logo_Primary.png" width="180">
+        </a>
+      </td>
+      
+    </tr></table>
+    
+  </div>
+</div>
+
+
+
+<!-- this stuff is all only on click
+-->
+<div id="helpbox" v-if="showHelp" class="ui raised segment">
+  <div v-cloak> 
+    <h2 style="margin-bottom:0px;">Trip generation, distribution and mode share</h2>
+    <hr style="margin-bottom:5px;margin-top:5px"/>
+    This tool estimates  the number, type and common destinations of new trips that people would take to and from a new development project. The estimates are for daily and for extended weekday PM peak hour (3 to 7 p.m.). The following are some key terms:
+
+    <ul>
+      <li><b>Trip Generation</b> The number of person trips that the tool estimates people would take to (inbound) and from (outbound) a new development project, by trip purpose (work, non-work, or total). </li>
+      <li><b>Ways People Travel</b> also known as mode split. The way or method people use to travel between destinations (e.g., walking, bicycling, transit, etc.). The tool estimates the percentages of transit, driving, or for-hire vehicle (i.e., taxi or transportation network company) people would take to (inbound) and from (outbound) a new development project, by trip purpose (work, non-work, or total). </li>
+      <li><b>Commmon Origins and Destinations</b> also known as trip distribution. The number of trips people would take to (inbound) and from (outbound) a new development project and another place (e.g., downtown), by trip purpose (work, non-work, or total). The tool distributes transit, driving, or for-hire vehicle trips into eight San Francisco neighborhoods, east bay, north bay, and south bay.</li>
+
+    </ul>
+
+
+    <div style="margin-top:20px;">
+      <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
+        &nbsp;OK&nbsp;
+      </button>
+
+      <button v-on:click="downloadCSV();"
+      class="small ui right labeled icon floated yellow button"
+      style="margin-right:5px">
+      <i class="icon download"></i>
+      Download data (.zip)
+    </button>
+  </div>
+</div>
+</div>
+
+<div id="instructionsBox" v-if="showInstructions" class="ui raised segment">
+  <div v-cloak> 
+    <h2 style="margin-bottom:0px;">How to Use This Tool</h2>
+    <!-- <hr style="margin-bottom:5px;margin-top:5px"/> -->
+
+    <ul>
+      <li><b>Step 1: </b> Please enter the project address </li>
+      <li><b>Step 2: </b> Please select any/all (multiple selections are permitted here) the land use/s proposed and enter the associated values (e.g., number of units, gross square footage, etc.). </li>
+      <li><b>Step 3: </b> Please choose the way of travel (e.g., the tool will output all project generated transit person trips if you choose “Transit”).</li>
+      <li><b>Step 4: </b> Please select a trip purpose (e.g., the tool will output all project generated “Transit” person trips whose trip purpose is “coming to and from work” if you choose the “Work” purpose). </li>
+      <li><b>Step 5: </b> Please choose a trip direction (e.g., the tool will output all project generated “Transit” “Work” person trips that are traveling to the project site if you choose “Inbound”). </li>
+      <li><b>Step 6: </b> Please select time period of interest (e.g., the tool will output all project generated “Transit” “Work” person trips in the “Inbound” during the PM peak period if “PM Peak” is selected).</li>
+      <li><b>Step 7: </b> Click on “Update”. </li>
+      <li><b>Step 8: </b> Move your mouse cursor over the various neighborhoods on the map interface to see the results of your selections displayed on the upper right corner. </li>
+      <li><b>Step 9: </b> Click on the “Download Data” button in "What is this?" to retrieve the outputs in a spreadsheet form to save for your records. </li>
+      <li><b>Step 10: </b> Click on “Clear Inputs” to start over.  </li></ul>
+
+
+    <div style="margin-top:20px;">
+      <button v-on:click="clickToggleInstructions" class="small ui right floated violet button">
+        &nbsp;OK&nbsp;
+      </button>
+  </div>
+</div>
+</div>
+
+
+
+<!-- </div> -->
+
+
+
+<div id="sfmap"></div>
 
 </div>

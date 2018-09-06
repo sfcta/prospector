@@ -1,0 +1,122 @@
+<div id="container">
+
+  <div id="panel">
+      <div id="preheader">
+        <hr/>
+        <h3 class="apptitle">TRAVEL DEMAND TOOL-helllllllooooo</h3>
+        <div id="helpbar">
+            <button class="ui mini right labeled icon violet button"
+                    v-on:click="clickToggleHelp">
+                    <i class="help circle icon"></i>
+                    What is this?
+            </button>
+            &nbsp;
+            <button class="ui mini right labeled icon violet button"
+                    v-on:click="this.window.open('http://sf-planning.org/','_blank')">
+                    <i class="arrow right icon"></i>
+                    Learn More
+            </button>
+            <hr/>
+           </div>
+
+          <div id="picker">
+            <div>
+              <input v-model="address" placeholder="Search for address or click on map">
+              <button v-on:click="updateMap"
+                      class="mini ui grey button">
+                      Search</button>
+            </div>
+          </div>
+      </div>
+      <div id="header">
+          <!--div id="stats-panel">
+            <hr style="margin-bottom:-5px;" />
+            <div id="chartinfo"><h3 style="font-size: 22px;">${chartTitle}</h3></div>
+            <div id="geoinfo"><h5>${chartSubtitle}</h5></div>
+            <div id="longchart">
+                <div class="ui active dimmer">
+                  <div class="ui text loader">Loading</div>
+                </div>
+            </div>
+          </div-->
+      </div>
+
+      <div class="logo">
+        <div class="pickers">
+
+            <h5>CHOOSE MODE:</h5>
+            <button v-on:click="pickAU"
+                    v-bind:class="{ active: isAUActive, yellow: isAUActive}"
+                     class="mini ui grey button">
+                     Auto</button>
+            <button v-on:click="pickTR"
+                    v-bind:class="{ active: isTRActive, yellow: isTRActive }"
+                     class="mini ui grey button">
+                     Transit</button>
+        </div>
+            <br>
+
+            <hr/>
+
+            <table id="table-logo"><tr>
+              <td class="td-logo">
+                <h4 class="agency"><b><a target="_blank" href="http://www.sfcta.org">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
+              </td>
+              <td class="td-logo">
+                <a class="agency-link" target="_blank" href="http://www.sfcta.org">
+                  <img class="img-logo" src="/assets/sfcta-logo-144.png" width="80">
+                </a>
+              </td>
+            </tr></table>
+      </div>
+    </div>
+
+  <div id="helpbox" v-if="showHelp" class="ui segment">
+  <div v-cloak> <!-- hides everything until Vue finished loading -->
+        <h2 style="margin-bottom:0px;">Congestion in San Francisco</h2>
+        <hr style="margin-bottom:5px;margin-top:5px"/>
+        trip distribution statistics
+
+        <ul>
+        <li><b>Auto Level-of-Service (LOS)</b> grades road segments by vehicle delay with "A" describing free flow,
+        and "F" describing bumper-to-bumper conditions.</li>
+        <li><b>Transit Speed</b> reflects the average speeds including both when the buses are in motion as well as waiting at stops.</li>
+        <li><b>Transit Reliability</b> shows the variability in transit travel speeds. A lower percentage means transit speeds are more consistent.</li>
+        <li><b>Auto-Transit Speed Ratio</b> compares auto speeds to  to transit speeds, with lower values indicating where transit is more competitive with auto.
+        If the ratio is 1 then auto and transit travel times are equal.</li>
+        </ul>
+
+        <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
+        <hr style="margin-bottom:5px;margin-top:5px"/>
+        <ul>
+        <li>Select a metric to display it on the map for all segments, for the latest year (2017).</li>
+        <li>Move the year slider to map historic data.</li>
+        <li>Choose time period to display metric for AM or PM peak.</li>
+        <li>Click on a colored roadway segment on the map to see segment-specific trends.</li>
+        </ul>
+
+        <div style="margin-top:20px;">
+          <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
+            &nbsp;OK&nbsp;
+          </button>
+
+          <button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')"
+                  class="small ui right labeled icon floated yellow button"
+                  style="margin-right:5px">
+                  <i class="icon download"></i>
+                  Download data (.zip)
+          </button>
+
+          <button v-on:click="this.window.open('http://sf-planning.org/','_blank')"
+                  class="small ui right floated basic violet button"
+                  style="margin-right:5px">
+                  Learn more&hellip;
+          </button>
+
+        </div>
+  </div>
+  </div>
+
+  <div id="sfmap"></div>
+
+</div>
