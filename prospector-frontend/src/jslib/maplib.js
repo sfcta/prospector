@@ -22,7 +22,7 @@ let sfmap = L.map('sfmap').setView([37.77, -122.42], 12);
 let url = 'https://api.mapbox.com/styles/v1/mapbox/'+theme+'-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
 let token = 'pk.eyJ1IjoicHNyYyIsImEiOiJjaXFmc2UxanMwM3F6ZnJtMWp3MjBvZHNrIn0._Dmske9er0ounTbBmdRrRQ';
 let attribution ='<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
-                 '<a href="http://mapbox.com">Mapbox</a> | ' + '<a href="https://github.com/abaum1">Amelia Baum</a>';
+                 '<a href="http://mapbox.com">Mapbox</a>';
 let baseLayer = L.tileLayer(url, {
   attribution:attribution,
   maxZoom: 18,
