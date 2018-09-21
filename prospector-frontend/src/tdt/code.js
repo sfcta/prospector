@@ -119,13 +119,13 @@ let modeTypes = ["auto", "transit", "taxi", "walk", "bike"]
 //some other global variables
 let addressDistrictNum; 
 let addressDistrictName;
-let modeSelect;
+let modeSelect = 'auto';
 let address; 
 let landUseCheck = false; //starts out as false and is set to true on the first time a user
   //selects a land use. it communicates that at least one land use has been specified by the user, enabling computation
-let tripPurposeSelect; 
-let tripDirectionSelect;
-let timePeriodSelect;
+let tripPurposeSelect = 'work'; 
+let tripDirectionSelect = 'inbound';
+let timePeriodSelect = 'daily';
 let namePopup;
 
 
@@ -1232,15 +1232,14 @@ function pickAU(thing){
   app.isAUActive = true;
   app.isTRActive = false;
   app.isTaxiTNCActive = false;
-  
-
+  updateMap();
 }
 function pickTR(thing){
   modeSelect = "transit";
   app.isTRActive = true;
   app.isAUActive = false;
   app.isTaxiTNCActive = false;
-  
+  updateMap();
 }
 
 
@@ -1249,7 +1248,7 @@ function pickTaxiTNC(thing){
   app.isTaxiTNCActive = true;
   app.isAUActive = false;
   app.isTRActive = false;
-  
+  updateMap();
 }
 
 function pickRes(thing){
@@ -1260,8 +1259,6 @@ function pickRes(thing){
   app.isRestaurant = false;
   app.isSupermarket = false;
   app.isHotel = false;
-
-
 }
 
 function pickOffice(thing){
@@ -1272,9 +1269,6 @@ function pickOffice(thing){
   app.isRestaurant = false;
   app.isSupermarket = false;
   app.isHotel = false;
-  
-
-
 }
 
 function pickRet(thing){
@@ -1286,7 +1280,6 @@ function pickRet(thing){
   app.isRestaurant = false;
   app.isSupermarket = false;
   app.isHotel = false;
-  
 }
 
 function pickRestaurant(thing){
@@ -1296,9 +1289,7 @@ function pickRestaurant(thing){
   app.isResidential = false;
   app.isOffice = false;
   app.isSupermarket = false;
-  app.isHotel = false;  
-  
-
+  app.isHotel = false;    
 }
 
 function pickHotel(thing){
@@ -1327,7 +1318,7 @@ function pickWork(thing){
   app.isWork = true;
   app.isOther = false;
   app.isAll = false;
-
+  updateMap();
 }
 
 function pickOther(thing){
@@ -1335,7 +1326,7 @@ function pickOther(thing){
   app.isOther = true;
   app.isWork = false;
   app.isAll = false;
-  
+  updateMap();
 }
 
 function pickAll(thing){
@@ -1343,7 +1334,7 @@ function pickAll(thing){
   app.isOther = false;
   app.isWork = false;
   app.isAll = true;
-  
+  updateMap();
 }
 
 function pickInbound(thing){
@@ -1351,7 +1342,7 @@ function pickInbound(thing){
   app.isInbound = true;
   app.isOutbound = false;
   app.isBoth = false;
-
+  updateMap();
 }
 
 function pickOutbound(thing){
@@ -1359,7 +1350,7 @@ function pickOutbound(thing){
   app.isInbound = false;
   app.isOutbound = true;
   app.isBoth = false;
-  
+  updateMap();
 }
 
 
@@ -1368,22 +1359,24 @@ function pickBoth(thing){
   app.isInbound = false;
   app.isOutbound = false;
   app.isBoth = true;
+  updateMap();
 }
 
 function pickPM(thing){
   timePeriodSelect = "pm";
   app.isPM = true;
   app.isDaily = false;
+  updateMap();
 }
 
 function pickDaily(thing){  
   timePeriodSelect = "daily";  
   app.isPM = false;
   app.isDaily = true;
+  updateMap();
 }
 
 function checkLandUseSelections() {
-
   app.resSelected = app.num_1bed > 0;
   app.resSelected = app.num_2bed > 0;
   app.resSelected = app.num_3bed > 0;
@@ -1394,8 +1387,6 @@ function checkLandUseSelections() {
   app.hotSelected = app.hot_sqft > 0;
   app.supSelected = app.sup_sqft > 0;
   app.retSelected = app.ret_sqft > 0;
-  
-
 }
 
 // Vue object connects what is done in the user interface html to the javascript. All the buttons
@@ -1404,7 +1395,7 @@ let app = new Vue({
   el: '#panel', //element is 'el' the whole right side of the map
   delimiters: ['${', '}'],
   data: {
-    isAUActive: false,
+    isAUActive: true,
     isTRActive: false,
     address: null,
     isOffice: false,
@@ -1413,13 +1404,13 @@ let app = new Vue({
     isRestaurant: false,
     isSupermarket: false,
     isHotel: false,
-    isWork: false,
+    isWork: true,
     isOther: false,
     isAll: false,
-    isInbound: false,
+    isInbound: true,
     isOutbound: false,
     isBoth: false,
-    isDaily: false,
+    isDaily: true,
     isPM: false,
     isCombined: false,
     off_sqft: null,
@@ -1443,8 +1434,6 @@ let app = new Vue({
     restSelected: false,
     supSelected: false,
     hotSelected: false,
-
-
   },
   watch: {
     off_sqft: checkLandUseSelections,
@@ -1457,8 +1446,6 @@ let app = new Vue({
     num_2bed: checkLandUseSelections,
     num_3bed: checkLandUseSelections,
     num_studios: checkLandUseSelections,
-
-
   },
   
   methods: {
@@ -1486,8 +1473,6 @@ let app = new Vue({
     pickPM: pickPM,
     // pickCombined: pickCombined,
     getFilteredTrips: getFilteredTrips,
-
-
   },
 });
 

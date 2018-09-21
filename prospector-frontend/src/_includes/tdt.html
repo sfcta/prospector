@@ -64,7 +64,7 @@ type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}"
   <label>Retail trip generation rate (daily): ${ret_tripgen_daily}</label>
   <br><label>Retail trip generation rate (PM peak): ${ret_tripgen_PM}</label>
   <h4>Enter retail square footage: </h4>
-  <input v-model.number = "ret_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="retail-footage">
+  <input v-model.number = v-on:keyup="updateMap" "ret_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="retail-footage">
   <br>
   <br></template>
   <template v-else-if="isOffice">
@@ -73,7 +73,7 @@ type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}"
     <br><label>Office trip generation rate (PM peak): ${off_tripgen_PM}</label>
 
     <h4>Enter office square footage: </h4>
-    <input v-model.number="off_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="office-footage">
+    <input v-model.number="off_sqft" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="office-footage">
     <br>
     <br></template>
     <template v-else-if="isResidential">
@@ -82,13 +82,13 @@ type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}"
       <br><label>Residential trip generation rate (PM peak): ${res_tripgen_PM}</label>
       <h4>Enter bedrooms by type: </h4>
       <label>Number of Studios:  </label>
-      <input v-model.number = "num_studios" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-studios">
+      <input v-model.number = "num_studios" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-studios">
       <br><br><label>Number of One Bedrooms:  </label>
-      <input v-model.number = "num_1bed" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-1bed">
+      <input v-model.number = "num_1bed" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-1bed">
       <br><br><label>Number of 2 bedrooms:  </label>
-      <input v-model.number = "num_2bed" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-2bed">
+      <input v-model.number = "num_2bed" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-2bed">
       <br><br><label>Number of 3 bedrooms:  </label>
-      <input v-model.number = "num_3bed" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-3bed">
+      <input v-model.number = "num_3bed" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-3bed">
       <br>
       <br></template>
       <template v-else-if="isRestaurant">
@@ -96,7 +96,7 @@ type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}"
         <label>Restaurant trip generation rate (daily): ${rest_tripgen_daily}</label>
         <br><label>Restaurant trip generation rate (PM peak): ${rest_tripgen_PM}</label>
         <h4>Enter restaurant square footage: </h4>
-        <input v-model.number="rest_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="rest-footage">
+        <input v-model.number="rest_sqft" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="rest-footage">
         <br>
         <br></template>
         <template v-else-if="isSupermarket">
@@ -104,7 +104,7 @@ type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}"
           <label>Supermarket trip generation rate (daily): ${sup_tripgen_daily}</label>
           <br><label>Supermarket trip generation rate (PM peak): ${sup_tripgen_PM}</label>
           <h4>Enter supermarket square footage: </h4>
-          <input v-model.number="sup_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="sup-footage">
+          <input v-model.number="sup_sqft" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="sup-footage">
           <br>
           <br></template>
           <template v-else-if="isHotel">
@@ -112,7 +112,7 @@ type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}"
             <label>Hotel trip generation rate (daily): ${hot_tripgen_daily}</label>
             <br><label>Hotel trip generation rate (PM peak): ${hot_tripgen_PM}</label>
             <h4>Enter hotel square footage: </h4>
-            <input v-model.number="hot_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="hot-footage">
+            <input v-model.number="hot_sqft" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="hot-footage">
             <br>
             <br></template>
             
