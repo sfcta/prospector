@@ -120,55 +120,44 @@ type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}"
 
             <div class="pickers">
               <h5>3. CHOOSE MODE:</h5>
-              <button class = "ui toggle button" v-on:click="pickAU" 
-              v-bind:class="{ active: isAUActive, yellow: isAUActive}"
-              class="tiny ui grey icon button"><i class="icon car"></i>
+              <button class = "tiny ui grey icon button" v-on:click="pickAU" 
+              v-bind:class="{ active: isAUActive, yellow: isAUActive}"><i class="icon car"></i>
             All Auto</button>
-            <button class = "ui toggle button" v-on:click="pickTR"
-            v-bind:class="{ active: isTRActive, yellow: isTRActive}"
-            class="tiny ui grey icon button"><i class="icon bus"></i>
+            <button class = "tiny ui grey icon button" v-on:click="pickTR"
+            v-bind:class="{ active: isTRActive, yellow: isTRActive}"><i class="icon bus"></i>
           Transit</button>
-          <button class = "ui toggle button" v-on:click="pickTaxiTNC"
-          v-bind:class="{ active: isTaxiTNCActive, yellow: isTaxiTNCActive}"
-          class="tiny ui grey icon button"><i class="icon taxi"></i>
+          <button class = "tiny ui grey icon button" v-on:click="pickTaxiTNC"
+          v-bind:class="{ active: isTaxiTNCActive, yellow: isTaxiTNCActive}"><i class="icon taxi"></i>
         TaxiTNC</button>
 
         <br>
 
 
         <h5>4. CHOOSE TRIP PURPOSE:</h5>
-        <button class = "ui toggle button" v-on:click="pickWork"
-        v-bind:class="{ active: isWork, yellow: isWork}"
-        class="tiny ui grey icon button">Work</button>
-        <button class = "ui toggle button" v-on:click="pickOther"
-        v-bind:class="{ active: isOther, yellow: isOther}"
-        class="tiny ui grey icon button"> Non Work</button>
-        <button class = "ui toggle button" v-on:click="pickAll"
-        v-bind:class="{ active: isAll, yellow: isAll}"
-        class="tiny ui grey icon button"> Total</button>
+        <button class = "tiny ui grey icon button" v-on:click="pickWork"
+        v-bind:class="{ active: isWork, yellow: isWork}">Work</button>
+        <button class = "tiny ui grey icon button" v-on:click="pickOther"
+        v-bind:class="{ active: isOther, yellow: isOther}"> Non Work</button>
+        <button class = "tiny ui grey icon button" v-on:click="pickAll"
+        v-bind:class="{ active: isAll, yellow: isAll}"> Total</button>
 
         <br>
 
         <h5>5. CHOOSE DIRECTION:</h5>
-        <button class = "ui toggle button" v-on:click="pickInbound"
-        v-bind:class="{ active: isInbound, yellow: isInbound}"
-        class="tiny ui jellybean icon button"><i class="icon compress"></i>Inbound</button>
-        <button class = "ui toggle button" v-on:click="pickOutbound"
-        v-bind:class="{ active: isOutbound, yellow: isOutbound}"
-        class="tiny ui blue icon button"><i class="icon expand"></i>Outbound</button>
-        <button class = "ui toggle button" v-on:click="pickBoth"
-        v-bind:class="{ active: isBoth, yellow: isBoth}"
-        class="tiny ui grey icon button"> Total</button>
+        <button class = "tiny ui jellybean icon button" v-on:click="pickInbound"
+        v-bind:class="{ active: isInbound, yellow: isInbound}"><i class="icon compress"></i>Inbound</button>
+        <button class = "tiny ui blue icon button" v-on:click="pickOutbound"
+        v-bind:class="{ active: isOutbound, yellow: isOutbound}"><i class="icon expand"></i>Outbound</button>
+        <button class = "tiny ui grey icon button" v-on:click="pickBoth"
+        v-bind:class="{ active: isBoth, yellow: isBoth}"> Total</button>
 
         <br>
 
         <h5>6. CHOOSE TIME PERIOD:</h5>
-        <button class = "ui toggle button" v-on:click="pickDaily"
-        v-bind:class="{ active: isDaily, yellow: isDaily}"
-        class="tiny ui grey icon button">Daily</button>
-        <button class = "ui toggle button" v-on:click="pickPM"
-        v-bind:class="{ active: isPM, yellow: isPM}"
-        class="tiny ui grey icon button"> PM Peak</button>
+        <button class = "tiny ui grey icon button" v-on:click="pickDaily"
+        v-bind:class="{ active: isDaily, yellow: isDaily}">Daily</button>
+        <button class = "tiny ui grey icon button" v-on:click="pickPM"
+        v-bind:class="{ active: isPM, yellow: isPM}"> PM Peak</button>
 
         <br>
         
