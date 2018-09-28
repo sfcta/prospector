@@ -64,7 +64,7 @@ type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}"
   <label>Retail trip generation rate (daily): ${ret_tripgen_daily}</label>
   <br><label>Retail trip generation rate (PM peak): ${ret_tripgen_PM}</label>
   <h4>Enter retail square footage: </h4>
-  <input v-model.number = v-on:keyup="updateMap" "ret_sqft" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="retail-footage">
+  <input v-model.number="ret_sqft" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="retail-footage">
   <br>
   <br></template>
   <template v-else-if="isOffice">
@@ -170,16 +170,28 @@ type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}"
         v-bind:class="{ active: isPM, yellow: isPM}"
         class="tiny ui grey icon button"> PM Peak</button>
 
-
+        <br>
+        
+        <h5>7. CHOOSE DISTRIBUTION METHOD:</h5>
+        <button class="tiny ui grey icon button" v-on:click="pickDistrict"
+        v-bind:class="{active: isDistrict, yellow: isDistrict}">District</button>
+        <button class="tiny ui grey icon button" v-on:click="pickPlaceType"
+        v-bind:class="{active: isPlaceType, yellow: isPlaceType}">Place Type</button>
+        <button class="tiny ui grey icon button" v-on:click="pickCity"
+        v-bind:class="{active: isCity, yellow: isCity}">City</button>
+        
         <br>
         <br>
-
         <div id="download">
-          <button v-on:click="updateMap" class="tiny ui right labeled icon floated greenish button" 
+          <!-- <button v-on:click="updateMap" class="tiny ui right labeled icon floated greenish button" 
           style="margin-right:5px"><i class="icon arrow circle right"></i>Update
         </button>
-        <button v-on:click="clearAllInputs" class="tiny ui right labeled icon floated grey button" 
+        <!--<button v-on:click="clearAllInputs" class="tiny ui right labeled icon floated grey button" 
         style="margin-right:5px"><i class="icon ban"></i>Clear Inputs
+      </button> -->
+      
+        <button v-on:click="resetAllInputs" class="tiny ui right labeled icon floated grey button" 
+        style="margin-right:5px"><i class="icon ban"></i>Reset All
       </button>
     </div>
   </div>

@@ -126,6 +126,7 @@ let landUseCheck = false; //starts out as false and is set to true on the first 
 let tripPurposeSelect = 'work'; 
 let tripDirectionSelect = 'inbound';
 let timePeriodSelect = 'daily';
+let distributionMethod = 'district';
 let namePopup;
 
 
@@ -1174,12 +1175,6 @@ function getFilteredTrips(){
 
 function clearAllInputs(){
   landUseCheck = false;
-  app.isRetail = true;
-  app.isResidential = false;
-  app.isOffice = false;
-  app.isRestaurant = false;
-  app.isSupermarket = false;
-  app.isHotel = false;
   app.isAUActive = false;
   app.isTRActive = false;
   app.address=  null;
@@ -1224,7 +1219,42 @@ function clearAllInputs(){
   infoTotals.update();
 }
 
-
+function resetAllInputs(){
+  landUseCheck = false;
+  app.isRetail = false;
+  app.isResidential = false;
+  app.isOffice = false;
+  app.isRestaurant = false;
+  app.isSupermarket = false;
+  app.isHotel = false;
+  app.address=  null;
+  pickAU();
+  pickWork();
+  pickInbound();
+  app.off_sqft = 0;
+  app.ret_sqft = 0;
+  app.res_sqft = 0;
+  app.rest_sqft = 0;
+  app.sup_sqft = 0;
+  app.hot_sqft = 0;
+  app.num_studios = 0;
+  app.num_1bed = 0;
+  app.num_2bed = 0;
+  app.num_3bed = 0;
+  
+  app.placetype = '';
+  //this doesn't seem to be doing anything
+  //districts_lyr.resetStyle(color_styles[0].normal);
+  districts_lyr.setStyle(color_styles[3].normal);
+  if (mapLegend) mymap.removeControl(mapLegend);
+  if (address_geoLyr){
+    mymap.removeLayer(address_geoLyr);
+    //this works but removing the layer is not the ideal situation. I'd rather keep the layer and just recolor it.
+    //mymap.removeLayer(districts_lyr);
+  }
+  info.update();
+  infoTotals.update();
+}
 
 //button functions
 function pickAU(thing){
@@ -1376,6 +1406,30 @@ function pickDaily(thing){
   updateMap();
 }
 
+function pickDistrict(thing){
+  distributionMethod="district";
+  app.isDistrict = true;
+  app.isPlaceType = false;
+  app.isCity = false;
+  updateMap();
+}
+  
+function pickPlaceType(thing){
+  distributionMethod="placetype";
+  app.isDistrict = false;
+  app.isPlaceType = true;
+  app.isCity = false;
+  updateMap();
+}
+  
+function pickCity(thing){
+  distributionMethod='city';
+  app.isDistrict = false;
+  app.isPlaceType = false;
+  app.isCity = true;
+  updateMap();
+}
+  
 function checkLandUseSelections() {
   app.resSelected = app.num_1bed > 0;
   app.resSelected = app.num_2bed > 0;
@@ -1413,6 +1467,9 @@ let app = new Vue({
     isDaily: true,
     isPM: false,
     isCombined: false,
+    isDistrict: true,
+    isPlaceType: false,
+    isCity: false,
     off_sqft: null,
     ret_sqft: null,
     res_sqft: null,
@@ -1455,6 +1512,7 @@ let app = new Vue({
     pickTR: pickTR,
     updateMap: updateMap,
     clearAllInputs: clearAllInputs,
+    resetAllInputs: resetAllInputs,
 
     pickOffice: pickOffice,
     pickRes: pickRes,
@@ -1471,6 +1529,9 @@ let app = new Vue({
     pickTaxiTNC: pickTaxiTNC,
     pickDaily: pickDaily,
     pickPM: pickPM,
+    pickDistrict: pickDistrict,
+    pickPlaceType: pickPlaceType,
+    pickCity: pickCity,
     // pickCombined: pickCombined,
     getFilteredTrips: getFilteredTrips,
   },
