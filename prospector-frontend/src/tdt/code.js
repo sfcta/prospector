@@ -131,11 +131,11 @@ let namePopup;
 
 
 
-  let info = L.control(); 
+  let infoDistrict = L.control(); 
   let infoTotals = L.control();
 
 
-  info.onAdd = function (map) {
+  infoDistrict.onAdd = function (map) {
 this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
 this.update();
 return this._div;
@@ -187,7 +187,7 @@ infoTotals.update = function() { //hoverDistrict is the mouseover target defned 
 };
 
 
-info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target defned in updateMap
+infoDistrict.update = function (hoverDistrict) { //hoverDistrict is the mouseover target defned in updateMap
   let message = '';
   if (addressDistrictNum == null || landUseCheck == false) {
     message = '';
@@ -218,7 +218,7 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
 
 
 infoTotals.addTo(mymap);
-info.addTo(mymap);
+infoDistrict.addTo(mymap);
 
 
 function queryServer(url){
@@ -293,7 +293,7 @@ function addGeoLayer(geoJsonData){
           // no real reason they need to come to the front on mouseover anyway. This is a quick resolution of this problem.
           address_geoLyr.bringToFront();
         }
-        info.update(e.target.feature); 
+        infoDistrict.update(e.target.feature); 
         infoTotals.update(e.target.feature);
       },
       mouseout: function(e){
@@ -1095,7 +1095,7 @@ function clearAllInputs(){
     //this works but removing the layer is not the ideal situation. I'd rather keep the layer and just recolor it.
     //mymap.removeLayer(districts_lyr);
   }
-  info.update();
+  infoDistrict.update();
   infoTotals.update();
 }
 
@@ -1132,7 +1132,7 @@ function resetAllInputs(){
     //this works but removing the layer is not the ideal situation. I'd rather keep the layer and just recolor it.
     //mymap.removeLayer(districts_lyr);
   }
-  info.update();
+  infoDistrict.update();
   infoTotals.update();
 }
 
