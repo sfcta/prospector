@@ -148,10 +148,11 @@ return this._div;
 };
 
 
-infoTotals.update = function (hoverDistrict) { //hoverDistrict is the mouseover target defned in updateMap
+infoTotals.update = function() { //hoverDistrict is the mouseover target defned in updateMap
   let message = '';
   if (addressDistrictNum == null || landUseCheck == false) {
     message = '<h4>Information</h4>';
+    //message = '<br> address district number ' + addressDistrictNum + ' <br>' + addressDistrictName;
     if (addressDistrictNum == null) {
       message += '<b>-Input an address</b>' ;
     }
@@ -160,105 +161,42 @@ infoTotals.update = function (hoverDistrict) { //hoverDistrict is the mouseover 
     }
    
   }
-  this._div.innerHTML = message; 
-  /*
   else {
-    if (tripDirectionSelect == "outbound"){
-      message = '<h4> Total Outbound trips</h4>' +
-      timePeriodSelect +  ' ' + modeSelect+ ' ' + tripPurposeSelect + ' trips based on the proposed project land use inputs'+
-      '<br>' + 'Total ' + "person trips by  auto from" + address + " is: " + totalPersonTripsByMode["auto"]+ '</b>'+
-      '<br>' + 'Total person trips by transit from ' + address + " is: " + totalPersonTripsByMode["transit"] + '</b>'+
-      '<br>' + 'Total person trips by bike from ' + address + " is: " + totalPersonTripsByMode["bike"] + '</b>'+
-      '<br>' + 'Total person trips by taxi from ' + address + " is: " + totalPersonTripsByMode["taxi"] + '</b>'+
-      '<br>' + 'Total person trips by walk from ' + address + " is: " + totalPersonTripsByMode["walk"] + '</b>'
-
-      if (modeSelect !== "transit"){
-        message += '<br>' + 'Total vehicle trips by auto from ' + address+ " is: "+ totalVehicleTripsByMode["auto"]+
-        '<br>' + 'Total person trips by transit from ' + address + " is: " + totalPersonTripsByMode["transit"] + '</b>'+
-        '<br>' + 'Total person trips by bike from ' + address + " is: " + totalPersonTripsByMode["bike"] + '</b>'+
-        '<br>' + 'Total person trips by taxi from ' + address + " is: " + totalPersonTripsByMode["taxi"] + '</b>'+
-        '<br>' + 'Total person trips by walk from ' + address + " is: " + totalPersonTripsByMode["walk"] + '</b>'
-
-      }
-      this._div.innerHTML = message;  
+    //message = tripDistributionSelect
+    switch(tripDirectionSelect) {
+      case 'outbound': 
+        message = '<h4> Total Outbound From' + address + '</h4>';
+        break;
+      case 'inbound': 
+        message = '<h4> Total Inbound To ' + address + '</h4>';
+        break;
+      default: 
+        message = '<h4> Total Inbound/Outbound From/To ' + address + '</h4>';
+        break;
     }
-  else if (tripDirectionSelect == "inbound"){
-let message;
-      message = '<h4> Total Inbound trips</h4>' +
-      timePeriodSelect + ' ' + modeSelect+ ' ' + tripPurposeSelect + ' trips based on the proposed project land use inputs'+
-      '<br>' + 'Total person trips by auto to ' + address + " is: " + totalPersonTripsByMode["auto"] + '</b>'+
-      '<br>' + 'Total person trips by transit to ' + address + " is: " + totalPersonTripsByMode["transit"] + '</b>'+
-      '<br>' + 'Total person trips by bike to ' + address + " is: " + totalPersonTripsByMode["bike"] + '</b>'+
-      '<br>' + 'Total person trips by taxi to ' + address + " is: " + totalPersonTripsByMode["taxi"] + '</b>'+
-      '<br>' + 'Total person trips by walk to ' + address + " is: " + totalPersonTripsByMode["walk"] + '</b>'
-
-    if (modeSelect !== "transit"){
-      message += '<br>' + 'Total vehicle trips by auto to ' + address+ " is: "+ totalVehicleTripsByMode["auto"]+
-      '<br>' + 'Total person trips by transit to ' + address + " is: " + totalPersonTripsByMode["transit"] + '</b>'+
-      '<br>' + 'Total person trips by bike to ' + address + " is: " + totalPersonTripsByMode["bike"] + '</b>'+
-      '<br>' + 'Total person trips by taxi to ' + address + " is: " + totalPersonTripsByMode["taxi"] + '</b>'+
-      '<br>' + 'Total person trips by walk to ' + address + " is: " + totalPersonTripsByMode["walk"] + '</b>'
-   
-    }
-    this._div.innerHTML = message;   
-   }
-   else if (tripDirectionSelect == "both"){
-    let message;
-      message = '<h4> Total trips</h4>' +
-      timePeriodSelect + ' ' + modeSelect+ ' ' + tripPurposeSelect + ' trips based on the proposed project land use inputs'+
-      '<br>' + 'Total <b>person trips by auto</b> to and from ' + address + " is: " + totalPersonTripsByMode["auto"] + '</b>'+
-      '<br>' + 'Total person trips by transit to and from ' + address + " is: " + totalPersonTripsByMode["transit"] + '</b>'+
-      '<br>' + 'Total person trips by bike to and from ' + address + " is: " + totalPersonTripsByMode["bike"] + '</b>'+
-      '<br>' + 'Total person trips by taxi to and from ' + address + " is: " + totalPersonTripsByMode["taxi"] + '</b>'+
-      '<br>' + 'Total person trips by walk to and from ' + address + " is: " + totalPersonTripsByMode["walk"] + '</b>'
-
-    if (modeSelect !== "transit"){
-      message += '<br>' + 'Total vehicle trips by auto to and from ' + address+ " is: "+ totalVehicleTripsByMode["auto"]+
-      '<br>' + 'Total person trips by transit to and from ' + address + " is: " + totalVehicleTripsByMode["transit"] + '</b>'+
-      '<br>' + 'Total person trips by bike to and from ' + address + " is: " + totalVehicleTripsByMode["bike"] + '</b>'+
-      '<br>' + 'Total person trips by taxi to and from ' + address + " is: " + totalVehicleTripsByMode["taxi"] + '</b>'+
-      '<br>' + 'Total person trips by walk to and from ' + address + " is: " + totalVehicleTripsByMode["walk"] + '</b>'
-  
-    }
-    this._div.innerHTML = message;  
-
- }
-}*/
-
+    message += '<h4>Person Trips</h4>';
+    message += ' - by  auto: ' + totalPersonTripsByMode["auto"]+ '</b>'+
+      '<br> - by transit: ' + totalPersonTripsByMode["transit"] + '</b>'+
+      '<br> - by bike: ' + totalPersonTripsByMode["bike"] + '</b>'+
+      '<br> - by taxi: ' + totalPersonTripsByMode["taxi"] + '</b>'+
+      '<br> - by walk: ' + totalPersonTripsByMode["walk"] + '</b>'
+    message += '<h4>Vehicle Trips</h4>';
+    message += ' - by  auto: ' + totalVehicleTripsByMode["auto"]+ '</b>'
+  }
+  this._div.innerHTML = message; 
 };
 
 
 info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target defned in updateMap
-  if (addressDistrictNum == null && hoverDistrict == null) {
-    this._div.innerHTML = '<b> Input project details </b>'
+  let message = '';
+  if (addressDistrictNum == null || landUseCheck == false) {
+    message = '';
   }
   else if (hoverDistrict == null) {
-    this._div.innerHTML = '<h4>Information</h4>' +
-    '<b> Hover over a district </b>'
+    message = '<h4>Information</h4>' + '<b> Hover over a district </b>';
   }
-  else if (addressDistrictNum == null) {
-    this._div.innerHTML = '<h4>Information</h4>' +
-    '<b> Input an address to see trip distribution for: '+ hoverDistrict.distname +  '</b>' 
-  }
-
-  else if (landUseCheck == false) {
-    this._div.innerHTML = '<h4>Information</h4>' +
-    '<b> Select a land use to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
-  }
-
-  else if (modeSelect == null) {
-    this._div.innerHTML = '<h4>Information</h4>' +
-    '<b> Select a mode to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
-  }
-
-  else if (tripPurposeSelect == null) {
-    this._div.innerHTML = '<h4>Information</h4>' +
-    '<b> Select a trip purpose to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
-  }
-
-
-  else {
-    let message;
+  this._div.innerHTML = message;
+  /*else if {
 
     if (tripDirectionSelect == "outbound"){
 
@@ -301,7 +239,7 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
  }
 
 
-}
+}*/
 
 };
 
@@ -526,7 +464,6 @@ function updateMap() {
       assignDistrict(geoJson, address_geoLyr, address);
       getFilteredTrips();
       getTotalTrips();
-
       //coloring the districts
       
       let trips = []
