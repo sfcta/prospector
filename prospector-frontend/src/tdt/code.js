@@ -91,18 +91,17 @@ let AVO_data;
 queryServer(CTA_API_SERVER + AVO_DATA)
 .then(function(data){
   AVO_data = data;
-  
-  
 })
 
-let color_styles = [{ normal  : {"color": "#39f", "weight":3,  "opacity": 0.5},
-selected: {"color": "#33f",    "weight":4, "opacity": 0.5 },},
-{ normal  : {"fillColor": "#8B0000 ", "fillOpacity": 0.8 },
-selected: {"color": "#34784b", "weight":5, "opacity": 1.0, },},
-{normal: {"fillColor": "#000", "fillOpacity": 0.8, },
-selected: {"color": "#000", "weight":5, "opacity": 1.0,},},
-{normal: {"color": "#969696", "fillColor": "#969696", "fillOpacity": 0.3, "weight":2, "opacity": 1,},
-selected: {"color": "#43C1FC", "weight":1, "opacity": 1,},},
+let color_styles = [
+  {normal: {"color": "#39f", "weight":3,  "opacity": 0.5},
+   selected: {"color": "#33f",    "weight":4, "opacity": 0.5 },},
+  {normal: {"fillColor": "#8B0000 ", "fillOpacity": 0.8 },
+   selected: {"color": "#34784b", "weight":5, "opacity": 1.0, },},
+  {normal: {"fillColor": "#000", "fillOpacity": 0.8, },
+   selected: {"color": "#000", "weight":5, "opacity": 1.0,},},
+  {normal: {"color": "#969696", "fillColor": "#969696", "fillOpacity": 0.3, "weight":2, "opacity": 1,},
+   selected: {"color": "#43C1FC", "weight":1, "opacity": 1,},},
 ];
 
 //some global geolayer variables
@@ -115,36 +114,33 @@ let color_func;
 let landUses = ["Residential", "Hotel", "Retail", "Supermarket", "Office"];
 let modeTypes = ["auto", "transit", "taxi", "walk", "bike"]
 
-
 //some other global variables
 let addressDistrictNum; 
 let addressDistrictName;
 let modeSelect = 'auto';
 let address; 
 let landUseCheck = false; //starts out as false and is set to true on the first time a user
-  //selects a land use. it communicates that at least one land use has been specified by the user, enabling computation
+
+//selects a land use. it communicates that at least one land use has been specified by the user, enabling computation
 let tripPurposeSelect = 'work'; 
 let tripDirectionSelect = 'inbound';
 let timePeriodSelect = 'daily';
 let distributionMethod = 'district';
 let namePopup;
 
+let infoDistrict = L.control(); 
+let infoTotals = L.control();
 
-
-  let infoDistrict = L.control(); 
-  let infoTotals = L.control();
-
-
-  infoDistrict.onAdd = function (map) {
-this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
-this.update();
-return this._div;
+infoDistrict.onAdd = function (map) {
+  this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+  this.update();
+  return this._div;
 };
 
 infoTotals.onAdd = function (map) {
-this._div = L.DomUtil.create('div', 'infoTotals'); // create a div with a class "info"
-this.update();
-return this._div;
+  this._div = L.DomUtil.create('div', 'infoTotals'); // create a div with a class "info"
+  this.update();
+  return this._div;
 };
 
 
@@ -186,7 +182,6 @@ infoTotals.update = function() { //hoverDistrict is the mouseover target defned 
   this._div.innerHTML = message; 
 };
 
-
 infoDistrict.update = function (hoverDistrict) { //hoverDistrict is the mouseover target defned in updateMap
   let message = '';
   if (addressDistrictNum == null || landUseCheck == false) {
@@ -216,10 +211,8 @@ infoDistrict.update = function (hoverDistrict) { //hoverDistrict is the mouseove
   this._div.innerHTML = message;
 };
 
-
 infoTotals.addTo(mymap);
 infoDistrict.addTo(mymap);
-
 
 function queryServer(url){
   var promise = new Promise(function(resolve, reject) {
@@ -229,13 +222,11 @@ function queryServer(url){
       resolve(jsonData)
     })
     .catch(function(error) {
-
       alert("Cannot query server");
     });
   })
   return promise
 }
-
 
 function planningJson2geojson(json) {
   //converts the response json of the planning geocoder into a geojson format that is readable by leaflet
@@ -247,16 +238,13 @@ function planningJson2geojson(json) {
   geoCodeJson['geometry']['type'] = 'MultiPolygon';
   geoCodeJson['geometry']['coordinates'] = [json.features[0].geometry.rings];
   return geoCodeJson;  
-  
 }
-
 
 function ctaJson2geojson(json) {
   //converts the response json of the sfcta api into a geojson format that is readable by leaflet
   //allows this data to be added to a geoLayer and drawn on the map
   json["type"] = "Feature";
   json["geometry"] = JSON.parse(json.geometry);
-  
 }
 
 function addGeoLayer(geoJsonData){
