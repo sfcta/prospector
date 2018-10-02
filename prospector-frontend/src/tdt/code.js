@@ -144,7 +144,7 @@ infoTotals.onAdd = function (map) {
 };
 
 
-infoTotals.update = function() { //hoverDistrict is the mouseover target defned in updateMap
+infoTotals.update = function() { 
   let message = '';
   if (addressDistrictNum == null || landUseCheck == false) {
     message = '<h4>Information</h4>';
@@ -155,7 +155,6 @@ infoTotals.update = function() { //hoverDistrict is the mouseover target defned 
     if (landUseCheck == false) {
       message += '<br><b>-Select a land use and enter project details</b>';
     }
-   
   }
   else {
     //message = tripDistributionSelect
@@ -285,8 +284,6 @@ function addGeoLayer(geoJsonData){
         infoTotals.update(e.target.feature);
       },
       mouseout: function(e){
-
-
         },
       });
     }
@@ -488,6 +485,8 @@ function updateMap() {
         };
         
         mapLegend.addTo(mymap);
+        infoTotals.update();
+        infoDistrict.update(hoverDistrict);
     }
     else {
       if (!(tripDirectionSelect)){
