@@ -149,38 +149,22 @@ return this._div;
 
 
 infoTotals.update = function (hoverDistrict) { //hoverDistrict is the mouseover target defned in updateMap
-  if (addressDistrictNum == null && hoverDistrict == null) {
-    this._div.innerHTML = '<b> Input project details </b>'
+  let message = '';
+  if (addressDistrictNum == null || landUseCheck == false) {
+    message = '<h4>Information</h4>';
+    if (addressDistrictNum == null) {
+      message += '<b>-Input an address</b>' ;
+    }
+    if (landUseCheck == false) {
+      message += '<br><b>-Select a land use and enter project details</b>';
+    }
+   
   }
-  else if (hoverDistrict == null) {
-    this._div.innerHTML = '<h4>Information</h4>' +
-    '<b> Hover over a district </b>'
-  }
-  else if (addressDistrictNum == null) {
-    this._div.innerHTML = '<h4>Information</h4>' +
-    '<b> Input an address to see trip distribution for: '+ hoverDistrict.distname +  '</b>' 
-  }
-
-  else if (landUseCheck == false) {
-    this._div.innerHTML = '<h4>Information</h4>' +
-    '<b> Select a land use to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
-  }
-
-  else if (modeSelect == null) {
-    this._div.innerHTML = '<h4>Information</h4>' +
-    '<b> Select a mode to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
-  }
-
-  else if (tripPurposeSelect == null) {
-    this._div.innerHTML = '<h4>Information</h4>' +
-    '<b> Select a trip purpose to see trip distribution for: '+ hoverDistrict.distname +  '</b>'
-  }
-
-
+  this._div.innerHTML = message; 
+  /*
   else {
     if (tripDirectionSelect == "outbound"){
-      let text;
-      text = '<h4> Total Outbound trips</h4>' +
+      message = '<h4> Total Outbound trips</h4>' +
       timePeriodSelect +  ' ' + modeSelect+ ' ' + tripPurposeSelect + ' trips based on the proposed project land use inputs'+
       '<br>' + 'Total ' + "person trips by  auto from" + address + " is: " + totalPersonTripsByMode["auto"]+ '</b>'+
       '<br>' + 'Total person trips by transit from ' + address + " is: " + totalPersonTripsByMode["transit"] + '</b>'+
@@ -188,19 +172,19 @@ infoTotals.update = function (hoverDistrict) { //hoverDistrict is the mouseover 
       '<br>' + 'Total person trips by taxi from ' + address + " is: " + totalPersonTripsByMode["taxi"] + '</b>'+
       '<br>' + 'Total person trips by walk from ' + address + " is: " + totalPersonTripsByMode["walk"] + '</b>'
 
-    if (modeSelect !== "transit"){
-      text += '<br>' + 'Total vehicle trips by auto from ' + address+ " is: "+ totalVehicleTripsByMode["auto"]+
-      '<br>' + 'Total person trips by transit from ' + address + " is: " + totalPersonTripsByMode["transit"] + '</b>'+
-      '<br>' + 'Total person trips by bike from ' + address + " is: " + totalPersonTripsByMode["bike"] + '</b>'+
-      '<br>' + 'Total person trips by taxi from ' + address + " is: " + totalPersonTripsByMode["taxi"] + '</b>'+
-      '<br>' + 'Total person trips by walk from ' + address + " is: " + totalPersonTripsByMode["walk"] + '</b>'
+      if (modeSelect !== "transit"){
+        message += '<br>' + 'Total vehicle trips by auto from ' + address+ " is: "+ totalVehicleTripsByMode["auto"]+
+        '<br>' + 'Total person trips by transit from ' + address + " is: " + totalPersonTripsByMode["transit"] + '</b>'+
+        '<br>' + 'Total person trips by bike from ' + address + " is: " + totalPersonTripsByMode["bike"] + '</b>'+
+        '<br>' + 'Total person trips by taxi from ' + address + " is: " + totalPersonTripsByMode["taxi"] + '</b>'+
+        '<br>' + 'Total person trips by walk from ' + address + " is: " + totalPersonTripsByMode["walk"] + '</b>'
 
+      }
+      this._div.innerHTML = message;  
     }
-    this._div.innerHTML = text;  
-  }
   else if (tripDirectionSelect == "inbound"){
-let text;
-      text = '<h4> Total Inbound trips</h4>' +
+let message;
+      message = '<h4> Total Inbound trips</h4>' +
       timePeriodSelect + ' ' + modeSelect+ ' ' + tripPurposeSelect + ' trips based on the proposed project land use inputs'+
       '<br>' + 'Total person trips by auto to ' + address + " is: " + totalPersonTripsByMode["auto"] + '</b>'+
       '<br>' + 'Total person trips by transit to ' + address + " is: " + totalPersonTripsByMode["transit"] + '</b>'+
@@ -209,18 +193,18 @@ let text;
       '<br>' + 'Total person trips by walk to ' + address + " is: " + totalPersonTripsByMode["walk"] + '</b>'
 
     if (modeSelect !== "transit"){
-      text += '<br>' + 'Total vehicle trips by auto to ' + address+ " is: "+ totalVehicleTripsByMode["auto"]+
+      message += '<br>' + 'Total vehicle trips by auto to ' + address+ " is: "+ totalVehicleTripsByMode["auto"]+
       '<br>' + 'Total person trips by transit to ' + address + " is: " + totalPersonTripsByMode["transit"] + '</b>'+
       '<br>' + 'Total person trips by bike to ' + address + " is: " + totalPersonTripsByMode["bike"] + '</b>'+
       '<br>' + 'Total person trips by taxi to ' + address + " is: " + totalPersonTripsByMode["taxi"] + '</b>'+
       '<br>' + 'Total person trips by walk to ' + address + " is: " + totalPersonTripsByMode["walk"] + '</b>'
    
     }
-    this._div.innerHTML = text;   
+    this._div.innerHTML = message;   
    }
    else if (tripDirectionSelect == "both"){
-    let text;
-      text = '<h4> Total trips</h4>' +
+    let message;
+      message = '<h4> Total trips</h4>' +
       timePeriodSelect + ' ' + modeSelect+ ' ' + tripPurposeSelect + ' trips based on the proposed project land use inputs'+
       '<br>' + 'Total <b>person trips by auto</b> to and from ' + address + " is: " + totalPersonTripsByMode["auto"] + '</b>'+
       '<br>' + 'Total person trips by transit to and from ' + address + " is: " + totalPersonTripsByMode["transit"] + '</b>'+
@@ -229,17 +213,17 @@ let text;
       '<br>' + 'Total person trips by walk to and from ' + address + " is: " + totalPersonTripsByMode["walk"] + '</b>'
 
     if (modeSelect !== "transit"){
-      text += '<br>' + 'Total vehicle trips by auto to and from ' + address+ " is: "+ totalVehicleTripsByMode["auto"]+
+      message += '<br>' + 'Total vehicle trips by auto to and from ' + address+ " is: "+ totalVehicleTripsByMode["auto"]+
       '<br>' + 'Total person trips by transit to and from ' + address + " is: " + totalVehicleTripsByMode["transit"] + '</b>'+
       '<br>' + 'Total person trips by bike to and from ' + address + " is: " + totalVehicleTripsByMode["bike"] + '</b>'+
       '<br>' + 'Total person trips by taxi to and from ' + address + " is: " + totalVehicleTripsByMode["taxi"] + '</b>'+
       '<br>' + 'Total person trips by walk to and from ' + address + " is: " + totalVehicleTripsByMode["walk"] + '</b>'
   
     }
-    this._div.innerHTML = text;  
+    this._div.innerHTML = message;  
 
  }
-}
+}*/
 
 };
 
@@ -274,45 +258,45 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
 
 
   else {
-    let text;
+    let message;
 
     if (tripDirectionSelect == "outbound"){
 
-      text = '<h4> Outbound Trips by District</h4>' +
+      message = '<h4> Outbound Trips by District</h4>' +
       timePeriodSelect +  ' ' + modeSelect+ ' ' + tripPurposeSelect + ' trips based on the proposed project land use inputs'+
       '<br>' + 'from ' +  address  + ' to ' + hoverDistrict.distname.toString()+
       '<br>' + "Person trips: "+ "<b>" +  districtPersonTrips[hoverDistrict.dist]["total"]+'</b>';
 
       if (modeSelect !== "transit"){
-        text += '<br>' + "Vehicle trips: "+ "<b>"+ districtVehicleTrips[hoverDistrict.dist]["total"]+'</b>';
+        message += '<br>' + "Vehicle trips: "+ "<b>"+ districtVehicleTrips[hoverDistrict.dist]["total"]+'</b>';
 
       }
-      this._div.innerHTML = text;
+      this._div.innerHTML = message;
     }
     else if (tripDirectionSelect == "inbound"){
 
-      text = '<h4>Inbound Trips by District</h4>' +
+      message = '<h4>Inbound Trips by District</h4>' +
       timePeriodSelect +  ' ' + modeSelect+ ' ' + tripPurposeSelect + ' trips based on the proposed project land use inputs'+
       '<br>' + 'from ' +  hoverDistrict.distname.toString()  + ' to ' + address+
       '<br>' + "Person trips: "+ "<b>"+ districtPersonTrips[hoverDistrict.dist]["total"]+'</b>';
 
       if (modeSelect !== "transit"){
-       text += '<br>' + "Vehicle trips: "+ "<b>"+ districtVehicleTrips[hoverDistrict.dist]["total"]+'</b>';
+       message += '<br>' + "Vehicle trips: "+ "<b>"+ districtVehicleTrips[hoverDistrict.dist]["total"]+'</b>';
 
      }
-     this._div.innerHTML = text;
+     this._div.innerHTML = message;
    }
    else if (tripDirectionSelect == "both"){
-    text = '<h4>Total Trips by District</h4>' +
+    message = '<h4>Total Trips by District</h4>' +
     timePeriodSelect +  ' ' + modeSelect+ ' ' + tripPurposeSelect + ' trips based on the proposed project land use inputs'+
     '<br>' + 'between ' +  address  + ' and ' + hoverDistrict.distname.toString()+
     '<br>' + "Person trips: "+ "<b>"+ districtPersonTrips[hoverDistrict.dist]["total"]+'</b>';
 
     if (modeSelect !== "transit"){
-     text += '<br>' + "Vehicle trips: "+ "<b>"+ districtVehicleTrips[hoverDistrict.dist]["total"]+'</b>';
+     message += '<br>' + "Vehicle trips: "+ "<b>"+ districtVehicleTrips[hoverDistrict.dist]["total"]+'</b>';
 
    }
-   this._div.innerHTML = text;
+   this._div.innerHTML = message;
 
  }
 
@@ -320,9 +304,9 @@ info.update = function (hoverDistrict) { //hoverDistrict is the mouseover target
 }
 
 };
-info.addTo(mymap);
-infoTotals.addTo(mymap);
 
+infoTotals.addTo(mymap);
+info.addTo(mymap);
 
 
 
@@ -576,7 +560,7 @@ function updateMap() {
       
       for (let breakpoint of unique_breakpoints) {
         if (breakpoint == 0){
-          labels.push(roundingTripGen((breakpoint)));
+          labels.push(roundToNearest((breakpoint)));
         }
         else{
           labels.push("<=" + Math.round(breakpoint));
@@ -588,7 +572,7 @@ function updateMap() {
           
         }
         else {
-          colors.push(color_func(roundingTripGen(breakpoint)));
+          colors.push(color_func(roundToNearest(breakpoint)));
 
         }
         
@@ -991,7 +975,7 @@ function createDownloadObjects() {
 // …
 // between 900 and 999, nearest 90;
 // greater or equal than 1,000, nearest 100
-function roundingTripGen(number) {
+/*function roundToNearest(number) {
   let increment = 110;
   let numbers = {
     100: 10,
@@ -1013,6 +997,10 @@ function roundingTripGen(number) {
   }    
   
   return Math.ceil(number / increment ) * increment;
+}*/
+// Above function is needlessly complicated, limited to 1000, and wrong.
+function roundToNearest(number, nearest=10) {
+  return Math.ceil(number / nearest) * nearest
 }
 
 let totalPersonTripsByMode = [];
@@ -1035,31 +1023,31 @@ function getTotalTrips(){
 
 
       if (app.isPM ==true) {
-        totalPersonTrips["Residential"] = roundingTripGen(((tripGenRates[1].pkhr_rate)*tot_num_bedrooms)*filterModeSplitData("Residential", app.placetype)[0][mode]);
-        totalPersonTrips["Retail"] = roundingTripGen((app.ret_sqft/1000)*(tripGenRates[3].pkhr_rate)*filterModeSplitData("Retail", app.placetype)[0][mode]);
-        totalPersonTrips["Office"] = roundingTripGen((app.off_sqft/1000)*(tripGenRates[0].pkhr_rate)*filterModeSplitData("Office", app.placetype)[0][mode]);
-        totalPersonTrips["Restaurant"] = roundingTripGen(((app.rest_sqft/1000)*(tripGenRates[6].pkhr_rate))*filterModeSplitData("Retail", app.placetype)[0][mode]); //rest and sup use retail distribution
-        totalPersonTrips["Supermarket"] = roundingTripGen(((app.sup_sqft/1000)*(tripGenRates[4].pkhr_rate))*filterModeSplitData("Retail", app.placetype)[0][mode]); 
-        totalPersonTrips["Hotel"] = roundingTripGen(((app.hot_sqft/1000)*(tripGenRates[2].pkhr_rate))*filterModeSplitData("Hotel", app.placetype)[0][mode]);
-        totalVehicleTrips["Residential"] = roundingTripGen(totalPersonTrips["Residential"]/(filterAvoData("residential", app.placetype)));
-        totalVehicleTrips["Retail"] = roundingTripGen(totalPersonTrips["Retail"]/(filterAvoData("retail", app.placetype)));
-        totalVehicleTrips["Hotel"] = roundingTripGen(totalPersonTrips["Hotel"]/(filterAvoData("retail", app.placetype)));
-        totalVehicleTrips["Office"] = roundingTripGen(totalPersonTrips["Office"]/(filterAvoData("office", app.placetype)));
-        totalVehicleTrips["Supermarket"] = roundingTripGen(totalPersonTrips["Supermarket"]/(filterAvoData("retail", app.placetype)));
+        totalPersonTrips["Residential"] = roundToNearest(((tripGenRates[1].pkhr_rate)*tot_num_bedrooms)*filterModeSplitData("Residential", app.placetype)[0][mode]);
+        totalPersonTrips["Retail"] = roundToNearest((app.ret_sqft/1000)*(tripGenRates[3].pkhr_rate)*filterModeSplitData("Retail", app.placetype)[0][mode]);
+        totalPersonTrips["Office"] = roundToNearest((app.off_sqft/1000)*(tripGenRates[0].pkhr_rate)*filterModeSplitData("Office", app.placetype)[0][mode]);
+        totalPersonTrips["Restaurant"] = roundToNearest(((app.rest_sqft/1000)*(tripGenRates[6].pkhr_rate))*filterModeSplitData("Retail", app.placetype)[0][mode]); //rest and sup use retail distribution
+        totalPersonTrips["Supermarket"] = roundToNearest(((app.sup_sqft/1000)*(tripGenRates[4].pkhr_rate))*filterModeSplitData("Retail", app.placetype)[0][mode]); 
+        totalPersonTrips["Hotel"] = roundToNearest(((app.hot_sqft/1000)*(tripGenRates[2].pkhr_rate))*filterModeSplitData("Hotel", app.placetype)[0][mode]);
+        totalVehicleTrips["Residential"] = roundToNearest(totalPersonTrips["Residential"]/(filterAvoData("residential", app.placetype)));
+        totalVehicleTrips["Retail"] = roundToNearest(totalPersonTrips["Retail"]/(filterAvoData("retail", app.placetype)));
+        totalVehicleTrips["Hotel"] = roundToNearest(totalPersonTrips["Hotel"]/(filterAvoData("retail", app.placetype)));
+        totalVehicleTrips["Office"] = roundToNearest(totalPersonTrips["Office"]/(filterAvoData("office", app.placetype)));
+        totalVehicleTrips["Supermarket"] = roundToNearest(totalPersonTrips["Supermarket"]/(filterAvoData("retail", app.placetype)));
       }
 
       else if (app.isDaily == true){
-        totalPersonTrips["Residential"] = roundingTripGen(((tripGenRates[1].daily_rate)*tot_num_bedrooms)*filterModeSplitData("Residential", app.placetype)[0][mode]);
-        totalPersonTrips["Retail"] = roundingTripGen((app.ret_sqft/1000)*(tripGenRates[3].daily_rate)*filterModeSplitData("Retail", app.placetype)[0][mode]);
-        totalPersonTrips["Office"] = roundingTripGen((app.off_sqft/1000)*(tripGenRates[0].daily_rate)*filterModeSplitData("Office", app.placetype)[0][mode]);
-        totalPersonTrips["Restaurant"] = roundingTripGen(((app.rest_sqft/1000)*(tripGenRates[6].daily_rate))*filterModeSplitData("Retail", app.placetype)[0][mode]); //rest and sup use retail distribution
-        totalPersonTrips["Supermarket"] = roundingTripGen(((app.sup_sqft/1000)*(tripGenRates[4].daily_rate))*filterModeSplitData("Retail", app.placetype)[0][mode]); 
-        totalPersonTrips["Hotel"] = roundingTripGen(((app.hot_sqft/1000)*(tripGenRates[2].daily_rate))*filterModeSplitData("Hotel", app.placetype)[0][mode]);
-        totalVehicleTrips["Residential"] = roundingTripGen(totalPersonTrips["Residential"]/(filterAvoData("residential", app.placetype)));
-        totalVehicleTrips["Retail"] = roundingTripGen(totalPersonTrips["Retail"]/(filterAvoData("retail", app.placetype)));
-        totalVehicleTrips["Hotel"] = roundingTripGen(totalPersonTrips["Hotel"]/(filterAvoData("retail", app.placetype)));
-        totalVehicleTrips["Office"] = roundingTripGen(totalPersonTrips["Office"]/(filterAvoData("office", app.placetype)));
-        totalVehicleTrips["Supermarket"] = roundingTripGen(totalPersonTrips["Supermarket"]/(filterAvoData("retail", app.placetype)));
+        totalPersonTrips["Residential"] = roundToNearest(((tripGenRates[1].daily_rate)*tot_num_bedrooms)*filterModeSplitData("Residential", app.placetype)[0][mode]);
+        totalPersonTrips["Retail"] = roundToNearest((app.ret_sqft/1000)*(tripGenRates[3].daily_rate)*filterModeSplitData("Retail", app.placetype)[0][mode]);
+        totalPersonTrips["Office"] = roundToNearest((app.off_sqft/1000)*(tripGenRates[0].daily_rate)*filterModeSplitData("Office", app.placetype)[0][mode]);
+        totalPersonTrips["Restaurant"] = roundToNearest(((app.rest_sqft/1000)*(tripGenRates[6].daily_rate))*filterModeSplitData("Retail", app.placetype)[0][mode]); //rest and sup use retail distribution
+        totalPersonTrips["Supermarket"] = roundToNearest(((app.sup_sqft/1000)*(tripGenRates[4].daily_rate))*filterModeSplitData("Retail", app.placetype)[0][mode]); 
+        totalPersonTrips["Hotel"] = roundToNearest(((app.hot_sqft/1000)*(tripGenRates[2].daily_rate))*filterModeSplitData("Hotel", app.placetype)[0][mode]);
+        totalVehicleTrips["Residential"] = roundToNearest(totalPersonTrips["Residential"]/(filterAvoData("residential", app.placetype)));
+        totalVehicleTrips["Retail"] = roundToNearest(totalPersonTrips["Retail"]/(filterAvoData("retail", app.placetype)));
+        totalVehicleTrips["Hotel"] = roundToNearest(totalPersonTrips["Hotel"]/(filterAvoData("retail", app.placetype)));
+        totalVehicleTrips["Office"] = roundToNearest(totalPersonTrips["Office"]/(filterAvoData("office", app.placetype)));
+        totalVehicleTrips["Supermarket"] = roundToNearest(totalPersonTrips["Supermarket"]/(filterAvoData("retail", app.placetype)));
 
 
       }
@@ -1114,33 +1102,33 @@ function getFilteredTrips(){
 
     
     if (app.isPM ==true) {
-      personTrips["Residential"] = roundingTripGen(((tripGenRates[1].pkhr_rate)*tot_num_bedrooms)*filterModeSplitData("Residential", app.placetype)[0][modeSelect]*getDirectionProps(district, "Residential", "pm")*getDistProps(district, "Residential", "pm"));
-      personTrips["Retail"] = roundingTripGen((app.ret_sqft/1000)*(tripGenRates[3].pkhr_rate)*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail", "pm")*getDistProps(district, "Retail", "pm"));
-      personTrips["Office"] = roundingTripGen((app.off_sqft/1000)*(tripGenRates[0].pkhr_rate)*filterModeSplitData("Office", app.placetype)[0][modeSelect]*getDirectionProps(district, "Office", "pm")*getDistProps(district, "Office","pm"));
-      personTrips["Restaurant"] = roundingTripGen(((app.rest_sqft/1000)*(tripGenRates[6].pkhr_rate))*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail", "pm")*getDistProps(district, "Retail", "pm")); //rest and sup use retail distribution
-      personTrips["Supermarket"] = roundingTripGen(((app.sup_sqft/1000)*(tripGenRates[4].pkhr_rate))*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail", "pm")*getDistProps(district, "Retail", "pm")); 
-      personTrips["Hotel"] = roundingTripGen(((app.hot_sqft/1000)*(tripGenRates[2].pkhr_rate))*filterModeSplitData("Hotel", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail", "pm")*getDistProps(district, "Retail", "pm"));
-      vehicleTrips["Residential"] = roundingTripGen(personTrips["Residential"]/(filterAvoData("residential", app.placetype)));
-      vehicleTrips["Retail"] = roundingTripGen(personTrips["Retail"]/(filterAvoData("retail", app.placetype)));
-      vehicleTrips["Hotel"] = roundingTripGen(personTrips["Hotel"]/(filterAvoData("retail", app.placetype)));
-      vehicleTrips["Office"] = roundingTripGen(personTrips["Office"]/(filterAvoData("office", app.placetype)));
-      vehicleTrips["Supermarket"] = roundingTripGen(personTrips["Supermarket"]/(filterAvoData("retail", app.placetype)));
-      vehicleTrips["Restaurant"] = roundingTripGen(personTrips["Restaurant"]/(filterAvoData("retail", app.placetype)));
+      personTrips["Residential"] = roundToNearest(((tripGenRates[1].pkhr_rate)*tot_num_bedrooms)*filterModeSplitData("Residential", app.placetype)[0][modeSelect]*getDirectionProps(district, "Residential", "pm")*getDistProps(district, "Residential", "pm"));
+      personTrips["Retail"] = roundToNearest((app.ret_sqft/1000)*(tripGenRates[3].pkhr_rate)*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail", "pm")*getDistProps(district, "Retail", "pm"));
+      personTrips["Office"] = roundToNearest((app.off_sqft/1000)*(tripGenRates[0].pkhr_rate)*filterModeSplitData("Office", app.placetype)[0][modeSelect]*getDirectionProps(district, "Office", "pm")*getDistProps(district, "Office","pm"));
+      personTrips["Restaurant"] = roundToNearest(((app.rest_sqft/1000)*(tripGenRates[6].pkhr_rate))*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail", "pm")*getDistProps(district, "Retail", "pm")); //rest and sup use retail distribution
+      personTrips["Supermarket"] = roundToNearest(((app.sup_sqft/1000)*(tripGenRates[4].pkhr_rate))*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail", "pm")*getDistProps(district, "Retail", "pm")); 
+      personTrips["Hotel"] = roundToNearest(((app.hot_sqft/1000)*(tripGenRates[2].pkhr_rate))*filterModeSplitData("Hotel", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail", "pm")*getDistProps(district, "Retail", "pm"));
+      vehicleTrips["Residential"] = roundToNearest(personTrips["Residential"]/(filterAvoData("residential", app.placetype)));
+      vehicleTrips["Retail"] = roundToNearest(personTrips["Retail"]/(filterAvoData("retail", app.placetype)));
+      vehicleTrips["Hotel"] = roundToNearest(personTrips["Hotel"]/(filterAvoData("retail", app.placetype)));
+      vehicleTrips["Office"] = roundToNearest(personTrips["Office"]/(filterAvoData("office", app.placetype)));
+      vehicleTrips["Supermarket"] = roundToNearest(personTrips["Supermarket"]/(filterAvoData("retail", app.placetype)));
+      vehicleTrips["Restaurant"] = roundToNearest(personTrips["Restaurant"]/(filterAvoData("retail", app.placetype)));
     }
 
     else if (app.isDaily == true){
-      personTrips["Residential"] = roundingTripGen(((tripGenRates[1].daily_rate)*tot_num_bedrooms)*filterModeSplitData("Residential", app.placetype)[0][modeSelect]*getDirectionProps(district, "Residential", "daily")*getDistProps(district, "Residential", "daily"));
-      personTrips["Retail"] = roundingTripGen((app.ret_sqft/1000)*(tripGenRates[3].daily_rate)*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail", "daily")*getDistProps(district, "Retail", "daily"));
-      personTrips["Office"] = roundingTripGen((app.off_sqft/1000)*(tripGenRates[0].daily_rate)*filterModeSplitData("Office", app.placetype)[0][modeSelect]*getDirectionProps(district, "Office", "daily")*getDistProps(district, "Office", "daily"));
-      personTrips["Restaurant"] = roundingTripGen(((app.rest_sqft/1000)*(tripGenRates[6].daily_rate))*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail", "daily")*getDistProps(district, "Retail", "daily")); //rest and sup use retail distribution
-      personTrips["Supermarket"] = roundingTripGen(((app.sup_sqft/1000)*(tripGenRates[4].daily_rate))*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail", "daily")*getDistProps(district, "Retail", "daily")); 
-      personTrips["Hotel"] = roundingTripGen(((app.hot_sqft/1000)*(tripGenRates[2].daily_rate))*filterModeSplitData("Hotel", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail", "daily")*getDistProps(district, "Retail", "daily")); 
-      vehicleTrips["Residential"] = roundingTripGen(personTrips["Residential"]/(filterAvoData("residential", app.placetype)));
-      vehicleTrips["Retail"] = roundingTripGen(personTrips["Retail"]/(filterAvoData("retail", app.placetype)));
-      vehicleTrips["Hotel"] = roundingTripGen(personTrips["Hotel"]/(filterAvoData("retail", app.placetype)));
-      vehicleTrips["Office"] = roundingTripGen(personTrips["Office"]/(filterAvoData("office", app.placetype)));
-      vehicleTrips["Supermarket"] = roundingTripGen(personTrips["Supermarket"]/(filterAvoData("retail", app.placetype)));
-      vehicleTrips["Restaurant"] = roundingTripGen(personTrips["Restaurant"]/(filterAvoData("retail", app.placetype)));
+      personTrips["Residential"] = roundToNearest(((tripGenRates[1].daily_rate)*tot_num_bedrooms)*filterModeSplitData("Residential", app.placetype)[0][modeSelect]*getDirectionProps(district, "Residential", "daily")*getDistProps(district, "Residential", "daily"));
+      personTrips["Retail"] = roundToNearest((app.ret_sqft/1000)*(tripGenRates[3].daily_rate)*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail", "daily")*getDistProps(district, "Retail", "daily"));
+      personTrips["Office"] = roundToNearest((app.off_sqft/1000)*(tripGenRates[0].daily_rate)*filterModeSplitData("Office", app.placetype)[0][modeSelect]*getDirectionProps(district, "Office", "daily")*getDistProps(district, "Office", "daily"));
+      personTrips["Restaurant"] = roundToNearest(((app.rest_sqft/1000)*(tripGenRates[6].daily_rate))*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail", "daily")*getDistProps(district, "Retail", "daily")); //rest and sup use retail distribution
+      personTrips["Supermarket"] = roundToNearest(((app.sup_sqft/1000)*(tripGenRates[4].daily_rate))*filterModeSplitData("Retail", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail", "daily")*getDistProps(district, "Retail", "daily")); 
+      personTrips["Hotel"] = roundToNearest(((app.hot_sqft/1000)*(tripGenRates[2].daily_rate))*filterModeSplitData("Hotel", app.placetype)[0][modeSelect]*getDirectionProps(district, "Retail", "daily")*getDistProps(district, "Retail", "daily")); 
+      vehicleTrips["Residential"] = roundToNearest(personTrips["Residential"]/(filterAvoData("residential", app.placetype)));
+      vehicleTrips["Retail"] = roundToNearest(personTrips["Retail"]/(filterAvoData("retail", app.placetype)));
+      vehicleTrips["Hotel"] = roundToNearest(personTrips["Hotel"]/(filterAvoData("retail", app.placetype)));
+      vehicleTrips["Office"] = roundToNearest(personTrips["Office"]/(filterAvoData("office", app.placetype)));
+      vehicleTrips["Supermarket"] = roundToNearest(personTrips["Supermarket"]/(filterAvoData("retail", app.placetype)));
+      vehicleTrips["Restaurant"] = roundToNearest(personTrips["Restaurant"]/(filterAvoData("retail", app.placetype)));
 
     }
     //if any of the land uses are undefined b/c no input, set them equal to 0. landUses is a global array of all 5 land uses
