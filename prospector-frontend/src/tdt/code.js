@@ -411,108 +411,95 @@ function updateMap() {
 
         let geoJson = planningJson2geojson(geocodedJson); //this is the polygon
         address_geoLyr = L.geoJSON(geoJson,{ //this makes a geoJSON layer from geojson data, which is input
-        style: color_styles[1].normal, //this is hardcoded to blue
-        onEachFeature: function(feature, layer) { 
+          style: color_styles[1].normal, //this is hardcoded to blue
+          onEachFeature: function(feature, layer) { 
 
           layer.on({
             mouseover: function(e){
               //e.target.setStyle(color_styles[1].selected);
               //e.target.bringToFront();
-
             },
             mouseout: function(e){
               address_geoLyr.resetStyle(e.target);
             },
           });
-        }
+         }
 
-      });
-      address_geoLyr.addTo(mymap); //adds the geoLayer to the map
-      address_geoLyr.bringToFront();
-      //why does this only work when i mouseover?
-      address_geoLyr.bindTooltip(address, {permanent: true, className:'myCSSClass'}).addTo(mymap);
-      assignDistrict(geoJson, address_geoLyr, address);
-      getFilteredTrips();
-      getTotalTrips();
-      //coloring the districts
+        });
+        
+        address_geoLyr.addTo(mymap); //adds the geoLayer to the map
+        address_geoLyr.bringToFront();
+        //why does this only work when i mouseover?
+        address_geoLyr.bindTooltip(address, {permanent: true, className:'myCSSClass'}).addTo(mymap);
+        assignDistrict(geoJson, address_geoLyr, address);
+        
+        getFilteredTrips();
+        getTotalTrips();
+        //coloring the districts
       
-      let trips = []
-      districts_lyr.setStyle(function(feature){
+        let trips = []
+        districts_lyr.setStyle(function(feature){
+          color_func = chroma.scale(['#eff3ff', '#bdd7e7' ,'#6baed6','#3182bd','#08519c']).domain([0, getMax()], 4, 'equal interval');
+          //#ffffe0 #ffd59b #ffa474 #f47461 #db4551 #b81b34 #8b0000
+          let tot_person_trips = districtPersonTrips[feature.dist]["total"];
+          trips.push(tot_person_trips);
 
-        color_func = chroma.scale(['#eff3ff', '#bdd7e7' ,'#6baed6','#3182bd','#08519c']).domain([0, getMax()], 4, 'equal interval');
-
-        //#ffffe0 #ffd59b #ffa474 #f47461 #db4551 #b81b34 #8b0000
-        let tot_person_trips = districtPersonTrips[feature.dist]["total"];
-        trips.push(tot_person_trips);
-
-        if (trips.reduce((a, b) => a + b, 0) == 0){
-          //if all the districts have 0 person trips, force the fill color to be white
-          return {'color': '#444444', 'weight': 2, 'fillColor': '#c6dbef', fillOpacity:0.6};
-        }
-        else{
-          //otherwise, color the districts according to the chroma color function
-          return {'color': '#444444', 'weight': 2, 'fillColor': color_func(tot_person_trips), fillOpacity:0.6};
-        }
-
-      });
-      //sort the person trips from all the districts in order
-      trips.sort(function(a, b){return a - b});
+          if (trips.reduce((a, b) => a + b, 0) == 0){
+            //if all the districts have 0 person trips, force the fill color to be white
+            return {'color': '#444444', 'weight': 2, 'fillColor': '#c6dbef', fillOpacity:0.6};
+          }
+          else{
+            //otherwise, color the districts according to the chroma color function
+            return {'color': '#444444', 'weight': 2, 'fillColor': color_func(tot_person_trips), fillOpacity:0.6};
+          }
+        });
+        
+        //sort the person trips from all the districts in order
+        trips.sort(function(a, b){return a - b});
       
-      let labels = [];
-      let colors = [];
-      //get the breakpoints from the chroma quantiles function on the trips array 
-      let breakpoints = chroma.limits(trips, 'e', 4);
-      //get rid of any duplicate breakpoints b/c only want unique labels on the legend
-      let unique_breakpoints = breakpoints.filter((v, i, a) => a.indexOf(v) === i);
+        let labels = [];
+        let colors = [];
+        
+        //get the breakpoints from the chroma quantiles function on the trips array 
+        let breakpoints = chroma.limits(trips, 'e', 4);
       
-      for (let breakpoint of unique_breakpoints) {
-        if (breakpoint == 0){
-          labels.push(roundToNearest((breakpoint)));
-        }
-        else{
-          labels.push("<=" + Math.round(breakpoint));
+        //get rid of any duplicate breakpoints b/c only want unique labels on the legend
+        let unique_breakpoints = breakpoints.filter((v, i, a) => a.indexOf(v) === i);
+      
+        for (let breakpoint of unique_breakpoints) {
+          if (breakpoint == 0){
+            labels.push(roundToNearest((breakpoint)));
+          }
+          else{
+            labels.push("<=" + Math.round(breakpoint));
+          }
+        
+          if (unique_breakpoints.reduce((a, b) => a + b, 0) == 0){
+            colors.push("#c6dbef"); 
+          }
+          else {
+            colors.push(color_func(roundToNearest(breakpoint)));
+          }
         }
         
-        
-        if (unique_breakpoints.reduce((a, b) => a + b, 0) == 0){
-          colors.push("#c6dbef"); 
+        //building and styling the legend for the districts
+        if (mapLegend) mymap.removeControl(mapLegend);
+        mapLegend = L.control({ position: 'bottomright' });
+
+        mapLegend.onAdd = function(map) {
+          let div = L.DomUtil.create('div', 'info legend');
+          let units = [" "];
           
-        }
-        else {
-          colors.push(color_func(roundToNearest(breakpoint)));
+          //I am not sure that the colors correctly match
+          let legHTML = getLegHTML(labels, colors, false, units);
 
-        }
+          for (var i = 0; i < labels.length; i++) {
+            div.innerHTML = '<h4>' + "Person Trips" + '</h4>' + legHTML;
+          }
+          return div;
+        };
         
-      }
-    
-
-
-
-      //building and styling the legend for the districts
-      if (mapLegend) mymap.removeControl(mapLegend);
-      mapLegend = L.control({ position: 'bottomright' });
-
-      mapLegend.onAdd = function(map) {
-        let div = L.DomUtil.create('div', 'info legend');
-        
-        let units = [" "];
-        //I am not sure that the colors correctly match
-        let legHTML = getLegHTML(labels, colors, false, units);
-
-        for (var i = 0; i < labels.length; i++) {
-
-          div.innerHTML =
-          '<h4>' + "Person Trips" + '</h4>' + legHTML;
-        }
-        return div;
-      };
-
-      mapLegend.addTo(mymap);
-
-
-
-
-
+        mapLegend.addTo(mymap);
     }
     else {
       if (!(tripDirectionSelect)){
@@ -536,9 +523,7 @@ function updateMap() {
           "address with this tool, contact the San Francisco Planning Department at cpc.transportationreview@sfgov.org");
 
       }
-      
     }
-    
   })
 }
 
