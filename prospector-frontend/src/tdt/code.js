@@ -275,37 +275,34 @@ function addGeoLayer(geoJsonData){
           }
           districtMarker = L.circleMarker(tooltip_positions[feature.dist], {color: 'blue', radius: 1}).addTo(mymap).bindTooltip(feature.distname, {permanent:true, sticky: true});
           if (address_geoLyr) { //this causes an error in clearAllInputs. it looks like this is an unsolved bug in leaflet, having to do with
-          // accessing a layer once its been deleted
-          // I'm proposing to get rid of the bringtoFront() functionality of the district polygons, since there is
-          // no real reason they need to come to the front on mouseover anyway. This is a quick resolution of this problem.
-          address_geoLyr.bringToFront();
-        }
+            // accessing a layer once its been deleted
+            // I'm proposing to get rid of the bringtoFront() functionality of the district polygons, since there is
+            // no real reason they need to come to the front on mouseover anyway. This is a quick resolution of this problem.
+            address_geoLyr.bringToFront();
+          }
         infoDistrict.update(e.target.feature); 
         infoTotals.update(e.target.feature);
-      },
-      mouseout: function(e){
+        },
+        mouseout: function(e){
         },
       });
     }
   });
-  
-  geolyr.addTo(mymap); 
-
+  geolyr.addTo(mymap);
   return geolyr;
 }
 
 function getMax() {
   let distributions = [];
-  if (modeSelect && landUseCheck && tripPurposeSelect && tripDirectionSelect && addressDistrictNum && timePeriodSelect
-    && filterDistributionData(modeSelect, addressDistrictNum, "Retail", //these are hardcoded pending decision at meeting
-    tripPurposeSelect, tripDirectionSelect, timePeriodSelect).length !== 0){ //not sure if this last check is correct
+  if (modeSelect && landUseCheck && tripPurposeSelect && tripDirectionSelect 
+  && addressDistrictNum && timePeriodSelect
+  && filterDistributionData(modeSelect, addressDistrictNum, "Retail", //these are hardcoded pending decision at meeting
+  tripPurposeSelect, tripDirectionSelect, timePeriodSelect).length !== 0){ //not sure if this last check is correct
     for (let key of Object.keys(districtPersonTrips)){
       distributions.push(districtPersonTrips[key]["total"]);
     }
     return Math.max.apply(null, distributions);
-
   }
-
 }
 
 function filterDistributionData(mode, districtNum, landUse, purpose, direction, timePeriodSelect) { 
@@ -314,30 +311,21 @@ function filterDistributionData(mode, districtNum, landUse, purpose, direction, 
     return piece.mode == mode && piece.dist == districtNum && piece.landuse == landUse && piece.purpose == purpose &&
     piece.direction == direction && piece.time_period == timePeriodSelect;
   }); 
-
-
 }
-
-
 
 function getDistProps(district, landUse, dailyOrPm) {
   let data;
   let referenceDistrictProp = "prop_dist" + district.dist; //the name of the value that stores the 
   //relevant proportion from address district to hover district
   
-
   if (modeSelect && landUseCheck==true && tripPurposeSelect && tripDirectionSelect && addressDistrictNum && timePeriodSelect){
     //this returns a number not an object
     console.log(filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, tripDirectionSelect, timePeriodSelect));
-
     data = filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, tripDirectionSelect, timePeriodSelect)[0][referenceDistrictProp];
-     
     console.log(data)
     return data;
   }   
 }
-    
-
 
 function getDirectionProps(district, landUse, dailyOrPm) {
   let directionDistrictProp = "prop_" + tripDirectionSelect;
@@ -348,16 +336,11 @@ function getDirectionProps(district, landUse, dailyOrPm) {
       return 1; //I'm not sure if this is the right way to dea with the both directions. maybe need bhargav to add something to the API
     }
     else{
-
-
       return (filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, 
-        tripDirectionSelect, dailyOrPm)[0][directionDistrictProp]); 
-
+              tripDirectionSelect, dailyOrPm)[0][directionDistrictProp]); 
     }
     
   }
-  
-
 }
 
 function filterModeSplitData(landUse, placetype){
@@ -366,7 +349,6 @@ function filterModeSplitData(landUse, placetype){
     return modeSplits.filter(function(piece){
       return (piece.place_type == placetype && piece.landuse == landUse);
     });
-    
   }
 }
 
@@ -376,12 +358,8 @@ function filterAvoData(landUse, placetype){
     return AVO_data.filter(function(piece){                   //how to deal with land use?
       return (piece.geography == "Place Type "+ app.placetype);
     })[0][landUse];
-    
   }
 }
-
-
-
 
 function updateMap() {
   if (address_geoLyr){
@@ -397,8 +375,7 @@ function updateMap() {
         let geoJson = planningJson2geojson(geocodedJson); //this is the polygon
         address_geoLyr = L.geoJSON(geoJson,{ //this makes a geoJSON layer from geojson data, which is input
           style: color_styles[1].normal, //this is hardcoded to blue
-          onEachFeature: function(feature, layer) { 
-
+          onEachFeature: function(feature, layer) {
           layer.on({
             mouseover: function(e){
               //e.target.setStyle(color_styles[1].selected);
@@ -409,7 +386,6 @@ function updateMap() {
             },
           });
          }
-
         });
         
         address_geoLyr.addTo(mymap); //adds the geoLayer to the map
@@ -508,15 +484,10 @@ function updateMap() {
       else {
         alert("The address is invalid or is outside the city limits of San Francisco. Enter another address. If you are unable to locate a San Francisco " +
           "address with this tool, contact the San Francisco Planning Department at cpc.transportationreview@sfgov.org");
-
       }
     }
   })
 }
-
-
-
-
 
 let trgen_download; //an array of dictionaries -> "a list of json"
 let tdist_download;
