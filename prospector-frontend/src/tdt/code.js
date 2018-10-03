@@ -246,21 +246,8 @@ function ctaJson2geojson(json) {
   json["geometry"] = JSON.parse(json.geometry);
 }
 
-function addGeoLayer(geoJsonData){
+function addDistrictGeoLayer(geoJsonData, tooltip_positions){
   let districtMarker;
-  let tooltip_positions = {
-    1: [37.799981, -122.412459],
-    2: [37.775795, -122.407478],
-    3: [37.789693, -122.441499],
-    4: [37.760652, -122.400000],
-    5: [37.737820, -122.445233],
-    6: [37.730118, -122.389315],
-    7: [37.776303, -122.499615],
-    8: [37.745433, -122.498202],
-    9: [37.825639, -122.371648],
-    10: [37.596137, -122.403582],
-    11: [37.810595, -122.288403],
-    12: [37.835095, -122.493132] };
   let geolyr = L.geoJSON(geoJsonData,{ //this makes a geoJSON layer from
     //geojson data, which is required input. i is the style input
     style: color_styles[3].normal, 
@@ -1289,7 +1276,7 @@ let app = new Vue({
   data: {
     isAUActive: true,
     isTRActive: false,
-    address: null,
+    address: '1455 Market Street',
     isOffice: false,
     isResidential: false,
     isRetail: false,
@@ -1454,16 +1441,28 @@ function assignDistrict(address, geoLayer, tooltipLabel) {
 
 
 function drawDistricts() {
-  let districtName;
-    for (let district of geoDistricts) { // in a for loop bc sfcta api returns a list of json for this one
+  let tooltip_positions = {
+    1: [37.799981, -122.412459],
+    2: [37.775795, -122.407478],
+    3: [37.789693, -122.441499],
+    4: [37.760652, -122.400000],
+    5: [37.737820, -122.445233],
+    6: [37.730118, -122.389315],
+    7: [37.776303, -122.499615],
+    8: [37.745433, -122.498202],
+    9: [37.825639, -122.371648],
+    10: [37.596137, -122.403582],
+    11: [37.810595, -122.288403],
+    12: [37.835095, -122.493132] };
+  //let districtName;
+  for (let district of geoDistricts) { // in a for loop bc sfcta api returns a list of json for this one
     //calls json2geojson function to convert json data response to geojson
     ctaJson2geojson(district);
-    districtName = district.distname;
-    let districtPolygon = L.polygon(district.geometry.coordinates[0]);
-    
+    //districtName = district.distname;
+    //let districtPolygon = L.polygon(district.geometry.coordinates[0]);  
   }
-    districts_lyr = addGeoLayer(geoDistricts); //takes in a list of geoJson objects and draws them
-  }
+  districts_lyr = addDistrictGeoLayer(geoDistricts, tooltip_positions); //takes in a list of geoJson objects and draws them
+}
 
 //save the geoDistricts data locally
 queryServer(CTA_API_SERVER + DISTRICTS_URL)
