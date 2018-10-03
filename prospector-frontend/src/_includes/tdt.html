@@ -48,16 +48,14 @@
       class="ui blueish button">Hotel</button>
     </div>
 
-    <br>
-    <br>
+    <br><br>
 
     <template v-if="isRetail">
       <label>Retail trip generation rate (daily): ${ret_tripgen_daily}</label>
       <br><label>Retail trip generation rate (PM peak): ${ret_tripgen_PM}</label>
       <h4>Enter retail square footage: </h4>
       <input v-model.number="ret_sqft" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="retail-footage">
-      <br>
-      <br>
+      <br><br>
     </template>
 
     <template v-else-if="isOffice">
@@ -65,21 +63,20 @@
       <br><label>Office trip generation rate (PM peak): ${off_tripgen_PM}</label>
       <h4>Enter office square footage: </h4>
       <input v-model.number="off_sqft" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="office-footage">
-      <br>
-      <br>
+      <br><br>
     </template>
 
     <template v-else-if="isResidential">
       <label>Residential trip generation rate (daily): ${res_tripgen_daily}</label>
       <br><label>Residential trip generation rate (PM peak): ${res_tripgen_PM}</label>
-      <h4>Enter bedrooms by type: </h4>
-      <label>Number of Studios:  </label>
+      <h4>Enter the number of bedrooms by unit type: </h4>
+      <label>Studios:  </label>
       <input v-model.number = "num_studios" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-studios">
-      <br><br><label>Number of One Bedrooms:  </label>
+      <br><br><label>1 Bedrooms:  </label>
       <input v-model.number = "num_1bed" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-1bed">
-      <br><br><label>Number of 2 bedrooms:  </label>
+      <br><br><label>2 Bedrooms:  </label>
       <input v-model.number = "num_2bed" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-2bed">
-      <br><br><label>Number of 3 bedrooms:  </label>
+      <br><br><label>3 Bedrooms:  </label>
       <input v-model.number = "num_3bed" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-3bed">
       <br><br>
     </template>
@@ -103,7 +100,7 @@
     <template v-else-if="isHotel">           
       <label>Hotel trip generation rate (daily): ${hot_tripgen_daily}</label>
       <br><label>Hotel trip generation rate (PM peak): ${hot_tripgen_PM}</label>
-      <h4>Enter hotel square footage: </h4>
+      <h4>Enter number of hotel rooms: </h4>
       <input v-model.number="hot_sqft" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="hot-footage">
       <br><br>
     </template>
