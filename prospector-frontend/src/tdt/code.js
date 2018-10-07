@@ -398,15 +398,18 @@ function filterAvoData(landUse, placetype){
 }
 
 function updateMap() {
-  if (address_geoLyr){
+  if (mymap.hasLayer(address_geoLyr)) {
     mymap.removeLayer(address_geoLyr);
   }
   
   address = app.address; // app.address is the user input. app refers to the VUE object below that handles
+  if (address == null) {
+    return
+  }
   let geocodedJson = queryServer(PLANNING_GEOCODER_baseurl+address, 0) //data has got to the geocoder
   .then(function(geocodedJson) { //after queryServer returns the data, do this:
-    if (geocodedJson.features.length !== 0 && modeSelect && landUseCheck==true && tripPurposeSelect && 
-      tripDirectionSelect && timePeriodSelect) {
+    //if (geocodedJson.features.length !== 0 && modeSelect && landUseCheck==true && tripPurposeSelect && 
+    //  tripDirectionSelect && timePeriodSelect) {
 
       let geoJson = planningJson2geojson(geocodedJson); //this is the polygon
       address_geoLyr = L.geoJSON(geoJson,{ //this makes a geoJSON layer from geojson data, which is input
@@ -509,8 +512,8 @@ function updateMap() {
       mapLegend.addTo(mymap);
       infoTotals.update();
       //infoDistrict.update(hoverDistrict);
-    }
-    else {
+    //}
+    /*else {
       if (!(tripDirectionSelect)){
         alert("The trip direction is not defined.");
       }
@@ -531,7 +534,7 @@ function updateMap() {
         alert("The address is invalid or is outside the city limits of San Francisco. Enter another address. If you are unable to locate a San Francisco " +
           "address with this tool, contact the San Francisco Planning Department at cpc.transportationreview@sfgov.org");
       }
-    }
+    }*/
   })
 }
 
@@ -1181,6 +1184,7 @@ function pickRes(thing){
   app.isRestaurant = false;
   app.isSupermarket = false;
   app.isHotel = false;
+  checkLandUseSelections()
 }
 
 function pickOffice(thing){
@@ -1191,6 +1195,7 @@ function pickOffice(thing){
   app.isRestaurant = false;
   app.isSupermarket = false;
   app.isHotel = false;
+  checkLandUseSelections()
 }
 
 function pickRet(thing){
@@ -1202,6 +1207,7 @@ function pickRet(thing){
   app.isRestaurant = false;
   app.isSupermarket = false;
   app.isHotel = false;
+  checkLandUseSelections()
 }
 
 function pickRestaurant(thing){
@@ -1212,6 +1218,7 @@ function pickRestaurant(thing){
   app.isOffice = false;
   app.isSupermarket = false;
   app.isHotel = false;    
+  checkLandUseSelections()
 }
 
 function pickHotel(thing){
@@ -1222,6 +1229,7 @@ function pickHotel(thing){
   app.isResidential = false;
   app.isOffice = false;
   app.isSupermarket = false;
+  checkLandUseSelections()
 }
 
 function pickSupermarket(thing){
@@ -1232,7 +1240,7 @@ function pickSupermarket(thing){
   app.isResidential = false;
   app.isOffice = false;
   app.isHotel = false;
-  
+  checkLandUseSelections()
 }
 
 function pickWork(thing){
@@ -1373,7 +1381,67 @@ function checkLandUseSelections() {
   app.hasHotel = app.hot_sqft > 0;
   app.hasSupermarket = app.sup_sqft > 0;
   app.hasRetail = app.ret_sqft > 0;
+
+  if (app.isResidential == true) {
+    app.residentialStyle = selectedToggleStyle;
+  }
+  else if (app.hasResidential == true) {
+    app.residentialStyle = loadedToggleStyle;
+  }
+  else {
+    app.residentialStyle = defaultToggleStyle;
+  }
+  if (app.isOffice == true) {
+    app.officeStyle = selectedToggleStyle;
+  }
+  else if (app.hasOffice == true) {
+    app.officeStyle = loadedToggleStyle;
+  }
+  else {
+    app.officeStyle = defaultToggleStyle;
+  }
+  if (app.isRetail == true) {
+    app.retailStyle = selectedToggleStyle;
+  }
+  else if (app.hasRetail == true) {
+    app.retailStyle = loadedToggleStyle;
+  }
+  else {
+    app.retailStyle = defaultToggleStyle;
+  }
+  if (app.isHotel == true) {
+    app.hotelStyle = selectedToggleStyle;
+  }
+  else if (app.hasHotel == true) {
+    app.hotelStyle = loadedToggleStyle;
+  }
+  else {
+    app.hotelStyle = defaultToggleStyle;
+  }
+  if (app.isSupermarket == true) {
+    app.supermarketStyle = selectedToggleStyle;
+  }
+  else if (app.hasSupermarket == true) {
+    app.supermarketStyle = loadedToggleStyle;
+  }
+  else {
+    app.supermarketStyle = defaultToggleStyle;
+  }
+  if (app.isRestaurant == true) {
+    app.restaurantStyle = selectedToggleStyle;
+  }
+  else if (app.hasSupermarket == true) {
+    app.restaurantStyle = loadedToggleStyle;
+  }
+  else {
+    app.restaurantStyle = defaultToggleStyle;
+  }
+  //alert(app.residentialStyle['background-color']);
 }
+
+let defaultToggleStyle = {'background-color': '#7db3cd'};
+let selectedToggleStyle = {'background-color': '#e4ae18'};
+let loadedToggleStyle = {'background-color': '#0E6EB8'};
 
 // Vue object connects what is done in the user interface html to the javascript. All the buttons
 // in the right side panel are connected here. 
@@ -1416,6 +1484,7 @@ let app = new Vue({
     isTaxiTNCActive: false,
     inputs: false,
     placetype: '',
+    placetype_text: '',
     ret_tripgen_daily: '',
     offSelected: false,
     resSelected: false,
@@ -1431,6 +1500,12 @@ let app = new Vue({
     hasSupermarket: false,
     hasHotel: false,
     
+    residentialStyle: defaultToggleStyle,
+    officeStyle: defaultToggleStyle,
+    retailStyle: defaultToggleStyle,
+    restaurantStyle: defaultToggleStyle,
+    supermarketStyle: defaultToggleStyle,
+    hotelStyle: defaultToggleStyle,
   },
   watch: {
     off_sqft: checkLandUseSelections,
@@ -1550,6 +1625,22 @@ function assignDistrict(address, geoLayer, tooltipLabel) {
   addressPlaceType = criticalDistrict[0].feature.place_type;
   //find out which place type the address district is in
   app.placetype = criticalDistrict[0].feature.place_type;
+  
+  switch(app.placetype) {
+    case 1:
+      app.placetype_text = "Urban high density";
+      break;
+    case 2:
+      app.placetype_text = "Urban medium density";
+      break;
+    case 3:
+      app.placetype_text = "Urban low density";
+      break;
+    default:
+      app.placetype_text = "Unknown";
+      break;
+  }
+  
 }
 
 function drawDistricts() {

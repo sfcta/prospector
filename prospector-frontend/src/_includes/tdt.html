@@ -14,37 +14,43 @@
     <!-- </div> -->
     <h5>1. ENTER AN ADDRESS:</h5>
 
-    <input v-model="address" class="fix" append-icon= "icon taxi"
-      type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}" value='1455 Market Street'/>
-    <!--type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}" placeholder="Search for address or click on map"/>
+    <input v-model="address" class="fix" append-icon= "icon taxi" v-on:blur="updateMap"
+    type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}" placeholder="Search for address or click on map"/>
+    <!--type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}" value='1455 Market Street'/>-->
           <!-- <v-text-field
                 label="outline"
                 placeholder="address"
                 outline
                 ></v-text-field> -->
-                &nbsp;&nbsp;<label>Place Type: ${placetype} </label>
+                &nbsp;&nbsp;<label>Place Type: ${placetype_text} </label>
     <!-- <label>something else <span id="district_PT"></span></label>
     -->
 
     <h5>2. CHOOSE LAND USE:</h5>
     <div id="vizbuttons" class="ui vertical buttons">
       <button class = "ui toggle button" v-on:click="pickRes"
-      v-bind:class="{ active: resSelected, blue: resSelected }"
+      v-bind:class="{ active: isResidential, yellow: isResidential}"
+      v-bind:style="residentialStyle"
       class="ui blueish button">Residential</button>
       <button class = "ui toggle button" v-on:click="pickOffice"
-      v-bind:class="{ active: offSelected, blue: offSelected }"
+      v-bind:class="{ active: isOffice, yellow: isOffice }"
+      v-bind:style="officeStyle"
       class="ui blueish button">Office</button>
       <button v-on:click="pickRet"
-      v-bind:class="{ active: retSelected, blue: retSelected }"
+      v-bind:class="{ active: isRetail, yellow: isRetail }"
+      v-bind:style="retailStyle"
       class="ui blueish button">Retail</button>
       <button v-on:click="pickRestaurant"
-      v-bind:class="{ active: restSelected, blue: restSelected }"
+      v-bind:class="{ active: isRestaurant, yellow: isRestaurant }"
+      v-bind:style="restaurantStyle"
       class="ui blueish button">Restaurant</button>
       <button v-on:click="pickSupermarket"
-      v-bind:class="{ active: supSelected, blue: supSelected }"
+      v-bind:class="{ active: isSupermarket, yellow: isSupermarket }"
+      v-bind:style="supermarketStyle"
       class="ui blueish button">Supermarket</button>
       <button v-on:click="pickHotel"
-      v-bind:class="{ active: hotSelected, blue: hotSelected}"
+      v-bind:class="{ active: isHotel, yellow: isHotel }"
+      v-bind:style="hotelStyle"
       class="ui blueish button">Hotel</button>
     </div>
 
