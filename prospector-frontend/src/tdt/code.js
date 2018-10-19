@@ -388,13 +388,24 @@ function filterModeSplitData(landUse, placetype){
   }
 }
 
-function filterAvoData(landUse, placetype){
+function filterAvoData(landUse, geoType, geoTypeKey){
   //trying to access the proportion that corresponds with a given land use, placetype and mode
-  if (modeSelect && landUseCheck==true && app.placetype != ''){
-    return AVO_data.filter(function(piece){                   //how to deal with land use?
-      return (piece.geography == "Place Type "+ app.placetype);
-    })[0][landUse];
+  let key;
+  switch(geoType) {
+    case "district":
+      key = "District " + geoTypeKey;
+      break;
+    case "place_type":
+      key = "Place Type " + geoTypeKey;
+      break;
+    case "city":
+      key = "San Francisco"
+      break;
   }
+  
+  return AVO_data.filter(function(piece){                   //how to deal with land use?
+    return (piece.geography == key);
+  })[0][landUse];
 }
 
 function updateMap() {
@@ -626,8 +637,8 @@ function createDownloadObjects() {
       tmp_dwld['transit modesplit'] = filterModeSplitData("Office", app.placetype)[0]["transit"].toString();
       tmp_dwld['all auto modesplit'] = filterModeSplitData("Office", app.placetype)[0]["auto"].toString();
       tmp_dwld['taxi modesplit'] = filterModeSplitData("Office", app.placetype)[0]["taxi"].toString();
-      tmp_dwld['walk modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["walk"].toString();
-      tmp_dwld['bike modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["bike"].toString();
+      tmp_dwld['walk modesplit'] = filterModeSplitData("Office", app.placetype)[0]["walk"].toString();
+      tmp_dwld['bike modesplit'] = filterModeSplitData("Office", app.placetype)[0]["bike"].toString();
       modesplit_download.push(tmp_dwld);
 
       tmp_dwld = {};
@@ -667,8 +678,8 @@ function createDownloadObjects() {
       tmp_dwld['transit modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["transit"].toString();
       tmp_dwld['all auto modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["auto"].toString();
       tmp_dwld['taxi modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["taxi"].toString();
-      tmp_dwld['walk modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["walk"].toString();
-      tmp_dwld['bike modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["bike"].toString();
+      tmp_dwld['walk modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["walk"].toString();
+      tmp_dwld['bike modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["bike"].toString();
       modesplit_download.push(tmp_dwld);
 
       tmp_dwld = {};
@@ -708,8 +719,8 @@ function createDownloadObjects() {
       tmp_dwld['transit modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["transit"].toString();
       tmp_dwld['all auto modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["auto"].toString();
       tmp_dwld['taxi modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["taxi"].toString();
-      tmp_dwld['walk modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["walk"].toString();
-      tmp_dwld['bike modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["bike"].toString();
+      tmp_dwld['walk modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["walk"].toString();
+      tmp_dwld['bike modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["bike"].toString();
       modesplit_download.push(tmp_dwld);
 
       tmp_dwld = {};
@@ -748,8 +759,8 @@ function createDownloadObjects() {
       tmp_dwld['transit modesplit'] = filterModeSplitData("Hotel", app.placetype)[0]["transit"].toString();
       tmp_dwld['all auto modesplit'] = filterModeSplitData("Hotel", app.placetype)[0]["auto"].toString();
       tmp_dwld['taxi modesplit'] = filterModeSplitData("Hotel", app.placetype)[0]["taxi"].toString();
-      tmp_dwld['walk modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["walk"].toString();
-      tmp_dwld['bike modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["bike"].toString();
+      tmp_dwld['walk modesplit'] = filterModeSplitData("Hotel", app.placetype)[0]["walk"].toString();
+      tmp_dwld['bike modesplit'] = filterModeSplitData("Hotel", app.placetype)[0]["bike"].toString();
       modesplit_download.push(tmp_dwld);
 
       tmp_dwld = {};
@@ -790,8 +801,8 @@ function createDownloadObjects() {
       tmp_dwld['transit modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["transit"].toString();
       tmp_dwld['all auto modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["auto"].toString();
       tmp_dwld['taxi modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["taxi"].toString();
-      tmp_dwld['walk modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["walk"].toString();
-      tmp_dwld['bike modesplit'] = filterModeSplitData("Residential", app.placetype)[0]["bike"].toString();
+      tmp_dwld['walk modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["walk"].toString();
+      tmp_dwld['bike modesplit'] = filterModeSplitData("Retail", app.placetype)[0]["bike"].toString();
       modesplit_download.push(tmp_dwld);
 
       tmp_dwld = {};
@@ -933,7 +944,7 @@ function getTotalTrips(){
           break;
       }
       totalPersonTrips[landUse] = roundToNearest((rate*scalar)*filterModeSplitData(proxyLandUse, app.placetype)[0][mode]);
-      totalVehicleTrips[landUse] = roundToNearest(totalPersonTrips[landUse]/(filterAvoData(proxyLandUse.toLowerCase(), app.placetype)));
+      totalVehicleTrips[landUse] = roundToNearest(totalPersonTrips[landUse]/(filterAvoData(proxyLandUse.toLowerCase(), 'city', 'San Francisco')));
     }
 
     for (let landUse of landUses) {
@@ -1043,7 +1054,7 @@ function getFilteredTrips(){
                                             getDistProps(distributionMethod, geoId, district,
                                                          modeSelect, tripDirectionSelect, proxyLandUse,
                                                          timePeriodSelect, tripPurposeSelect))
-      vehicleTrips[landUse] = roundToNearest(personTrips[landUse]/(filterAvoData(proxyLandUse.toLowerCase(), app.placetype)));
+      vehicleTrips[landUse] = roundToNearest(personTrips[landUse]/(filterAvoData(proxyLandUse.toLowerCase(), distributionMethod, geoId)));
     }
 
     //if any of the land uses are undefined b/c no input, set them equal to 0. landUses is a global array of all 5 land uses
