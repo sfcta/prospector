@@ -894,7 +894,22 @@ function getTotalTrips(){
   let tot_num_bedrooms = num_studios + num_1bed + (2*app.num_2bed) + (2*app.num_3bed);
   let totalPersonTrips = {};
   let totalVehicleTrips = {};
-
+  let geoId; 
+  
+  switch(distributionMethod) {
+      case 'district':
+        geoId = addressDistrictNum;
+        break;
+      case 'place_type':
+        geoId = addressPlaceType;
+        break;
+      case 'city':
+        geoId = 1;
+        break;
+      default:
+        geoId = addressDistrictNum;
+        break;
+    }
     //the computations below happen without the direction and distrbution data multiplications
   for (let mode of modeTypes){
     let rate;
@@ -944,7 +959,7 @@ function getTotalTrips(){
           break;
       }
       totalPersonTrips[landUse] = roundToNearest((rate*scalar)*filterModeSplitData(proxyLandUse, app.placetype)[0][mode]);
-      totalVehicleTrips[landUse] = roundToNearest(totalPersonTrips[landUse]/(filterAvoData(proxyLandUse.toLowerCase(), 'city', 'San Francisco')));
+      totalVehicleTrips[landUse] = roundToNearest(totalPersonTrips[landUse]/(filterAvoData(proxyLandUse.toLowerCase(), distributionMethod, geoId)));
     }
 
     for (let landUse of landUses) {
