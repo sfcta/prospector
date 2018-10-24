@@ -169,9 +169,9 @@ infoTotals.update = function() {
     }
   }
   else {
-    switch(tripDirectionSelect) {
+    /*switch(tripDirectionSelect) {
       case 'outbound': 
-        message = '<h4> Total Outbound From' + address + '</h4>';
+        message = '<h4> Total Outbound From ' + address + '</h4>';
         break;
       case 'inbound': 
         message = '<h4> Total Inbound To ' + address + '</h4>';
@@ -179,7 +179,8 @@ infoTotals.update = function() {
       default: 
         message = '<h4> Total Inbound/Outbound From/To ' + address + '</h4>';
         break;
-    }
+    }*/
+    message = '<h4> Total Inbound/Outbound From ' + address + '</h4>';
     message += '<h4>Person Trips</h4>';
     message += ' - by  auto: ' + totalPersonTripsByMode["auto"]+ '</b>'+
       '<br> - by transit: ' + totalPersonTripsByMode["transit"] + '</b>'+
@@ -364,7 +365,22 @@ function getDistProps(sourceGeoType, sourceGeoTypeKey, targetDistrict, mode, dir
   }   
 }
 
-function getDirectionProps(district, landUse, dailyOrPm) {
+/*function getDirectionProps(district, landUse, dailyOrPm) {
+  let directionDistrictProp = "prop_" + tripDirectionSelect;
+  //let referenceDistrict = "trips_dist" + district.dist;
+  
+  if (modeSelect && landUseCheck==true && tripPurposeSelect && tripDirectionSelect && addressDistrictNum){
+    if (tripDirectionSelect == "both"){
+      return 1; //I'm not sure if this is the right way to dea with the both directions. maybe need bhargav to add something to the API
+    }
+    else{
+      return (filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, 
+              tripDirectionSelect, dailyOrPm)[0][directionDistrictProp]); 
+    }
+  }
+}*/
+
+function getDirectionProps(sourceGeoType, sourceGeoKey, landUse, timePeriod) {
   let directionDistrictProp = "prop_" + tripDirectionSelect;
   //let referenceDistrict = "trips_dist" + district.dist;
   
