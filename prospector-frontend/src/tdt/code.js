@@ -934,20 +934,18 @@ function getTotalTrips(){
     }
 
     totalPersonTrips["total"] = 0;
+    totalVehicleTrips["total"] = 0;
     for (let landUse of landUses) {
       if (!(totalPersonTrips[landUse])){
         totalPersonTrips[landUse] == 0;
       }
-      totalPersonTrips["total"] += totalPersonTrips[landUse];
-    }
-    totalVehicleTrips["total"] = 0;
-    for (let landUse of landUses) {
       if (!(totalVehicleTrips[landUse])){
         totalVehicleTrips[landUse] == 0;
       }
+      totalPersonTrips["total"] += totalPersonTrips[landUse];
       totalVehicleTrips["total"] += totalVehicleTrips[landUse];
     }
-
+    
     totalPersonTripsByMode[mode] = totalPersonTrips["total"];
     totalVehicleTripsByMode[mode] = totalVehicleTrips["total"];
   }
@@ -1049,17 +1047,15 @@ function getFilteredTrips(){
 
     //if any of the land uses are undefined b/c no input, set them equal to 0. landUses is a global array of all 5 land uses
     personTrips["total"] = 0
+    vehicleTrips["total"] = 0
     for (let landUse of landUses) {
       if (!(personTrips[landUse])){
         personTrips[landUse] == 0;
       }
-      personTrips["total"] += personTrips[landUse]
-    }
-    vehicleTrips["total"] = 0
-    for (let landUse of landUses) {
       if (!(vehicleTrips[landUse])){
         vehicleTrips[landUse] == 0;
       }
+      personTrips["total"] += personTrips[landUse]
       vehicleTrips["total"] += vehicleTrips[landUse]
     }
 
