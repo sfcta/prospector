@@ -78,14 +78,16 @@ queryServer(CTA_API_SERVER + TRIP_GEN_RTS)
   tripGenRates = data;
   app.ret_tripgen_daily = numeral(tripGenRates[3].daily_rate).format('0.0');
   app.res_tripgen_daily = numeral(tripGenRates[1].daily_rate).format('0.0');
-  app.rest_tripgen_daily = numeral(tripGenRates[6].daily_rate).format('0.0')
+  app.rest_tripgen_daily = numeral(tripGenRates[5].daily_rate).format('0.0');
+  app.comp_tripgen_daily = numeral(tripGenRates[6].daily_rate).format('0.0');
   app.off_tripgen_daily = numeral(tripGenRates[0].daily_rate).format('0.0');
   app.sup_tripgen_daily = numeral(tripGenRates[4].daily_rate).format('0.0');
   app.hot_tripgen_daily = numeral(tripGenRates[2].daily_rate).format('0.0')
 
   app.ret_tripgen_PM = numeral(tripGenRates[3].pkhr_rate).format('0.0');
   app.res_tripgen_PM = numeral(tripGenRates[1].pkhr_rate).format('0.0');
-  app.rest_tripgen_PM = numeral(tripGenRates[6].pkhr_rate).format('0.0');
+  app.rest_tripgen_PM = numeral(tripGenRates[5].pkhr_rate).format('0.0');
+  app.comp_tripgen_PM = numeral(tripGenRates[6].pkhr_rate).format('0.0');
   app.off_tripgen_PM = numeral(tripGenRates[0].pkhr_rate).format('0.0');
   app.sup_tripgen_PM = numeral(tripGenRates[4].pkhr_rate).format('0.0');
   app.hot_tripgen_PM = numeral(tripGenRates[2].pkhr_rate).format('0.0');
@@ -122,7 +124,7 @@ let placetype_lyr;
 let city_lyr;
 let markers = []; //this is the list of all the district markers
 let color_func;
-let landUses = ["Residential", "Hotel", "Retail", "Supermarket", "Office", "Restaurant"];
+let landUses = ["Residential", "Hotel", "Retail", "Supermarket", "Office", "Restaurant", "Composite"];
 let modeTypes = ["auto", "transit", "taxi", "walk", "bike"]
 
 //some other global variables
@@ -899,8 +901,13 @@ function getTotalTrips(){
           proxyLandUse = landUse;
           break;
         case "Restaurant":
-          rate_key = 6;
+          rate_key = 5;
           scalar = app.rest_sqft/1000;
+          proxyLandUse = "Retail";
+          break;
+        case "Composite":
+          rate_key = 6;
+          scalar = app.comp_sqft/1000;
           proxyLandUse = "Retail";
           break;
         case "Supermarket":
@@ -926,23 +933,22 @@ function getTotalTrips(){
       totalVehicleTrips[landUse] = roundToNearest(totalPersonTrips[landUse]/(filterAvoData(proxyLandUse.toLowerCase(), distributionMethod, geoId)));
     }
 
+    totalPersonTrips["total"] = 0;
     for (let landUse of landUses) {
       if (!(totalPersonTrips[landUse])){
         totalPersonTrips[landUse] == 0;
       }
+      totalPersonTrips["total"] += totalPersonTrips[landUse];
     }
+    totalVehicleTrips["total"] = 0;
     for (let landUse of landUses) {
       if (!(totalVehicleTrips[landUse])){
         totalVehicleTrips[landUse] == 0;
       }
+      totalVehicleTrips["total"] += totalVehicleTrips[landUse];
     }
 
-    totalPersonTrips["total"] = (totalPersonTrips["Residential"]+totalPersonTrips["Retail"]+totalPersonTrips["Hotel"]+ 
-    totalPersonTrips["Office"]+totalPersonTrips["Supermarket"]);
     totalPersonTripsByMode[mode] = totalPersonTrips["total"];
-
-    totalVehicleTrips["total"] = (totalVehicleTrips["Residential"]+totalVehicleTrips["Retail"]+totalVehicleTrips["Hotel"]+ 
-    totalVehicleTrips["Office"]+totalVehicleTrips["Supermarket"]);
     totalVehicleTripsByMode[mode] = totalVehicleTrips["total"];
   }
 }
@@ -1005,8 +1011,13 @@ function getFilteredTrips(){
           proxyLandUse = landUse;
           break;
         case "Restaurant":
-          rate_key = 6;
+          rate_key = 5;
           scalar = app.rest_sqft/1000;
+          proxyLandUse = "Retail";
+          break;
+        case "Composite":
+          rate_key = 6;
+          scalar = app.comp_sqft/1000;
           proxyLandUse = "Retail";
           break;
         case "Supermarket":
@@ -1037,22 +1048,23 @@ function getFilteredTrips(){
     }
 
     //if any of the land uses are undefined b/c no input, set them equal to 0. landUses is a global array of all 5 land uses
+    personTrips["total"] = 0
     for (let landUse of landUses) {
       if (!(personTrips[landUse])){
         personTrips[landUse] == 0;
       }
+      personTrips["total"] += personTrips[landUse]
     }
+    vehicleTrips["total"] = 0
     for (let landUse of landUses) {
       if (!(vehicleTrips[landUse])){
         vehicleTrips[landUse] == 0;
       }
+      vehicleTrips["total"] += vehicleTrips[landUse]
     }
 
-    //still in the for each district for loop
-    personTrips["total"] = (personTrips["Residential"]+personTrips["Retail"]+personTrips["Office"]+personTrips["Restaurant"]+personTrips["Supermarket"]+personTrips["Hotel"]);
     districtPersonTrips[district.dist] = personTrips; //this creates a dictionary of dictionaries, with one dictionary for every district where the keys are the land uses/total
     //and the dictionary is populated by the time period
-    vehicleTrips["total"] = vehicleTrips["Residential"] + vehicleTrips["Retail"]+ vehicleTrips["Hotel"] + vehicleTrips["Restaurant"] + vehicleTrips["Office"] + vehicleTrips["Supermarket"];
     districtVehicleTrips[district.dist] = vehicleTrips;
     console.log(district);
   }
@@ -1082,6 +1094,7 @@ function clearAllInputs(){
   app.ret_sqft = 0;
   app.res_sqft = 0;
   app.rest_sqft = 0;
+  app.comp_sqft = 0;
   app.sup_sqft = 0;
   app.hot_sqft = 0;
   app.num_studios = 0;
@@ -1120,6 +1133,7 @@ function resetAllInputs(){
   app.ret_sqft = 0;
   app.res_sqft = 0;
   app.rest_sqft = 0;
+  app.comp_sqft = 0;
   app.sup_sqft = 0;
   app.hot_sqft = 0;
   app.num_studios = 0;
@@ -1367,7 +1381,7 @@ function checkLandUseSelections() {
   app.hasResidential = (app.num_studios > 0 || app.num_1bed > 0 || 
                         app.num_2bed > 0 || app.num_3bed > 0);
   app.hasOffice = app.off_sqft > 0;
-  app.hasRestaurant = app.rest_sqft > 0;
+  app.hasRestaurant = app.rest_sqft > 0 || app.comp_sqft > 0;
   app.hasHotel = app.hot_sqft > 0;
   app.hasSupermarket = app.sup_sqft > 0;
   app.hasRetail = app.ret_sqft > 0;
@@ -1464,6 +1478,7 @@ let app = new Vue({
     ret_sqft: null,
     res_sqft: null,
     rest_sqft: null,
+    comp_sqft: null,
     sup_sqft: null,
     hot_sqft: null,
     num_studios: null,

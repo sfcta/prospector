@@ -88,10 +88,15 @@
     </template>
 
     <template v-else-if="isRestaurant">
-      <label>Restaurant trip generation rate (daily): ${rest_tripgen_daily}</label>
-      <br><label>Restaurant trip generation rate (PM peak): ${rest_tripgen_PM}</label>
-      <h4>Enter restaurant square footage: </h4>
+      <label>Eating/restaurant - Quality sit-down trip generation rate (daily): ${rest_tripgen_daily}</label>
+      <br><label>Eating/restaurant - Quality sit-down trip generation rate (PM peak): ${rest_tripgen_PM}</label>
+      <br><label>Eating/restaurant - Composite trip generation rate (daily): ${comp_tripgen_daily}</label>
+      <br><label>Eating/restaurant - Composite trip generation rate (PM peak): ${comp_tripgen_PM}</label>
+      <h4>Enter Restaurant square footage: </h4>
+      <label>Quality sit-down: </label>
       <input v-model.number="rest_sqft" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="rest-footage">
+      <br><br><label>Composite: </label>
+      <input v-model.number="comp_sqft" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="comp-footage">
       <br><br>
     </template>
 
