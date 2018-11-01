@@ -316,28 +316,6 @@ function getMax() {
   }
 }
 
-/*function filterDistributionData(mode, districtNum, landUse, purpose, direction, timePeriodSelect) { 
-  //returns a json object or list of json objects that fit given parameters   
-  return distributionData.filter(function(piece){ 
-    return piece.mode == mode && piece.dist == districtNum && piece.landuse == landUse && piece.purpose == purpose &&
-    piece.direction == direction && piece.time_period == timePeriodSelect;
-  }); 
-}*/
-
-/*function getDistProps(district, landUse, dailyOrPm) {
-  let data;
-  let referenceDistrictProp = "prop_dist" + district.dist; //the name of the value that stores the 
-  //relevant proportion from address district to hover district
-  
-  if (modeSelect && landUseCheck==true && tripPurposeSelect && tripDirectionSelect && addressDistrictNum && timePeriodSelect){
-    //this returns a number not an object
-    console.log(filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, tripDirectionSelect, timePeriodSelect));
-    data = filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, tripDirectionSelect, timePeriodSelect)[0][referenceDistrictProp];
-    console.log(data)
-    return data;
-  }   
-}*/
-
 function filterDistributionData(sourceGeoType, sourceGeoTypeKey, mode, direction, landUse, timePeriod, purpose) { 
   //returns a json object or list of json objects that fit given parameters   
   return distributionData.filter(function(piece){ 
@@ -363,36 +341,6 @@ function getDistProps(sourceGeoType, sourceGeoTypeKey, targetDistrict, mode, dir
     console.log(data)
     return data;
   }   
-}
-
-/*function getDirectionProps(district, landUse, dailyOrPm) {
-  let directionDistrictProp = "prop_" + tripDirectionSelect;
-  //let referenceDistrict = "trips_dist" + district.dist;
-  
-  if (modeSelect && landUseCheck==true && tripPurposeSelect && tripDirectionSelect && addressDistrictNum){
-    if (tripDirectionSelect == "both"){
-      return 1; //I'm not sure if this is the right way to dea with the both directions. maybe need bhargav to add something to the API
-    }
-    else{
-      return (filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, 
-              tripDirectionSelect, dailyOrPm)[0][directionDistrictProp]); 
-    }
-  }
-}*/
-
-function getDirectionProps(sourceGeoType, sourceGeoKey, landUse, timePeriod) {
-  let directionDistrictProp = "prop_" + tripDirectionSelect;
-  //let referenceDistrict = "trips_dist" + district.dist;
-  
-  if (modeSelect && landUseCheck==true && tripPurposeSelect && tripDirectionSelect && addressDistrictNum){
-    if (tripDirectionSelect == "both"){
-      return 1; //I'm not sure if this is the right way to dea with the both directions. maybe need bhargav to add something to the API
-    }
-    else{
-      return (filterDistributionData(modeSelect, addressDistrictNum, landUse, tripPurposeSelect, 
-              tripDirectionSelect, dailyOrPm)[0][directionDistrictProp]); 
-    }
-  }
 }
 
 function filterModeSplitData(landUse, placetype){
@@ -1002,16 +950,16 @@ function getTotalTrips(){
 let districtPersonTrips = {}; // {key = district number, value = person trips corresponding to this district}
 let districtVehicleTrips = {};
 
-//let landUses = ["Residential", "Retail", "Office","Restaurant", "Supermarket"];
-//I'm changing this function so that instead of taking in a hoverDistrict parameter, it calculates the number of person trips for all 12 districts
-//for all land uses and time periods
+// Calculates the number of person trips for each of districts
+// filtered by selected purpose, mode, direction, timePeriod, distributionMethod
+// and aggregates districts to region
 function getFilteredTrips(){
   let num_studios = app.num_studios;
   let num_1bed = app.num_1bed;
   let num_2bed = app.num_2bed;
   let num_3bed = app.num_3bed;
   let tot_num_bedrooms = num_studios + num_1bed + (2*app.num_2bed) + (3*app.num_3bed);
-  let msg = '';
+  
   for (let district of geoDistricts) {
     let personTrips = {};
     let vehicleTrips = {};
