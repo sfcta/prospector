@@ -12,21 +12,30 @@
       <hr/>
     </div>
     <!-- </div> -->
-    <h5>1. ENTER AN ADDRESS:</h5>
-
-    <input v-model="address" class="fix" append-icon= "icon taxi" v-on:blur="updateMap"
+    <h5>1. ADDRESS:</h5>
+    <form class="ui tiny equal width form" v-on:submit.prevent>
+      <div class="field">
+        <input v-model="address" class="fix" append-icon= "icon taxi" v-on:blur="updateMap"
+        
+        type="text" placeholder="Search for address"/>
+      </div>
+    </form>
+    <div class="ui mini yellow message">
+      <b>Place Type: ${placetype_text}</b>
+    </div>
+    <!--<input v-model="address" class="fix" append-icon= "icon taxi" v-on:blur="updateMap"
     type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}" placeholder="Search for address or click on map"/>
     <!--type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}" value='1455 Market Street'/>-->
           <!-- <v-text-field
                 label="outline"
                 placeholder="address"
                 outline
-                ></v-text-field> -->
+                ></v-text-field> 
                 &nbsp;&nbsp;<label>Place Type: ${placetype_text} </label>
     <!-- <label>something else <span id="district_PT"></span></label>
     -->
 
-    <h5>2. CHOOSE LAND USE:</h5>
+    <h5>2. LAND USE:</h5>
     <div id="vizbuttons" class="ui vertical buttons">
       <button class = "ui toggle button" v-on:click="pickRes"
       v-bind:class="{ active: isResidential, yellow: isResidential}"
@@ -57,67 +66,115 @@
     <br><br>
 
     <template v-if="isRetail">
-      <label>Retail trip generation rate (daily): ${ret_tripgen_daily}</label>
-      <br><label>Retail trip generation rate (PM peak): ${ret_tripgen_PM}</label>
-      <h4>Enter retail square footage: </h4>
-      <input v-model.number="ret_sqft" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="retail-footage">
-      <br><br>
+      <table class="ui small very compact inverted grey table">
+        <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
+        <tr><td>Retail (per sqft)</td><td>${ret_tripgen_daily}</td><td>${ret_tripgen_PM}</td></tr>
+      </table>
+      <form class="ui tiny equal width form" v-on:submit.prevent>
+        <div class="field">
+          <label>Retail</label>
+          <input v-model.number="ret_sqft" v-on:keyup="updateMap" placeholder="Square feet of retail space" type="number" key="retail-footage">
+        </div>
+      </form>
+      <br>
     </template>
 
     <template v-else-if="isOffice">
-      <label>Office trip generation daily rate (PM peak rate): ${off_tripgen_daily} (${off_tripgen_PM})</label>
-      <br><label>Office trip generation rate (PM peak): ${off_tripgen_PM}</label>
-      <h4>Enter office square footage: </h4>
-      <input v-model.number="off_sqft" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="office-footage">
-      <br><br>
+      <table class="ui small very compact inverted grey table">
+        <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
+        <tr><td>Office (per sqft)</td><td>${off_tripgen_daily}</td><td>${off_tripgen_PM}</td></tr>
+      </table>
+      <form class="ui tiny equal width form" v-on:submit.prevent>
+        <div class="field">
+          <label>Office</label>
+          <input v-model.number="off_sqft" v-on:keyup="updateMap" placeholder="Square feet of office space" type="number" key="office-footage">
+        </div>
+      </form>
+      <br>
     </template>
 
     <template v-else-if="isResidential">
-      <label>Residential trip generation rate (daily): ${res_tripgen_daily}</label>
-      <br><label>Residential trip generation rate (PM peak): ${res_tripgen_PM}</label>
-      <h4>Enter the number of bedrooms by unit type: </h4>
-      <label>Studios:  </label>
-      <input v-model.number = "num_studios" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-studios">
-      <br><br><label>1 Bedrooms:  </label>
-      <input v-model.number = "num_1bed" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-1bed">
-      <br><br><label>2 Bedrooms:  </label>
-      <input v-model.number = "num_2bed" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-2bed">
-      <br><br><label>3 Bedrooms:  </label>
-      <input v-model.number = "num_3bed" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '60px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="num-3bed">
-      <br><br>
+      <table class="ui small very compact inverted grey table">
+        <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
+        <tr><td>Residential (per bedroom)</td><td>${res_tripgen_daily}</td><td>${res_tripgen_PM}</td></tr>
+      </table>
+      
+      <form class="ui tiny equal width form" v-on:submit.prevent>
+        <div class="fields">
+          <div class="field">
+            <label>Studios</label>
+            <input v-model.number="num_studios" v-on:keyup="updateMap" placeholder="Number of studios" type="number" key="num-studios">
+          </div>
+          <div class="field">
+            <label>1 Bedrooms</label>
+            <input v-model.number="num_1bed" v-on:keyup="updateMap" placeholder="Number of 1 bedrooms" type="number" key="num-1bed">
+          </div>
+        </div>
+        <div class="fields">
+          <div class="field">
+            <label>2 Bedrooms</label>
+            <input v-model.number="num_2bed" v-on:keyup="updateMap" placeholder="Number of 2 bedrooms" type="number" key="num-2bed">
+          </div>
+          <div class="field">
+            <label>3 Bedrooms</label>
+            <input v-model.number="num_3bed" v-on:keyup="updateMap" placeholder="Number of 3 bedrooms" type="number" key="num-3bed">
+          </div>
+        </div>
+      </form>
     </template>
 
     <template v-else-if="isRestaurant">
-      <label>Eating/restaurant - Quality sit-down trip generation rate (daily): ${rest_tripgen_daily}</label>
-      <br><label>Eating/restaurant - Quality sit-down trip generation rate (PM peak): ${rest_tripgen_PM}</label>
-      <br><label>Eating/restaurant - Composite trip generation rate (daily): ${comp_tripgen_daily}</label>
-      <br><label>Eating/restaurant - Composite trip generation rate (PM peak): ${comp_tripgen_PM}</label>
-      <h4>Enter Restaurant square footage: </h4>
-      <label>Quality sit-down: </label>
-      <input v-model.number="rest_sqft" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="rest-footage">
-      <br><br><label>Composite: </label>
-      <input v-model.number="comp_sqft" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="comp-footage">
-      <br><br>
+      <table class="ui small very compact inverted grey table">
+        <!--<label>Restaurant Trip Generation</label>-->
+          <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
+          <tr><td>Quality Sit-down (per sqft)</td><td>${rest_tripgen_daily}</td><td>${rest_tripgen_PM}</td></tr>
+          <tr><td>Composite (per sqft)</td><td>${comp_tripgen_daily}</td><td>${comp_tripgen_PM}</td></tr>
+      </table>
+      
+      <form class="ui tiny equal width form" v-on:submit.prevent>
+        <div class="fields">
+          <div class="field">
+            <label>Quality sit-down: </label>
+            <input v-model.number="rest_sqft" v-on:keyup="updateMap" placeholder="Square feet of quality sit-down restaurant" type = "number" key="rest-footage">
+          </div>
+          <div class="field">
+            <label>Composite: </label>
+            <input v-model.number="comp_sqft" v-on:keyup="updateMap" placeholder="Square feet of composite restaurant" type = "number" key="comp-footage">
+          </div>
+        </div>
+      </form>
     </template>
 
-    <template v-else-if="isSupermarket">          
-      <label>Supermarket trip generation rate (daily): ${sup_tripgen_daily}</label>
-      <br><label>Supermarket trip generation rate (PM peak): ${sup_tripgen_PM}</label>
-      <h4>Enter supermarket square footage: </h4>
-      <input v-model.number="sup_sqft" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="sup-footage">
-      <br><br>
+    <template v-else-if="isSupermarket">  
+      <table class="ui small very compact inverted grey table" v-on:submit.prevent>
+        <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
+        <tr><td>Supermarket (per sqft)</td><td>${sup_tripgen_daily}</td><td>${sup_tripgen_PM}</td></tr>
+      </table>
+      <form class="ui tiny equal width form">
+        <div class="field">
+          <label>Supermarket</label>
+          <input v-model.number="sup_sqft" v-on:keyup="updateMap" placeholder="Square feet of supermarket space" type = "number" key="sup-footage">
+        </div>
+      </form>    
+      <br>
     </template>
 
-    <template v-else-if="isHotel">           
-      <label>Hotel trip generation rate (daily): ${hot_tripgen_daily}</label>
-      <br><label>Hotel trip generation rate (PM peak): ${hot_tripgen_PM}</label>
-      <h4>Enter number of hotel rooms: </h4>
-      <input v-model.number="hot_sqft" v-on:keyup="updateMap" v-autowidth="{maxWidth: '100px', minWidth: '100px', comfortZone: 0}" placeholder="Enter a number" type = "number" key="hot-footage">
-      <br><br>
+    <template v-else-if="isHotel">
+      <table class="ui small very compact inverted grey table" v-on:submit.prevent>
+        <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
+        <tr><td>Hotel (per room)</td><td>${hot_tripgen_daily}</td><td>${hot_tripgen_PM}</td></tr>
+      </table>
+      <form class="ui tiny equal width form">
+        <div class="field">
+          <label>Hotel</label>
+          <input v-model.number="hot_sqft" v-on:keyup="updateMap" placeholder="Number of hotel rooms" type = "number" key="sup-footage">
+        </div>
+      </form>     
+      <br>
     </template>
                 
     <div class="pickers">
-      <h5>3. CHOOSE MODE:</h5>
+      <h5>3. MODE:</h5>
         <div class="three tiny ui buttons">
           <button class = "tiny ui grey icon button" v-on:click="pickAU" 
             v-bind:class="{ active: isAUActive, yellow: isAUActive}"><i class="icon car"></i>All Auto</button>
@@ -128,7 +185,7 @@
         </div>
         <br>
 
-      <h5>4. CHOOSE TRIP PURPOSE:</h5>
+      <h5>4. TRIP PURPOSE:</h5>
         <div class="three tiny ui buttons">
           <button class = "tiny ui grey icon button" v-on:click="pickWork"
             v-bind:class="{ active: isWork, yellow: isWork}">Work</button>
@@ -139,7 +196,7 @@
         </div>
         <br>
 
-      <h5>5. CHOOSE DIRECTION:</h5>
+      <h5>5. DIRECTION:</h5>
         <div class="three tiny ui buttons">
           <button class = "tiny ui grey icon button" v-on:click="pickInbound"
             v-bind:class="{ active: isInbound, yellow: isInbound}"><i class="icon compress"></i>Inbound</button>
@@ -150,7 +207,7 @@
         </div>
         <br>
 
-      <h5>6. CHOOSE TIME PERIOD:</h5>
+      <h5>6. TIME PERIOD:</h5>
         <div class="two tiny ui buttons">
           <button class = "tiny ui grey icon button" v-on:click="pickDaily"
             v-bind:class="{ active: isDaily, yellow: isDaily}">Daily</button>
@@ -159,7 +216,7 @@
         </div>
         <br>
               
-      <h5>7. CHOOSE DISTRIBUTION METHOD:</h5>
+      <h5>7. DISTRIBUTION METHOD:</h5>
         <div class="three tiny ui buttons">
           <button class="tiny ui grey icon button" v-on:click="pickDistrict"
             v-bind:class="{active: isDistrict, yellow: isDistrict}">District</button>
