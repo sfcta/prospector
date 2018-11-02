@@ -257,11 +257,16 @@ hr {
 }
 
 tbody tr:nth-child(odd) td, tbody th {
-    background-color: #444;
+    background-color: #555;
     border: 0px;
 }
 
-table { border: 0px; }
+tbody tr:nth-child(even) td, tbody th {
+    background-color: #555;
+    border: 0px;
+}
+
+table { border: 0px; border-radius: 5px;}
 
 .img-logo {
   vertical-align: center;

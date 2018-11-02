@@ -9,10 +9,12 @@
       &nbsp;
       <button class="ui mini right labeled icon greenish button"
         v-on:click="clickToggleInstructions"><i class="arrow right icon"></i>How to Use this Tool</button>
-      <hr/>
+      <!--<hr/>-->
+      <div class="ui divider"></div>
     </div>
     <!-- </div> -->
-    <h5>1. ADDRESS:</h5>
+    <!--<h5>1. ADDRESS:</h5>-->
+    
     <form class="ui tiny equal width form" v-on:submit.prevent>
       <div class="field">
         <input v-model="address" class="fix" append-icon= "icon taxi" v-on:blur="updateMap"
@@ -23,19 +25,9 @@
     <div class="ui mini yellow message">
       <b>Place Type: ${placetype_text}</b>
     </div>
-    <!--<input v-model="address" class="fix" append-icon= "icon taxi" v-on:blur="updateMap"
-    type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}" placeholder="Search for address or click on map"/>
-    <!--type="text" v-autowidth="{maxWidth: '500px', minWidth: '130px', comfortZone: 0}" value='1455 Market Street'/>-->
-          <!-- <v-text-field
-                label="outline"
-                placeholder="address"
-                outline
-                ></v-text-field> 
-                &nbsp;&nbsp;<label>Place Type: ${placetype_text} </label>
-    <!-- <label>something else <span id="district_PT"></span></label>
-    -->
-
-    <h5>2. LAND USE:</h5>
+    
+    <!--<h5>2. LAND USE:</h5>-->
+    <div class="ui divider"></div>
     <div id="vizbuttons" class="ui vertical buttons">
       <button class = "ui toggle button" v-on:click="pickRes"
       v-bind:class="{ active: isResidential, yellow: isResidential}"
@@ -173,8 +165,9 @@
       <br>
     </template>
                 
+    <div class="ui divider"></div>
     <div class="pickers">
-      <h5>3. MODE:</h5>
+      <!--<h5>3. MODE:</h5>-->
         <div class="three tiny ui buttons">
           <button class = "tiny ui grey icon button" v-on:click="pickAU" 
             v-bind:class="{ active: isAUActive, yellow: isAUActive}"><i class="icon car"></i>All Auto</button>
@@ -183,9 +176,9 @@
           <button class = "tiny ui grey icon button" v-on:click="pickTaxiTNC"
             v-bind:class="{ active: isTaxiTNCActive, yellow: isTaxiTNCActive}"><i class="icon taxi"></i>TaxiTNC</button>
         </div>
-        <br>
+        <div class="ui divider"></div>
 
-      <h5>4. TRIP PURPOSE:</h5>
+      <!--<h5>4. TRIP PURPOSE:</h5>-->
         <div class="three tiny ui buttons">
           <button class = "tiny ui grey icon button" v-on:click="pickWork"
             v-bind:class="{ active: isWork, yellow: isWork}">Work</button>
@@ -194,9 +187,9 @@
           <button class = "tiny ui grey icon button" v-on:click="pickAll"
             v-bind:class="{ active: isAll, yellow: isAll}"> Total</button>
         </div>
-        <br>
+        <div class="ui divider"></div>
 
-      <h5>5. DIRECTION:</h5>
+      <!--<h5>5. DIRECTION:</h5>-->
         <div class="three tiny ui buttons">
           <button class = "tiny ui grey icon button" v-on:click="pickInbound"
             v-bind:class="{ active: isInbound, yellow: isInbound}"><i class="icon compress"></i>Inbound</button>
@@ -205,18 +198,18 @@
           <button class = "tiny ui grey icon button" v-on:click="pickBoth"
             v-bind:class="{ active: isBoth, yellow: isBoth}"> Total</button>
         </div>
-        <br>
+        <div class="ui divider"></div>
 
-      <h5>6. TIME PERIOD:</h5>
+      <!--<h5>6. TIME PERIOD:</h5>-->
         <div class="two tiny ui buttons">
           <button class = "tiny ui grey icon button" v-on:click="pickDaily"
             v-bind:class="{ active: isDaily, yellow: isDaily}">Daily</button>
           <button class = "tiny ui grey icon button" v-on:click="pickPM"
             v-bind:class="{ active: isPM, yellow: isPM}"> PM Peak</button>
         </div>
-        <br>
+        <div class="ui divider"></div>
               
-      <h5>7. DISTRIBUTION METHOD:</h5>
+      <!--<h5>7. DISTRIBUTION METHOD:</h5>-->
         <div class="three tiny ui buttons">
           <button class="tiny ui grey icon button" v-on:click="pickDistrict"
             v-bind:class="{active: isDistrict, yellow: isDistrict}">District</button>
@@ -225,7 +218,7 @@
           <button class="tiny ui grey icon button" v-on:click="pickCity"
             v-bind:class="{active: isCity, yellow: isCity}">City</button>
         </div>
-        <br><br>
+        <div class="ui divider"></div>
         
       <div id="download">
                 <!-- <button v-on:click="updateMap" class="tiny ui right labeled icon floated greenish button" 
@@ -238,11 +231,10 @@
           style="margin-right:5px"><i class="icon ban"></i>Reset All</button>
       </div>
     </div>
-
-    <br>
-
+    
     <div class="logo">
-      <hr/>
+      <!--<hr/>-->
+      <div class="ui divider"></div>
         <table id="table-logo"><tr>
           <!-- <td class="td-logo">
             <h4 class="agency"><b><a target="_blank" href="http://www.sfcta.org">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
