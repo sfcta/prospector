@@ -20,7 +20,7 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 let theme = "light";
 let sfmap = L.map('sfmap').setView([37.77, -122.42], 12);
 let url = 'https://api.mapbox.com/styles/v1/mapbox/'+theme+'-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
-let token = 'pk.eyJ1IjoicHNyYyIsImEiOiJjaXFmc2UxanMwM3F6ZnJtMWp3MjBvZHNrIn0._Dmske9er0ounTbBmdRrRQ';
+let token = 'pk.eyJ1Ijoic2ZjdGEiLCJhIjoiY2ozdXBhNm1mMDFkaTJ3dGRmZHFqanRuOCJ9.KDmACTJBGNA6l0CyPi1Luw';
 let attribution ='<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
                  '<a href="http://mapbox.com">Mapbox</a>';
 let baseLayer = L.tileLayer(url, {
