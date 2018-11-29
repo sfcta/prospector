@@ -37,6 +37,7 @@ let getLegHTML = maplib.getLegHTML;
 let mymap = maplib.sfmap;
 var numeral = require('numeral');
 var leafletPip = require('@mapbox/leaflet-pip');
+//var acc = require('accordion-js');
 //leafletPip.bassackwards = true;
 
 mymap.setView([37.76889, -122.440997], 12);
@@ -1187,6 +1188,12 @@ function pickRes(thing){
   checkLandUseSelections()
 }
 
+function accord(thing){
+  landUseCheck = true;
+  checkLandUseSelections()
+  $(".ui.accordion").accordion();
+}
+
 function pickOffice(thing){
   landUseCheck = true;
   app.isOffice = true;
@@ -1530,6 +1537,7 @@ let app = new Vue({
     clearAllInputs: clearAllInputs,
     resetAllInputs: resetAllInputs,
 
+    accord: accord,
     pickOffice: pickOffice,
     pickRes: pickRes,
     pickRet: pickRet,

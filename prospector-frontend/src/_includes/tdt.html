@@ -26,145 +26,139 @@
       <b>Place Type: ${placetype_text}</b>
     </div>
     
-    <!--<h5>2. LAND USE:</h5>-->
-    <div class="ui divider"></div>
-    <div id="vizbuttons" class="ui vertical buttons">
-      <button class = "ui toggle button" v-on:click="pickRes"
-      v-bind:class="{ active: isResidential, yellow: isResidential}"
-      v-bind:style="residentialStyle"
-      class="ui blueish button">Residential</button>
-      <button class = "ui toggle button" v-on:click="pickOffice"
-      v-bind:class="{ active: isOffice, yellow: isOffice }"
-      v-bind:style="officeStyle"
-      class="ui blueish button">Office</button>
-      <button v-on:click="pickRet"
-      v-bind:class="{ active: isRetail, yellow: isRetail }"
-      v-bind:style="retailStyle"
-      class="ui blueish button">Retail</button>
-      <button v-on:click="pickRestaurant"
-      v-bind:class="{ active: isRestaurant, yellow: isRestaurant }"
-      v-bind:style="restaurantStyle"
-      class="ui blueish button">Restaurant</button>
-      <button v-on:click="pickSupermarket"
-      v-bind:class="{ active: isSupermarket, yellow: isSupermarket }"
-      v-bind:style="supermarketStyle"
-      class="ui blueish button">Supermarket</button>
-      <button v-on:click="pickHotel"
-      v-bind:class="{ active: isHotel, yellow: isHotel }"
-      v-bind:style="hotelStyle"
-      class="ui blueish button">Hotel</button>
+    <div class="ui tiny grey fluid form">
+        <div class="ui blueish accordion field"> <!-- put v-bind attributes here..-->
+          <div class="top title" v-on:click="accord" v-on:keyup="updateMap">Residential</div>
+          <div class="content field">
+            <div class="ui tiny grey inverted segment">
+              <table class="ui small very compact inverted grey table">
+                <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
+                <tr><td>Retail (per sqft)</td><td>${ret_tripgen_daily}</td><td>${ret_tripgen_PM}</td></tr>
+              </table>
+              <div class="fields">
+                <div class="field">
+                  <label>Studios</label>
+                  <input v-model.number="num_studios" v-on:keyup="updateMap" placeholder="Number of studios" type="number" key="num-studios">
+                </div>
+                <div class="field">
+                  <label>1 Bedrooms</label>
+                  <input v-model.number="num_1bed" v-on:keyup="updateMap" placeholder="Number of 1 bedrooms" type="number" key="num-1bed">
+                </div>
+              </div>
+              <div class="fields">
+                <div class="field">
+                  <label>2 Bedrooms</label>
+                  <input v-model.number="num_2bed" v-on:keyup="updateMap" placeholder="Number of 2 bedrooms" type="number" key="num-2bed">
+                </div>
+                <div class="field">
+                  <label>3 Bedrooms</label>
+                  <input v-model.number="num_3bed" v-on:keyup="updateMap" placeholder="Number of 3 bedrooms" type="number" key="num-3bed">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ui accordion field">
+          <div class="title" v-on:click="accord" >Office</div>
+          <div class="content field">
+            <div class="ui tiny grey inverted segment">
+              <table class="ui small very compact inverted grey table">
+                <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
+                <tr><td>Office (per sqft)</td><td>${off_tripgen_daily}</td><td>${off_tripgen_PM}</td></tr>
+              </table>
+              <div class="field">
+                <label>Office Space</label>
+                <input v-model.number="off_sqft" v-on:keyup="updateMap" placeholder="Square feet of office space" type="number" key="office-footage">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ui accordion field">
+          <div class="title" v-on:click="accord" >Retail</div>
+          <div class="content field">
+            <div class="ui tiny grey inverted segment">
+              <table class="ui small very compact inverted grey table">
+                <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
+                <tr><td>Retail (per sqft)</td><td>${ret_tripgen_daily}</td><td>${ret_tripgen_PM}</td></tr>
+              </table>
+              <div class="field">
+                <label>Retail</label>
+                <input v-model.number="ret_sqft" v-on:keyup="updateMap" placeholder="Square feet of retail space" type="number" key="retail-footage">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="ui accordion field">
+          <div class="title" v-on:click="accord" >Restaurant</div>
+          <div class="content field">
+            <div class="ui tiny grey inverted segment">
+              <table class="ui small very compact inverted grey table">
+                <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
+                <tr><td>Quality Sit-down (per sqft)</td><td>${rest_tripgen_daily}</td><td>${rest_tripgen_PM}</td></tr>
+                <tr><td>Composite (per sqft)</td><td>${comp_tripgen_daily}</td><td>${comp_tripgen_PM}</td></tr>
+              </table>
+              <div class="fields">
+                <div class="field">
+                  <label>Quality sit-down: </label>
+                  <input v-model.number="rest_sqft" v-on:keyup="updateMap" placeholder="Square feet of quality sit-down restaurant" type = "number" key="rest-footage">
+                </div>
+                <div class="field">
+                  <label>Composite: </label>
+                  <input v-model.number="comp_sqft" v-on:keyup="updateMap" placeholder="Square feet of composite restaurant" type = "number" key="comp-footage">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="ui accordion field">
+          <div class="title" v-on:click="accord" >Supermarket</div>
+          <div class="content field">
+            <div class="ui tiny grey inverted segment">
+              <table class="ui small very compact inverted grey table" v-on:submit.prevent>
+                <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
+                <tr><td>Supermarket (per sqft)</td><td>${sup_tripgen_daily}</td><td>${sup_tripgen_PM}</td></tr>
+              </table>
+              <div class="fields">
+                <div class="field">
+                  <label>Quality sit-down: </label>
+                  <input v-model.number="rest_sqft" v-on:keyup="updateMap" placeholder="Square feet of quality sit-down restaurant" type = "number" key="rest-footage">
+                </div>
+                <div class="field">
+                  <label>Supermarket</label>
+                  <input v-model.number="sup_sqft" v-on:keyup="updateMap" placeholder="Square feet of supermarket space" type = "number" key="sup-footage">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="ui accordion field">
+          <div class="bottom title" v-on:click="accord" >Hotel</div>
+          <div class="content field">
+            <div class="ui tiny grey inverted segment">
+              <table class="ui small very compact inverted grey table" v-on:submit.prevent>
+                <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
+                <tr><td>Hotel (per room)</td><td>${hot_tripgen_daily}</td><td>${hot_tripgen_PM}</td></tr>
+              </table>
+              <div class="fields">
+                <div class="field">
+                  <label>Quality sit-down: </label>
+                  <input v-model.number="rest_sqft" v-on:keyup="updateMap" placeholder="Square feet of quality sit-down restaurant" type = "number" key="rest-footage">
+                </div>
+                <div class="field">
+                  <label>Hotel</label>
+                  <input v-model.number="hot_sqft" v-on:keyup="updateMap" placeholder="Number of hotel rooms" type = "number" key="sup-footage">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
-
-    <br><br>
-
-    <template v-if="isRetail">
-      <table class="ui small very compact inverted grey table">
-        <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
-        <tr><td>Retail (per sqft)</td><td>${ret_tripgen_daily}</td><td>${ret_tripgen_PM}</td></tr>
-      </table>
-      <form class="ui tiny equal width form" v-on:submit.prevent>
-        <div class="field">
-          <label>Retail</label>
-          <input v-model.number="ret_sqft" v-on:keyup="updateMap" placeholder="Square feet of retail space" type="number" key="retail-footage">
-        </div>
-      </form>
-      <br>
-    </template>
-
-    <template v-else-if="isOffice">
-      <table class="ui small very compact inverted grey table">
-        <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
-        <tr><td>Office (per sqft)</td><td>${off_tripgen_daily}</td><td>${off_tripgen_PM}</td></tr>
-      </table>
-      <form class="ui tiny equal width form" v-on:submit.prevent>
-        <div class="field">
-          <label>Office</label>
-          <input v-model.number="off_sqft" v-on:keyup="updateMap" placeholder="Square feet of office space" type="number" key="office-footage">
-        </div>
-      </form>
-      <br>
-    </template>
-
-    <template v-else-if="isResidential">
-      <table class="ui small very compact inverted grey table">
-        <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
-        <tr><td>Residential (per bedroom)</td><td>${res_tripgen_daily}</td><td>${res_tripgen_PM}</td></tr>
-      </table>
-      
-      <form class="ui tiny equal width form" v-on:submit.prevent>
-        <div class="fields">
-          <div class="field">
-            <label>Studios</label>
-            <input v-model.number="num_studios" v-on:keyup="updateMap" placeholder="Number of studios" type="number" key="num-studios">
-          </div>
-          <div class="field">
-            <label>1 Bedrooms</label>
-            <input v-model.number="num_1bed" v-on:keyup="updateMap" placeholder="Number of 1 bedrooms" type="number" key="num-1bed">
-          </div>
-        </div>
-        <div class="fields">
-          <div class="field">
-            <label>2 Bedrooms</label>
-            <input v-model.number="num_2bed" v-on:keyup="updateMap" placeholder="Number of 2 bedrooms" type="number" key="num-2bed">
-          </div>
-          <div class="field">
-            <label>3 Bedrooms</label>
-            <input v-model.number="num_3bed" v-on:keyup="updateMap" placeholder="Number of 3 bedrooms" type="number" key="num-3bed">
-          </div>
-        </div>
-      </form>
-    </template>
-
-    <template v-else-if="isRestaurant">
-      <table class="ui small very compact inverted grey table">
-        <!--<label>Restaurant Trip Generation</label>-->
-          <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
-          <tr><td>Quality Sit-down (per sqft)</td><td>${rest_tripgen_daily}</td><td>${rest_tripgen_PM}</td></tr>
-          <tr><td>Composite (per sqft)</td><td>${comp_tripgen_daily}</td><td>${comp_tripgen_PM}</td></tr>
-      </table>
-      
-      <form class="ui tiny equal width form" v-on:submit.prevent>
-        <div class="fields">
-          <div class="field">
-            <label>Quality sit-down: </label>
-            <input v-model.number="rest_sqft" v-on:keyup="updateMap" placeholder="Square feet of quality sit-down restaurant" type = "number" key="rest-footage">
-          </div>
-          <div class="field">
-            <label>Composite: </label>
-            <input v-model.number="comp_sqft" v-on:keyup="updateMap" placeholder="Square feet of composite restaurant" type = "number" key="comp-footage">
-          </div>
-        </div>
-      </form>
-    </template>
-
-    <template v-else-if="isSupermarket">  
-      <table class="ui small very compact inverted grey table" v-on:submit.prevent>
-        <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
-        <tr><td>Supermarket (per sqft)</td><td>${sup_tripgen_daily}</td><td>${sup_tripgen_PM}</td></tr>
-      </table>
-      <form class="ui tiny equal width form">
-        <div class="field">
-          <label>Supermarket</label>
-          <input v-model.number="sup_sqft" v-on:keyup="updateMap" placeholder="Square feet of supermarket space" type = "number" key="sup-footage">
-        </div>
-      </form>    
-      <br>
-    </template>
-
-    <template v-else-if="isHotel">
-      <table class="ui small very compact inverted grey table" v-on:submit.prevent>
-        <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
-        <tr><td>Hotel (per room)</td><td>${hot_tripgen_daily}</td><td>${hot_tripgen_PM}</td></tr>
-      </table>
-      <form class="ui tiny equal width form">
-        <div class="field">
-          <label>Hotel</label>
-          <input v-model.number="hot_sqft" v-on:keyup="updateMap" placeholder="Number of hotel rooms" type = "number" key="sup-footage">
-        </div>
-      </form>     
-      <br>
-    </template>
-                
+    
     <div class="ui divider"></div>
     <div class="pickers">
       <!--<h5>3. MODE:</h5>-->
@@ -220,25 +214,15 @@
         </div>
         <div class="ui divider"></div>
         
-      <div id="download">
-                <!-- <button v-on:click="updateMap" class="tiny ui right labeled icon floated greenish button" 
-                style="margin-right:5px"><i class="icon arrow circle right"></i>Update
-              </button>
-              <!--<button v-on:click="clearAllInputs" class="tiny ui right labeled icon floated grey button" 
-              style="margin-right:5px"><i class="icon ban"></i>Clear Inputs
-            </button> -->
-        <button v-on:click="resetAllInputs" class="tiny ui right labeled icon floated grey button" 
-          style="margin-right:5px"><i class="icon ban"></i>Reset All</button>
-      </div>
+      <button v-on:click="resetAllInputs" class="tiny ui right labeled icon floated grey button" 
+        style="margin-right:5px"><i class="icon ban"></i>Reset All</button>
+
     </div>
     
     <div class="logo">
       <!--<hr/>-->
       <div class="ui divider"></div>
         <table id="table-logo"><tr>
-          <!-- <td class="td-logo">
-            <h4 class="agency"><b><a target="_blank" href="http://www.sfcta.org">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
-          </td> -->
           <td class="td-logo">
             <a class="agency-link" target="_blank" href="http://www.sfcta.org">
               <img class="img-logo" src="/assets/sfcta-logo-144.png" width="80">
@@ -254,7 +238,7 @@
         
     </div>
   </div>
-
+ 
 <!-- this stuff is all only on click
 -->
   <div id="helpbox" v-if="showHelp" class="ui raised segment">
