@@ -30,7 +30,7 @@
         <div class="ui blueish accordion field"> <!-- put v-bind attributes here..-->
           <div class="top title" v-on:click="accord" v-on:keyup="updateMap">Residential</div>
           <div class="content field">
-            <div class="ui tiny grey inverted segment">
+            <div class="ui mini grey inverted segment">
               <table class="ui small very compact inverted grey table">
                 <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
                 <tr><td>Retail (per sqft)</td><td>${ret_tripgen_daily}</td><td>${ret_tripgen_PM}</td></tr>
@@ -62,7 +62,7 @@
         <div class="ui accordion field">
           <div class="title" v-on:click="accord" >Office</div>
           <div class="content field">
-            <div class="ui tiny grey inverted segment">
+            <div class="ui mini grey inverted segment">
               <table class="ui small very compact inverted grey table">
                 <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
                 <tr><td>Office (per sqft)</td><td>${off_tripgen_daily}</td><td>${off_tripgen_PM}</td></tr>
@@ -78,7 +78,7 @@
         <div class="ui accordion field">
           <div class="title" v-on:click="accord" >Retail</div>
           <div class="content field">
-            <div class="ui tiny grey inverted segment">
+            <div class="ui mini grey inverted segment">
               <table class="ui small very compact inverted grey table">
                 <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
                 <tr><td>Retail (per sqft)</td><td>${ret_tripgen_daily}</td><td>${ret_tripgen_PM}</td></tr>
@@ -94,7 +94,7 @@
         <div class="ui accordion field">
           <div class="title" v-on:click="accord" >Restaurant</div>
           <div class="content field">
-            <div class="ui tiny grey inverted segment">
+            <div class="ui mini grey inverted segment">
               <table class="ui small very compact inverted grey table">
                 <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
                 <tr><td>Quality Sit-down (per sqft)</td><td>${rest_tripgen_daily}</td><td>${rest_tripgen_PM}</td></tr>
@@ -117,20 +117,14 @@
         <div class="ui accordion field">
           <div class="title" v-on:click="accord" >Supermarket</div>
           <div class="content field">
-            <div class="ui tiny grey inverted segment">
+            <div class="ui mini grey inverted segment">
               <table class="ui small very compact inverted grey table" v-on:submit.prevent>
                 <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
                 <tr><td>Supermarket (per sqft)</td><td>${sup_tripgen_daily}</td><td>${sup_tripgen_PM}</td></tr>
               </table>
-              <div class="fields">
-                <div class="field">
-                  <label>Quality sit-down: </label>
-                  <input v-model.number="rest_sqft" v-on:keyup="updateMap" placeholder="Square feet of quality sit-down restaurant" type = "number" key="rest-footage">
-                </div>
-                <div class="field">
-                  <label>Supermarket</label>
-                  <input v-model.number="sup_sqft" v-on:keyup="updateMap" placeholder="Square feet of supermarket space" type = "number" key="sup-footage">
-                </div>
+              <div class="field">
+                <label>Supermarket</label>
+                <input v-model.number="sup_sqft" v-on:keyup="updateMap" placeholder="Square feet of supermarket space" type = "number" key="sup-footage">
               </div>
             </div>
           </div>
@@ -139,20 +133,14 @@
         <div class="ui accordion field">
           <div class="bottom title" v-on:click="accord" >Hotel</div>
           <div class="content field">
-            <div class="ui tiny grey inverted segment">
+            <div class="ui mini grey inverted segment">
               <table class="ui small very compact inverted grey table" v-on:submit.prevent>
                 <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
                 <tr><td>Hotel (per room)</td><td>${hot_tripgen_daily}</td><td>${hot_tripgen_PM}</td></tr>
               </table>
-              <div class="fields">
-                <div class="field">
-                  <label>Quality sit-down: </label>
-                  <input v-model.number="rest_sqft" v-on:keyup="updateMap" placeholder="Square feet of quality sit-down restaurant" type = "number" key="rest-footage">
-                </div>
-                <div class="field">
-                  <label>Hotel</label>
-                  <input v-model.number="hot_sqft" v-on:keyup="updateMap" placeholder="Number of hotel rooms" type = "number" key="sup-footage">
-                </div>
+              <div class="field">
+                <label>Hotel</label>
+                <input v-model.number="hot_rooms" v-on:keyup="updateMap" placeholder="Number of hotel rooms" type = "number" key="sup-footage">
               </div>
             </div>
           </div>
@@ -179,7 +167,7 @@
           <button class = "tiny ui grey icon button" v-on:click="pickOther"
             v-bind:class="{ active: isOther, yellow: isOther}"> Non Work</button>
           <button class = "tiny ui grey icon button" v-on:click="pickAll"
-            v-bind:class="{ active: isAll, yellow: isAll}"> Total</button>
+            v-bind:class="{ active: isAll, yellow: isAll}">Total</button>
         </div>
         <div class="ui divider"></div>
 
@@ -190,7 +178,7 @@
           <button class = "tiny ui grey icon button" v-on:click="pickOutbound"
             v-bind:class="{ active: isOutbound, yellow: isOutbound}"><i class="icon expand"></i>Outbound</button>
           <button class = "tiny ui grey icon button" v-on:click="pickBoth"
-            v-bind:class="{ active: isBoth, yellow: isBoth}"> Total</button>
+            v-bind:class="{ active: isBoth, yellow: isBoth}">Total</button>
         </div>
         <div class="ui divider"></div>
 
