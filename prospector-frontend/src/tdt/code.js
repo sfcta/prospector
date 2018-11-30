@@ -708,17 +708,17 @@ function createDownloadObjects() {
       }
       tdist_vehicle_download.push(tmp_dwld_vehicle);
     }
-    if(app.hot_sqft>0) {
+    if(app.hot_rooms>0) {
       tmp_dwld = {};
       tmp_dwld['Landuse'] = 'Hotel';
-      tmp_dwld['Amount'] = app.hot_sqft.toString();
+      tmp_dwld['Amount'] = app.hot_rooms.toString();
       tmp_dwld['Unit'] = 'Per 1k sqft.';
       tmp_dwld['Daily_Person_Rate'] = app.hot_tripgen_daily.toString();
-      tmp_dwld['Daily_Person_Trips'] = ((app.hot_sqft/1000)*app.hot_tripgen_daily).toString();
+      tmp_dwld['Daily_Person_Trips'] = ((app.hot_rooms/1000)*app.hot_tripgen_daily).toString();
       tot_daily += (app.ret_sqft/1000)*app.hot_tripgen_daily;
       tmp_dwld['PM_Person_Rate'] = app.hot_tripgen_PM.toString();
-      tmp_dwld['PM_Person_Trips'] = ((app.hot_sqft/1000)*app.hot_tripgen_PM).toString();
-      tot_pm += (app.hot_sqft/1000)*app.hot_tripgen_PM;
+      tmp_dwld['PM_Person_Trips'] = ((app.hot_rooms/1000)*app.hot_tripgen_PM).toString();
+      tot_pm += (app.hot_rooms/1000)*app.hot_tripgen_PM;
       trgen_download.push(tmp_dwld);
 
       tmp_dwld = {};
@@ -918,8 +918,8 @@ function getTotalTrips(){
           break;
         case "Hotel":
           rate_key = 2;
-          scalar = app.hot_sqft/1000;
-          proxyLandUse = "Retail";
+          scalar = app.hot_rooms;
+          proxyLandUse = landUse;
           break;
       }
       switch (timePeriodSelect) {
@@ -1026,8 +1026,8 @@ function getFilteredTrips(){
           break;
         case "Hotel":
           rate_key = 2;
-          scalar = app.hot_sqft/1000;
-          proxyLandUse = "Retail";
+          scalar = app.hot_rooms;
+          proxyLandUse = landUse;
           break;
       }
       switch (timePeriodSelect) {
@@ -1093,7 +1093,7 @@ function clearAllInputs(){
   app.rest_sqft = 0;
   app.comp_sqft = 0;
   app.sup_sqft = 0;
-  app.hot_sqft = 0;
+  app.hot_rooms = 0;
   app.num_studios = 0;
   app.num_1bed = 0;
   app.num_2bed = 0;
@@ -1132,7 +1132,7 @@ function resetAllInputs(){
   app.rest_sqft = 0;
   app.comp_sqft = 0;
   app.sup_sqft = 0;
-  app.hot_sqft = 0;
+  app.hot_rooms = 0;
   app.num_studios = 0;
   app.num_1bed = 0;
   app.num_2bed = 0;
@@ -1385,7 +1385,7 @@ function checkLandUseSelections() {
                         app.num_2bed > 0 || app.num_3bed > 0);
   app.hasOffice = app.off_sqft > 0;
   app.hasRestaurant = app.rest_sqft > 0 || app.comp_sqft > 0;
-  app.hasHotel = app.hot_sqft > 0;
+  app.hasHotel = app.hot_rooms > 0;
   app.hasSupermarket = app.sup_sqft > 0;
   app.hasRetail = app.ret_sqft > 0;
 
@@ -1483,7 +1483,7 @@ let app = new Vue({
     rest_sqft: null,
     comp_sqft: null,
     sup_sqft: null,
-    hot_sqft: null,
+    hot_rooms: null,
     num_studios: null,
     num_1bed: null,
     num_2bed: null,
@@ -1521,7 +1521,7 @@ let app = new Vue({
     
     rest_sqft: checkLandUseSelections,
     sup_sqft: checkLandUseSelections,
-    hot_sqft: checkLandUseSelections,
+    hot_rooms: checkLandUseSelections,
     num_1bed: checkLandUseSelections,
     num_2bed: checkLandUseSelections,
     num_3bed: checkLandUseSelections,
