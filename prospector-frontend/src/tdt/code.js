@@ -489,30 +489,6 @@ function updateMap() {
       
       mapLegend.addTo(mymap);
       infoTotals.update();
-      //infoDistrict.update(hoverDistrict);
-    //}
-    /*else {
-      if (!(tripDirectionSelect)){
-        alert("The trip direction is not defined.");
-      }
-      else if (!(tripPurposeSelect)){
-        alert("The trip purpose is not defined.");
-      }
-      
-      else if (!(modeSelect)){
-        alert("The trip mode is not defined.");
-      }
-      else if (!(landUseCheck)){
-        alert("Enter at least one land use type.");
-      }
-      else if (!(timePeriodSelect)){
-        alert("Enter a time frame.");
-      }
-      else {
-        alert("The address is invalid or is outside the city limits of San Francisco. Enter another address. If you are unable to locate a San Francisco " +
-          "address with this tool, contact the San Francisco Planning Department at cpc.transportationreview@sfgov.org");
-      }
-    }*/
   })
 }
 
@@ -1027,7 +1003,7 @@ function getFilteredTrips(){
         case "Hotel":
           rate_key = 2;
           scalar = app.hot_rooms;
-          proxyLandUse = landUse;
+          proxyLandUse = "Retail";
           break;
       }
       switch (timePeriodSelect) {
@@ -1177,77 +1153,9 @@ function pickTaxiTNC(thing){
   updateMap();
 }
 
-function pickRes(thing){
-  landUseCheck = true; 
-  app.isResidential = true;  
-  app.isRetail = false;
-  app.isOffice = false;
-  app.isRestaurant = false;
-  app.isSupermarket = false;
-  app.isHotel = false;
-  checkLandUseSelections()
-}
-
 function accord(thing){
   landUseCheck = true;
-  checkLandUseSelections()
   $(".ui.accordion").accordion();
-}
-
-function pickOffice(thing){
-  landUseCheck = true;
-  app.isOffice = true;
-  app.isResidential = false;
-  app.isRetail = false;
-  app.isRestaurant = false;
-  app.isSupermarket = false;
-  app.isHotel = false;
-  checkLandUseSelections()
-}
-
-function pickRet(thing){
-  //landUseSelect = "Ret";
-  landUseCheck = true;
-  app.isRetail = true;
-  app.isResidential = false;
-  app.isOffice = false;
-  app.isRestaurant = false;
-  app.isSupermarket = false;
-  app.isHotel = false;
-  checkLandUseSelections()
-}
-
-function pickRestaurant(thing){
-  landUseCheck = true;
-  app.isRestaurant = true;
-  app.isRetail = false;
-  app.isResidential = false;
-  app.isOffice = false;
-  app.isSupermarket = false;
-  app.isHotel = false;    
-  checkLandUseSelections()
-}
-
-function pickHotel(thing){
-  landUseCheck = true;
-  app.isHotel = true;
-  app.isRestaurant = false;
-  app.isRetail = false;
-  app.isResidential = false;
-  app.isOffice = false;
-  app.isSupermarket = false;
-  checkLandUseSelections()
-}
-
-function pickSupermarket(thing){
-  landUseCheck = true;
-  app.isSupermarket = true;
-  app.isRestaurant = false;
-  app.isRetail = false;
-  app.isResidential = false;
-  app.isOffice = false;
-  app.isHotel = false;
-  checkLandUseSelections()
 }
 
 function pickWork(thing){
@@ -1380,76 +1288,6 @@ function updateBoundary(boundary_type) {
   }
 }
 
-function checkLandUseSelections() {
-  app.hasResidential = (app.num_studios > 0 || app.num_1bed > 0 || 
-                        app.num_2bed > 0 || app.num_3bed > 0);
-  app.hasOffice = app.off_sqft > 0;
-  app.hasRestaurant = app.rest_sqft > 0 || app.comp_sqft > 0;
-  app.hasHotel = app.hot_rooms > 0;
-  app.hasSupermarket = app.sup_sqft > 0;
-  app.hasRetail = app.ret_sqft > 0;
-
-  if (app.isResidential == true) {
-    app.residentialStyle = selectedToggleStyle;
-  }
-  else if (app.hasResidential == true) {
-    app.residentialStyle = loadedToggleStyle;
-  }
-  else {
-    app.residentialStyle = defaultToggleStyle;
-  }
-  if (app.isOffice == true) {
-    app.officeStyle = selectedToggleStyle;
-  }
-  else if (app.hasOffice == true) {
-    app.officeStyle = loadedToggleStyle;
-  }
-  else {
-    app.officeStyle = defaultToggleStyle;
-  }
-  if (app.isRetail == true) {
-    app.retailStyle = selectedToggleStyle;
-  }
-  else if (app.hasRetail == true) {
-    app.retailStyle = loadedToggleStyle;
-  }
-  else {
-    app.retailStyle = defaultToggleStyle;
-  }
-  if (app.isHotel == true) {
-    app.hotelStyle = selectedToggleStyle;
-  }
-  else if (app.hasHotel == true) {
-    app.hotelStyle = loadedToggleStyle;
-  }
-  else {
-    app.hotelStyle = defaultToggleStyle;
-  }
-  if (app.isSupermarket == true) {
-    app.supermarketStyle = selectedToggleStyle;
-  }
-  else if (app.hasSupermarket == true) {
-    app.supermarketStyle = loadedToggleStyle;
-  }
-  else {
-    app.supermarketStyle = defaultToggleStyle;
-  }
-  if (app.isRestaurant == true) {
-    app.restaurantStyle = selectedToggleStyle;
-  }
-  else if (app.hasSupermarket == true) {
-    app.restaurantStyle = loadedToggleStyle;
-  }
-  else {
-    app.restaurantStyle = defaultToggleStyle;
-  }
-  //alert(app.residentialStyle['background-color']);
-}
-
-let defaultToggleStyle = {'background-color': '#7db3cd'};
-let selectedToggleStyle = {'background-color': '#e4ae18'};
-let loadedToggleStyle = {'background-color': '#0E6EB8'};
-
 // Vue object connects what is done in the user interface html to the javascript. All the buttons
 // in the right side panel are connected here. 
 let app = new Vue({
@@ -1488,44 +1326,14 @@ let app = new Vue({
     num_1bed: null,
     num_2bed: null,
     num_3bed: null,
-    //tot_num_bedrooms:0,
     isTaxiTNCActive: false,
     inputs: false,
     placetype: '',
     placetype_text: '',
     ret_tripgen_daily: '',
-    offSelected: false,
-    resSelected: false,
-    retSelected: false,
-    restSelected: false,
-    supSelected: false,
-    hotSelected: false,
     
-    hasOffice: false,
-    hasResidential: false,
-    hasRetail: false,
-    hasRestaurant: false,
-    hasSupermarket: false,
-    hasHotel: false,
-    
-    residentialStyle: defaultToggleStyle,
-    officeStyle: defaultToggleStyle,
-    retailStyle: defaultToggleStyle,
-    restaurantStyle: defaultToggleStyle,
-    supermarketStyle: defaultToggleStyle,
-    hotelStyle: defaultToggleStyle,
   },
   watch: {
-    off_sqft: checkLandUseSelections,
-    ret_sqft: checkLandUseSelections,
-    
-    rest_sqft: checkLandUseSelections,
-    sup_sqft: checkLandUseSelections,
-    hot_rooms: checkLandUseSelections,
-    num_1bed: checkLandUseSelections,
-    num_2bed: checkLandUseSelections,
-    num_3bed: checkLandUseSelections,
-    num_studios: checkLandUseSelections,
   },
   
   methods: {
@@ -1538,12 +1346,6 @@ let app = new Vue({
     resetAllInputs: resetAllInputs,
 
     accord: accord,
-    pickOffice: pickOffice,
-    pickRes: pickRes,
-    pickRet: pickRet,
-    pickRestaurant: pickRestaurant,
-    pickSupermarket: pickSupermarket,
-    pickHotel: pickHotel,
     pickWork: pickWork,
     pickOther: pickOther,
     pickAll: pickAll,
