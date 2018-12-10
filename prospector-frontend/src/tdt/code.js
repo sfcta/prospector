@@ -183,7 +183,8 @@ infoTotals.update = function() {
         message = '<h4> Total Inbound/Outbound From/To ' + address + '</h4>';
         break;
     }*/
-    message = '<h4> Total Inbound/Outbound From ' + address + '</h4>';
+    
+    /*message = '<h4> Total Inbound/Outbound From ' + address + '</h4>';
     message += '<h4>Person Trips</h4>';
     message += ' - by  auto: ' + totalPersonTripsByMode["auto"]+ '</b>'+
       '<br> - by transit: ' + totalPersonTripsByMode["transit"] + '</b>'+
@@ -191,7 +192,14 @@ infoTotals.update = function() {
       '<br> - by taxi: ' + totalPersonTripsByMode["taxi"] + '</b>'+
       '<br> - by walk: ' + totalPersonTripsByMode["walk"] + '</b>'
     message += '<h4>Vehicle Trips</h4>';
-    message += ' - by  auto: ' + totalVehicleTripsByMode["auto"]+ '</b>'
+    message += ' - by  auto: ' + totalVehicleTripsByMode["auto"]+ '</b>'*/
+    message = '<table class="ui small very compact inverted table">'
+    message += '<tr><th>Mode</th><th>Total</th><th>Filtered*</th></tr>'
+    message += '<tr><td>Auto</td><td>' + totalPersonTripsByMode["auto"] + '</td><td>' + filteredPersonTripsByMode["auto"] + '</td>'
+    message += '<tr><td>Transit</td><td>' + totalPersonTripsByMode["transit"] + '</td><td>' + filteredPersonTripsByMode["transit"] + '</td>'
+    message += '<tr><td>Bike</td><td>' + totalPersonTripsByMode["bike"] + '</td><td>' + filteredPersonTripsByMode["bike"] + '</td>'
+    message += '<tr><td>Taxi/TNC</td><td>' + totalPersonTripsByMode["taxi"] + '</td><td>' + filteredPersonTripsByMode["taxi"] + '</td>'
+    message += '<tr><td>Walk</td><td>' + totalPersonTripsByMode["walk"] + '</td><td>' + filteredPersonTripsByMode["walk"] + '</td>'
   }
   this._div.innerHTML = message; 
 };
@@ -411,7 +419,7 @@ function updateMap() {
       address_geoLyr.bindTooltip(address, {permanent: true, className:'myCSSClass'}).addTo(mymap);
       assignDistrict(geoJson, address_geoLyr, address);
       
-      getFilteredTrips();
+      getFilteredTripsByDistrict();
       getTotalTrips();
       //coloring the districts
       
@@ -545,7 +553,7 @@ function createDownloadObjects() {
       tmp_dwld = {};
       tmp_dwld['Landuse'] = 'Residential';
       for (let district of geoDistricts) {
-        getFilteredTrips(district);
+        getFilteredTripsByDistrict(district);
         tmp_dwld[district.distname] = districtPersonTrips[district.dist]["Residential"].toString();
         total_person_dist += tmp_dwld[district.distname];
       }
@@ -555,7 +563,7 @@ function createDownloadObjects() {
       tmp_dwld_vehicle = {};
       tmp_dwld_vehicle['Landuse'] = 'Residential';
       for (let district of geoDistricts) {
-        getFilteredTrips(district);
+        getFilteredTripsByDistrict(district);
         tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist]["Residential"].toString();
         total_vehicle_dist += tmp_dwld_vehicle[district.distname];
       }
@@ -587,7 +595,7 @@ function createDownloadObjects() {
       tmp_dwld = {};
       tmp_dwld['Landuse'] = 'Office';
       for (let district of geoDistricts) {
-        getFilteredTrips(district);
+        getFilteredTripsByDistrict(district);
         tmp_dwld[district.distname] = districtPersonTrips[district.dist]["Office"].toString();
         total_person_dist += tmp_dwld[district.distname];
       }
@@ -596,7 +604,7 @@ function createDownloadObjects() {
       tmp_dwld_vehicle = {};
       tmp_dwld_vehicle['Landuse'] = 'Office';
       for (let district of geoDistricts) {
-        getFilteredTrips(district);
+        getFilteredTripsByDistrict(district);
         tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist]["Office"].toString();
         total_vehicle_dist += tmp_dwld_vehicle[district.distname];
       }
@@ -628,7 +636,7 @@ function createDownloadObjects() {
       tmp_dwld = {};
       tmp_dwld['Landuse'] = 'Retail';
       for (let district of geoDistricts) {
-        getFilteredTrips(district);
+        getFilteredTripsByDistrict(district);
         tmp_dwld[district.distname] = districtPersonTrips[district.dist]["Retail"].toString();
         total_person_dist += tmp_dwld[district.distname];
 
@@ -638,7 +646,7 @@ function createDownloadObjects() {
       tmp_dwld_vehicle = {};
       tmp_dwld_vehicle['Landuse'] = 'Retail';
       for (let district of geoDistricts) {
-        getFilteredTrips(district);
+        getFilteredTripsByDistrict(district);
         tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist]["Retail"].toString();
         total_vehicle_dist += tmp_dwld_vehicle[district.distname];
       }
@@ -669,7 +677,7 @@ function createDownloadObjects() {
       tmp_dwld = {};
       tmp_dwld['Landuse'] = 'Restaurant';
       for (let district of geoDistricts) {
-        getFilteredTrips(district);
+        getFilteredTripsByDistrict(district);
         tmp_dwld[district.distname] = districtPersonTrips[district.dist]["Restaurant"].toString();
         total_person_dist += tmp_dwld[district.distname];
       }
@@ -678,7 +686,7 @@ function createDownloadObjects() {
       tmp_dwld_vehicle = {};
       tmp_dwld_vehicle['Landuse'] = 'Restaurant';
       for (let district of geoDistricts) {
-        getFilteredTrips(district);
+        getFilteredTripsByDistrict(district);
         tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist]["Restaurant"].toString();
         total_vehicle_dist += tmp_dwld_vehicle[district.distname];
       }
@@ -709,7 +717,7 @@ function createDownloadObjects() {
       tmp_dwld = {};
       tmp_dwld['Landuse'] = 'Hotel';
       for (let district of geoDistricts) {
-        getFilteredTrips(district);
+        getFilteredTripsByDistrict(district);
         tmp_dwld[district.distname] = districtPersonTrips[district.dist]["Hotel"].toString();
         total_person_dist += tmp_dwld[district.distname];
       }
@@ -718,7 +726,7 @@ function createDownloadObjects() {
       tmp_dwld_vehicle = {};
       tmp_dwld_vehicle['Landuse'] = 'Hotel';
       for (let district of geoDistricts) {
-        getFilteredTrips(district);
+        getFilteredTripsByDistrict(district);
         tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist]["Hotel"].toString();
         total_vehicle_dist += tmp_dwld_vehicle[district.distname];
       }
@@ -751,7 +759,7 @@ function createDownloadObjects() {
       tmp_dwld = {};
       tmp_dwld['Landuse'] = 'Supermarket';
       for (let district of geoDistricts) {
-        getFilteredTrips(district);
+        getFilteredTripsByDistrict(district);
         tmp_dwld[district.distname] = districtPersonTrips[district.dist]["Supermarket"].toString();
         total_person_dist += tmp_dwld[district.distname];
       }
@@ -760,7 +768,7 @@ function createDownloadObjects() {
       tmp_dwld_vehicle = {};
       tmp_dwld_vehicle['Landuse'] = 'Supermarket';
       for (let district of geoDistricts) {
-        getFilteredTrips(district);
+        getFilteredTripsByDistrict(district);
         tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist]["Supermarket"].toString();
         total_vehicle_dist += tmp_dwld_vehicle[district.distname];
       }
@@ -771,7 +779,7 @@ function createDownloadObjects() {
     tmp_dwld_vehicle = {};
     tmp_dwld_vehicle['Landuse'] = "Total";
     for (let district of geoDistricts) {
-      getFilteredTrips(district);
+      getFilteredTripsByDistrict(district);
       tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist]["total"].toString();
       total_vehicle_dist += tmp_dwld_vehicle[district.distname];
     }
@@ -781,7 +789,7 @@ function createDownloadObjects() {
     tmp_dwld = {};
     tmp_dwld['Landuse'] = "Total";
     for (let district of geoDistricts) {
-      getFilteredTrips(district);
+      getFilteredTripsByDistrict(district);
       tmp_dwld[district.distname] = districtPersonTrips[district.dist]["total"].toString();
       
     }
@@ -826,8 +834,10 @@ function roundToNearest(number, nearest=1) {
   return Math.round(number / nearest) * nearest
 }
 
-let totalPersonTripsByMode = [];
-let totalVehicleTripsByMode = [];
+let totalPersonTripsByMode = {};
+let totalVehicleTripsByMode = {};
+let filteredPersonTripsByMode = {};
+let filteredVehicleTripsByMode = {};
 
 function getTotalTrips(){
   let num_studios = app.num_studios;
@@ -835,8 +845,10 @@ function getTotalTrips(){
   let num_2bed = app.num_2bed;
   let num_3bed = app.num_3bed;
   let tot_num_bedrooms = num_studios + num_1bed + (2*app.num_2bed) + (2*app.num_3bed);
-  let totalPersonTrips = {};
-  let totalVehicleTrips = {};
+  let totalPersonTrips = {}; // key is landUse
+  let totalVehicleTrips = {}; // key is landUse
+  let filteredPersonTrips = {};
+  let filteredVehicleTrips = {};
   let geoId; 
   
   switch(distributionMethod) {
@@ -895,7 +907,7 @@ function getTotalTrips(){
         case "Hotel":
           rate_key = 2;
           scalar = app.hot_rooms;
-          proxyLandUse = landUse;
+          proxyLandUse = "Retail";
           break;
       }
       switch (timePeriodSelect) {
@@ -906,12 +918,24 @@ function getTotalTrips(){
           rate = tripGenRates[rate_key].daily_rate;
           break;
       }
+      
       totalPersonTrips[landUse] = roundToNearest((rate*scalar)*filterModeSplitData(proxyLandUse, app.placetype)[0][mode]);
       totalVehicleTrips[landUse] = roundToNearest(totalPersonTrips[landUse]/(filterAvoData(proxyLandUse.toLowerCase(), distributionMethod, geoId)));
+      
+      let filteredProp=0;
+      for (let district of geoDistricts) {
+        filteredProp += getDistProps(distributionMethod, geoId, district, modeSelect, tripDirectionSelect, proxyLandUse, timePeriodSelect, tripPurposeSelect);
+      }
+      
+      let avo = filterAvoData(proxyLandUse.toLowerCase(), distributionMethod, geoId);
+      filteredPersonTrips[landUse] = roundToNearest(totalPersonTrips[landUse] * filteredProp);
+      filteredVehicleTrips[landUse] = roundToNearest(totalPersonTrips[landUse] * filteredProp / avo);
     }
 
     totalPersonTrips["total"] = 0;
     totalVehicleTrips["total"] = 0;
+    filteredPersonTrips["total"] = 0;
+    filteredVehicleTrips["total"] = 0;
     for (let landUse of landUses) {
       if (!(totalPersonTrips[landUse])){
         totalPersonTrips[landUse] == 0;
@@ -919,12 +943,22 @@ function getTotalTrips(){
       if (!(totalVehicleTrips[landUse])){
         totalVehicleTrips[landUse] == 0;
       }
+      if (!(filteredPersonTrips[landUse])){
+        filteredPersonTrips[landUse] == 0;
+      }
+      if (!(filteredVehicleTrips[landUse])){
+        filteredVehicleTrips[landUse] == 0;
+      }
       totalPersonTrips["total"] += totalPersonTrips[landUse];
       totalVehicleTrips["total"] += totalVehicleTrips[landUse];
+      filteredPersonTrips["total"] += filteredPersonTrips[landUse];
+      filteredVehicleTrips["total"] += filteredVehicleTrips[landUse];
     }
     
     totalPersonTripsByMode[mode] = totalPersonTrips["total"];
     totalVehicleTripsByMode[mode] = totalVehicleTrips["total"];
+    filteredPersonTripsByMode[mode] = filteredPersonTrips["total"];
+    filteredVehicleTripsByMode[mode] = filteredVehicleTrips["total"];
   }
 }
 
@@ -934,7 +968,7 @@ let districtVehicleTrips = {};
 // Calculates the number of person trips for each of districts
 // filtered by selected purpose, mode, direction, timePeriod, distributionMethod
 // and aggregates districts to region
-function getFilteredTrips(){
+function getFilteredTripsByDistrict(){
   let num_studios = app.num_studios;
   let num_1bed = app.num_1bed;
   let num_2bed = app.num_2bed;
@@ -1359,7 +1393,8 @@ let app = new Vue({
     pickPlaceType: pickPlaceType,
     pickCity: pickCity,
     // pickCombined: pickCombined,
-    getFilteredTrips: getFilteredTrips,
+    getFilteredTripsByDistrict: getFilteredTripsByDistrict,
+    //getFilteredTrips: getFilteredTrips
   },
 });
 
