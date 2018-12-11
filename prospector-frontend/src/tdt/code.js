@@ -172,15 +172,20 @@ infoTotals.update = function() {
     }
   }
   else {
-    message = '<table class="ui small very compact inverted table">'
-    message += '<tr><th>Mode</th><th>Total</th><th>Filtered*</th></tr>'
-    message += '<tr><td>Auto</td><td>' + totalPersonTripsByMode["auto"] + '</td><td>' + filteredPersonTripsByMode["auto"] + '</td>'
-    message += '<tr><td>Transit</td><td>' + totalPersonTripsByMode["transit"] + '</td><td>' + filteredPersonTripsByMode["transit"] + '</td>'
-    message += '<tr><td>Bike</td><td>' + totalPersonTripsByMode["bike"] + '</td><td>' + filteredPersonTripsByMode["bike"] + '</td>'
-    message += '<tr><td>Taxi/TNC</td><td>' + totalPersonTripsByMode["tnc/taxi"] + '</td><td>' + filteredPersonTripsByMode["tnc/taxi"] + '</td>'
-    message += '<tr><td>Walk</td><td>' + totalPersonTripsByMode["walk"] + '</td><td>' + filteredPersonTripsByMode["walk"] + '</td>'
-    message += '</table>'
-    message += '\n*'
+    message = '<table class="ui small very compact inverted table">';
+    message += '<tr><th>Mode</th><th>Total</th><th>Filtered*</th></tr>';
+    message += '<tr><td>Auto</td><td>' + roundToNearest(totalPersonTripsByMode["auto"]);
+    message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["auto"]) + '</td>';
+    message += '<tr><td>Transit</td><td>' + roundToNearest(totalPersonTripsByMode["transit"]);
+    message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["transit"]) + '</td>';
+    message += '<tr><td>Bike</td><td>' + roundToNearest(totalPersonTripsByMode["bike"]) ;
+    message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["bike"]) + '</td>';
+    message += '<tr><td>TNC/Taxi</td><td>' + roundToNearest(totalPersonTripsByMode["tnc/taxi"]);
+    message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["tnc/taxi"]) + '</td>';
+    message += '<tr><td>Walk</td><td>' + roundToNearest(totalPersonTripsByMode["walk"]) ;
+    message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["walk"]) + '</td>';
+    message += '</table>';
+    message += '\n*';
     message += selectedTimePeriod + ' ' + selectedDirection + ' ' + selectedPurpose + ' trips by ' + selectedMode;
     /*switch(selectedDirection) {
       case 'outbound': 
@@ -218,9 +223,9 @@ infoDistrict.update = function (hoverDistrict) { //hoverDistrict is the mouseove
         break;
     }
     message += hoverDistrict.distname.toString() + ' </h4>';
-    message += "Person trips: "+ "<b>" +  districtPersonTrips[hoverDistrict.dist]["total"]+'</b>';
+    message += "Person trips: "+ "<b>" +  roundToNearest(districtPersonTrips[hoverDistrict.dist]["total"]) +'</b>';
     if (selectedMode !== "transit"){
-        message += '<br>' + "Vehicle trips: "+ "<b>"+ districtVehicleTrips[hoverDistrict.dist]["total"]+'</b>';
+        message += '<br>' + "Vehicle trips: "+ "<b>"+ roundToNearest(districtVehicleTrips[hoverDistrict.dist]["total"]) +'</b>';
       }
   }
   this._div.innerHTML = message;
@@ -943,7 +948,7 @@ function getTotalTrips(){
       }
       // note that all modes are displayed regardless of selected mode, so don't filter by mode here.
       
-      totalPersonTrips[landUse] = roundToNearest((rate*scalar)*filterModeSplitData(proxyLandUse, app.placetype)[0][mode2]);
+      totalPersonTrips[landUse] = (rate*scalar)*filterModeSplitData(proxyLandUse, app.placetype)[0][mode2];
 
       let filteredProp=0;
       
@@ -957,15 +962,15 @@ function getTotalTrips(){
         filteredProp=1;
       }
       
-      filteredPersonTrips[landUse] = roundToNearest(totalPersonTrips[landUse] * filteredProp);
+      filteredPersonTrips[landUse] = totalPersonTrips[landUse] * filteredProp;
 
       if (mode=='auto'){
         let avo = filterAvoData(proxyLandUse.toLowerCase(), selectedDistribution, geoId);
-        totalVehicleTrips[landUse] = roundToNearest(totalPersonTrips[landUse]/ avo);
-        filteredVehicleTrips[landUse] = roundToNearest(totalPersonTrips[landUse] * filteredProp / avo);
+        totalVehicleTrips[landUse] = totalPersonTrips[landUse]/ avo;
+        filteredVehicleTrips[landUse] = totalPersonTrips[landUse] * filteredProp / avo;
       }
-      totalVehicleTrips[landUse] = roundToNearest(totalPersonTrips[landUse]);
-      filteredVehicleTrips[landUse] = roundToNearest(totalPersonTrips[landUse] * filteredProp);
+      totalVehicleTrips[landUse] = totalPersonTrips[landUse];
+      filteredVehicleTrips[landUse] = totalPersonTrips[landUse] * filteredProp;
       
     }
 
@@ -1091,12 +1096,11 @@ function getFilteredTripsByDistrict(){
         mode2='tnc_taxi';
       }
       
-      personTrips[landUse] = roundToNearest((rate*scalar)*
-                                            filterModeSplitData(proxyLandUse, app.placetype)[0][mode2]*            
-                                            getDistProps(selectedDistribution, geoId, district,
-                                                         selectedMode, selectedDirection, proxyLandUse,
-                                                         selectedTimePeriod, selectedPurpose))
-      vehicleTrips[landUse] = roundToNearest(personTrips[landUse]/(filterAvoData(proxyLandUse.toLowerCase(), selectedDistribution, geoId)));
+      personTrips[landUse] = (rate*scalar)*filterModeSplitData(proxyLandUse, app.placetype)[0][mode2]*            
+                              getDistProps(selectedDistribution, geoId, district,
+                                           selectedMode, selectedDirection, proxyLandUse,
+                                           selectedTimePeriod, selectedPurpose)
+      vehicleTrips[landUse] = personTrips[landUse]/(filterAvoData(proxyLandUse.toLowerCase(), selectedDistribution, geoId));
     }
 
     //if any of the land uses are undefined b/c no input, set them equal to 0. landUses is a global array of all 5 land uses
