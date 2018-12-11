@@ -151,54 +151,54 @@
     <div class="pickers">
       <!--<h5>3. MODE:</h5>-->
         <div class="three tiny ui buttons">
-          <button class = "tiny ui grey icon button" v-on:click="pickAU" 
-            v-bind:class="{ active: isAUActive, yellow: isAUActive}"><i class="icon car"></i>All Auto</button>
-          <button class = "tiny ui grey icon button" v-on:click="pickTR"
-            v-bind:class="{ active: isTRActive, yellow: isTRActive}"><i class="icon bus"></i>Transit</button>
-          <button class = "tiny ui grey icon button" v-on:click="pickTaxiTNC"
-            v-bind:class="{ active: isTaxiTNCActive, yellow: isTaxiTNCActive}"><i class="icon taxi"></i>TaxiTNC</button>
+          <button class = "tiny ui grey icon button" v-on:click="pickMode('auto')" 
+            v-bind:class="{ active: isModeAuto, yellow: isModeAuto}"><i class="icon car"></i>All Auto</button>
+          <button class = "tiny ui grey icon button" v-on:click="pickMode('transit')"
+            v-bind:class="{ active: isModeTransit, yellow: isModeTransit}"><i class="icon bus"></i>Transit</button>
+          <button class = "tiny ui grey icon button" v-on:click="pickMode('tnc/taxi')"
+            v-bind:class="{ active: isModeTaxi, yellow: isModeTaxi}"><i class="icon taxi"></i>TNC/Taxi</button>
         </div>
         <div class="ui divider"></div>
 
       <!--<h5>4. TRIP PURPOSE:</h5>-->
         <div class="three tiny ui buttons">
-          <button class = "tiny ui grey icon button" v-on:click="pickWork"
-            v-bind:class="{ active: isWork, yellow: isWork}">Work</button>
-          <button class = "tiny ui grey icon button" v-on:click="pickOther"
-            v-bind:class="{ active: isOther, yellow: isOther}"> Non Work</button>
-          <button class = "tiny ui grey icon button" v-on:click="pickAll"
-            v-bind:class="{ active: isAll, yellow: isAll}">Total</button>
+          <button class = "tiny ui grey icon button" v-on:click="pickPurpose('work')"
+            v-bind:class="{ active: isPurposeWork, yellow: isPurposeWork}">Work</button>
+          <button class = "tiny ui grey icon button" v-on:click="pickPurpose('non-work')"
+            v-bind:class="{ active: isPurposeNonWork, yellow: isPurposeNonWork}"> Non Work</button>
+          <button class = "tiny ui grey icon button" v-on:click="pickPurpose('work and non-work')"
+            v-bind:class="{ active: isPurposeAll, yellow: isPurposeAll}">Total</button>
         </div>
         <div class="ui divider"></div>
 
-      <!--<h5>5. DIRECTION:</h5>-->
+      <!--<h5>5. DIRECTION:</h5> -->
         <div class="three tiny ui buttons">
-          <button class = "tiny ui grey icon button" v-on:click="pickInbound"
-            v-bind:class="{ active: isInbound, yellow: isInbound}"><i class="icon compress"></i>Inbound</button>
-          <button class = "tiny ui grey icon button" v-on:click="pickOutbound"
-            v-bind:class="{ active: isOutbound, yellow: isOutbound}"><i class="icon expand"></i>Outbound</button>
-          <button class = "tiny ui grey icon button" v-on:click="pickBoth"
-            v-bind:class="{ active: isBoth, yellow: isBoth}">Total</button>
+          <button class = "tiny ui grey icon button" v-on:click="pickDirection('inbound')"
+            v-bind:class="{ active: isDirectionInbound, yellow: isDirectionInbound}"><i class="icon compress"></i>Inbound</button>
+          <button class = "tiny ui grey icon button" v-on:click="pickDirection('outbound')"
+            v-bind:class="{ active: isDirectionOutbound, yellow: isDirectionOutbound}"><i class="icon expand"></i>Outbound</button>
+          <button class = "tiny ui grey icon button" v-on:click="pickDirection('inbound and outbound')"
+            v-bind:class="{ active: isDirectionBoth, yellow: isDirectionBoth}">Total</button>
         </div>
         <div class="ui divider"></div>
 
-      <!--<h5>6. TIME PERIOD:</h5>-->
+      <!--<h5>6. TIME PERIOD:</h5> -->
         <div class="two tiny ui buttons">
-          <button class = "tiny ui grey icon button" v-on:click="pickDaily"
-            v-bind:class="{ active: isDaily, yellow: isDaily}">Daily</button>
-          <button class = "tiny ui grey icon button" v-on:click="pickPM"
-            v-bind:class="{ active: isPM, yellow: isPM}"> PM Peak</button>
+          <button class = "tiny ui grey icon button" v-on:click="pickTimePeriod('daily')"
+            v-bind:class="{ active: isTimePeriodDaily, yellow: isTimePeriodDaily}">Daily</button>
+          <button class = "tiny ui grey icon button" v-on:click="pickTimePeriod('pm')"
+            v-bind:class="{ active: isTimePeriodPM, yellow: isTimePeriodPM}"> PM Peak</button>
         </div>
         <div class="ui divider"></div>
               
-      <!--<h5>7. DISTRIBUTION METHOD:</h5>-->
+      <!--<h5>7. DISTRIBUTION METHOD:</h5> -->
         <div class="three tiny ui buttons">
-          <button class="tiny ui grey icon button" v-on:click="pickDistrict"
-            v-bind:class="{active: isDistrict, yellow: isDistrict}">District</button>
-          <button class="tiny ui grey icon button" v-on:click="pickPlaceType"
-            v-bind:class="{active: isPlaceType, yellow: isPlaceType}">Place Type</button>
-          <button class="tiny ui grey icon button" v-on:click="pickCity"
-            v-bind:class="{active: isCity, yellow: isCity}">City</button>
+          <button class="tiny ui grey icon button" v-on:click="pickDistribution('district')"
+            v-bind:class="{active: isDistributionDistrict, yellow: isDistributionDistrict}">District</button>
+          <button class="tiny ui grey icon button" v-on:click="pickDistribution('place-type')"
+            v-bind:class="{active: isDistributionPlaceType, yellow: isDistributionPlaceType}">Place Type</button>
+          <button class="tiny ui grey icon button" v-on:click="pickDistribution('city')"
+            v-bind:class="{active: isDistributionCity, yellow: isDistributionCity}">City</button>
         </div>
         <div class="ui divider"></div>
         
