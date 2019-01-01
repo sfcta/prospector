@@ -127,6 +127,7 @@ let markers = []; //this is the list of all the district markers
 let color_func;
 let landUses = ["Residential", "Hotel", "Retail", "Supermarket", "Office", "Restaurant", "Composite"];
 let modeTypes = ["auto", "transit", "tnc/taxi", "walk", "bike"]
+let landUseToAttr;
 
 //some other global variables
 let addressDistrictNum; 
@@ -163,7 +164,6 @@ infoTotals.update = function() {
   let message = '';
   if (addressDistrictNum == null || landUseCheck == false) {
     message = '<h4>Information</h4>';
-    //message = '<br> address district number ' + addressDistrictNum + ' <br>' + addressDistrictName;
     if (addressDistrictNum == null) {
       message += '<b>-Input an address</b>' ;
     }
@@ -187,17 +187,6 @@ infoTotals.update = function() {
     message += '</table>';
     message += '\n*';
     message += selectedTimePeriod + ' ' + selectedDirection + ' ' + selectedPurpose + ' trips by ' + selectedMode;
-    /*switch(selectedDirection) {
-      case 'outbound': 
-        message += 'Outbound trips from ';
-        break;
-      case 'inbound': 
-        message += 'Inbound trips to ';
-        break;
-      default: 
-        message += 'Inbound and outbound trips from/to ';
-        break;
-    }*/
   }
   this._div.innerHTML = message; 
 };
@@ -282,12 +271,6 @@ function addDistrictGeoLayer(geoJsonData, tooltip_positions){
             mymap.removeLayer(districtMarker);
           }
           districtMarker = L.circleMarker(tooltip_positions[feature.dist], {color: 'blue', radius: 1}).addTo(mymap).bindTooltip(feature.distname, {permanent:true, sticky: true});
-          if (address_geoLyr) { //this causes an error in clearAllInputs. it looks like this is an unsolved bug in leaflet, having to do with
-            // accessing a layer once its been deleted
-            // I'm proposing to get rid of the bringtoFront() functionality of the district polygons, since there is
-            // no real reason they need to come to the front on mouseover anyway. This is a quick resolution of this problem.
-            address_geoLyr.bringToFront();
-          }
         infoDistrict.update(e.target.feature); 
         infoTotals.update();
         },
@@ -381,7 +364,7 @@ function filterAvoData(landUse, geoType, geoTypeKey){
   })[0][landUse];
 }
 
-function updateMap() {
+function addAddressTooltipToMap() {
   if (mymap.hasLayer(address_geoLyr)) {
     mymap.removeLayer(address_geoLyr);
   }
@@ -411,91 +394,102 @@ function updateMap() {
        }
       });
       
-      address_geoLyr.addTo(mymap); //adds the geoLayer to the map
-      address_geoLyr.bringToFront();
+      //address_geoLyr.addTo(mymap); //adds the geoLayer to the map
+      //address_geoLyr.bringToFront();
       //why does this only work when i mouseover?
       address_geoLyr.bindTooltip(address, {permanent: true, className:'myCSSClass'}).addTo(mymap);
       assignDistrict(geoJson, address_geoLyr, address);
-      
-      getFilteredTripsByDistrict();
-      getTotalTrips();
-      //coloring the districts
-      
-      let trips = []
-      districts_lyr.setStyle(function(feature){
-        let style;
-        
-        color_func = chroma.scale(['#eff3ff', '#bdd7e7' ,'#6baed6','#3182bd','#08519c']).domain([0, getMax()], 4, 'equal interval');
-        //#ffffe0 #ffd59b #ffa474 #f47461 #db4551 #b81b34 #8b0000
-        let tot_person_trips = districtPersonTrips[feature.dist]["total"];
-        trips.push(tot_person_trips);
+    });
+  
+  updateMap();
+}
 
-        if (trips.reduce((a, b) => a + b, 0) == 0){
-          //if all the districts have 0 person trips, force the fill color to be light blue
-          style = {'color': '#444444', 'weight': 2, 'fillColor': '#c6dbef', fillOpacity:0.6};
-        }
-        else{
-          //otherwise, color the districts according to the chroma color function
-          style = {'color': '#444444', 'weight': 2, 'fillColor': color_func(tot_person_trips), fillOpacity:0.6};
-        }
-        return style
-      });
-      
-      // not working??
-      /*districts_lyr.eachLayer(function(feature) {
-        if (feature.place_type == addressPlaceType) {
-          feature.bringToFront();
-        }
-      });*/
-      
-      //sort the person trips from all the districts in order
-      trips.sort(function(a, b){return a - b});
+function updateMap() {
+  landUseToAttr = {'Residential':{'rate_key':1, 'scalar': app.num_studios+app.num_1bed+2*app.num_2bed+2*app.num_3bed,
+                     'unit':'Bedrooms', 'proxyLandUse':'Residential'},
+                 'Office':{'rate_key':0, 'scalar': app.off_sqft/1000,
+                     'unit':'Square Feet', 'proxyLandUse':'Office'},
+                 'Retail':{'rate_key':3, 'scalar': app.ret_sqft/1000,
+                     'unit':'Square Feet', 'proxyLandUse':'Retail'},
+                 'Restaurant':{'rate_key':5, 'scalar': app.rest_sqft/1000,
+                     'unit':'Square Feet', 'proxyLandUse':'Retail'},
+                 'Composite':{'rate_key':6, 'scalar': app.comp_sqft/1000,
+                     'unit':'Square Feet', 'proxyLandUse':'Retail'},
+                 'Supermarket':{'rate_key':4, 'scalar': app.sup_sqft/1000,
+                     'unit':'Square Feet', 'proxyLandUse':'Retail'},
+                 'Hotel':{'rate_key':2, 'scalar': app.hot_rooms/1000,
+                     'unit':'Rooms', 'proxyLandUse':'Retail'},
+  }
+  getFilteredTripsByDistrict();
+  getTotalTrips();
+  //coloring the districts
+  
+  let trips = []
+  districts_lyr.setStyle(function(feature){
+    let style;
     
-      let labels = [];
-      let colors = [];
-      
-      //get the breakpoints from the chroma quantiles function on the trips array 
-      let breakpoints = chroma.limits(trips, 'e', 4);
-    
-      //get rid of any duplicate breakpoints b/c only want unique labels on the legend
-      let unique_breakpoints = breakpoints.filter((v, i, a) => a.indexOf(v) === i);
-    
-      for (let breakpoint of unique_breakpoints) {
-        if (breakpoint == 0){
-          labels.push(roundToNearest((breakpoint)));
-        }
-        else{
-          labels.push("<=" + Math.round(breakpoint));
-        }
-      
-        if (unique_breakpoints.reduce((a, b) => a + b, 0) == 0){
-          colors.push("#c6dbef"); 
-        }
-        else {
-          colors.push(color_func(roundToNearest(breakpoint)));
-        }
-      }
-      
-      //building and styling the legend for the districts
-      if (mapLegend) mymap.removeControl(mapLegend);
-      mapLegend = L.control({ position: 'bottomright' });
+    color_func = chroma.scale(['#eff3ff', '#bdd7e7' ,'#6baed6','#3182bd','#08519c']).domain([0, getMax()], 4, 'equal interval');
+    //#ffffe0 #ffd59b #ffa474 #f47461 #db4551 #b81b34 #8b0000
+    let tot_person_trips = districtPersonTrips[feature.dist]["total"];
+    trips.push(tot_person_trips);
 
-      mapLegend.onAdd = function(map) {
-        let div = L.DomUtil.create('div', 'info legend');
-        let units = [" "];
-        
-        //I am not sure that the colors correctly match
-        let legHTML = getLegHTML(labels, colors, false, units);
+    if (trips.reduce((a, b) => a + b, 0) == 0){
+      //if all the districts have 0 person trips, force the fill color to be light blue
+      style = {'color': '#444444', 'weight': 2, 'fillColor': '#c6dbef', fillOpacity:0.6};
+    }
+    else{
+      //otherwise, color the districts according to the chroma color function
+      style = {'color': '#444444', 'weight': 2, 'fillColor': color_func(tot_person_trips), fillOpacity:0.6};
+    }
+    return style
+  });
+  
+  //sort the person trips from all the districts in order
+  trips.sort(function(a, b){return a - b});
 
-        for (var i = 0; i < labels.length; i++) {
-          div.innerHTML = '<h4>' + "Person Trips" + '</h4>' + legHTML;
-        }
-        return div;
-      };
-      
-      mapLegend.addTo(mymap);
-      infoTotals.update();
-  })
+  let labels = [];
+  let colors = [];
+  
+  //get the breakpoints from the chroma quantiles function on the trips array 
+  let breakpoints = chroma.limits(trips, 'e', 4);
+
+  //get rid of any duplicate breakpoints b/c only want unique labels on the legend
+  let unique_breakpoints = breakpoints.filter((v, i, a) => a.indexOf(v) === i);
+
+  for (let breakpoint of unique_breakpoints) {
+    if (breakpoint == 0){
+      labels.push(roundToNearest((breakpoint)));
+    }
+    else{
+      labels.push("<=" + Math.round(breakpoint));
+    }
+    if (unique_breakpoints.reduce((a, b) => a + b, 0) == 0){
+      colors.push("#c6dbef"); 
+    }
+    else {
+      colors.push(color_func(roundToNearest(breakpoint)));
+    }
+  }
+  
+  //building and styling the legend for the districts
+  if (mapLegend) mymap.removeControl(mapLegend);
+  mapLegend = L.control({ position: 'bottomright' });
+
+  mapLegend.onAdd = function(map) {
+    let div = L.DomUtil.create('div', 'info legend');
+    let units = [" "];
+    
+    //I am not sure that the colors correctly match
+    let legHTML = getLegHTML(labels, colors, false, units);
+
+    for (var i = 0; i < labels.length; i++) {
+      div.innerHTML = '<h4>' + "Person Trips" + '</h4>' + legHTML;
+    }
+    return div;
+  };
+  
+  mapLegend.addTo(mymap);
+  infoTotals.update();
 }
 
 function roundToNearest(number, nearest=1) {
@@ -519,6 +513,12 @@ function getTotalTrips(){
   let filteredPersonTrips = {};
   let filteredVehicleTrips = {};
   let geoId; 
+  let attr;
+  let rate;
+  let rate_key;
+  let unit;
+  let scalar;
+  let proxyLandUse;
   
   switch(selectedDistribution) {
       case 'district':
@@ -536,49 +536,13 @@ function getTotalTrips(){
     }
     //the computations below happen without the direction and distrbution data multiplications
   for (let mode of modeTypes){
-    let rate;
-    let rate_key;
-    let scalar;
-    let proxyLandUse;
-
     for (let landUse of landUses) {
-      switch (landUse) {
-        case "Residential":
-          rate_key = 1;
-          scalar = tot_num_bedrooms;
-          proxyLandUse = landUse;
-          break;
-        case "Retail":
-          rate_key = 3;
-          scalar = app.ret_sqft/1000;
-          proxyLandUse = landUse;
-          break;
-        case "Office":
-          rate_key = 0;
-          scalar = app.off_sqft/1000;
-          proxyLandUse = landUse;
-          break;
-        case "Restaurant":
-          rate_key = 5;
-          scalar = app.rest_sqft/1000;
-          proxyLandUse = "Retail";
-          break;
-        case "Composite":
-          rate_key = 6;
-          scalar = app.comp_sqft/1000;
-          proxyLandUse = "Retail";
-          break;
-        case "Supermarket":
-          rate_key = 4;
-          scalar = app.sup_sqft/1000;
-          proxyLandUse = "Retail";
-          break;
-        case "Hotel":
-          rate_key = 2;
-          scalar = app.hot_rooms;
-          proxyLandUse = "Retail";
-          break;
-      }
+      attr = landUseToAttr[landUse];
+      rate_key = attr['rate_key'];
+      scalar = attr['scalar'];
+      unit = attr['unit'];
+      proxyLandUse = attr['proxyLandUse'];
+      
       switch (selectedTimePeriod) {
         case 'pm':
           rate = tripGenRates[rate_key].pkhr_rate;
@@ -593,11 +557,9 @@ function getTotalTrips(){
         mode2='tnc_taxi';
       }
       // note that all modes are displayed regardless of selected mode, so don't filter by mode here.
-      
       totalPersonTrips[landUse] = (rate*scalar)*filterModeSplitData(proxyLandUse, app.placetype)[0][mode2];
 
       let filteredProp=0;
-      
       // TO DO: Need to include walk/bike in database.  This is a hack b/c active modes don't matter for now.
       if (mode != 'walk' && mode !='bike'){
         for (let district of geoDistricts) {
@@ -607,7 +569,6 @@ function getTotalTrips(){
       else {
         filteredProp=1;
       }
-      
       filteredPersonTrips[landUse] = totalPersonTrips[landUse] * filteredProp;
 
       if (mode=='auto'){
@@ -617,9 +578,7 @@ function getTotalTrips(){
       }
       totalVehicleTrips[landUse] = totalPersonTrips[landUse];
       filteredVehicleTrips[landUse] = totalPersonTrips[landUse] * filteredProp;
-      
     }
-
     totalPersonTrips["total"] = 0;
     totalVehicleTrips["total"] = 0;
     filteredPersonTrips["total"] = 0;
@@ -642,7 +601,6 @@ function getTotalTrips(){
       filteredPersonTrips["total"] += filteredPersonTrips[landUse];
       filteredVehicleTrips["total"] += filteredVehicleTrips[landUse];
     }
-    
     totalPersonTripsByMode[mode] = totalPersonTrips["total"];
     totalVehicleTripsByMode[mode] = totalVehicleTrips["total"];
     filteredPersonTripsByMode[mode] = filteredPersonTrips["total"];
@@ -662,6 +620,12 @@ function getFilteredTripsByDistrict(){
   let num_2bed = app.num_2bed;
   let num_3bed = app.num_3bed;
   let tot_num_bedrooms = num_studios + num_1bed + (2*app.num_2bed) + (3*app.num_3bed);
+  let attr;
+  let rate;
+  let rate_key;
+  let unit;
+  let scalar;
+  let proxyLandUse;
   
   for (let district of geoDistricts) {
     let personTrips = {};
@@ -686,48 +650,12 @@ function getFilteredTripsByDistrict(){
     }
     
     for (let landUse of landUses) {
-      let rate;
-      let rate_key;
-      let scalar;
-      let proxyLandUse;
-
-      switch (landUse) {
-        case "Residential":
-          rate_key = 1;
-          scalar = tot_num_bedrooms;
-          proxyLandUse = landUse;
-          break;
-        case "Retail":
-          rate_key = 3;
-          scalar = app.ret_sqft/1000;
-          proxyLandUse = landUse;
-          break;
-        case "Office":
-          rate_key = 0;
-          scalar = app.off_sqft/1000;
-          proxyLandUse = landUse;
-          break;
-        case "Restaurant":
-          rate_key = 5;
-          scalar = app.rest_sqft/1000;
-          proxyLandUse = "Retail";
-          break;
-        case "Composite":
-          rate_key = 6;
-          scalar = app.comp_sqft/1000;
-          proxyLandUse = "Retail";
-          break;
-        case "Supermarket":
-          rate_key = 4;
-          scalar = app.sup_sqft/1000;
-          proxyLandUse = "Retail";
-          break;
-        case "Hotel":
-          rate_key = 2;
-          scalar = app.hot_rooms;
-          proxyLandUse = "Retail";
-          break;
-      }
+      attr = landUseToAttr[landUse];
+      rate_key = attr['rate_key'];
+      scalar = attr['scalar'];
+      unit = attr['unit'];
+      proxyLandUse = attr['proxyLandUse'];
+      
       switch (selectedTimePeriod) {
         case 'pm':
           rate = tripGenRates[rate_key].pkhr_rate;
@@ -741,14 +669,12 @@ function getFilteredTripsByDistrict(){
       if (selectedMode == 'tnc/taxi'){
         mode2='tnc_taxi';
       }
-      
       personTrips[landUse] = (rate*scalar)*filterModeSplitData(proxyLandUse, app.placetype)[0][mode2]*            
                               getDistProps(selectedDistribution, geoId, district,
                                            selectedMode, selectedDirection, proxyLandUse,
                                            selectedTimePeriod, selectedPurpose)
       vehicleTrips[landUse] = personTrips[landUse]/(filterAvoData(proxyLandUse.toLowerCase(), selectedDistribution, geoId));
     }
-
     //if any of the land uses are undefined b/c no input, set them equal to 0. landUses is a global array of all 5 land uses
     personTrips["total"] = 0
     vehicleTrips["total"] = 0
@@ -762,7 +688,6 @@ function getFilteredTripsByDistrict(){
       personTrips["total"] += personTrips[landUse]
       vehicleTrips["total"] += vehicleTrips[landUse]
     }
-
     districtPersonTrips[district.dist] = personTrips; //this creates a dictionary of dictionaries, with one dictionary for every district where the keys are the land uses/total
     //and the dictionary is populated by the time period
     districtVehicleTrips[district.dist] = vehicleTrips;
@@ -772,8 +697,9 @@ function getFilteredTripsByDistrict(){
 
 function clearAllInputs(){
   landUseCheck = false;
-  app.isModeAuto = false;
+  app.isModeAuto = true;
   app.isModeTransit = false;
+  app.isModeTaxi = false;
   app.address=  null;
   app.isOffice = false;
   app.isResidential = false;
@@ -781,18 +707,16 @@ function clearAllInputs(){
   app.isRestaurant = false;
   app.isSupermarket = false;
   app.isHotel = false;
-  app.isPurposeWork = false;
+  app.isPurposeWork = true;
   app.isPurposeNonWork = false;
   app.isPurposeAll = false;
-  app.isDirectionInbound = false;
+  app.isDirectionInbound = true;
   app.isDirectionOutbound = false;
   app.isDirectionBoth = false;
-  app.isTimePeriodDaily = false;
+  app.isTimePeriodDaily = true;
   app.isTimePeriodPM = false;
-  app.isCombined = false;
   app.off_sqft = 0;
   app.ret_sqft = 0;
-  app.res_sqft = 0;
   app.rest_sqft = 0;
   app.comp_sqft = 0;
   app.sup_sqft = 0;
@@ -801,7 +725,7 @@ function clearAllInputs(){
   app.num_1bed = 0;
   app.num_2bed = 0;
   app.num_3bed = 0;
-  app.isModeTaxi = false;
+  
   
   app.placetype = '';
   //this doesn't seem to be doing anything
@@ -828,18 +752,19 @@ function resetAllInputs(){
   app.address=  null;
   pickMode('auto');
   pickPurpose('work');
-  pickInbound();
-  app.off_sqft = 0;
-  app.ret_sqft = 0;
-  app.res_sqft = 0;
-  app.rest_sqft = 0;
-  app.comp_sqft = 0;
-  app.sup_sqft = 0;
-  app.hot_rooms = 0;
-  app.num_studios = 0;
-  app.num_1bed = 0;
-  app.num_2bed = 0;
-  app.num_3bed = 0;
+  pickDirection('inbound');
+  pickTimePeriod('daily');
+  pickDistribution('district');
+  app.off_sqft = null;
+  app.ret_sqft = null;
+  app.rest_sqft = null;
+  app.comp_sqft = null;
+  app.sup_sqft = null;
+  app.hot_rooms = null;
+  app.num_studios = null;
+  app.num_1bed = null;
+  app.num_2bed = null;
+  app.num_3bed = null;
   
   app.placetype = '';
   //this doesn't seem to be doing anything
@@ -851,8 +776,9 @@ function resetAllInputs(){
     //this works but removing the layer is not the ideal situation. I'd rather keep the layer and just recolor it.
     //mymap.removeLayer(districts_lyr);
   }
-  infoDistrict.update();
-  infoTotals.update();
+  updateMap();
+  //infoDistrict.update();
+  //infoTotals.update();
 }
 
 //button functions
@@ -1022,13 +948,11 @@ let app = new Vue({
     isDirectionBoth: false,
     isTimePeriodDaily: true,
     isTimePeriodPM: false,
-    isCombined: false,
     isDistributionDistrict: true,
     isDistributionPlaceType: false,
     isDistributionCity: false,
     off_sqft: null,
     ret_sqft: null,
-    res_sqft: null,
     rest_sqft: null,
     comp_sqft: null,
     sup_sqft: null,
@@ -1041,7 +965,7 @@ let app = new Vue({
     inputs: false,
     placetype: '',
     placetype_text: '',
-    ret_tripgen_daily: '',
+    res_tripgen_daily: '',
     
   },
   watch: {
@@ -1057,6 +981,7 @@ let app = new Vue({
     pickDistribution: pickDistribution,
     
     updateMap: updateMap,
+    addAddressTooltipToMap: addAddressTooltipToMap,
     clearAllInputs: clearAllInputs,
     resetAllInputs: resetAllInputs,
 
@@ -1228,6 +1153,7 @@ queryServer(CTA_API_SERVER + CITY_URL)
 
 //this is the downloading part
 
+let avo_download;
 let trgen_download; //an array of dictionaries -> "a list of json"
 let tdist_download;
 let modesplit_download; 
@@ -1240,6 +1166,7 @@ let total_trips_download;
 function createDownloadObjects() {
   // each of the downloads is a list of dicts, where the key is a column header
   // and the value becomes a cell value in that column
+  avo_download = [];
   trgen_download = []; 
   tdist_download = [];
   modesplit_download = [];
@@ -1247,6 +1174,7 @@ function createDownloadObjects() {
   total_person_dist = 0;
   total_vehicle_dist = 0;
   total_trips_download = [];
+  let attr;
   let rate_key;
   let scalar;
   let unit;
@@ -1261,52 +1189,26 @@ function createDownloadObjects() {
   let tot_pm = 0;
 
   for (let landUse of landUses){
-    switch (landUse) {
-        case "Residential":
-          rate_key = 1;
-          scalar = tot_num_bedrooms;
-          unit = 'Bedrooms';
-          proxyLandUse = landUse;
-          break;
-        case "Retail":
-          rate_key = 3;
-          scalar = app.ret_sqft/1000;
-          unit = 'Square Feet';
-          proxyLandUse = landUse;
-          break;
-        case "Office":
-          rate_key = 0;
-          scalar = app.off_sqft/1000;
-          unit = 'Square Feet';
-          proxyLandUse = landUse;
-          break;
-        case "Restaurant":
-          rate_key = 5;
-          scalar = app.rest_sqft/1000;
-          unit = 'Square Feet';
-          proxyLandUse = "Retail";
-          break;
-        case "Composite":
-          rate_key = 6;
-          scalar = app.comp_sqft/1000;
-          unit = 'Square Feet';
-          proxyLandUse = "Retail";
-          break;
-        case "Supermarket":
-          rate_key = 4;
-          scalar = app.sup_sqft/1000;
-          unit = 'Square Feet';
-          proxyLandUse = "Retail";
-          break;
-        case "Hotel":
-          rate_key = 2;
-          scalar = app.hot_rooms;
-          unit = 'Rooms';
-          proxyLandUse = "Retail";
-          break;
-    }
+    attr = landUseToAttr[landUse];
+    rate_key = attr['rate_key'];
+    scalar = attr['scalar'];
+    unit = attr['unit'];
+    proxyLandUse = attr['proxyLandUse'];
     pm_rate = tripGenRates[rate_key].pkhr_rate;
     daily_rate = tripGenRates[rate_key].daily_rate;
+    
+    // Average Vehicle Occupancy
+    tmp_dwld = {};
+    tmp_dwld['Landuse'] = landUse;
+    tmp_dwld['District'] = addressDistrictName;
+    tmp_dwld['District AVO'] = filterAvoData(proxyLandUse.toLowerCase(), 'district', addressDistrictNum);
+    //avo_download.push(tmp_dwld);
+    //tmp_dwld['Landuse'] = landUse;
+    tmp_dwld['Place Type'] = app.placetype_text;
+    tmp_dwld['Place Type AVO'] = filterAvoData(proxyLandUse.toLowerCase(), 'place-type', addressPlaceType);
+    tmp_dwld['City'] = 'San Francisco'
+    tmp_dwld['City AVO'] = filterAvoData(proxyLandUse.toLowerCase(), 'city', 'San Francisco');
+    avo_download.push(tmp_dwld);
     
     // Trip Generation
     tmp_dwld = {};
@@ -1404,8 +1306,14 @@ function createDownloadObjects() {
 window.downloadCSV = function(){
   createDownloadObjects();
   let data, filename, link;
-  let csv = 'Total Trips Generated by Land Use and Time';
+  let csv = 'Average vehicle occupancy';
   if (csv == null) return;
+  
+  csv += '\n'+ convertArrayOfObjectsToCSV({
+    data: avo_download
+  });
+  
+  csv += '\n\n'+ 'Total Trips Generated by Land Use and Time';
   csv += '\n'+ convertArrayOfObjectsToCSV({
     data: trgen_download
   });

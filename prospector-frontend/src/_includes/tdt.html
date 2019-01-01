@@ -17,7 +17,7 @@
     
     <form class="ui tiny equal width form" v-on:submit.prevent>
       <div class="field">
-        <input v-model="address" class="fix" append-icon= "icon taxi" v-on:blur="updateMap"
+        <input v-model="address" class="fix" v-on:blur="addAddressTooltipToMap"
         
         type="text" placeholder="Search for address"/>
       </div>
@@ -33,7 +33,7 @@
             <div class="ui mini grey inverted segment">
               <table class="ui small very compact inverted grey table">
                 <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
-                <tr><td>Retail (per sqft)</td><td>${ret_tripgen_daily}</td><td>${ret_tripgen_PM}</td></tr>
+                <tr><td>Residential (per bedroom)</td><td>${res_tripgen_daily}</td><td>${res_tripgen_PM}</td></tr>
               </table>
               <div class="fields">
                 <div class="field">
@@ -261,16 +261,17 @@
       <h2 style="margin-bottom:0px;">How to Use This Tool</h2>
       <!-- <hr style="margin-bottom:5px;margin-top:5px"/> -->
       <ul>
-        <li><b>Step 1: </b> Please enter the project address </li>
-        <li><b>Step 2: </b> Please select any/all (multiple selections are permitted here) the land use/s proposed and enter the associated values (e.g., number of units, gross square footage, etc.). </li>
-        <li><b>Step 3: </b> Please choose the way of travel (e.g., the tool will output all project generated transit person trips if you choose “Transit”).</li>
-        <li><b>Step 4: </b> Please select a trip purpose (e.g., the tool will output all project generated “Transit” person trips whose trip purpose is “coming to and from work” if you choose the “Work” purpose). </li>
-        <li><b>Step 5: </b> Please choose a trip direction (e.g., the tool will output all project generated “Transit” “Work” person trips that are traveling to the project site if you choose “Inbound”). </li>
-        <li><b>Step 6: </b> Please select time period of interest (e.g., the tool will output all project generated “Transit” “Work” person trips in the “Inbound” during the PM peak period if “PM Peak” is selected).</li>
-        <li><b>Step 7: </b> Click on “Update”. </li>
-        <li><b>Step 8: </b> Move your mouse cursor over the various neighborhoods on the map interface to see the results of your selections displayed on the upper right corner. </li>
-        <li><b>Step 9: </b> Click on the “Download Data” button in "What is this?" to retrieve the outputs in a spreadsheet form to save for your records. </li>
-        <li><b>Step 10: </b> Click on “Clear Inputs” to start over.  </li></ul>
+        <li><b>Step 1: </b> Enter the project address </li>
+        <li><b>Step 2: </b> Enter project attributes by selecting appropriate land use types and filling in forms (e.g., number of units, gross square footage, etc.). </li>
+        <li><b>Step 3: </b> Select travel attributes: </li>
+        <li><b>     3.a: </b>   Mode: (e.g., All Auto, Transit, or TNC/Taxi).</li>
+        <li><b>     3.b: </b>   Purpose (e.g., Work or Non-Work). </li>
+        <li><b>     3.c: </b>   Direction (e.g., Inbound or Outbound). </li>
+        <li><b>     3.d: </b>   Time period (e.g., Daily or PM Peak).</li>
+        <li><b>Step 4: </b> Click on the “Download Data” button in "What is this?" to retrieve the outputs in a spreadsheet form to save for your records. </li>
+        <li><b>Step 5: </b> Click on “Clear Inputs” to start over.  </li>
+        <li><b>Note: </b> Move your mouse cursor over the various neighborhoods on the map interface to see the results of your selections displayed on the upper right corner. </li>
+      </ul>
 
       <div style="margin-top:20px;">
         <button v-on:click="clickToggleInstructions" class="small ui right floated violet button">
