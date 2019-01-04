@@ -7,7 +7,8 @@ const sfcta_components = [
 	   'autolos',
      'tmcshp',
      'viz-template',
-     'tdt'
+     'tdt',
+     'champlu'
 	 //'cmp-v0',
 ];
 
