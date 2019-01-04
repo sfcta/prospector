@@ -39,7 +39,7 @@ const GEO_VIEW = 'taz_boundaries';
 const DATA_VIEW = 'lua2017';
 
 const FRAC_COLS = ['speed','time','vol','vmt','vhd','vht','pti80','pti80_vmt'];
-const YR_LIST = [2015,2020,2025,2030,2035,2040];
+const YR_LIST = [2015,2020,2025,2030,2035,2040,2050];
 
 const INT_COLS = ['dt','at','ft2'];
 const DISCRETE_VAR_LIMIT = 10;
