@@ -125,16 +125,26 @@ function getLegHTML(vals, colors, bins=true, postunits=''){
 }
 
 // this variation is to only assign colors to values in the range passed in as input
-function getLegHTML2(vals, colors, bins=true, postunits=''){
+function getLegHTML2(vals, colors, bins=true, postunits='', reverse=false){
   let ret = '';
   if(bins){
     // loop through our bin intervals and generate a label with a colored square for each interval
-    for (var i = 0; i < vals.length-1; i++) {
-      ret +=
-          '<p class="legend-row"><i style="background:' + colors[i] + '"></i> '
-          + (i==0 ? 'less than ' : ((i==vals.length-2)? (vals[i] + postunits + ' or more') : (vals[i] + postunits + ' &ndash; ')))
-          + ((i==vals.length-2)? '' : (vals[i + 1] + postunits + '<br>'))
-          + '</p>';
+    if (reverse) {
+      for (var i = vals.length-2; i >= 0; i--) {
+        ret +=
+            '<p class="legend-row"><i style="background:' + colors[i] + '"></i> '
+            + (i==0 ? vals[i+1] + postunits + ' or less' : ((i==vals.length-2)? ('more than ' + vals[i] + postunits) : (vals[i] + postunits + ' &ndash; ')))
+            + ((i==0)? '' : (i==vals.length-2? '<br>' : vals[i+1] + postunits + '<br>'))
+            + '</p>';
+      }      
+    } else {
+      for (var i = 0; i < vals.length-1; i++) {
+        ret +=
+            '<p class="legend-row"><i style="background:' + colors[i] + '"></i> '
+            + (i==0 ? vals[i+1] + postunits + ' or less' : ((i==vals.length-2)? ('more than ' + vals[i] + postunits) : (vals[i] + postunits + ' &ndash; ')))
+            + ((i==vals.length-2)? '' : (i==0? '<br>' : vals[i + 1] + postunits + '<br>'))
+            + '</p>';
+      }
     }
   } else{
     for (var i = 0; i < vals.length; i++) {
