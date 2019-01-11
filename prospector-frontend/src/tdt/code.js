@@ -377,7 +377,6 @@ function addAddressTooltipToMap() {
   .then(function(geocodedJson) { //after queryServer returns the data, do this:
     //if (geocodedJson.features.length !== 0 && selectedMode && landUseCheck==true && selectedPurpose && 
     //  selectedDirection && selectedTimePeriod) {
-
       let geoJson = planningJson2geojson(geocodedJson); //this is the polygon
       address_geoLyr = L.geoJSON(geoJson,{ //this makes a geoJSON layer from geojson data, which is input
         style: color_styles[1].normal, //this is hardcoded to blue
@@ -393,15 +392,10 @@ function addAddressTooltipToMap() {
         });
        }
       });
-      
-      //address_geoLyr.addTo(mymap); //adds the geoLayer to the map
-      //address_geoLyr.bringToFront();
-      //why does this only work when i mouseover?
       address_geoLyr.bindTooltip(address, {permanent: true, className:'myCSSClass'}).addTo(mymap);
-      assignDistrict(geoJson, address_geoLyr, address);
+      assignDistrict(geoJson);
+      updateMap();
     });
-    
-  updateMap();
 }
 
 function updateMap() {
@@ -1058,7 +1052,7 @@ let instructionsPanel = new Vue({
   },
 });
 
-function assignDistrict(address, geoLayer, tooltipLabel) {
+function assignDistrict(address) {
   //convert the address geojson to leaflet polygon
   let addressPolygon = L.polygon(address.geometry.coordinates[0]);
   //find the centroid of the address polygon
