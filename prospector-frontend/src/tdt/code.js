@@ -185,8 +185,11 @@ infoTotals.update = function() {
     message += '<tr><td>Walk</td><td>' + roundToNearest(totalPersonTripsByMode["walk"]) ;
     message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["walk"]) + '</td>';
     message += '</table>';
-    message += '\n*';
-    message += selectedTimePeriod + ' ' + selectedDirection + ' ' + selectedPurpose + ' trips by ' + selectedMode;
+    message += 'Filtered by: ' + selectedTimePeriod + ' ' + selectedDirection + ' ' + selectedPurpose;
+    message += '<br><br><b>Total trips:</b> all daily trips, by all modes, purposes, and directions';
+    message += '<br><b>Filtered trips:</b> trips filtered by selected toggle buttons for time period,';
+    message += '<br>purpose, and direction';
+    
   }
   this._div.innerHTML = message; 
 };
@@ -200,21 +203,53 @@ infoDistrict.update = function (hoverDistrict) { //hoverDistrict is the mouseove
     message = '<h4>Information</h4>' + '<b> Hover over a district to see filtered trips by mode </b>';
   }
   else {
+    message = '<h4>';
+    switch(selectedTimePeriod) {
+      case 'daily':
+        message += 'Daily';
+        break;
+      case 'pm':
+        message += 'PM Peak Period';
+    }
+    switch(selectedPurpose) {
+      case 'work':
+        message += ' Work';
+        break;
+      case 'non-work':
+        message += ' Non-Work';
+        break;
+      case 'work and non-work':
+        message += ' Work and Non-Work';
+        break;
+    }
+    switch(selectedMode) {
+      case 'auto':
+        message += ' Trips by Auto';
+        break;
+      case 'tnc/taxi':
+        message += ' Trips by TNC/Taxi';
+        break;
+      case 'transit':
+        message += ' Trips by Transit';
+    }
+    message += '<br>';
     switch(selectedDirection) {
       case 'outbound': 
-        message = '<h4> Outbound From' + address + ' to ';
+        message += ' Outbound From' + address + ' to ';
         break;
       case 'inbound': 
-        message = '<h4> Inbound To ' + address + ' from ';
+        message += ' Inbound To ' + address + ' from ';
         break;
       default: 
-        message = '<h4> Inbound/Outbound ' + address + ' from/to ';
+        message += ' Inbound/Outbound ' + address + ' from/to ';
         break;
     }
     message += hoverDistrict.distname.toString() + ' </h4>';
     message += "Person trips: "+ "<b>" +  roundToNearest(districtPersonTrips[hoverDistrict.dist]["total"]) +'</b>';
     if (selectedMode !== "transit"){
         message += '<br>' + "Vehicle trips: "+ "<b>"+ roundToNearest(districtVehicleTrips[hoverDistrict.dist]["total"]) +'</b>';
+        let avo = districtVehicleTrips[hoverDistrict.dist]["total"] / districtPersonTrips[hoverDistrict.dist]["total"]
+        message += '<br>' + "Avg Veh Occ: " + "<b>"+ roundToNearest(avo,1)
       }
   }
   this._div.innerHTML = message;
@@ -486,9 +521,9 @@ function updateMap() {
   infoTotals.update();
 }
 
-function roundToNearest(number, nearest=1) {
-  //return Math.ceil(number / nearest) * nearest
-  return Math.round(number / nearest) * nearest
+function roundToNearest(number, precision=0) {
+  let scale = Math.pow(10, precision);
+  return Math.round(number * scale) / scale;
 }
 
 let totalPersonTripsByMode = {};
