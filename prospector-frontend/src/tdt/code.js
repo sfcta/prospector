@@ -400,7 +400,7 @@ function addAddressTooltipToMap() {
       address_geoLyr.bindTooltip(address, {permanent: true, className:'myCSSClass'}).addTo(mymap);
       assignDistrict(geoJson, address_geoLyr, address);
     });
-  
+    
   updateMap();
 }
 
@@ -417,7 +417,7 @@ function updateMap() {
                      'unit':'Square Feet', 'proxyLandUse':'Retail'},
                  'Supermarket':{'rate_key':4, 'scalar': app.sup_sqft/1000,
                      'unit':'Square Feet', 'proxyLandUse':'Retail'},
-                 'Hotel':{'rate_key':2, 'scalar': app.hot_rooms/1000,
+                 'Hotel':{'rate_key':2, 'scalar': app.hot_rooms,
                      'unit':'Rooms', 'proxyLandUse':'Retail'},
   }
   getFilteredTripsByDistrict();
@@ -519,6 +519,7 @@ function getTotalTrips(){
   let unit;
   let scalar;
   let proxyLandUse;
+  let filtered_rate;
   
   switch(selectedDistribution) {
       case 'district':
@@ -545,12 +546,14 @@ function getTotalTrips(){
       
       switch (selectedTimePeriod) {
         case 'pm':
-          rate = tripGenRates[rate_key].pkhr_rate;
+          filtered_rate = tripGenRates[rate_key].pkhr_rate;
           break;
         case 'daily':
-          rate = tripGenRates[rate_key].daily_rate;
+          filtered_rate = tripGenRates[rate_key].daily_rate;
           break;
       }
+      rate = tripGenRates[rate_key].daily_rate; 
+      
       // postgreSQL can't have slash in field name, so this is necessary as long as the mode continues to have slash
       let mode2=mode;
       if (mode == 'tnc/taxi'){
@@ -558,7 +561,8 @@ function getTotalTrips(){
       }
       // note that all modes are displayed regardless of selected mode, so don't filter by mode here.
       totalPersonTrips[landUse] = (rate*scalar)*filterModeSplitData(proxyLandUse, app.placetype)[0][mode2];
-
+      filteredPersonTrips[landUse] = (filtered_rate*scalar)*filterModeSplitData(proxyLandUse, app.placetype)[0][mode2];
+      
       let filteredProp=0;
       // TO DO: Need to include walk/bike in database.  This is a hack b/c active modes don't matter for now.
       if (mode != 'walk' && mode !='bike'){
@@ -569,15 +573,17 @@ function getTotalTrips(){
       else {
         filteredProp=1;
       }
-      filteredPersonTrips[landUse] = totalPersonTrips[landUse] * filteredProp;
+      filteredPersonTrips[landUse] = filteredPersonTrips[landUse] * filteredProp;
 
       if (mode=='auto'){
         let avo = filterAvoData(proxyLandUse.toLowerCase(), selectedDistribution, geoId);
         totalVehicleTrips[landUse] = totalPersonTrips[landUse]/ avo;
-        filteredVehicleTrips[landUse] = totalPersonTrips[landUse] * filteredProp / avo;
+        filteredVehicleTrips[landUse] = filteredPersonTrips[landUse] / avo;
       }
-      totalVehicleTrips[landUse] = totalPersonTrips[landUse];
-      filteredVehicleTrips[landUse] = totalPersonTrips[landUse] * filteredProp;
+      else {
+        totalVehicleTrips[landUse] = totalPersonTrips[landUse];
+        filteredVehicleTrips[landUse] = filteredPersonTrips[landUse] * filteredProp;
+      }
     }
     totalPersonTrips["total"] = 0;
     totalVehicleTrips["total"] = 0;
