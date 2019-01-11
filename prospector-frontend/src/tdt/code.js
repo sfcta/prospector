@@ -434,7 +434,7 @@ function addAddressTooltipToMap() {
 }
 
 function updateMap() {
-  landUseToAttr = {'Residential':{'rate_key':1, 'scalar': app.num_studios+app.num_1bed+2*app.num_2bed+2*app.num_3bed,
+  landUseToAttr = {'Residential':{'rate_key':1, 'scalar': app.num_studios+app.num_1bed+2*app.num_2bed+3*app.num_3bed,
                      'unit':'Bedrooms', 'proxyLandUse':'Residential'},
                  'Office':{'rate_key':0, 'scalar': app.off_sqft/1000,
                      'unit':'Square Feet', 'proxyLandUse':'Office'},
@@ -536,7 +536,7 @@ function getTotalTrips(){
   let num_1bed = app.num_1bed;
   let num_2bed = app.num_2bed;
   let num_3bed = app.num_3bed;
-  let tot_num_bedrooms = num_studios + num_1bed + (2*app.num_2bed) + (2*app.num_3bed);
+  let tot_num_bedrooms = num_studios + num_1bed + (2*app.num_2bed) + (3*app.num_3bed);
   let totalPersonTrips = {}; // key is landUse
   let totalVehicleTrips = {}; // key is landUse
   let filteredPersonTrips = {};
@@ -1219,7 +1219,7 @@ function createDownloadObjects() {
   let tmp_dwld;
   let tmp_dwld_vehicle;
   
-  let tot_num_bedrooms = app.num_studios+app.num_1bed+2*app.num_2bed+2*app.num_3bed;
+  let tot_num_bedrooms = app.num_studios+app.num_1bed+2*app.num_2bed+3*app.num_3bed;
   let tot_daily = 0;
   let tot_pm = 0;
 
