@@ -8,7 +8,8 @@ const sfcta_components = [
      'tmcshp',
      'viz-template',
      'tdt',
-     'champlu'
+     'champlu',
+     'tnctrn'
 	 //'cmp-v0',
 ];
 
