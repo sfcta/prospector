@@ -184,6 +184,8 @@ infoTotals.update = function() {
     message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["tnc/taxi"]) + '</td>';
     message += '<tr><td>Walk</td><td>' + roundToNearest(totalPersonTripsByMode["walk"]) ;
     message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["walk"]) + '</td>';
+    message += '<tr><td>Total</td><td>' + roundToNearest(totalPersonTripsByMode["total"]);
+    message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["total"]) + '</td>';
     message += '</table>';
     message += 'Filtered by: ' + selectedTimePeriod + ' ' + selectedDirection + ' ' + selectedPurpose;
     message += '<br><br><b>Total trips:</b> all daily trips, by all modes, purposes, and directions';
@@ -248,7 +250,7 @@ infoDistrict.update = function (hoverDistrict) { //hoverDistrict is the mouseove
     message += "Person trips: "+ "<b>" +  roundToNearest(districtPersonTrips[hoverDistrict.dist]["total"]) +'</b>';
     if (selectedMode !== "transit"){
         message += '<br>' + "Vehicle trips: "+ "<b>"+ roundToNearest(districtVehicleTrips[hoverDistrict.dist]["total"]) +'</b>';
-        let avo = districtVehicleTrips[hoverDistrict.dist]["total"] / districtPersonTrips[hoverDistrict.dist]["total"]
+        let avo = districtPersonTrips[hoverDistrict.dist]["total"] / districtVehicleTrips[hoverDistrict.dist]["total"]
         message += '<br>' + "Avg Veh Occ: " + "<b>"+ roundToNearest(avo,1)
       }
   }
@@ -379,7 +381,7 @@ function filterModeSplitData(landUse, placetype){
   }
 }
 
-function filterAvoData(landUse, geoType, geoTypeKey){
+function filterAvoData(landUse, timePeriod, geoType, geoTypeKey){
   //trying to access the proportion that corresponds with a given land use, placetype and mode
   let key;
   switch(geoType) {
@@ -395,7 +397,7 @@ function filterAvoData(landUse, geoType, geoTypeKey){
   }
   
   return AVO_data.filter(function(piece){                   //how to deal with land use?
-    return (piece.geography == key);
+    return (piece.geography == key && piece.time_period == timePeriod);
   })[0][landUse];
 }
 
@@ -436,17 +438,17 @@ function addAddressTooltipToMap() {
 function updateMap() {
   landUseToAttr = {'Residential':{'rate_key':1, 'scalar': app.num_studios+app.num_1bed+2*app.num_2bed+3*app.num_3bed,
                      'unit':'Bedrooms', 'proxyLandUse':'Residential'},
-                 'Office':{'rate_key':0, 'scalar': app.off_sqft/1000,
+                   'Office':{'rate_key':0, 'scalar': app.off_sqft/1000,
                      'unit':'Square Feet', 'proxyLandUse':'Office'},
-                 'Retail':{'rate_key':3, 'scalar': app.ret_sqft/1000,
+                   'Retail':{'rate_key':3, 'scalar': app.ret_sqft/1000,
                      'unit':'Square Feet', 'proxyLandUse':'Retail'},
-                 'Restaurant':{'rate_key':5, 'scalar': app.rest_sqft/1000,
-                     'unit':'Square Feet', 'proxyLandUse':'Retail'},
-                 'Composite':{'rate_key':6, 'scalar': app.comp_sqft/1000,
-                     'unit':'Square Feet', 'proxyLandUse':'Retail'},
-                 'Supermarket':{'rate_key':4, 'scalar': app.sup_sqft/1000,
-                     'unit':'Square Feet', 'proxyLandUse':'Retail'},
-                 'Hotel':{'rate_key':2, 'scalar': app.hot_rooms,
+                   'Restaurant':{'rate_key':5, 'scalar': app.rest_sqft/1000,
+                     'unit':'Square Feet', 'proxyLandUse':'Restaurant'},
+                   'Composite':{'rate_key':6, 'scalar': app.comp_sqft/1000,
+                     'unit':'Square Feet', 'proxyLandUse':'Composite'},
+                   'Supermarket':{'rate_key':4, 'scalar': app.sup_sqft/1000,
+                     'unit':'Square Feet', 'proxyLandUse':'Supermarket'},
+                   'Hotel':{'rate_key':2, 'scalar': app.hot_rooms,
                      'unit':'Rooms', 'proxyLandUse':'Retail'},
   }
   getFilteredTripsByDistrict();
@@ -550,6 +552,11 @@ function getTotalTrips(){
   let proxyLandUse;
   let filtered_rate;
   
+  totalPersonTripsByMode['total'] = 0;
+  totalVehicleTripsByMode['total'] = 0;
+  filteredPersonTripsByMode['total'] = 0;
+  filteredVehicleTripsByMode['total'] = 0;
+  
   switch(selectedDistribution) {
       case 'district':
         geoId = addressDistrictNum;
@@ -605,7 +612,7 @@ function getTotalTrips(){
       filteredPersonTrips[landUse] = filteredPersonTrips[landUse] * filteredProp;
 
       if (mode=='auto'){
-        let avo = filterAvoData(proxyLandUse.toLowerCase(), selectedDistribution, geoId);
+        let avo = filterAvoData(proxyLandUse.toLowerCase(), selectedTimePeriod, selectedDistribution, geoId);
         totalVehicleTrips[landUse] = totalPersonTrips[landUse]/ avo;
         filteredVehicleTrips[landUse] = filteredPersonTrips[landUse] / avo;
       }
@@ -637,9 +644,14 @@ function getTotalTrips(){
       filteredVehicleTrips["total"] += filteredVehicleTrips[landUse];
     }
     totalPersonTripsByMode[mode] = totalPersonTrips["total"];
+    totalPersonTripsByMode["total"] += totalPersonTrips["total"];
     totalVehicleTripsByMode[mode] = totalVehicleTrips["total"];
+    totalVehicleTripsByMode["total"] += totalVehicleTrips["total"];
+    
     filteredPersonTripsByMode[mode] = filteredPersonTrips["total"];
+    filteredPersonTripsByMode["total"] += filteredPersonTrips["total"];
     filteredVehicleTripsByMode[mode] = filteredVehicleTrips["total"];
+    filteredVehicleTripsByMode["total"] += filteredVehicleTrips["total"];
   }
 }
 
@@ -704,11 +716,12 @@ function getFilteredTripsByDistrict(){
       if (selectedMode == 'tnc/taxi'){
         mode2='tnc_taxi';
       }
+      
       personTrips[landUse] = (rate*scalar)*filterModeSplitData(proxyLandUse, app.placetype)[0][mode2]*            
                               getDistProps(selectedDistribution, geoId, district,
                                            selectedMode, selectedDirection, proxyLandUse,
                                            selectedTimePeriod, selectedPurpose)
-      vehicleTrips[landUse] = personTrips[landUse]/(filterAvoData(proxyLandUse.toLowerCase(), selectedDistribution, geoId));
+      vehicleTrips[landUse] = personTrips[landUse]/(filterAvoData(proxyLandUse.toLowerCase(), selectedTimePeriod, selectedDistribution, geoId));
     }
     //if any of the land uses are undefined b/c no input, set them equal to 0. landUses is a global array of all 5 land uses
     personTrips["total"] = 0
@@ -1236,13 +1249,13 @@ function createDownloadObjects() {
     tmp_dwld = {};
     tmp_dwld['Landuse'] = landUse;
     tmp_dwld['District'] = addressDistrictName;
-    tmp_dwld['District AVO'] = filterAvoData(proxyLandUse.toLowerCase(), 'district', addressDistrictNum);
+    tmp_dwld['District AVO'] = filterAvoData(proxyLandUse.toLowerCase(), selectedTimePeriod, 'district', addressDistrictNum);
     //avo_download.push(tmp_dwld);
     //tmp_dwld['Landuse'] = landUse;
     tmp_dwld['Place Type'] = app.placetype_text;
-    tmp_dwld['Place Type AVO'] = filterAvoData(proxyLandUse.toLowerCase(), 'place-type', addressPlaceType);
+    tmp_dwld['Place Type AVO'] = filterAvoData(proxyLandUse.toLowerCase(), selectedTimePeriod, 'place-type', addressPlaceType);
     tmp_dwld['City'] = 'San Francisco'
-    tmp_dwld['City AVO'] = filterAvoData(proxyLandUse.toLowerCase(), 'city', 'San Francisco');
+    tmp_dwld['City AVO'] = filterAvoData(proxyLandUse.toLowerCase(), selectedTimePeriod, 'city', 'San Francisco');
     avo_download.push(tmp_dwld);
     
     // Trip Generation
