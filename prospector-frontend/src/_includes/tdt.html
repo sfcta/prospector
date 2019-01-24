@@ -65,7 +65,7 @@
             <div class="ui mini grey inverted segment">
               <table class="ui small very compact inverted grey table">
                 <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
-                <tr><td>Office (per sqft)</td><td>${off_tripgen_daily}</td><td>${off_tripgen_PM}</td></tr>
+                <tr><td>Office (per 1k sqft)</td><td>${off_tripgen_daily}</td><td>${off_tripgen_PM}</td></tr>
               </table>
               <div class="field">
                 <label>Office Space</label>
@@ -81,7 +81,7 @@
             <div class="ui mini grey inverted segment">
               <table class="ui small very compact inverted grey table">
                 <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
-                <tr><td>Retail (per sqft)</td><td>${ret_tripgen_daily}</td><td>${ret_tripgen_PM}</td></tr>
+                <tr><td>Retail (per 1k sqft)</td><td>${ret_tripgen_daily}</td><td>${ret_tripgen_PM}</td></tr>
               </table>
               <div class="field">
                 <label>Retail</label>
@@ -97,8 +97,8 @@
             <div class="ui mini grey inverted segment">
               <table class="ui small very compact inverted grey table">
                 <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
-                <tr><td>Quality Sit-down (per sqft)</td><td>${rest_tripgen_daily}</td><td>${rest_tripgen_PM}</td></tr>
-                <tr><td>Composite (per sqft)</td><td>${comp_tripgen_daily}</td><td>${comp_tripgen_PM}</td></tr>
+                <tr><td>Quality Sit-down (per 1k sqft)</td><td>${rest_tripgen_daily}</td><td>${rest_tripgen_PM}</td></tr>
+                <tr><td>Composite (per 1k sqft)</td><td>${comp_tripgen_daily}</td><td>${comp_tripgen_PM}</td></tr>
               </table>
               <div class="fields">
                 <div class="field">
@@ -120,7 +120,7 @@
             <div class="ui mini grey inverted segment">
               <table class="ui small very compact inverted grey table" v-on:submit.prevent>
                 <tr><th></th><th>Daily</th><th>PM Peak</th></tr>
-                <tr><td>Supermarket (per sqft)</td><td>${sup_tripgen_daily}</td><td>${sup_tripgen_PM}</td></tr>
+                <tr><td>Supermarket (per 1k sqft)</td><td>${sup_tripgen_daily}</td><td>${sup_tripgen_PM}</td></tr>
               </table>
               <div class="field">
                 <label>Supermarket</label>
@@ -269,7 +269,7 @@
         <li><b>     3.c: </b>   Direction (e.g., Inbound or Outbound). </li>
         <li><b>     3.d: </b>   Time period (e.g., Daily or PM Peak).</li>
         <li><b>Step 4: </b> Click on the “Download Data” button in "What is this?" to retrieve the outputs in a spreadsheet form to save for your records. </li>
-        <li><b>Step 5: </b> Click on “Clear Inputs” to start over.  </li>
+        <li><b>Step 5: </b> Click on “Reset All” to start over.  </li>
         <li><b>Note: </b> Move your mouse cursor over the various neighborhoods on the map interface to see the results of your selections displayed on the upper right corner. </li>
       </ul>
 
