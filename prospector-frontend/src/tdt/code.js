@@ -441,15 +441,15 @@ function updateMap() {
   landUseToAttr = {'Residential':{'rate_key':1, 'scalar': app.num_studios+app.num_1bed+2*app.num_2bed+3*app.num_3bed,
                      'unit':'Bedrooms', 'proxyLandUse':'Residential'},
                    'Office':{'rate_key':0, 'scalar': app.off_sqft/1000,
-                     'unit':'Square Feet', 'proxyLandUse':'Office'},
+                     'unit':'1K Square Feet', 'proxyLandUse':'Office'},
                    'Retail':{'rate_key':3, 'scalar': app.ret_sqft/1000,
-                     'unit':'Square Feet', 'proxyLandUse':'Retail'},
+                     'unit':'1K Square Feet', 'proxyLandUse':'Retail'},
                    'Restaurant':{'rate_key':5, 'scalar': app.rest_sqft/1000,
-                     'unit':'Square Feet', 'proxyLandUse':'Restaurant'},
+                     'unit':'1K Square Feet', 'proxyLandUse':'Restaurant'},
                    'Composite':{'rate_key':6, 'scalar': app.comp_sqft/1000,
-                     'unit':'Square Feet', 'proxyLandUse':'Composite'},
+                     'unit':'1K Square Feet', 'proxyLandUse':'Composite'},
                    'Supermarket':{'rate_key':4, 'scalar': app.sup_sqft/1000,
-                     'unit':'Square Feet', 'proxyLandUse':'Supermarket'},
+                     'unit':'1K Square Feet', 'proxyLandUse':'Supermarket'},
                    'Hotel':{'rate_key':2, 'scalar': app.hot_rooms,
                      'unit':'Rooms', 'proxyLandUse':'Hotel'},
   }
@@ -1255,13 +1255,13 @@ function createDownloadObjects() {
     // Average Vehicle Occupancy
     tmp_dwld = {};
     tmp_dwld['Landuse'] = landUse;
-    tmp_dwld['District'] = addressDistrictName;
+    //tmp_dwld['District'] = addressDistrictName;
     tmp_dwld['District AVO'] = filterAvoData(proxyLandUse.toLowerCase(), selectedTimePeriod, 'district', addressDistrictNum);
     //avo_download.push(tmp_dwld);
     //tmp_dwld['Landuse'] = landUse;
-    tmp_dwld['Place Type'] = app.placetype_text;
+    //tmp_dwld['Place Type'] = app.placetype_text;
     tmp_dwld['Place Type AVO'] = filterAvoData(proxyLandUse.toLowerCase(), selectedTimePeriod, 'place-type', addressPlaceType);
-    tmp_dwld['City'] = 'San Francisco'
+    //tmp_dwld['City'] = 'San Francisco'
     tmp_dwld['City AVO'] = filterAvoData(proxyLandUse.toLowerCase(), selectedTimePeriod, 'city', 'San Francisco');
     avo_download.push(tmp_dwld);
     
@@ -1269,12 +1269,12 @@ function createDownloadObjects() {
     tmp_dwld = {};
     tmp_dwld['Landuse'] = landUse;
     tmp_dwld['Amount'] = scalar;
-    tmp_dwld['Unit'] = 'Per Bedroom';
-    tmp_dwld['Daily_Person_Rate'] = daily_rate.toString();
-    tmp_dwld['Daily_Person_Trips'] = (scalar*daily_rate).toString();
+    tmp_dwld['Unit'] = unit;
+    tmp_dwld['Daily Person Trip Rate'] = daily_rate.toString();
+    tmp_dwld['Daily Person Trips'] = (scalar*daily_rate).toString();
     tot_daily += scalar*daily_rate;
-    tmp_dwld['PM_Person_Rate'] = pm_rate.toString();
-    tmp_dwld['PM_Person_Trips'] = (scalar*pm_rate).toString();
+    tmp_dwld['PM Person Trip Rate'] = pm_rate.toString();
+    tmp_dwld['PM Person Trips'] = (scalar*pm_rate).toString();
     tot_pm += scalar*pm_rate;
     trgen_download.push(tmp_dwld);
     
@@ -1310,66 +1310,73 @@ function createDownloadObjects() {
   }
   
   
-    tmp_dwld_vehicle = {};
-    tmp_dwld_vehicle['Landuse'] = "Total";
-    for (let district of geoDistricts) {
-      tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist]["total"].toString();
-      total_vehicle_dist += tmp_dwld_vehicle[district.distname];
-    }
-    tdist_vehicle_download.push(tmp_dwld_vehicle);
+  tmp_dwld_vehicle = {};
+  tmp_dwld_vehicle['Landuse'] = "Total";
+  for (let district of geoDistricts) {
+    tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist]["total"].toString();
+    total_vehicle_dist += tmp_dwld_vehicle[district.distname];
+  }
+  tdist_vehicle_download.push(tmp_dwld_vehicle);
 
-    //this is working
-    tmp_dwld = {};
-    tmp_dwld['Landuse'] = "Total";
-    for (let district of geoDistricts) {
-      tmp_dwld[district.distname] = districtPersonTrips[district.dist]["total"].toString();
-    }
-    tdist_download.push(tmp_dwld);
+  //this is working
+  tmp_dwld = {};
+  tmp_dwld['Landuse'] = "Total";
+  for (let district of geoDistricts) {
+    tmp_dwld[district.distname] = districtPersonTrips[district.dist]["total"].toString();
+  }
+  tdist_download.push(tmp_dwld);
 
 
-    trgen_download.push({'Landuse':'Total','Amount':'','Unit':'','Daily_Person_Rate':'',
-      'Daily_Person_Trips':tot_daily.toString(),'PM_Person_Rate':'',
-      'PM_Person_Trips':tot_pm.toString()});
+  trgen_download.push({'Landuse':'Total','Amount':'','Unit':'','Daily Person Trip Rate':'',
+    'Daily Person Trips':tot_daily.toString(),'PM Person Trip Rate':'',
+    'PM Person Trips':tot_pm.toString()});
 
-    //total trips by mode
-    tmp_dwld = {};
-    tmp_dwld["Mode"] = "Auto"
-    tmp_dwld["Person Trips"] = totalPersonTripsByMode["auto"];
-    tmp_dwld["Vehicle Trips"] = totalVehicleTripsByMode["auto"];
-    total_trips_download.push(tmp_dwld);
-    tmp_dwld = {};
-    tmp_dwld["Mode"] = "TNC/Taxi"
-    tmp_dwld["Person Trips"] = totalPersonTripsByMode["tnc/taxi"];
-    tmp_dwld["Vehicle Trips"] = totalVehicleTripsByMode["tnc/taxi"];
-    total_trips_download.push(tmp_dwld);
-    tmp_dwld = {};
-    tmp_dwld["Mode"] = "Transit"
-    tmp_dwld["Person Trips"] = totalPersonTripsByMode["transit"];
-    tmp_dwld["Vehicle Trips"] = ""//totalVehicleTripsByMode["transit"];
-    total_trips_download.push(tmp_dwld);
-    tmp_dwld = {};
-    tmp_dwld["Mode"] = "Private Shuttle"
-    tmp_dwld["Person Trips"] = totalPersonTripsByMode["pvt_shuttle"];
-    tmp_dwld["Vehicle Trips"] = ""//totalVehicleTripsByMode["pvt_shuttle"];
-    total_trips_download.push(tmp_dwld);
-    tmp_dwld = {};
-    tmp_dwld["Mode"] = "Walk"
-    tmp_dwld["Person Trips"] = totalPersonTripsByMode["walk"];
-    tmp_dwld["Vehicle Trips"] = ""//totalVehicleTripsByMode["walk"];
-    total_trips_download.push(tmp_dwld);
-    tmp_dwld = {};
-    tmp_dwld["Mode"] = "Bike"
-    tmp_dwld["Person Trips"] = totalPersonTripsByMode["bike"];
-    tmp_dwld["Vehicle Trips"] = ""//totalVehicleTripsByMode["bike"];
-    total_trips_download.push(tmp_dwld);
+  //total trips by mode
+  tmp_dwld = {};
+  tmp_dwld["Mode"] = "Auto"
+  tmp_dwld["Person Trips"] = totalPersonTripsByMode["auto"];
+  tmp_dwld["Vehicle Trips"] = totalVehicleTripsByMode["auto"];
+  total_trips_download.push(tmp_dwld);
+  tmp_dwld = {};
+  tmp_dwld["Mode"] = "TNC/Taxi"
+  tmp_dwld["Person Trips"] = totalPersonTripsByMode["tnc/taxi"];
+  tmp_dwld["Vehicle Trips"] = totalVehicleTripsByMode["tnc/taxi"];
+  total_trips_download.push(tmp_dwld);
+  tmp_dwld = {};
+  tmp_dwld["Mode"] = "Transit"
+  tmp_dwld["Person Trips"] = totalPersonTripsByMode["transit"];
+  tmp_dwld["Vehicle Trips"] = ""//totalVehicleTripsByMode["transit"];
+  total_trips_download.push(tmp_dwld);
+  tmp_dwld = {};
+  tmp_dwld["Mode"] = "Private Shuttle"
+  tmp_dwld["Person Trips"] = totalPersonTripsByMode["pvt_shuttle"];
+  tmp_dwld["Vehicle Trips"] = ""//totalVehicleTripsByMode["pvt_shuttle"];
+  total_trips_download.push(tmp_dwld);
+  tmp_dwld = {};
+  tmp_dwld["Mode"] = "Walk"
+  tmp_dwld["Person Trips"] = totalPersonTripsByMode["walk"];
+  tmp_dwld["Vehicle Trips"] = ""//totalVehicleTripsByMode["walk"];
+  total_trips_download.push(tmp_dwld);
+  tmp_dwld = {};
+  tmp_dwld["Mode"] = "Bike"
+  tmp_dwld["Person Trips"] = totalPersonTripsByMode["bike"];
+  tmp_dwld["Vehicle Trips"] = ""//totalVehicleTripsByMode["bike"];
+  total_trips_download.push(tmp_dwld);
 }
 
 window.downloadCSV = function(){
   createDownloadObjects();
   let data, filename, link;
-  let csv = 'Average vehicle occupancy';
+  let csv = 'Project Location';
   if (csv == null) return;
   
+  csv += '\nAddress: ' + address;
+  csv += '\nDistrict: ' + addressDistrictName;
+  csv += '\nPlace Type: ' + app.placetype_text;
+  csv += '\nCity: San Francisco\n';
+  csv += '\n\n';
+  
+  csv += 'Average vehicle occupancy';
   csv += '\n'+ convertArrayOfObjectsToCSV({
     data: avo_download
   });
