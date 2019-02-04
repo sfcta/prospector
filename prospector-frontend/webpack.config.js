@@ -9,7 +9,8 @@ const sfcta_components = [
      'viz-template',
      'tdt',
      'champlu',
-     'tnctrn'
+     'tnctrn',
+     'connectSFjobs'
 	 //'cmp-v0',
 ];
 
