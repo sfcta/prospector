@@ -189,23 +189,23 @@ infoTotals.update = function() {
     
     message += '<tr><td>Transit</td><td>' + roundToNearest(totalPersonTripsByMode["transit"]) + '</td>';
     message += '<td>' + roundToNearest(filteredPersonTripsByMode["transit"]) + '</td>';
-    message += '<td>' + roundToNearest(totalVehicleTripsByMode["transit"]) + '</td>';
-    message += '<td>' + roundToNearest(filteredVehicleTripsByMode["transit"]) + '</td>';
+    message += '<td></td>';//'<td>' + roundToNearest(totalVehicleTripsByMode["transit"]) + '</td>';
+    message += '<td></td>';//'<td>' + roundToNearest(filteredVehicleTripsByMode["transit"]) + '</td>';
     
     message += '<tr><td>Private Shuttle</td><td>' + roundToNearest(totalPersonTripsByMode["pvt_shuttle"]) + '</td>';
     message += '<td>' + roundToNearest(filteredPersonTripsByMode["pvt_shuttle"]) + '</td>';
-    message += '<td>' + roundToNearest(totalVehicleTripsByMode["pvt_shuttle"]) + '</td>';
-    message += '<td>' + roundToNearest(filteredVehicleTripsByMode["pvt_shuttle"]) + '</td>';
+    message += '<td></td>';//'<td>' + roundToNearest(totalVehicleTripsByMode["pvt_shuttle"]) + '</td>';
+    message += '<td></td>';//'<td>' + roundToNearest(filteredVehicleTripsByMode["pvt_shuttle"]) + '</td>';
     
     message += '<tr><td>Bike</td><td>' + roundToNearest(totalPersonTripsByMode["bike"]) + '</td>';
     message += '<td>' + roundToNearest(filteredPersonTripsByMode["bike"]) + '</td>';
-    message += '<td>' + roundToNearest(totalVehicleTripsByMode["bike"]) + '</td>';
-    message += '<td>' + roundToNearest(filteredVehicleTripsByMode["bike"]) + '</td>';
+    message += '<td></td>';//'<td>' + roundToNearest(totalVehicleTripsByMode["bike"]) + '</td>';
+    message += '<td></td>';//'<td>' + roundToNearest(filteredVehicleTripsByMode["bike"]) + '</td>';
     
     message += '<tr><td>Walk</td><td>' + roundToNearest(totalPersonTripsByMode["walk"]) + '</td>';
     message += '<td>' + roundToNearest(filteredPersonTripsByMode["walk"]) + '</td>';
-    message += '<td>' + roundToNearest(totalVehicleTripsByMode["walk"]) + '</td>';
-    message += '<td>' + roundToNearest(filteredVehicleTripsByMode["walk"]) + '</td>';
+    message += '<td></td>';//'<td>' + roundToNearest(totalVehicleTripsByMode["walk"]) + '</td>';
+    message += '<td></td>';//'<td>' + roundToNearest(filteredVehicleTripsByMode["walk"]) + '</td>';
     
     message += '<tr><td>Total</td><td>' + roundToNearest(totalPersonTripsByMode["total"]) + '</td>';
     message += '<td>' + roundToNearest(filteredPersonTripsByMode["total"]) + '</td>';
@@ -625,14 +625,20 @@ function getTotalTrips(){
       filteredPersonTrips[landUse] = (filtered_rate*scalar)*filterModeSplitData(proxyLandUse, app.placetype)[0][mode2];
       
       let filteredProp=0;
-      // TO DO: Need to include walk/bike in database.  This is a hack b/c active modes don't matter for now.
+      
       if (mode != 'walk' && mode !='bike' && mode != 'pvt_shuttle'){
         for (let district of geoDistricts) {
           filteredProp += getDistProps(selectedDistribution, geoId, district, mode, selectedDirection, proxyLandUse, selectedTimePeriod, selectedPurpose);
         }
       }
       else {
-        filteredProp=1;
+      // TO DO: Need to include walk/bike in database.  This is a hack b/c active modes don't matter for now.
+        for (let district of geoDistricts) {
+          for (let mode3 of ['auto','transit','tnc/taxi']){
+            filteredProp += getDistProps(selectedDistribution, geoId, district, mode3, selectedDirection, proxyLandUse, selectedTimePeriod, selectedPurpose);
+          }
+        }
+        filteredProp = filteredProp / 3;
       }
       filteredPersonTrips[landUse] = filteredPersonTrips[landUse] * filteredProp;
 
@@ -1279,13 +1285,13 @@ function createDownloadObjects() {
     tmp_dwld = {};
     tmp_dwld['Landuse'] = landUse;
     //tmp_dwld['District'] = addressDistrictName;
-    tmp_dwld['District AVO'] = filterAvoData(proxyLandUse.toLowerCase(), selectedTimePeriod, 'district', addressDistrictNum);
+    tmp_dwld['District AVO'] = roundToNearest(filterAvoData(proxyLandUse.toLowerCase(), selectedTimePeriod, 'district', addressDistrictNum), 1);
     //avo_download.push(tmp_dwld);
     //tmp_dwld['Landuse'] = landUse;
     //tmp_dwld['Place Type'] = app.placetype_text;
-    tmp_dwld['Place Type AVO'] = filterAvoData(proxyLandUse.toLowerCase(), selectedTimePeriod, 'place-type', addressPlaceType);
+    tmp_dwld['Place Type AVO'] = roundToNearest(filterAvoData(proxyLandUse.toLowerCase(), selectedTimePeriod, 'place-type', addressPlaceType), 1);
     //tmp_dwld['City'] = 'San Francisco'
-    tmp_dwld['City AVO'] = filterAvoData(proxyLandUse.toLowerCase(), selectedTimePeriod, 'city', 'San Francisco');
+    tmp_dwld['City AVO'] = roundToNearest(filterAvoData(proxyLandUse.toLowerCase(), selectedTimePeriod, 'city', 'San Francisco'), 1);
     avo_download.push(tmp_dwld);
     
     // Trip Generation
@@ -1293,23 +1299,23 @@ function createDownloadObjects() {
     tmp_dwld['Landuse'] = landUse;
     tmp_dwld['Amount'] = scalar;
     tmp_dwld['Unit'] = unit;
-    tmp_dwld['Daily Person Trip Rate'] = daily_rate.toString();
-    tmp_dwld['Daily Person Trips'] = (scalar*daily_rate).toString();
+    tmp_dwld['Daily Person Trip Rate'] = roundToNearest(daily_rate,1);
+    tmp_dwld['Daily Person Trips'] = roundToNearest((scalar*daily_rate),1);
     tot_daily += scalar*daily_rate;
-    tmp_dwld['PM Person Trip Rate'] = pm_rate.toString();
-    tmp_dwld['PM Person Trips'] = (scalar*pm_rate).toString();
+    tmp_dwld['PM Person Trip Rate'] = roundToNearest(pm_rate,1);
+    tmp_dwld['PM Person Trips'] = roundToNearest((scalar*pm_rate),1);
     tot_pm += scalar*pm_rate;
     trgen_download.push(tmp_dwld);
     
     // Mode Split
     tmp_dwld = {};
     tmp_dwld['Landuse'] = landUse;
-    tmp_dwld['Auto'] = filterModeSplitData(proxyLandUse, app.placetype)[0]["auto"].toString();
-    tmp_dwld['TNC/Taxi'] = filterModeSplitData(proxyLandUse, app.placetype)[0]["tnc_taxi"].toString();
-    tmp_dwld['Transit'] = filterModeSplitData(proxyLandUse, app.placetype)[0]["transit"].toString();
-    tmp_dwld['Private Shuttle'] = filterModeSplitData(proxyLandUse, app.placetype)[0]["pvt_shuttle"].toString();
-    tmp_dwld['Walk'] = filterModeSplitData(proxyLandUse, app.placetype)[0]["walk"].toString();
-    tmp_dwld['Bike'] = filterModeSplitData(proxyLandUse, app.placetype)[0]["bike"].toString();
+    tmp_dwld['Auto'] = roundToNearest(filterModeSplitData(proxyLandUse, app.placetype)[0]["auto"],3);
+    tmp_dwld['TNC/Taxi'] = roundToNearest(filterModeSplitData(proxyLandUse, app.placetype)[0]["tnc_taxi"],3);
+    tmp_dwld['Transit'] = roundToNearest(filterModeSplitData(proxyLandUse, app.placetype)[0]["transit"],3);
+    tmp_dwld['Private Shuttle'] = roundToNearest(filterModeSplitData(proxyLandUse, app.placetype)[0]["pvt_shuttle"],3);
+    tmp_dwld['Walk'] = roundToNearest(filterModeSplitData(proxyLandUse, app.placetype)[0]["walk"],3);
+    tmp_dwld['Bike'] = roundToNearest(filterModeSplitData(proxyLandUse, app.placetype)[0]["bike"],3);
     modesplit_download.push(tmp_dwld);
     
     // Person-trip Distribution
@@ -1317,7 +1323,7 @@ function createDownloadObjects() {
     tmp_dwld = {};
     tmp_dwld['Landuse'] = landUse;
     for (let district of geoDistricts) {
-      tmp_dwld[district.distname] = districtPersonTrips[district.dist][landUse].toString();
+      tmp_dwld[district.distname] = roundToNearest(districtPersonTrips[district.dist][landUse],1);
       total_person_dist += tmp_dwld[district.distname];
     }
     tdist_download.push(tmp_dwld);
@@ -1326,7 +1332,7 @@ function createDownloadObjects() {
     tmp_dwld_vehicle = {};
     tmp_dwld_vehicle['Landuse'] = landUse;
     for (let district of geoDistricts) {
-      tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist][landUse].toString();
+      tmp_dwld_vehicle[district.distname] = roundToNearest(districtVehicleTrips[district.dist][landUse],1);
       total_vehicle_dist += tmp_dwld_vehicle[district.distname];
     }
     tdist_vehicle_download.push(tmp_dwld_vehicle);
@@ -1336,7 +1342,7 @@ function createDownloadObjects() {
   tmp_dwld_vehicle = {};
   tmp_dwld_vehicle['Landuse'] = "Total";
   for (let district of geoDistricts) {
-    tmp_dwld_vehicle[district.distname] = districtVehicleTrips[district.dist]["total"].toString();
+    tmp_dwld_vehicle[district.distname] = roundToNearest(districtVehicleTrips[district.dist]["total"],1);
     total_vehicle_dist += tmp_dwld_vehicle[district.distname];
   }
   tdist_vehicle_download.push(tmp_dwld_vehicle);
@@ -1345,44 +1351,44 @@ function createDownloadObjects() {
   tmp_dwld = {};
   tmp_dwld['Landuse'] = "Total";
   for (let district of geoDistricts) {
-    tmp_dwld[district.distname] = districtPersonTrips[district.dist]["total"].toString();
+    tmp_dwld[district.distname] = roundToNearest(districtPersonTrips[district.dist]["total"],1);
   }
   tdist_download.push(tmp_dwld);
 
 
   trgen_download.push({'Landuse':'Total','Amount':'','Unit':'','Daily Person Trip Rate':'',
-    'Daily Person Trips':tot_daily.toString(),'PM Person Trip Rate':'',
-    'PM Person Trips':tot_pm.toString()});
+    'Daily Person Trips':roundToNearest(tot_daily,1),'PM Person Trip Rate':'',
+    'PM Person Trips':roundToNearest(tot_pm,1)});
 
   //total trips by mode
   tmp_dwld = {};
   tmp_dwld["Mode"] = "Auto"
-  tmp_dwld["Person Trips"] = totalPersonTripsByMode["auto"];
-  tmp_dwld["Vehicle Trips"] = totalVehicleTripsByMode["auto"];
+  tmp_dwld["Person Trips"] = roundToNearest(totalPersonTripsByMode["auto"],1);
+  tmp_dwld["Vehicle Trips"] = roundToNearest(totalVehicleTripsByMode["auto"],1);
   total_trips_download.push(tmp_dwld);
   tmp_dwld = {};
   tmp_dwld["Mode"] = "TNC/Taxi"
-  tmp_dwld["Person Trips"] = totalPersonTripsByMode["tnc/taxi"];
-  tmp_dwld["Vehicle Trips"] = totalVehicleTripsByMode["tnc/taxi"];
+  tmp_dwld["Person Trips"] = roundToNearest(totalPersonTripsByMode["tnc/taxi"],1);
+  tmp_dwld["Vehicle Trips"] = roundToNearest(totalVehicleTripsByMode["tnc/taxi"],1);
   total_trips_download.push(tmp_dwld);
   tmp_dwld = {};
   tmp_dwld["Mode"] = "Transit"
-  tmp_dwld["Person Trips"] = totalPersonTripsByMode["transit"];
+  tmp_dwld["Person Trips"] = roundToNearest(totalPersonTripsByMode["transit"],1);
   tmp_dwld["Vehicle Trips"] = ""//totalVehicleTripsByMode["transit"];
   total_trips_download.push(tmp_dwld);
   tmp_dwld = {};
   tmp_dwld["Mode"] = "Private Shuttle"
-  tmp_dwld["Person Trips"] = totalPersonTripsByMode["pvt_shuttle"];
+  tmp_dwld["Person Trips"] = roundToNearest(totalPersonTripsByMode["pvt_shuttle"],1);
   tmp_dwld["Vehicle Trips"] = ""//totalVehicleTripsByMode["pvt_shuttle"];
   total_trips_download.push(tmp_dwld);
   tmp_dwld = {};
   tmp_dwld["Mode"] = "Walk"
-  tmp_dwld["Person Trips"] = totalPersonTripsByMode["walk"];
+  tmp_dwld["Person Trips"] = roundToNearest(totalPersonTripsByMode["walk"],1);
   tmp_dwld["Vehicle Trips"] = ""//totalVehicleTripsByMode["walk"];
   total_trips_download.push(tmp_dwld);
   tmp_dwld = {};
   tmp_dwld["Mode"] = "Bike"
-  tmp_dwld["Person Trips"] = totalPersonTripsByMode["bike"];
+  tmp_dwld["Person Trips"] = roundToNearest(totalPersonTripsByMode["bike"],1);
   tmp_dwld["Vehicle Trips"] = ""//totalVehicleTripsByMode["bike"];
   total_trips_download.push(tmp_dwld);
 }
