@@ -177,40 +177,40 @@ infoTotals.update = function() {
     message += '<tr><th>Mode</th><th>Total</th><th>Filtered*</th>';
     message +=     '<th>Total</th><th>Filtered*</th></tr>';
     
-    message += '<tr><td>Auto</td><td>' + roundToNearest(totalPersonTripsByMode["auto"]);
-    message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["auto"]) + '</td>';
-    message += '<td>' + roundToNearest(totalVehicleTripsByMode["auto"]);
-    message += '</td><td>' + roundToNearest(filteredVehicleTripsByMode["auto"]) + '</td>';
+    message += '<tr><td>Auto</td><td>' + roundToNearest(totalPersonTripsByMode["auto"]) + '</td>';
+    message += '<td>' + roundToNearest(filteredPersonTripsByMode["auto"]) + '</td>';
+    message += '<td>' + roundToNearest(totalVehicleTripsByMode["auto"]) + '</td>';
+    message += '<td>' + roundToNearest(filteredVehicleTripsByMode["auto"]) + '</td>';
     
-    message += '<tr><td>TNC/Taxi</td><td>' + roundToNearest(totalPersonTripsByMode["tnc/taxi"]);
-    message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["tnc/taxi"]) + '</td>';
-    message += '<td>' + roundToNearest(totalVehicleTripsByMode["tnc/taxi"]);
-    message += '</td><td>' + roundToNearest(filteredVehicleTripsByMode["tnc/taxi"]) + '</td>';
+    message += '<tr><td>TNC/Taxi</td><td>' + roundToNearest(totalPersonTripsByMode["tnc/taxi"]) + '</td>';
+    message += '<td>' + roundToNearest(filteredPersonTripsByMode["tnc/taxi"]) + '</td>';
+    message += '<td>' + roundToNearest(totalVehicleTripsByMode["tnc/taxi"]) + '</td>';
+    message += '<td>' + roundToNearest(filteredVehicleTripsByMode["tnc/taxi"]) + '</td>';
     
-    message += '<tr><td>Transit</td><td>' + roundToNearest(totalPersonTripsByMode["transit"]);
-    message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["transit"]) + '</td>';
-    message += '<td>' + roundToNearest(totalVehicleTripsByMode["transit"]);
-    message += '</td><td>' + roundToNearest(filteredVehicleTripsByMode["transit"]) + '</td>';
+    message += '<tr><td>Transit</td><td>' + roundToNearest(totalPersonTripsByMode["transit"]) + '</td>';
+    message += '<td>' + roundToNearest(filteredPersonTripsByMode["transit"]) + '</td>';
+    message += '<td>' + roundToNearest(totalVehicleTripsByMode["transit"]) + '</td>';
+    message += '<td>' + roundToNearest(filteredVehicleTripsByMode["transit"]) + '</td>';
     
-    message += '<tr><td>Private Shuttle</td><td>' + roundToNearest(totalPersonTripsByMode["pvt_shuttle"]);
-    message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["pvt_shuttle"]) + '</td>';
-    message += '<td>' + roundToNearest(totalVehicleTripsByMode["pvt_shuttle"]);
-    message += '</td><td>' + roundToNearest(filteredVehicleTripsByMode["pvt_shuttle"]) + '</td>';
+    message += '<tr><td>Private Shuttle</td><td>' + roundToNearest(totalPersonTripsByMode["pvt_shuttle"]) + '</td>';
+    message += '<td>' + roundToNearest(filteredPersonTripsByMode["pvt_shuttle"]) + '</td>';
+    message += '<td>' + roundToNearest(totalVehicleTripsByMode["pvt_shuttle"]) + '</td>';
+    message += '<td>' + roundToNearest(filteredVehicleTripsByMode["pvt_shuttle"]) + '</td>';
     
-    message += '<tr><td>Bike</td><td>' + roundToNearest(totalPersonTripsByMode["bike"]) ;
-    message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["bike"]) + '</td>';
-    message += '<td>' + roundToNearest(totalVehicleTripsByMode["bike"]) ;
-    message += '</td><td>' + roundToNearest(filteredVehicleTripsByMode["bike"]) + '</td>';
+    message += '<tr><td>Bike</td><td>' + roundToNearest(totalPersonTripsByMode["bike"]) + '</td>';
+    message += '<td>' + roundToNearest(filteredPersonTripsByMode["bike"]) + '</td>';
+    message += '<td>' + roundToNearest(totalVehicleTripsByMode["bike"]) + '</td>';
+    message += '<td>' + roundToNearest(filteredVehicleTripsByMode["bike"]) + '</td>';
     
-    message += '<tr><td>Walk</td><td>' + roundToNearest(totalPersonTripsByMode["walk"]) ;
-    message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["walk"]) + '</td>';
-    message += '<td>' + roundToNearest(totalVehicleTripsByMode["walk"]) ;
-    message += '</td><td>' + roundToNearest(filteredVehicleTripsByMode["walk"]) + '</td>';
+    message += '<tr><td>Walk</td><td>' + roundToNearest(totalPersonTripsByMode["walk"]) + '</td>';
+    message += '<td>' + roundToNearest(filteredPersonTripsByMode["walk"]) + '</td>';
+    message += '<td>' + roundToNearest(totalVehicleTripsByMode["walk"]) + '</td>';
+    message += '<td>' + roundToNearest(filteredVehicleTripsByMode["walk"]) + '</td>';
     
-    message += '<tr><td>Total</td><td>' + roundToNearest(totalPersonTripsByMode["total"]);
-    message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["total"]) + '</td>';
-    message += '<td>' + roundToNearest(totalVehicleTripsByMode["total"]);
-    message += '</td><td>' + roundToNearest(filteredVehicleTripsByMode["total"]) + '</td>';
+    message += '<tr><td>Total</td><td>' + roundToNearest(totalPersonTripsByMode["total"]) + '</td>';
+    message += '<td>' + roundToNearest(filteredPersonTripsByMode["total"]) + '</td>';
+    message += '<td>' + roundToNearest(totalVehicleTripsByMode["total"]) + '</td>';
+    message += '<td>' + roundToNearest(filteredVehicleTripsByMode["total"]) + '</td>';
     message += '</table>';
     message += 'Filtered by: ' + selectedTimePeriod + ' ' + selectedDirection + ' ' + selectedPurpose;
     message += '<br><br><b>Total trips:</b> all daily trips, by all modes, purposes, and directions';
