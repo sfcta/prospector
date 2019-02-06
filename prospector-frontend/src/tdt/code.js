@@ -173,21 +173,44 @@ infoTotals.update = function() {
   }
   else {
     message = '<table class="ui small very compact inverted table">';
-    message += '<tr><th>Mode</th><th>Total</th><th>Filtered*</th></tr>';
+    message += '<tr><th></th><th colspan="2">Person Trips</th><th colspan="2">Vehicle Trips</th></tr>';
+    message += '<tr><th>Mode</th><th>Total</th><th>Filtered*</th>';
+    message +=     '<th>Total</th><th>Filtered*</th></tr>';
+    
     message += '<tr><td>Auto</td><td>' + roundToNearest(totalPersonTripsByMode["auto"]);
     message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["auto"]) + '</td>';
+    message += '<td>' + roundToNearest(totalVehicleTripsByMode["auto"]);
+    message += '</td><td>' + roundToNearest(filteredVehicleTripsByMode["auto"]) + '</td>';
+    
     message += '<tr><td>TNC/Taxi</td><td>' + roundToNearest(totalPersonTripsByMode["tnc/taxi"]);
     message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["tnc/taxi"]) + '</td>';
+    message += '<td>' + roundToNearest(totalVehicleTripsByMode["tnc/taxi"]);
+    message += '</td><td>' + roundToNearest(filteredVehicleTripsByMode["tnc/taxi"]) + '</td>';
+    
     message += '<tr><td>Transit</td><td>' + roundToNearest(totalPersonTripsByMode["transit"]);
     message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["transit"]) + '</td>';
+    message += '<td>' + roundToNearest(totalVehicleTripsByMode["transit"]);
+    message += '</td><td>' + roundToNearest(filteredVehicleTripsByMode["transit"]) + '</td>';
+    
     message += '<tr><td>Private Shuttle</td><td>' + roundToNearest(totalPersonTripsByMode["pvt_shuttle"]);
     message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["pvt_shuttle"]) + '</td>';
+    message += '<td>' + roundToNearest(totalVehicleTripsByMode["pvt_shuttle"]);
+    message += '</td><td>' + roundToNearest(filteredVehicleTripsByMode["pvt_shuttle"]) + '</td>';
+    
     message += '<tr><td>Bike</td><td>' + roundToNearest(totalPersonTripsByMode["bike"]) ;
     message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["bike"]) + '</td>';
+    message += '<td>' + roundToNearest(totalVehicleTripsByMode["bike"]) ;
+    message += '</td><td>' + roundToNearest(filteredVehicleTripsByMode["bike"]) + '</td>';
+    
     message += '<tr><td>Walk</td><td>' + roundToNearest(totalPersonTripsByMode["walk"]) ;
     message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["walk"]) + '</td>';
+    message += '<td>' + roundToNearest(totalVehicleTripsByMode["walk"]) ;
+    message += '</td><td>' + roundToNearest(filteredVehicleTripsByMode["walk"]) + '</td>';
+    
     message += '<tr><td>Total</td><td>' + roundToNearest(totalPersonTripsByMode["total"]);
     message += '</td><td>' + roundToNearest(filteredPersonTripsByMode["total"]) + '</td>';
+    message += '<td>' + roundToNearest(totalVehicleTripsByMode["total"]);
+    message += '</td><td>' + roundToNearest(filteredVehicleTripsByMode["total"]) + '</td>';
     message += '</table>';
     message += 'Filtered by: ' + selectedTimePeriod + ' ' + selectedDirection + ' ' + selectedPurpose;
     message += '<br><br><b>Total trips:</b> all daily trips, by all modes, purposes, and directions';
