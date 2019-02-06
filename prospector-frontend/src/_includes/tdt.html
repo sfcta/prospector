@@ -202,9 +202,10 @@
         </div>
         <div class="ui divider"></div>
         
-      <button v-on:click="resetAllInputs" class="tiny ui right labeled icon floated grey button" 
+      <button v-on:click="resetAllInputs" class="tiny ui right labeled icon floated red button" 
         style="margin-right:5px"><i class="icon ban"></i>Reset All</button>
-
+      <button v-on:click="downloadCSV();" class="tiny ui right labeled icon floated greenish button"
+        style="margin-right:5px"><i class="icon download"></i>Download data (.zip)</button>
     </div>
     
     <div class="logo">
@@ -246,13 +247,6 @@
       <div style="margin-top:20px;">
         <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
           &nbsp;OK&nbsp;
-        </button>
-
-        <button v-on:click="downloadCSV();"
-          class="small ui right labeled icon floated yellow button"
-          style="margin-right:5px">
-          <i class="icon download"></i>
-          Download data (.zip)
         </button>
       </div>
     </div>
