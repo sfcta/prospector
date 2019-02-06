@@ -260,19 +260,28 @@
     <div v-cloak> 
       <h2 style="margin-bottom:0px;">How to Use This Tool</h2>
       <!-- <hr style="margin-bottom:5px;margin-top:5px"/> -->
-      <ul>
-        <li><b>Step 1: </b> Enter the project address </li>
-        <li><b>Step 2: </b> Enter project attributes by selecting appropriate land use types and filling in forms (e.g., number of units, gross square footage, etc.). </li>
-        <li><b>Step 3: </b> Select travel attributes: </li>
-        <li><b>     3.a: </b>   Mode: (e.g., All Auto, Transit, or TNC/Taxi).</li>
-        <li><b>     3.b: </b>   Purpose (e.g., Work or Non-Work). </li>
-        <li><b>     3.c: </b>   Direction (e.g., Inbound or Outbound). </li>
-        <li><b>     3.d: </b>   Time period (e.g., Daily or PM Peak).</li>
-        <li><b>Step 4: </b> Click on the “Download Data” button in "What is this?" to retrieve the outputs in a spreadsheet form to save for your records. </li>
-        <li><b>Step 5: </b> Click on “Reset All” to start over.  </li>
-        <li><b>Note: </b> Move your mouse cursor over the various neighborhoods on the map interface to see the results of your selections displayed on the upper right corner. </li>
-      </ul>
-
+      This tool estimates the number, type and common destinations of new trips that people would take to and from a new development project. The estimates are for daily and for weekday PM peak hour. 
+      <br/><br/>
+      <div>
+        <ol>
+          <li>Please enter the project address in the entry bar. </li>
+          <li>Enter project attributes by selecting the project’s appropriate land use types and filling in the amount of land use (e.g., number of units, gross square footage, etc.). </li>
+          <li>Select travel attributes that you wish to query and display: </li>
+          <ol type='a'>
+            <li>Mode (e.g., All Auto Trips, Transit Trips, or TNC/Taxi Trips). </li>
+            <li>Purpose (e.g., Work Trips,  Non-Work Trips, or All Trips). </li>
+            <li>Direction (e.g., Inbound or Outbound Trips to the Project Site). </li>
+            <li>Time period (e.g., Daily or PM Peak). </li>
+            <li>Level of Trip Distribution (e.g., District, Place Type, City). </li>
+          </ol>
+          Based on your toggled attributes, the map interface displays the number of person trips between the project site and the neighborhood districts. The thresholds used by the interface to display the continuum of color scheme (light blue for the lowest group of person trips to dark blue for the highest group of person trips) self-updates based on the highest number of person trips using the toggled attributes.
+          <br/><br/>
+          <li>Click on the “Download Data” button to retrieve the outputs in a spreadsheet form to save for your records. </li>
+          <li>Click on “Reset All” to start over. </li>        
+        </ol>
+        <b>Note: </b> The results of your selections are displayed on the upper right corner of the map interface. The ‘Total (Person Trips)’ column displays all daily person trips by mode, regardless of trip purpose and direction and vehicle trips. The ‘Filtered (Person Trips)’ column displays the number of person trips filtered by the selected toggle buttons for mode, purpose, direction, and time period.
+        <br/><br/><b>Note: </b> Move your mouse cursor over the various neighborhoods on the map interface to see the results of your selections (filtered person trips, vehicle trips, and average vehicle occupancy) displayed per district (or selected level of distribution) located in the right corner of the map interface.
+      </div>
       <div style="margin-top:20px;">
         <button v-on:click="clickToggleInstructions" class="small ui right floated violet button">
           &nbsp;OK&nbsp;
