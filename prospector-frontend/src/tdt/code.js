@@ -1363,46 +1363,65 @@ function createDownloadObjects() {
   //total trips by mode
   tmp_dwld = {};
   tmp_dwld["Mode"] = "Auto"
-  tmp_dwld["Person Trips"] = roundToNearest(totalPersonTripsByMode["auto"],1);
-  tmp_dwld["Vehicle Trips"] = roundToNearest(totalVehicleTripsByMode["auto"],1);
+  tmp_dwld["Total Person Trips"] = roundToNearest(totalPersonTripsByMode["auto"],1);
+  tmp_dwld["Filtered Person Trips"] = roundToNearest(filteredPersonTripsByMode["auto"],1);
+  tmp_dwld["Total Vehicle Trips"] = roundToNearest(totalVehicleTripsByMode["auto"],1);
+  tmp_dwld["Filtered Vehicle Trips"] = roundToNearest(filteredVehicleTripsByMode["auto"],1);
   total_trips_download.push(tmp_dwld);
   tmp_dwld = {};
   tmp_dwld["Mode"] = "TNC/Taxi"
-  tmp_dwld["Person Trips"] = roundToNearest(totalPersonTripsByMode["tnc/taxi"],1);
-  tmp_dwld["Vehicle Trips"] = roundToNearest(totalVehicleTripsByMode["tnc/taxi"],1);
+  tmp_dwld["Total Person Trips"] = roundToNearest(totalPersonTripsByMode["tnc/taxi"],1);
+  tmp_dwld["Filtered Person Trips"] = roundToNearest(filteredPersonTripsByMode["tnc/taxi"],1);
+  tmp_dwld["Total Vehicle Trips"] = roundToNearest(totalVehicleTripsByMode["tnc/taxi"],1);
+  tmp_dwld["Filtered Vehicle Trips"] = roundToNearest(filteredVehicleTripsByMode["tnc/taxi"],1);
   total_trips_download.push(tmp_dwld);
   tmp_dwld = {};
   tmp_dwld["Mode"] = "Transit"
-  tmp_dwld["Person Trips"] = roundToNearest(totalPersonTripsByMode["transit"],1);
-  tmp_dwld["Vehicle Trips"] = ""//totalVehicleTripsByMode["transit"];
+  tmp_dwld["Total Person Trips"] = roundToNearest(totalPersonTripsByMode["transit"],1);
+  tmp_dwld["Filtered Person Trips"] = roundToNearest(filteredPersonTripsByMode["transit"],1);
+  tmp_dwld["Total Vehicle Trips"] = ""//totalVehicleTripsByMode["transit"];
+  tmp_dwld["Filtered Vehicle Trips"] = ""//filteredVehicleTripsByMode["transit"];
   total_trips_download.push(tmp_dwld);
   tmp_dwld = {};
   tmp_dwld["Mode"] = "Private Shuttle"
-  tmp_dwld["Person Trips"] = roundToNearest(totalPersonTripsByMode["pvt_shuttle"],1);
-  tmp_dwld["Vehicle Trips"] = ""//totalVehicleTripsByMode["pvt_shuttle"];
+  tmp_dwld["Total Person Trips"] = roundToNearest(totalPersonTripsByMode["pvt_shuttle"],1);
+  tmp_dwld["Filtered Person Trips"] = roundToNearest(filteredPersonTripsByMode["pvt_shuttle"],1);
+  tmp_dwld["Total Vehicle Trips"] = ""//totalVehicleTripsByMode["pvt_shuttle"];
+  tmp_dwld["Filtered Vehicle Trips"] = ""//filteredVehicleTripsByMode["pvt_shuttle"];
   total_trips_download.push(tmp_dwld);
   tmp_dwld = {};
   tmp_dwld["Mode"] = "Walk"
-  tmp_dwld["Person Trips"] = roundToNearest(totalPersonTripsByMode["walk"],1);
-  tmp_dwld["Vehicle Trips"] = ""//totalVehicleTripsByMode["walk"];
+  tmp_dwld["Total Person Trips"] = roundToNearest(totalPersonTripsByMode["walk"],1);
+  tmp_dwld["Filtered Person Trips"] = roundToNearest(filteredPersonTripsByMode["walk"],1);
+  tmp_dwld["Total Vehicle Trips"] = ""//totalVehicleTripsByMode["walk"];
+  tmp_dwld["Filtered Vehicle Trips"] = ""//filteredVehicleTripsByMode["walk"];
   total_trips_download.push(tmp_dwld);
   tmp_dwld = {};
   tmp_dwld["Mode"] = "Bike"
-  tmp_dwld["Person Trips"] = roundToNearest(totalPersonTripsByMode["bike"],1);
-  tmp_dwld["Vehicle Trips"] = ""//totalVehicleTripsByMode["bike"];
+  tmp_dwld["Total Person Trips"] = roundToNearest(totalPersonTripsByMode["bike"],1);
+  tmp_dwld["Filtered Person Trips"] = roundToNearest(filteredPersonTripsByMode["bike"],1);
+  tmp_dwld["Total Vehicle Trips"] = ""//totalVehicleTripsByMode["bike"];
+  tmp_dwld["Filtered Vehicle Trips"] = ""//filteredVehicleTripsByMode["bike"];
   total_trips_download.push(tmp_dwld);
 }
 
 window.downloadCSV = function(){
   createDownloadObjects();
   let data, filename, link;
-  let csv = 'Project Location';
+  let csv = 'PROJECT LOCATION ATTRIBUTES';
   if (csv == null) return;
   
-  csv += '\nAddress: ' + address;
-  csv += '\nDistrict: ' + addressDistrictName;
-  csv += '\nPlace Type: ' + app.placetype_text;
-  csv += '\nCity: San Francisco\n';
+  csv += '\n------------------------';
+  csv += '\nAddress:, ' + address;
+  csv += '\nDistrict:, ' + addressDistrictName;
+  csv += '\nPlace Type:, ' + app.placetype_text;
+  csv += '\nCity:, San Francisco';
+  csv += '\n\nSELECTED FILTERS';
+  csv += '\n------------------------';
+  csv += '\nTime Period:, ' + selectedTimePeriod;
+  csv += '\nPurpose:, ' + selectedPurpose;
+  csv += '\nDirection:, ' + selectedDirection;
+  csv += '\nDistribution Method:, ' + selectedDistribution;
   csv += '\n\n';
   
   csv += 'Average vehicle occupancy';
@@ -1419,8 +1438,8 @@ window.downloadCSV = function(){
   csv += '\n' + convertArrayOfObjectsToCSV({
     data: modesplit_download
   });
-
-  csv += '\n\n'+ 'Total '+ selectedDirection + ' Trips by Mode';
+  
+  csv += '\n\n'+ 'Total Trips by Mode';
   csv += '\n' + convertArrayOfObjectsToCSV({
     data: total_trips_download
   });
