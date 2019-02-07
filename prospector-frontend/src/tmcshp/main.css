@@ -4,17 +4,9 @@ p {color:#ccc;}
 h3 {color: white; padding-top:5px;}
 h4 {color: white; }
 
-#container {
-  height:100%;
-  width:100%;
-}
-
-#panel {
-}
-
 #sfmap {
   background-color:#eee;
-  height: 700px;
+  height: 1068px;
   width: 100%;
 }
 

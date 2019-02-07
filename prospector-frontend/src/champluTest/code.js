@@ -21,8 +21,11 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 
 // Must use npm and babel to support IE11/Safari
 import 'isomorphic-fetch';
+import 'babel-polyfill';
+import 'lodash';
 import vueSlider from 'vue-slider-component';
 import Cookies from 'js-cookie';
+import JSZip from 'jszip';
 
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
@@ -30,20 +33,30 @@ let getLegHTML = maplib.getLegHTML2;
 let getColorFromVal = maplib.getColorFromVal2;
 let getBWLegHTML = maplib.getBWLegHTML;
 let getQuantiles = maplib.getQuantiles;
-let mymap = maplib.sfmap;
-// set map center and zoom level
-mymap.setView([37.76889, -122.440997], 13);
+
+mapboxgl.accessToken = "pk.eyJ1Ijoic2ZjdGEiLCJhIjoiY2ozdXBhNm1mMDFkaTJ3dGRmZHFqanRuOCJ9.KDmACTJBGNA6l0CyPi1Luw";
+
+// let mymap = maplib.sfmap;
+// mymap.setView([37.76889, -122.440997], 13);
+
+let mymap = new mapboxgl.Map({
+  container: 'sfmap',
+  style: 'mapbox://styles/mapbox/light-v9',
+  center: [-122.44, 37.77],
+  zoom: 12,
+  bearing: 0,
+  pitch: 0,
+  attributionControl: true,
+  logoPosition: 'bottom-right',
+});
 
 // some important global variables.
-// the data source
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
-const DATA_VIEW = 'hhjobs';
-
+const DATA_VIEW = 'lua2017';
 
 const FRAC_COLS = ['speed','time','vol','vmt','vhd','vht','pti80','pti80_vmt'];
-const YR_LIST = [2015,2050];
-const TRANSIT_MODE = ['auto','transit'];
+const YR_LIST = [2015,2020,2025,2030,2035,2040,2050];
 
 const INT_COLS = ['dt','at','ft2'];
 const DISCRETE_VAR_LIMIT = 10;
@@ -64,20 +77,21 @@ const BWIDTH_MAP = {
 };
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'total': {'base':[250000, 500000, 750000, 1000000], 'diff':[-1000, -500, 10000, 20000], 'pctdiff':[-20, -5, 10, 20]},
-  'cie': {'base':[50000, 100000, 150000, 200000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 10, 20]},
-  'med': {'base':[50000, 100000, 150000, 200000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 10, 20]},
-  'mips': {'base':[50000, 100000, 150000, 200000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 10, 20]},
-  'pdr': {'base':[50000, 100000, 150000, 200000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 10, 20]},
-  'retail': {'base':[50000, 100000, 150000, 200000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 10, 20]},
-  'visitor': {'base':[50000, 100000, 150000, 200000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 10, 20]},
+  'hh': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
+  'tot': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
+  'cie': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
+  'med': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
+  'mips': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
+  'pdr': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
+  'ret': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
+  'vis': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
 }
 
 const METRIC_UNITS = {'speed':'mph','tot':'jobs'};
-let modeSelect = 'auto';
+
 let sel_colorvals, sel_colors, sel_binsflag;
 let sel_bwvals;
-// let bwidth_metric_list = [''];
+let bwidth_metric_list = [''];
 
 let chart_deftitle = 'All TAZs Combined';
 
@@ -85,6 +99,38 @@ let geoLayer, mapLegend;
 let _featJson;
 let _aggregateData;
 let prec;
+
+mymap.dragRotate.enable();
+mymap.touchZoomRotate.enableRotation();
+
+// In 3D mode, place TAZs above everything
+mymap.moveLayer('taz'); // to the top
+mymap.moveLayer('taz-selected'); // to the very top
+mymap.setPaintProperty('taz','fill-extrusion-opacity',0.85);
+
+mymap.setPaintProperty('road-label-large', 'text-color', '#000');
+mymap.setPaintProperty('road-label-medium', 'text-color', '#000');
+mymap.setPaintProperty('road-label-small', 'text-color', '#000');
+
+let paintZone3D = {
+  'fill-extrusion-opacity':1.0,
+  'fill-extrusion-color': '#6ff',
+  'fill-extrusion-height': {
+      property: 'trips',
+      type:'identity',
+  },
+};
+
+updateColors();
+let options = {pitch: _this._pitch, bearing: _this._bearing};
+if (_this._minpitchzoom && map.getZoom() > _this._minpitchzoom) {
+    options.zoom = _this._minpitchzoom;
+}
+map.easeTo(options);
+
+_this._btn.className = 'mapboxgl-ctrl-icon mapboxgl-ctrl-pitchtoggle-2d';
+
+
 
 async function initialPrep() {
 
@@ -100,7 +146,6 @@ async function initialPrep() {
   console.log('4 !!!');
 }
 
-// get the taz boundary data
 async function fetchMapFeatures() {
   const geo_url = API_SERVER + GEO_VIEW + '?select=taz,geometry,nhood';
 
@@ -167,48 +212,35 @@ infoPanel.update = function(geo) {
 };
 infoPanel.addTo(mymap);
 
-// get data from database
 async function getMapData() {
   let data_url = API_SERVER + DATA_VIEW;
   let resp = await fetch(data_url);
   let jsonData = await resp.json();
-
   base_lookup = {};
   let tmp = {};
   for (let yr of YR_LIST) {
     tmp[yr] = {};
-    for (let mode of TRANSIT_MODE) {
-      tmp[yr][mode] = {}
-      for (let met of app.metric_options) {
-        tmp[yr][mode][met.value] = 0;
-      }
+    for (let met of app.metric_options) {
+      tmp[yr][met.value] = 0;
     }
   }
-
   for (let entry of jsonData) {
     base_lookup[entry.taz] = entry;
     for (let yr of YR_LIST) {
-      for (let mode of TRANSIT_MODE) {
-        for (let met of app.metric_options) {
-          tmp[yr][mode][met.value] += entry[mode+met.value+yr];
-        }
+      for (let met of app.metric_options) {
+        tmp[yr][met.value] += entry[met.value+yr];
       }
     }
   }
-
   _aggregateData = [];
   for (let yr of YR_LIST) {
-    for (let mode of TRANSIT_MODE) {
-      let row = {};
-      row['year'] = yr.toString();
-      row['mode'] = mode.toString()
-      for (let met of app.metric_options) {
-        row[met.value] = tmp[yr][mode][met.value];
-      }
-      _aggregateData.push(row);
+    let row = {};
+    row['year'] = yr.toString();
+    for (let met of app.metric_options) {
+      row[met.value] = tmp[yr][met.value];
     }
+    _aggregateData.push(row);
   }
-  // console.log(_aggregateData)
 }
 
 let base_lookup;
@@ -222,51 +254,34 @@ async function drawMapFeatures(queryMapData=true) {
   let sel_metric = app.selected_metric;
   let base_metric = sel_metric + app.sliderValue[0];
   let comp_metric = sel_metric + app.sliderValue[1];
-
-  if (app.isTRActive == true && app.isAUActive == false) {
-    base_metric = 'transit' + base_metric;
-    comp_metric = 'transit' + comp_metric;
-  }
-  if (app.isAUActive == true && app.isTRActive == false) {
-    base_metric = 'auto' + base_metric;
-    comp_metric = 'auto' + comp_metric;
-  }
-
   if (base_metric==comp_metric) {
-    // base num for a year
     app.comp_check = false;
     app.pct_check = false;
   } else {
-    // changing num for time duration
     app.comp_check = true;
   }
-  
   prec = (FRAC_COLS.includes(sel_metric) ? 100 : 1);
   
-
   try {
-    // draw data
     if (queryMapData) {
       app.custom_check = false;
       if (base_lookup == undefined) await getMapData();
-      // console.log(base_lookup)
-      // console.log("data draw!")
+      
       let map_metric;
       let bwidth_metric;
       map_vals = [];
       bwidth_vals = [];
       for (let feat of cleanFeatures) {
-        // bwidth_metric = null;
-        // if (base_lookup.hasOwnProperty(feat.taz)) {
-        //   bwidth_metric = Math.round(base_lookup[feat.taz][app.selected_bwidth]);
-        //   if (bwidth_metric !== null) bwidth_vals.push(bwidth_metric);
-        // }
-        // feat['bwmetric'] = bwidth_metric;
+        bwidth_metric = null;
+        if (base_lookup.hasOwnProperty(feat.taz)) {
+          bwidth_metric = Math.round(base_lookup[feat.taz][app.selected_bwidth]);
+          if (bwidth_metric !== null) bwidth_vals.push(bwidth_metric);
+        }
+        feat['bwmetric'] = bwidth_metric;
+        
         map_metric = null;
         if (app.comp_check) {
-          // changing num for time duration
           if (base_lookup.hasOwnProperty(feat.taz)) {
-            // console.log("drawMapFeatures, 1")
             let feat_entry = base_lookup[feat.taz];
             map_metric = feat_entry[comp_metric] - feat_entry[base_metric];
             feat['base'] = feat_entry[base_metric];
@@ -278,13 +293,8 @@ async function drawMapFeatures(queryMapData=true) {
             }
           }
         } else {
-          // base num for a year
           if (base_lookup.hasOwnProperty(feat.taz)) {
-            // console.log("drawMapFeatures, 2")
             map_metric = base_lookup[feat.taz][base_metric];
-            // console.log(base_lookup[feat.taz])
-            // console.log(base_metric)
-            // console.log(map_metric)
           }
         }
         if (map_metric !== null) {
@@ -297,19 +307,16 @@ async function drawMapFeatures(queryMapData=true) {
       bwidth_vals = bwidth_vals.sort((a, b) => a - b); 
     }
     
-    // draw map color
     if (map_vals.length > 0) {
       let color_func;
       let sel_colorvals2;
       let bp;
-      console.log("color draw!")
+      
       if (queryMapData) {
-        
         sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
+        
         //calculate distribution
         let dist_vals = app.comp_check? map_vals.filter(entry => entry <= MAX_PCTDIFF) : map_vals;
-        // console.log(app.comp_check)
-        // console.log(dist_vals)
         let x = d3.scaleLinear()
                 .domain([dist_vals[0], dist_vals[dist_vals.length-1]])
         let numticks = 20;
@@ -319,10 +326,8 @@ async function drawMapFeatures(queryMapData=true) {
             .thresholds(x.ticks(numticks));
         updateDistChart(histogram(dist_vals));
 
-        // console.log(sel_colorvals.length)
-        // console.log(DISCRETE_VAR_LIMIT)
+        
         if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) {
-          console.log("drawMapFeatures, 3")
           sel_binsflag = false;
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
           sel_colorvals2 = sel_colorvals.slice(0);
@@ -336,7 +341,6 @@ async function drawMapFeatures(queryMapData=true) {
           app.bp5 = 1;
           
         } else {
-          console.log("drawMapFeatures, 4")
           app.custom_disable = false;
           
           let mode = 'base';
@@ -348,10 +352,8 @@ async function drawMapFeatures(queryMapData=true) {
             }
           }
           let custom_bps;
-          console.log(CUSTOM_BP_DICT)
           if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)){
             custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
-            console.log(custom_bps)
             sel_colorvals = [map_vals[0]];
             for (var i = 0; i < custom_bps.length; i++) {
               if (custom_bps[i]>map_vals[0] && custom_bps[i]<map_vals[map_vals.length-1]) sel_colorvals.push(custom_bps[i]);
@@ -463,7 +465,7 @@ async function drawMapFeatures(queryMapData=true) {
         legHTML = '<h4>' + sel_metric.toUpperCase() + (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(sel_metric)? (' (' + METRIC_UNITS[sel_metric] + ')') : '')) +
                   '</h4>' + legHTML;
         if (app.bwidth_check) {
-          // legHTML += '<hr/>' + '<h4>' + app.selected_bwidth.toUpperCase() +  '</h4>';
+          legHTML += '<hr/>' + '<h4>' + app.selected_bwidth.toUpperCase() +  '</h4>';
           legHTML += getBWLegHTML(sel_bwvals, bw_widths);
         }
         div.innerHTML = legHTML;
@@ -731,26 +733,26 @@ function bp4Changed(thing) {
   if (thing > app.bp5) app.bp4 = app.bp5;
   app.isUpdActive = true;
 }
-// function bwbp1Changed(thing) {
-//   if (thing < app.bwbp0) app.bwbp1 = app.bwbp0;
-//   if (thing > app.bwbp2) app.bwbp2 = thing;
-//   app.isBWUpdActive = true;
-// }
-// function bwbp2Changed(thing) {
-//   if (thing < app.bwbp1) app.bwbp1 = thing;
-//   if (thing > app.bwbp3) app.bwbp3 = thing;
-//   app.isBWUpdActive = true;
-// }
-// function bwbp3Changed(thing) {
-//   if (thing < app.bwbp2) app.bwbp2 = thing;
-//   if (thing > app.bwbp4) app.bwbp4 = thing;
-//   app.isBWUpdActive = true;
-// }
-// function bwbp4Changed(thing) {
-//   if (thing < app.bwbp3) app.bwbp3 = thing;
-//   if (thing > app.bwbp5) app.bwbp4 = app.bwbp5;
-//   app.isBWUpdActive = true;
-// }
+function bwbp1Changed(thing) {
+  if (thing < app.bwbp0) app.bwbp1 = app.bwbp0;
+  if (thing > app.bwbp2) app.bwbp2 = thing;
+  app.isBWUpdActive = true;
+}
+function bwbp2Changed(thing) {
+  if (thing < app.bwbp1) app.bwbp1 = thing;
+  if (thing > app.bwbp3) app.bwbp3 = thing;
+  app.isBWUpdActive = true;
+}
+function bwbp3Changed(thing) {
+  if (thing < app.bwbp2) app.bwbp2 = thing;
+  if (thing > app.bwbp4) app.bwbp4 = thing;
+  app.isBWUpdActive = true;
+}
+function bwbp4Changed(thing) {
+  if (thing < app.bwbp3) app.bwbp3 = thing;
+  if (thing > app.bwbp5) app.bwbp4 = app.bwbp5;
+  app.isBWUpdActive = true;
+}
 
 async function selectionChanged(thing) {
   app.chartTitle = app.selected_metric.toUpperCase() + ' TREND';
@@ -771,16 +773,6 @@ async function updateMap(thing) {
     popSelGeo.setContent(getInfoHtml(selfeat));
   }
 }
-
-async function changeMode(thing) {
-  app.isUpdActive = false;
-  let selfeat = await drawMapFeatures();
-  if (selfeat) {
-    highlightSelectedSegment();
-    popSelGeo.setContent(getInfoHtml(selfeat));
-  }
-}
-
 function customBreakPoints(thing) {
   if(thing) {
     app.isUpdActive = false;
@@ -788,32 +780,17 @@ function customBreakPoints(thing) {
     drawMapFeatures();
   }
 }
-
-// function customBWBreakPoints(thing) {
-//   if(thing) {
-//     app.isBWUpdActive = false;
-//   } else {
-//     drawMapFeatures();
-//   }
-// }
-// 
-// function colorschemeChanged(thing) {
-//   app.selected_colorscheme = thing;
-//   drawMapFeatures(false);
-// }
-
-function pickAU(thing){
-  modeSelect = "auto";
-  app.isAUActive = true;
-  app.isTRActive = false;
-  changeMode();
+function customBWBreakPoints(thing) {
+  if(thing) {
+    app.isBWUpdActive = false;
+  } else {
+    drawMapFeatures();
+  }
 }
 
-function pickTR(thing){
-  modeSelect = "transit";
-  app.isTRActive = true;
-  app.isAUActive = false;
-  changeMode();
+function colorschemeChanged(thing) {
+  app.selected_colorscheme = thing;
+  drawMapFeatures(false);
 }
 
 function bwidthChanged(thing) {
@@ -840,60 +817,50 @@ let app = new Vue({
   delimiters: ['${', '}'],
   data: {
     isPanelHidden: false,
-
-    // transit type
-    isAUActive: true,
-    isTRActive: false,
-
-    // percent diff
+    isUpdActive: false,
     comp_check: true,
     pct_check: true,
-    // bwidth_check: false,
+    bwidth_check: false,
     custom_check: false,
-    // custom_disable: false,
-    
-    // custom break points
+    custom_disable: false,
     bp0: 0.0,
     bp1: 0.0,
     bp2: 0.0,
     bp3: 0.0,
     bp4: 0.0,
     bp5: 0.0,
-    // update after change custom break points
-    isUpdActive: false,
     
-    // isBWUpdActive: false,
-    // bwcustom_check: false,
-    // bwcustom_disable: true,
-    // bwbp0: 0.0,
-    // bwbp1: 0.0,
-    // bwbp2: 0.0,
-    // bwbp3: 0.0,
-    // bwbp4: 0.0,
-    // bwbp5: 0.0,
+    isBWUpdActive: false,
+    bwcustom_check: false,
+    bwcustom_disable: true,
+    bwbp0: 0.0,
+    bwbp1: 0.0,
+    bwbp2: 0.0,
+    bwbp3: 0.0,
+    bwbp4: 0.0,
+    bwbp5: 0.0,
     
-    selected_metric: 'total',
+    selected_metric: 'hh',
     metric_options: [
-    {text: 'Total_Jobs', value: 'total'},
-    {text: 'CIE_Jobs', value: 'cie'},
-    {text: 'MED_Jobs', value: 'med'},
-    {text: 'MIPS_Jobs', value: 'mips'},
-    {text: 'PDR_Jobs', value: 'pdr'},
-    {text: 'RET_Jobs', value: 'retail'},
-    {text: 'VIS_Jobs', value: 'visitor'},
+    {text: 'Households', value: 'hh'},
+    {text: 'CIE_EMP', value: 'cie'},
+    {text: 'MED_EMP', value: 'med'},
+    {text: 'MIPS_EMP', value: 'mips'},
+    {text: 'PDR_EMP', value: 'pdr'},
+    {text: 'RET_EMP', value: 'ret'},
+    {text: 'VIS_EMP', value: 'vis'},
+    {text: 'TOT_EMP', value: 'tot'},
     ],
-
-    chartTitle: 'Household Accessible Jobs TREND',
+    chartTitle: 'HH TREND',
     chartSubtitle: chart_deftitle,
     
     scnSlider: scnSlider,
     sliderValue: [YR_LIST[0],YR_LIST[YR_LIST.length-1]],
 
-    // selected_bwidth: bwidth_metric_list[0],
-    // bwidth_options: [],    
+    selected_bwidth: bwidth_metric_list[0],
+    bwidth_options: [],    
     
-    // selected_colorscheme: COLORRAMP.DIV,
-    // map color control
+    selected_colorscheme: COLORRAMP.DIV,
     modeMap: {
       '#ffffcc,#663399': 'lch',
       '#ebbe5e,#3f324f': 'hsl',
@@ -902,12 +869,12 @@ let app = new Vue({
       '#fafa6e,#2A4858': 'lch',
     },
 
-    // selected_breaks: 5,
-    // break_options: [
-    // {text: 'Tertiles (3)', value: 3},
-    // {text: 'Quartiles (4)', value: 4},
-    // {text: 'Quintiles (5)', value: 5},
-    // ]      
+    selected_breaks: 5,
+    break_options: [
+    {text: 'Tertiles (3)', value: 3},
+    {text: 'Quartiles (4)', value: 4},
+    {text: 'Quintiles (5)', value: 5},
+    ]      
   },
   watch: {
     sliderValue: selectionChanged,
@@ -919,19 +886,17 @@ let app = new Vue({
     bp2: bp2Changed,
     bp3: bp3Changed,
     bp4: bp4Changed,
-    // bwbp1: bwbp1Changed,
-    // bwbp2: bwbp2Changed,
-    // bwbp3: bwbp3Changed,
-    // bwbp4: bwbp4Changed,
-    custom_check: customBreakPoints,
-    // bwcustom_check: customBWBreakPoints,
+    bwbp1: bwbp1Changed,
+    bwbp2: bwbp2Changed,
+    bwbp3: bwbp3Changed,
+    bwbp4: bwbp4Changed,
+    //custom_check: customBreakPoints,
+    bwcustom_check: customBWBreakPoints,
     bwidth_check: bwidthChanged,
   },
   methods: {
-    pickAU: pickAU,
-    pickTR: pickTR,
     updateMap: updateMap,
-    // bwUpdateMap: bwUpdateMap,
+    bwUpdateMap: bwUpdateMap,
     clickToggleHelp: clickToggleHelp,
     clickedShowHide: clickedShowHide,
   },
@@ -994,4 +959,3 @@ let helpPanel = new Vue({
 
 initialPrep();
 
-// test

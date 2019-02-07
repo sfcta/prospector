@@ -1,0 +1,11 @@
+/* CSS Layout for CHAMPLU ONLY goes here */
+
+
+#slide-panel {
+  top: auto;
+  bottom: 50px;
+}
+
+.leaflet-bottom .info.legend.leaflet-control {
+    margin-bottom: 70px;
+}
