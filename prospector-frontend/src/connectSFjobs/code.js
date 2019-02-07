@@ -64,7 +64,9 @@ const BWIDTH_MAP = {
 };
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'total': {'base':[250000, 500000, 750000, 1000000], 'diff':[-1000, -500, 10000, 20000], 'pctdiff':[-20, -5, 10, 20]},
+  'transittotal': {'2015':[200000, 400000, 550000, 650000], '2050':[300000, 600000, 750000, 900000], 'diff':[0, 150000, 225000, 300000]},
+  'autototal': {'2015':[850000, 1000000, 1100000, 1200000], '2050':[1000000, 1100000, 1200000, 1300000], 'diff':[0, 50000, 100000, 150000]},
+  // need to be commit
   'cie': {'base':[50000, 100000, 150000, 200000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 10, 20]},
   'med': {'base':[50000, 100000, 150000, 200000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 10, 20]},
   'mips': {'base':[50000, 100000, 150000, 200000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 10, 20]},
@@ -75,6 +77,7 @@ const CUSTOM_BP_DICT = {
 
 const METRIC_UNITS = {'speed':'mph','tot':'jobs'};
 let modeSelect = 'auto';
+let yearSelect = '2015';
 let sel_colorvals, sel_colors, sel_binsflag;
 let sel_bwvals;
 // let bwidth_metric_list = [''];
@@ -220,26 +223,24 @@ async function drawMapFeatures(queryMapData=true) {
   if (!_featJson) return;
   let cleanFeatures = _featJson.slice();
   let sel_metric = app.selected_metric;
-  let base_metric = sel_metric + app.sliderValue[0];
-  let comp_metric = sel_metric + app.sliderValue[1];
-
-  if (app.isTRActive == true && app.isAUActive == false) {
-    base_metric = 'transit' + base_metric;
-    comp_metric = 'transit' + comp_metric;
-  }
-  if (app.isAUActive == true && app.isTRActive == false) {
-    base_metric = 'auto' + base_metric;
-    comp_metric = 'auto' + comp_metric;
-  }
-
-  if (base_metric==comp_metric) {
-    // base num for a year
-    app.comp_check = false;
-    app.pct_check = false;
+  let mode_metric = modeSelect + sel_metric;
+  let base_metric = mode_metric;
+  let comp_metric = mode_metric;
+  if (yearSelect == "diff") {
+    base_metric = base_metric + "2015";
+    comp_metric = comp_metric + "2050";
   } else {
-    // changing num for time duration
-    app.comp_check = true;
+    base_metric = base_metric + yearSelect;
   }
+
+  // if (base_metric==comp_metric) {
+  //   // base num for a year
+  //   app.comp_check = false;
+  //   app.pct_check = false;
+  // } else {
+  //   // changing num for time duration
+  //   app.comp_check = true;
+  // }
   
   prec = (FRAC_COLS.includes(sel_metric) ? 100 : 1);
   
@@ -249,10 +250,10 @@ async function drawMapFeatures(queryMapData=true) {
     if (queryMapData) {
       app.custom_check = false;
       if (base_lookup == undefined) await getMapData();
-      // console.log(base_lookup)
-      // console.log("data draw!")
+      console.log(base_lookup)
+      console.log("data draw!")
       let map_metric;
-      let bwidth_metric;
+      // let bwidth_metric;
       map_vals = [];
       bwidth_vals = [];
       for (let feat of cleanFeatures) {
@@ -263,24 +264,49 @@ async function drawMapFeatures(queryMapData=true) {
         // }
         // feat['bwmetric'] = bwidth_metric;
         map_metric = null;
-        if (app.comp_check) {
+        // if (app.comp_check) {
+        //   // changing num for time duration
+        //   if (base_lookup.hasOwnProperty(feat.taz)) {
+        //     // console.log("drawMapFeatures, 1")
+        //     let feat_entry = base_lookup[feat.taz];
+        //     map_metric = feat_entry[comp_metric] - feat_entry[base_metric];
+        //     feat['base'] = feat_entry[base_metric];
+        //     feat['comp'] = feat_entry[comp_metric];
+        //     if (app.pct_check && app.comp_check) {
+        //       if (feat_entry[base_metric]>0) {
+        //         map_metric = map_metric*100/feat_entry[base_metric];
+        //       }
+        //     }
+        //   }
+        // } else {
+        //   // base num for a year
+        //   if (base_lookup.hasOwnProperty(feat.taz)) {
+        //     // console.log("drawMapFeatures, 2")
+        //     map_metric = base_lookup[feat.taz][base_metric];
+        //     // console.log(base_lookup[feat.taz])
+        //     // console.log(base_metric)
+        //     // console.log(map_metric)
+        //   }
+        // }
+        if (yearSelect == "diff") {
           // changing num for time duration
           if (base_lookup.hasOwnProperty(feat.taz)) {
-            // console.log("drawMapFeatures, 1")
+            console.log("drawMapFeatures, 1")
             let feat_entry = base_lookup[feat.taz];
             map_metric = feat_entry[comp_metric] - feat_entry[base_metric];
             feat['base'] = feat_entry[base_metric];
             feat['comp'] = feat_entry[comp_metric];
-            if (app.pct_check && app.comp_check) {
-              if (feat_entry[base_metric]>0) {
-                map_metric = map_metric*100/feat_entry[base_metric];
-              }
-            }
+            // percent mode
+            // if (app.pct_check && app.comp_check) {
+            //   if (feat_entry[base_metric]>0) {
+            //     map_metric = map_metric*100/feat_entry[base_metric];
+            //   }
+            // }
           }
         } else {
           // base num for a year
           if (base_lookup.hasOwnProperty(feat.taz)) {
-            // console.log("drawMapFeatures, 2")
+            console.log("drawMapFeatures, 2")
             map_metric = base_lookup[feat.taz][base_metric];
             // console.log(base_lookup[feat.taz])
             // console.log(base_metric)
@@ -306,18 +332,19 @@ async function drawMapFeatures(queryMapData=true) {
       if (queryMapData) {
         
         sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
-        //calculate distribution
-        let dist_vals = app.comp_check? map_vals.filter(entry => entry <= MAX_PCTDIFF) : map_vals;
+
+        // draw the distribution plot
+        // let dist_vals = app.comp_check? map_vals.filter(entry => entry <= MAX_PCTDIFF) : map_vals;
         // console.log(app.comp_check)
         // console.log(dist_vals)
-        let x = d3.scaleLinear()
-                .domain([dist_vals[0], dist_vals[dist_vals.length-1]])
-        let numticks = 20;
-        if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) numticks = sel_colorvals.length;
-        let histogram = d3.histogram()
-            .domain(x.domain())
-            .thresholds(x.ticks(numticks));
-        updateDistChart(histogram(dist_vals));
+        // let x = d3.scaleLinear()
+        //         .domain([dist_vals[0], dist_vals[dist_vals.length-1]])
+        // let numticks = 20;
+        // if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) numticks = sel_colorvals.length;
+        // let histogram = d3.histogram()
+        //     .domain(x.domain())
+        //     .thresholds(x.ticks(numticks));
+        // updateDistChart(histogram(dist_vals));
 
         // console.log(sel_colorvals.length)
         // console.log(DISCRETE_VAR_LIMIT)
@@ -339,19 +366,21 @@ async function drawMapFeatures(queryMapData=true) {
           console.log("drawMapFeatures, 4")
           app.custom_disable = false;
           
-          let mode = 'base';
-          if (app.comp_check){
-            if(app.pct_check){
-              mode = 'pctdiff';
-            } else {
-              mode = 'diff';
-            }
-          }
+          let year = '2015';
+          // let mode = 'base'
+          // if (app.comp_check){
+          //   if(app.pct_check){
+          //     mode = 'pctdiff';
+          //   } else {
+          //     mode = 'diff';
+          //   }
+          // }
           let custom_bps;
-          console.log(CUSTOM_BP_DICT)
-          if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)){
-            custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
-            console.log(custom_bps)
+          // console.log(CUSTOM_BP_DICT)
+          // console.log(mode_metric)
+          if (CUSTOM_BP_DICT.hasOwnProperty(mode_metric)){
+            custom_bps = CUSTOM_BP_DICT[mode_metric][yearSelect];
+            // console.log(custom_bps)
             sel_colorvals = [map_vals[0]];
             for (var i = 0; i < custom_bps.length; i++) {
               if (custom_bps[i]>map_vals[0] && custom_bps[i]<map_vals[map_vals.length-1]) sel_colorvals.push(custom_bps[i]);
@@ -364,7 +393,7 @@ async function drawMapFeatures(queryMapData=true) {
           bp = Array.from(sel_colorvals).sort((a, b) => a - b);
           app.bp0 = bp[0];
           app.bp5 = bp[bp.length-1];
-          if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)){
+          if (CUSTOM_BP_DICT.hasOwnProperty(mode_metric)){
             app.bp1 = custom_bps[0];
             app.bp2 = custom_bps[1];
             app.bp3 = custom_bps[2];
@@ -389,16 +418,16 @@ async function drawMapFeatures(queryMapData=true) {
           sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
         }
 
-        app.bwcustom_disable = false;
-        sel_bwvals = getQuantiles(bwidth_vals, 5);
-        bp = Array.from(sel_bwvals).sort((a, b) => a - b);
-        app.bwbp0 = bp[0];
-        app.bwbp1 = bp[1];
-        app.bwbp2 = bp[2];
-        app.bwbp3 = bp[3];
-        app.bwbp4 = bp[4];
-        app.bwbp5 = bp[5];
-        sel_bwvals = Array.from(new Set(sel_bwvals)).sort((a, b) => a - b); 
+        // app.bwcustom_disable = false;
+        // sel_bwvals = getQuantiles(bwidth_vals, 5);
+        // bp = Array.from(sel_bwvals).sort((a, b) => a - b);
+        // app.bwbp0 = bp[0];
+        // app.bwbp1 = bp[1];
+        // app.bwbp2 = bp[2];
+        // app.bwbp3 = bp[3];
+        // app.bwbp4 = bp[4];
+        // app.bwbp5 = bp[5];
+        // sel_bwvals = Array.from(new Set(sel_bwvals)).sort((a, b) => a - b); 
       } else {
         sel_colorvals = new Set([app.bp0, app.bp1, app.bp2, app.bp3, app.bp4, app.bp5]);
         sel_colorvals = Array.from(sel_colorvals).sort((a, b) => a - b);
@@ -411,27 +440,27 @@ async function drawMapFeatures(queryMapData=true) {
         sel_bwvals = Array.from(sel_bwvals).sort((a, b) => a - b);
       }
 
-      let bw_widths;
-      if (app.bwidth_check) {
-        bw_widths = BWIDTH_MAP[sel_bwvals.length]; 
-        for (let feat of cleanFeatures) {
-          if (feat['bwmetric'] !== null) {
-            if (sel_bwvals.length <= 2){
-              feat['bwmetric_scaled'] = bw_widths;
-            } else {
-              for (var i = 0; i < sel_bwvals.length-1; i++) {
-                if (feat['bwmetric'] <= sel_bwvals[i + 1]) {
-                  feat['bwmetric_scaled'] = bw_widths[i];
-                  break;
-                }
-              }
-            }
-            //feat['bwmetric_scaled'] = (feat['bwmetric']-bwidth_vals[0])*(MAX_BWIDTH-MIN_BWIDTH)/(bwidth_vals[bwidth_vals.length-1]-bwidth_vals[0])+MIN_BWIDTH;
-          } else {
-            feat['bwmetric_scaled'] = null;
-          }
-        }
-      }
+      // let bw_widths;
+      // if (app.bwidth_check) {
+      //   bw_widths = BWIDTH_MAP[sel_bwvals.length]; 
+      //   for (let feat of cleanFeatures) {
+      //     if (feat['bwmetric'] !== null) {
+      //       if (sel_bwvals.length <= 2){
+      //         feat['bwmetric_scaled'] = bw_widths;
+      //       } else {
+      //         for (var i = 0; i < sel_bwvals.length-1; i++) {
+      //           if (feat['bwmetric'] <= sel_bwvals[i + 1]) {
+      //             feat['bwmetric_scaled'] = bw_widths[i];
+      //             break;
+      //           }
+      //         }
+      //       }
+      //       //feat['bwmetric_scaled'] = (feat['bwmetric']-bwidth_vals[0])*(MAX_BWIDTH-MIN_BWIDTH)/(bwidth_vals[bwidth_vals.length-1]-bwidth_vals[0])+MIN_BWIDTH;
+      //     } else {
+      //       feat['bwmetric_scaled'] = null;
+      //     }
+      //   }
+      // }
       
       sel_colors = [];
       for(let i of sel_colorvals2) {
@@ -462,10 +491,10 @@ async function drawMapFeatures(queryMapData=true) {
         );
         legHTML = '<h4>' + sel_metric.toUpperCase() + (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(sel_metric)? (' (' + METRIC_UNITS[sel_metric] + ')') : '')) +
                   '</h4>' + legHTML;
-        if (app.bwidth_check) {
-          // legHTML += '<hr/>' + '<h4>' + app.selected_bwidth.toUpperCase() +  '</h4>';
-          legHTML += getBWLegHTML(sel_bwvals, bw_widths);
-        }
+        // if (app.bwidth_check) {
+        //   // legHTML += '<hr/>' + '<h4>' + app.selected_bwidth.toUpperCase() +  '</h4>';
+        //   legHTML += getBWLegHTML(sel_bwvals, bw_widths);
+        // }
         div.innerHTML = legHTML;
         return div;
       };
@@ -493,7 +522,8 @@ function updateColorScheme(colorvals) {
   if (colorvals[0] * colorvals[colorvals.length-1] >= 0) {
     app.selected_colorscheme = COLORRAMP.SEQ;
   } else {
-    app.selected_colorscheme = COLORRAMP.DIV;
+    // app.selected_colorscheme = COLORRAMP.DIV;
+    app.selected_colorscheme = COLORRAMP.SEQ;
   } 
 }
 
@@ -553,51 +583,51 @@ function highlightSelectedSegment() {
   });
 }
 
-let distChart = null;
-let distLabels;
-function updateDistChart(bins) {
-  let data = [];
-  distLabels = [];
-  for (let b of bins) {
-    let x0 = Math.round(b.x0*prec)/prec;
-    let x1 = Math.round(b.x1*prec)/prec;
-    data.push({x:x0, y:b.length});
-    distLabels.push(x0 + '-' + x1);
-  }
+// let distChart = null;
+// let distLabels;
+// function updateDistChart(bins) {
+//   let data = [];
+//   distLabels = [];
+//   for (let b of bins) {
+//     let x0 = Math.round(b.x0*prec)/prec;
+//     let x1 = Math.round(b.x1*prec)/prec;
+//     data.push({x:x0, y:b.length});
+//     distLabels.push(x0 + '-' + x1);
+//   }
 
-  if (distChart) {
-    distChart.setData(data);
-  } else {
-      distChart = new Morris.Area({
-        // ID of the element in which to draw the chart.
-        element: 'dist-chart',
-        data: data,
-        // The name of the data record attribute that contains x-values.
-        xkey: 'x',
-        // A list of names of data record attributes that contain y-values.
-        ykeys: 'y',
-        ymin: 0,
-        labels: ['Freq'],
-        lineColors: ['#1fc231'],
-        xLabels: 'x',
-        xLabelAngle: 25,
-        xLabelFormat: binFmt,
-        //yLabelFormat: yFmt,
-        hideHover: true,
-        parseTime: false,
-        fillOpacity: 0.4,
-        pointSize: 1,
-        behaveLikeLine: false,
-        eventStrokeWidth: 2,
-        eventLineColors: ['#ccc'],
-      });
-  }
+//   if (distChart) {
+//     distChart.setData(data);
+//   } else {
+//       distChart = new Morris.Area({
+//         // ID of the element in which to draw the chart.
+//         element: 'dist-chart',
+//         data: data,
+//         // The name of the data record attribute that contains x-values.
+//         xkey: 'x',
+//         // A list of names of data record attributes that contain y-values.
+//         ykeys: 'y',
+//         ymin: 0,
+//         labels: ['Freq'],
+//         lineColors: ['#1fc231'],
+//         xLabels: 'x',
+//         xLabelAngle: 25,
+//         xLabelFormat: binFmt,
+//         //yLabelFormat: yFmt,
+//         hideHover: true,
+//         parseTime: false,
+//         fillOpacity: 0.4,
+//         pointSize: 1,
+//         behaveLikeLine: false,
+//         eventStrokeWidth: 2,
+//         eventLineColors: ['#ccc'],
+//       });
+//   }
 
-}
+// }
 
-function binFmt(x) {
-  return distLabels[x.x] + ((app.pct_check && app.comp_check)? '%':'');
-}
+// function binFmt(x) {
+//   return distLabels[x.x] + ((app.pct_check && app.comp_check)? '%':'');
+// }
 
 let selGeoId;
 let selectedGeo, prevSelectedGeo;
@@ -625,69 +655,69 @@ function clickedOnFeature(e) {
   }
 }
 
-let popSelGeo;
-function showGeoDetails(latlng) {
-  // show popup
-  popSelGeo = L.popup()
-    .setLatLng(latlng)
-    .setContent(infoPanel._div.innerHTML)
-    .addTo(mymap);
+// let popSelGeo;
+// function showGeoDetails(latlng) {
+//   // show popup
+//   popSelGeo = L.popup()
+//     .setLatLng(latlng)
+//     .setContent(infoPanel._div.innerHTML)
+//     .addTo(mymap);
 
-  // Revert to overall chart when no segment selected
-  popSelGeo.on('remove', function(e) {
-    resetPopGeo();
-  });
-}
+//   // Revert to overall chart when no segment selected
+//   popSelGeo.on('remove', function(e) {
+//     resetPopGeo();
+//   });
+// }
 
-function resetPopGeo() {
-  geoLayer.resetStyle(selectedGeo);
-  prevSelectedGeo = selectedGeo = selGeoId = null;
-  app.chartSubtitle = chart_deftitle;
-  buildChartHtmlFromData();
-}
+// function resetPopGeo() {
+//   geoLayer.resetStyle(selectedGeo);
+//   prevSelectedGeo = selectedGeo = selGeoId = null;
+//   app.chartSubtitle = chart_deftitle;
+//   buildChartHtmlFromData();
+// }
 
-let trendChart = null
-function buildChartHtmlFromData(geoid = null) {
-  document.getElementById('longchart').innerHTML = '';
-  if (geoid) {
-    let selgeodata = [];
-    for (let yr of YR_LIST) {
-      let row = {};
-      row['year'] = yr.toString();
-      for (let met of app.metric_options) {
-        row[met.value] = base_lookup[geoid][met.value+yr];
-      }
-      selgeodata.push(row);
-    } 
-    trendChart = new Morris.Line({
-      data: selgeodata,
-      element: 'longchart',
-      gridTextColor: '#aaa',
-      hideHover: true,
-      labels: [app.selected_metric.toUpperCase()],
-      lineColors: ['#f66'],
-      xkey: 'year',
-      smooth: false,
-      parseTime: false,
-      xLabelAngle: 45,
-      ykeys: [app.selected_metric],
-    });
-  } else {
-    trendChart = new Morris.Line({
-      data: _aggregateData,
-      element: 'longchart',
-      gridTextColor: '#aaa',
-      hideHover: true,
-      labels: [app.selected_metric.toUpperCase()],
-      lineColors: ['#f66'],
-      xkey: 'year',
-      smooth: false,
-      parseTime: false,
-      xLabelAngle: 45,
-      ykeys: [app.selected_metric],
-    });
-  }
-}
+// let trendChart = null
+// function buildChartHtmlFromData(geoid = null) {
+//   document.getElementById('longchart').innerHTML = '';
+//   if (geoid) {
+//     let selgeodata = [];
+//     for (let yr of YR_LIST) {
+//       let row = {};
+//       row['year'] = yr.toString();
+//       for (let met of app.metric_options) {
+//         row[met.value] = base_lookup[geoid][met.value+yr];
+//       }
+//       selgeodata.push(row);
+//     } 
+//     trendChart = new Morris.Line({
+//       data: selgeodata,
+//       element: 'longchart',
+//       gridTextColor: '#aaa',
+//       hideHover: true,
+//       labels: [app.selected_metric.toUpperCase()],
+//       lineColors: ['#f66'],
+//       xkey: 'year',
+//       smooth: false,
+//       parseTime: false,
+//       xLabelAngle: 45,
+//       ykeys: [app.selected_metric],
+//     });
+//   } else {
+//     trendChart = new Morris.Line({
+//       data: _aggregateData,
+//       element: 'longchart',
+//       gridTextColor: '#aaa',
+//       hideHover: true,
+//       labels: [app.selected_metric.toUpperCase()],
+//       lineColors: ['#f66'],
+//       xkey: 'year',
+//       smooth: false,
+//       parseTime: false,
+//       xLabelAngle: 45,
+//       ykeys: [app.selected_metric],
+//     });
+//   }
+// }
 
 
 // SLIDER ----
@@ -763,7 +793,7 @@ async function selectionChanged(thing) {
   }
 }
 
-async function updateMap(thing) {
+async function updateColor(thing) {
   app.isUpdActive = false;
   let selfeat = await drawMapFeatures(false);
   if (selfeat) {
@@ -772,13 +802,37 @@ async function updateMap(thing) {
   }
 }
 
-async function changeMode(thing) {
+async function updateMap(thing) {
   app.isUpdActive = false;
   let selfeat = await drawMapFeatures();
   if (selfeat) {
     highlightSelectedSegment();
     popSelGeo.setContent(getInfoHtml(selfeat));
   }
+}
+
+function yr2015(thing){
+  yearSelect = "2015";
+  app.is2015 = true,
+  app.is2050 = false,
+  app.isDIFF = false,
+  updateMap();
+}
+
+function yr2050(thing){
+  yearSelect = "2050";
+  app.is2015 = false,
+  app.is2050 = true,
+  app.isDIFF = false,
+  updateMap();
+}
+
+function yrdiff(thing){
+  yearSelect = "diff";
+  app.is2015 = false,
+  app.is2050 = false,
+  app.isDIFF = true,
+  updateMap();
 }
 
 function customBreakPoints(thing) {
@@ -806,24 +860,24 @@ function pickAU(thing){
   modeSelect = "auto";
   app.isAUActive = true;
   app.isTRActive = false;
-  changeMode();
+  updateMap();
 }
 
 function pickTR(thing){
   modeSelect = "transit";
   app.isTRActive = true;
   app.isAUActive = false;
-  changeMode();
+  updateMap();
 }
 
-function bwidthChanged(thing) {
-  app.bwcustom_disable = !thing;
-  drawMapFeatures(false);
-}
-function bwUpdateMap(thing) {
-  app.isBWUpdActive = false;
-  drawMapFeatures(false);
-}
+// function bwidthChanged(thing) {
+//   app.bwcustom_disable = !thing;
+//   drawMapFeatures(false);
+// }
+// function bwUpdateMap(thing) {
+//   app.isBWUpdActive = false;
+//   drawMapFeatures(false);
+// }
 
 
 function getColorMode(cscheme) {
@@ -840,14 +894,19 @@ let app = new Vue({
   delimiters: ['${', '}'],
   data: {
     isPanelHidden: false,
+    // year
+    is2015: true,
+    is2050: false,
+    isDIFF: false,
 
     // transit type
     isAUActive: true,
     isTRActive: false,
 
     // percent diff
-    comp_check: true,
-    pct_check: true,
+    // comp_check: true,
+    // pct_check: true,
+
     // bwidth_check: false,
     custom_check: false,
     // custom_disable: false,
@@ -883,11 +942,11 @@ let app = new Vue({
     {text: 'VIS_Jobs', value: 'visitor'},
     ],
 
-    chartTitle: 'Household Accessible Jobs TREND',
-    chartSubtitle: chart_deftitle,
+    // chartTitle: 'Household Accessible Jobs TREND',
+    // chartSubtitle: chart_deftitle,
     
-    scnSlider: scnSlider,
-    sliderValue: [YR_LIST[0],YR_LIST[YR_LIST.length-1]],
+    // scnSlider: scnSlider,
+    // sliderValue: [YR_LIST[0],YR_LIST[YR_LIST.length-1]],
 
     // selected_bwidth: bwidth_metric_list[0],
     // bwidth_options: [],    
@@ -910,9 +969,9 @@ let app = new Vue({
     // ]      
   },
   watch: {
-    sliderValue: selectionChanged,
+    // sliderValue: selectionChanged,
     selected_metric: selectionChanged,
-    pct_check: selectionChanged,
+    // pct_check: selectionChanged,
     
     //selected_colorscheme: colorschemeChanged,
     bp1: bp1Changed,
@@ -925,12 +984,15 @@ let app = new Vue({
     // bwbp4: bwbp4Changed,
     custom_check: customBreakPoints,
     // bwcustom_check: customBWBreakPoints,
-    bwidth_check: bwidthChanged,
+    // bwidth_check: bwidthChanged,
   },
   methods: {
+    yr2015: yr2015,
+    yr2050: yr2050,
+    yrdiff: yrdiff,
     pickAU: pickAU,
     pickTR: pickTR,
-    updateMap: updateMap,
+    updateMap: updateColor,
     // bwUpdateMap: bwUpdateMap,
     clickToggleHelp: clickToggleHelp,
     clickedShowHide: clickedShowHide,
