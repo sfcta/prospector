@@ -38,7 +38,7 @@ mymap.setView([37.76889, -122.440997], 13);
 // the data source
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
-const DATA_VIEW = 'hhjobs';
+const DATA_VIEW = 'connectsf_accjobs';
 
 
 const FRAC_COLS = ['speed','time','vol','vmt','vhd','vht','pti80','pti80_vmt'];
