@@ -9,7 +9,8 @@ const sfcta_components = [
      'viz-template',
      'tdt',
      'champlu',
-     'tnctrn'
+     'tnctrn',
+     'connectsf_traveltime'
 	 //'cmp-v0',
 ];
 
