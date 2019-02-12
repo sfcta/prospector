@@ -140,19 +140,17 @@ function getInfoHtml(geo) {
   if (geo.base !== null) base_val = (Math.round(geo.base*100)/100).toLocaleString();
   let comp_val = null;
   if (geo.comp !== null) comp_val = (Math.round(geo.comp*100)/100).toLocaleString();
-  let bwmetric_val = null;
-  if (geo.bwmetric !== null) bwmetric_val = (Math.round(geo.bwmetric*100)/100).toLocaleString();
+  // let bwmetric_val = null;
+  // if (geo.bwmetric !== null) bwmetric_val = (Math.round(geo.bwmetric*100)/100).toLocaleString();
   let retval = '<b>TAZ: </b>' + `${geo.taz}<br/>` +
                 '<b>NEIGHBORHOOD: </b>' + `${geo.nhood}<br/><hr>`;
-  if (app.comp_check) {
-    retval += `<b>${app.sliderValue[0]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${base_val}<br/>` +
-              `<b>${app.sliderValue[1]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${comp_val}<br/>`;
-  }
-  retval += `<b>${app.selected_metric.toUpperCase()}</b>` + 
-            (app.pct_check? '<b> %</b>': '') +
-            (app.comp_check? '<b> Diff: </b>':'<b>: </b>') + 
-            `${metric_val}` + 
-            ((app.pct_check && app.comp_check && metric_val !== null)? '%':''); 
+  // if (app.comp_check) {
+  //   retval += `<b>${app.sliderValue[0]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${base_val}<br/>` +
+  //             `<b>${app.sliderValue[1]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${comp_val}<br/>`;
+  // }
+  retval += `<b>2015 ACCESSIBLE JOBS: </b> ` + `${base_val}<br/>` +
+            `<b>2050 ACCESSIBLE JOBS: </b> ` + `${comp_val}<br/>`;
+  retval += `<b>ACCESSIBLE JOBS CHANGE: </b>` + `${metric_val}`; 
   return retval; 
 }
 
@@ -250,7 +248,7 @@ async function drawMapFeatures(queryMapData=true) {
     if (queryMapData) {
       app.custom_check = false;
       if (base_lookup == undefined) await getMapData();
-      console.log(base_lookup)
+      // console.log(base_lookup)
       console.log("data draw!")
       let map_metric;
       // let bwidth_metric;
@@ -782,16 +780,17 @@ function bp4Changed(thing) {
 //   app.isBWUpdActive = true;
 // }
 
-async function selectionChanged(thing) {
-  app.chartTitle = app.selected_metric.toUpperCase() + ' TREND';
-  if (app.sliderValue && app.selected_metric) {
-    let selfeat = await drawMapFeatures();
-    if (selfeat) {
-      highlightSelectedSegment();
-      popSelGeo.setContent(getInfoHtml(selfeat));
-    }
-  }
-}
+// async function selectionChanged(thing) {
+//   app.chartTitle = app.selected_metric.toUpperCase() + ' TREND';
+//   if (app.sliderValue && app.selected_metric) {
+//     let selfeat = await drawMapFeatures();
+//     console.log(selfeat)
+//     if (selfeat) {
+//       highlightSelectedSegment();
+//       popSelGeo.setContent(getInfoHtml(selfeat));
+//     }
+//   }
+// }
 
 async function updateColor(thing) {
   app.isUpdActive = false;
@@ -970,7 +969,7 @@ let app = new Vue({
   },
   watch: {
     // sliderValue: selectionChanged,
-    selected_metric: selectionChanged,
+    // selected_metric: selectionChanged,
     // pct_check: selectionChanged,
     
     //selected_colorscheme: colorschemeChanged,
