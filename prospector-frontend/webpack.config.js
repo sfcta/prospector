@@ -10,7 +10,8 @@ const sfcta_components = [
      'tdt',
      'champlu',
      'tnctrn',
-     'jobpop'
+     'jobpop',
+	 'csf_acc'
 	 //'cmp-v0',
 ];
 
