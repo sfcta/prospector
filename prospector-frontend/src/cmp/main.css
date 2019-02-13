@@ -89,8 +89,8 @@ p.hint {color:#777; text-align:right; margin-right:24px; margin-top:-20px;}
 .colors:hover {opacity: 1.0; border-color: #fff;}
 
 #sfmap {
-  height:1068px;
-  margin-right: 400px;
+  height:800px;
+  margin-right: 320px;
   z-index:0;
 }
 
