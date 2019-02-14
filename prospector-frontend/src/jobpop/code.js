@@ -65,7 +65,7 @@ const YR_LIST = [2015,2050];
 
 const INT_COLS = [];
 const DISCRETE_VAR_LIMIT = 10;
-const MISSING_COLOR = '#ccd';
+const MISSING_COLOR = '#ffffcc';
 const COLORRAMP = {SEQ: ['#ffecb3','#f2ad86', '#d55175', '#963d8e','#3f324f'],
                     DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
