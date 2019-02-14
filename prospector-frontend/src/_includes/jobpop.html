@@ -10,16 +10,17 @@
   
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
       <div id="preheader">
+        <a target="_blank" href="https://connectsf.org/"><img src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png"  height="50" width="250" alt="Connect SF"/></a>
         <hr/>
-        <h3 class="apptitle">ConnectSF Land Use</h3>
+        <h3 class="apptitle">Population & Jobs</h3>
         <div id="helpbar">
-            <button class="ui mini right labeled icon violet button"
+            <button class="ui mini right labeled icon color1 button"
                     v-on:click="clickToggleHelp">
                     <i class="help circle icon"></i>
                     What is this?
             </button>
             &nbsp;
-            <button class="ui mini right labeled icon violet button"
+            <button class="ui mini right labeled icon color1 button"
                     v-on:click="this.window.open('https://connectsf.org/','_blank')">
                     <i class="arrow right icon"></i>
                     Learn More
@@ -33,7 +34,7 @@
               <button v-for="item in year_options"
                     v-on:click="yrChanged(item.value)"
                     class="ui grey button"
-                    v-bind:class="{ active: item.value==selected_year, yellow: item.value==selected_year }">
+                    v-bind:class="{ active: item.value==selected_year, color2: item.value==selected_year }">
                     ${item.text}
               </button>
             </div>
@@ -43,7 +44,7 @@
               <button v-for="item in metric_options"
                     v-on:click="metricChanged(item.value)"
                     class="ui grey button"
-                    v-bind:class="{ active: item.value==selected_metric, yellow: item.value==selected_metric }">
+                    v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
                     ${item.text}
               </button>
             </div>            
