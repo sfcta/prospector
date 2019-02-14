@@ -73,7 +73,7 @@ const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
   'jobpop': {'base':[10, 20, 30, 40], 'diff':[5, 10, 15, 20], 'pctdiff':[-20, -5, 5, 20]},
   'pop': {'base':[10, 20, 30, 40], 'diff':[5, 10, 15, 20], 'pctdiff':[-20, -5, 5, 20]},
-  'tot': {'base':[10, 20, 30, 4], 'diff':[5, 10, 15, 20], 'pctdiff':[-20, -5, 5, 20]},
+  'tot': {'base':[10, 20, 30, 40], 'diff':[5, 10, 15, 20], 'pctdiff':[-20, -5, 5, 20]},
 };
 
 const METRIC_UNITS = {'pop': '000s per sq. mi.',
