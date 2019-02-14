@@ -71,12 +71,14 @@ const COLORRAMP = {SEQ: ['#ffecb3','#f2ad86', '#d55175', '#963d8e','#3f324f'],
 
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'jobpop': {'base':[500, 1500, 3000, 4500], 'diff':[100, 500, 1500, 3000], 'pctdiff':[-20, -5, 5, 20]},
-  'pop': {'base':[500, 1000, 1500, 2000], 'diff':[100, 500, 1500, 3000], 'pctdiff':[-20, -5, 5, 20]},
-  'tot': {'base':[500, 1500, 2500, 3500], 'diff':[100, 500, 1500, 3000], 'pctdiff':[-20, -5, 5, 20]},
+  'jobpop': {'base':[10, 20, 30, 40], 'diff':[5, 10, 15, 20], 'pctdiff':[-20, -5, 5, 20]},
+  'pop': {'base':[10, 20, 30, 40], 'diff':[5, 10, 15, 20], 'pctdiff':[-20, -5, 5, 20]},
+  'tot': {'base':[10, 20, 30, 4], 'diff':[5, 10, 15, 20], 'pctdiff':[-20, -5, 5, 20]},
 };
 
-const METRIC_UNITS = {};
+const METRIC_UNITS = {'pop': '000s per sq. mi.',
+                      'tot': '000s per sq. mi.',
+                      'jobpop': '000s per sq. mi.'};
 const METRIC_DESC = {'pop': 'Population','tot': 'Jobs',
                       'jobpop': 'Jobs+Population',
 };
@@ -105,7 +107,7 @@ async function initialPrep() {
 }
 
 async function fetchMapFeatures() {
-  const geo_url = API_SERVER + GEO_VIEW + '?select=taz,geometry,nhood';
+  const geo_url = API_SERVER + GEO_VIEW + '?select=taz,geometry,nhood,sq_mile';
 
   try {
     let resp = await fetch(geo_url);
@@ -139,11 +141,17 @@ function getInfoHtml(geo) {
 
   let metric1 = app.selected_metric + YR_LIST[0];
   let metric2 = app.selected_metric + YR_LIST[1];
+  let metric3 = app.selected_metric + 'den' + YR_LIST[0];
+  let metric4 = app.selected_metric + 'den' + YR_LIST[1];
   let diff = geo[metric2] - geo[metric1];
+  let dendiff = Math.round((geo[metric4] - geo[metric3])*100)/100;
 
   retval += `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric1]}<br/>` +
-            `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric2]}<br/>`+
-            '<b> Change: </b>' + `${diff}`;
+            `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric2]}<br/>` +
+            `<b>${METRIC_DESC[app.selected_metric]}</b>` + '<b> Change: </b>' + `${diff}<br/><hr>` +
+            `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}</b>` + `<b> Density (000s per sq. mi.): </b>` + `${geo[metric3]}<br/>` +
+            `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}</b>` + `<b> Density (000s per sq. mi.): </b>` + `${geo[metric4]}<br/>` +
+            `<b>${METRIC_DESC[app.selected_metric]}</b>` + '<b> Density Change: </b>' + `${dendiff}<br/>`;
   return retval; 
 }
 
@@ -157,7 +165,7 @@ infoPanel.update = function(geo) {
     infoPanel._div.className = 'info-panel-hide';
     // and clear the hover too
     if (oldHoverTarget.feature[GEOID_VAR] != selGeoId) geoLayer.resetStyle(oldHoverTarget);
-  }, 4000);
+  }, 2500);
 };
 infoPanel.addTo(mymap);
 
@@ -219,10 +227,18 @@ async function drawMapFeatures(queryMapData=true) {
       map_vals = [];
       for (let feat of cleanFeatures) {
         map_metric = null;
+        
+        if (base_lookup.hasOwnProperty(feat[GEOID_VAR])) {
+          feat[sel_metric + YR_LIST[0]] = base_lookup[feat[GEOID_VAR]][sel_metric + YR_LIST[0]];
+          feat[sel_metric + YR_LIST[1]] = base_lookup[feat[GEOID_VAR]][sel_metric + YR_LIST[1]];
+          feat[sel_metric + 'den' + YR_LIST[0]] = Math.round(100*feat[sel_metric + YR_LIST[0]]/(feat['sq_mile']*1000))/100;
+          feat[sel_metric + 'den' + YR_LIST[1]] = Math.round(100*feat[sel_metric + YR_LIST[1]]/(feat['sq_mile']*1000))/100;
+        } 
+        
         if (app.comp_check) {
           if (base_lookup.hasOwnProperty(feat[GEOID_VAR])) {
             let feat_entry = base_lookup[feat[GEOID_VAR]];
-            map_metric = feat_entry[comp_metric] - feat_entry[base_metric];
+            map_metric = (feat_entry[comp_metric] - feat_entry[base_metric])/(feat['sq_mile']*1000);
             feat['base'] = feat_entry[base_metric];
             feat['comp'] = feat_entry[comp_metric];
             if (app.pct_check && app.comp_check) {
@@ -233,14 +249,9 @@ async function drawMapFeatures(queryMapData=true) {
           }
         } else {
           if (base_lookup.hasOwnProperty(feat[GEOID_VAR])) {
-            map_metric = base_lookup[feat[GEOID_VAR]][base_metric];
-            }
-        }
-
-        if (base_lookup.hasOwnProperty(feat[GEOID_VAR])) {
-          feat[sel_metric + YR_LIST[0]] = base_lookup[feat[GEOID_VAR]][sel_metric + YR_LIST[0]];
-          feat[sel_metric + YR_LIST[1]] = base_lookup[feat[GEOID_VAR]][sel_metric + YR_LIST[1]];
-        }        
+            map_metric = base_lookup[feat[GEOID_VAR]][base_metric]/(feat['sq_mile']*1000);
+          }
+        }       
         
         if (map_metric !== null) {
           map_metric = Math.round(map_metric*prec)/prec;
@@ -334,7 +345,8 @@ async function drawMapFeatures(queryMapData=true) {
           sel_binsflag,
           (app.pct_check && app.comp_check)? '%': ''
         );
-        legHTML = '<h4>' + METRIC_DESC[sel_metric] + (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(sel_metric)? (' (' + METRIC_UNITS[sel_metric] + ')') : '')) +
+        legHTML = '<h4>' + METRIC_DESC[sel_metric] + ' Density' +
+                  (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(sel_metric)? (' (' + METRIC_UNITS[sel_metric] + ')') : '')) +
                   '</h4>' + legHTML;
         div.innerHTML = legHTML;
         return div;
