@@ -42,7 +42,7 @@ baseLayer = L.tileLayer(url, {
   accessToken:token,
 }).addTo(mymap);
 
-let url2 = 'https://api.mapbox.com/styles/v1/sfcta/cjrtv3hb001pe1fmzeryo0eih/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+let url2 = 'https://api.mapbox.com/styles/v1/sfcta/cjs5awmb11fnn1fp5g907e2cj/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
 let streetLayer = L.tileLayer(url2, {
   attribution:attribution,
   maxZoom: 18,
@@ -597,7 +597,8 @@ let app = new Vue({
       '#ffffcc,#3f324f': 'hsl',
       '#3f324f,#ffffcc': 'hsl',
       '#fafa6e,#2A4858': 'lch',
-    },      
+    },
+    comment: '',
   },
   watch: {
     sliderValue: selectionChanged,
