@@ -110,7 +110,7 @@ async function initialPrep() {
 }
 
 async function fetchMapFeatures() {
-  const geo_url = API_SERVER + GEO_VIEW + '?select=taz,geometry,nhood,sq_mile';
+  const geo_url = API_SERVER + GEO_VIEW + '?taz=lt.1000&select=taz,geometry,nhood,sq_mile';
 
   try {
     let resp = await fetch(geo_url);
