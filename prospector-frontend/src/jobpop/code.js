@@ -348,6 +348,7 @@ async function drawMapFeatures(queryMapData=true) {
           sel_binsflag,
           (app.pct_check && app.comp_check)? '%': ''
         );
+        legHTML = '<p class="legend-row"><i style="background:' + MISSING_COLOR + '"></i> 0 or null<br>' + legHTML;
         legHTML = '<h4>' + METRIC_DESC_SHORT[sel_metric] + ' Density' +
                   (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(sel_metric)? ('<br>(' + METRIC_UNITS[sel_metric] + ')') : '')) +
                   '</h4>' + legHTML;
