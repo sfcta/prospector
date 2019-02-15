@@ -397,7 +397,7 @@ function styleByMetricColor(feat) {
   if (feat[GEOID_VAR]>1000) {
     fo = 0;
   }
-  return { fillColor: color, opacity: 0.5, weight: 0, fillOpacity: fo};
+  return { fillColor: color, opacity: 1, weight: 1, color: color, fillOpacity: fo};
 }
 
 let infoPanelTimeout;
