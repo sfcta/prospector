@@ -60,7 +60,7 @@ const DATA_VIEW = 'lua2017';
 const GEOTYPE = 'TAZ';
 const GEOID_VAR = 'taz';
 
-const FRAC_COLS = [];
+const FRAC_COLS = ['pop','tot','jobpop'];
 const YR_LIST = [2015,2050];
 
 const INT_COLS = [];
