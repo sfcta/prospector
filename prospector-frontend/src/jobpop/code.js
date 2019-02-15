@@ -82,6 +82,9 @@ const METRIC_UNITS = {'pop': '000s per sq. mi.',
 const METRIC_DESC = {'pop': 'Population','tot': 'Jobs',
                       'jobpop': 'Jobs+Population',
 };
+const METRIC_DESC_SHORT = {'pop': 'Pop','tot': 'Jobs',
+                      'jobpop': 'Jobs+Pop',
+};
 
 let sel_colorvals, sel_colors, sel_binsflag;
 
@@ -148,10 +151,10 @@ function getInfoHtml(geo) {
 
   retval += `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric1]}<br/>` +
             `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric2]}<br/>` +
-            `<b>${METRIC_DESC[app.selected_metric]}</b>` + '<b> Change: </b>' + `${diff}<br/><hr>` +
-            `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}</b>` + `<b> Density (000s per sq. mi.): </b>` + `${geo[metric3]}<br/>` +
-            `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}</b>` + `<b> Density (000s per sq. mi.): </b>` + `${geo[metric4]}<br/>` +
-            `<b>${METRIC_DESC[app.selected_metric]}</b>` + '<b> Density Change: </b>' + `${dendiff}<br/>`;
+            `<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + '<b> Change: </b>' + `${diff}<br/><hr>` +
+            `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + `<b> Density (000s /sq. mi.): </b>` + `${geo[metric3]}<br/>` +
+            `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + `<b> Density (000s /sq. mi.): </b>` + `${geo[metric4]}<br/>` +
+            `<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + '<b> Density Change: </b>' + `${dendiff}<br/>`;
   return retval; 
 }
 
@@ -345,8 +348,8 @@ async function drawMapFeatures(queryMapData=true) {
           sel_binsflag,
           (app.pct_check && app.comp_check)? '%': ''
         );
-        legHTML = '<h4>' + METRIC_DESC[sel_metric] + ' Density' +
-                  (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(sel_metric)? (' (' + METRIC_UNITS[sel_metric] + ')') : '')) +
+        legHTML = '<h4>' + METRIC_DESC_SHORT[sel_metric] + ' Density' +
+                  (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(sel_metric)? ('<br>(' + METRIC_UNITS[sel_metric] + ')') : '')) +
                   '</h4>' + legHTML;
         div.innerHTML = legHTML;
         return div;
