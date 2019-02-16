@@ -46,9 +46,9 @@ const INC_VAR = 'income_group';
 
 const FRAC_COLS = ['oneway_travel_time_mins','avg_time'];
 const SCNYR_LIST = [2015,2050];
-const PURP_LIST = ['work','school']
+const IMP_LIST = ['mandatory','discretionary']
 
-const INT_COLS = [''];
+const INT_COLS = ['num_tours'];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ccd';
 const COLORRAMP = {SEQ: ['#ffffcc','#3f324f'],
@@ -174,11 +174,11 @@ async function getMapData() {
     for (let inc of app.income_group_options) {
       tmp[yr][inc.value] = {};
       base_lookup[yr][inc.value] = {};
-      for (let purp of app.importance_options) {
-        tmp[yr][inc.value][purp.value] = {};
-        base_lookup[yr][inc.value][purp.value] = {};
+      for (let imp of app.importance_options) {
+        tmp[yr][inc.value][imp.value] = {};
+        base_lookup[yr][inc.value][imp.value] = {};
         for (let met of app.metric_options) {
-          tmp[yr][inc.value][purp.value][met.value] = 0;
+          tmp[yr][inc.value][imp.value][met.value] = 0;
         }
       }
     }
@@ -187,26 +187,26 @@ async function getMapData() {
     }*/
   }
   for (let entry of jsonData) {
-    base_lookup[entry[YEAR_VAR]][entry[INC_VAR]][entry[PURP_VAR]][entry[GEOID_VAR]] = entry;
+    base_lookup[entry[YEAR_VAR]][entry[INC_VAR]][entry[IMP_VAR]][entry[GEOID_VAR]] = entry;
     for (let met of app.metric_options) {
-      tmp[entry[YEAR_VAR]][entry[INC_VAR]][entry[PURP_VAR]][met.value] += entry[met.value];
+      tmp[entry[YEAR_VAR]][entry[INC_VAR]][entry[IMP_VAR]][met.value] += entry[met.value];
     }
   }
   
   _aggregateData = {};
-  for (let purp of app.importance_options) {
-    _aggregateData[purp.value] = [];
+  for (let imp of app.importance_options) {
+    _aggregateData[imp.value] = [];
   }
   
   for (let yr of SCNYR_LIST) {
     for (let inc of app.income_group_options) {
-      for (let purp of app.importance_options) {
+      for (let imp of app.importance_options) {
         let row = {};
         row['year'] = yr.toString();
         for (let met of app.metric_options) {
-          row[met.value] = Math.round(tmp[yr][inc.value][purp.value][met.value]*prec)/prec;
+          row[met.value] = Math.round(tmp[yr][inc.value][imp.value][met.value]*prec)/prec;
         }
-        _aggregateData[purp.value].push(row);
+        _aggregateData[imp.value].push(row);
       }
     }
   }
