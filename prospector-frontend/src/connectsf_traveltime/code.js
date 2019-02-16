@@ -44,7 +44,7 @@ const YEAR_VAR = 'year';
 const IMP_VAR = 'importance';
 const INC_VAR = 'income_group';
 
-const FRAC_COLS = ['oneway_travel_time_mins','avg_distance'];
+const FRAC_COLS = ['oneway_travel_time_mins','avg_time'];
 const SCNYR_LIST = [2015,2050];
 const PURP_LIST = ['work','school']
 
@@ -898,9 +898,10 @@ let app = new Vue({
     {text: '2050', value: 2050},
     ],
     
-    selected_metric: 'avg_distance',
+    selected_metric: 'avg_time',
     metric_options: [
-    {text: 'Average Time', value: 'avg_distance'},
+    {text: 'Average Time', value: 'avg_time'},
+    {text: 'Tours', value: 'num_tours'},
     ],
     
     chartTitle: 'AVG_RIDE TREND',
