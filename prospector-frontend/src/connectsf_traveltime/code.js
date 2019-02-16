@@ -827,27 +827,19 @@ function pickImportance(importance){
 
 function pickIncome(inc){
   app.selected_income_group = inc;
-  app.isIncomeVeryLow = false;
-  app.isIncomeLow = false;
-  app.isIncomeMiddle = false;
-  app.isIncomeModerate = false;
-  app.isIncomeHigh = false;
+  app.isIncomeBelow = false;
+  app.isIncomeAbove = false;
+  app.isIncomeAll = false;
   
   switch(inc) {
-    case 'very_low':
-    app.isIncomeVeryLow = true;
+    case 'below_200pct_poverty':
+    app.isIncomeBelow = true;
     break;
-    case 'low':
-    app.isIncomeLow = true;
+    case 'above_200pct_poverty':
+    app.isIncomeAbove = true;
     break;
-    case 'middle':
-    app.isIncomeMiddle = true;
-    break;
-    case 'moderate':
-    app.isIncomeModerate = true;
-    break;
-    case 'high':
-    app.isIncomeHigh = true;
+    case 'all':
+    app.isIncomeAll = true;
     break;
   }
     
@@ -862,11 +854,9 @@ let app = new Vue({
     isUpdActive: false,
     isImportanceMandatory: true,
     isImportanceDiscretionary: false,
-    isIncomeVeryLow: false,
-    isIncomeLow: false,
-    isIncomeMiddle: true,
-    isIncomeModerate: false,
-    isIncomeHigh: false,
+    isIncomeBelow: false,
+    isIncomeAbove: false,
+    isIncomeAll: true,
     isYear2015: true,
     isYear2050: false,
     isYearDiff: false,
@@ -916,13 +906,11 @@ let app = new Vue({
     {text: 'discretionary', value: 'discretionary'},
     ],
 
-    selected_income_group: 'middle',
+    selected_income_group: 'all',
     income_group_options: [
-    {text: 'very low', value: 'very_low'},
-    {text: 'low', value: 'low'},
-    {text: 'middle', value: 'middle'},
-    {text: 'moderate', value: 'moderate'},
-    {text: 'high', value: 'high'},
+    {text: 'above_200pct_poverty', value: 'above_200pct_poverty'},
+    {text: 'below_200pct_poverty', value: 'below_200pct_poverty'},
+    {text: 'all', value: 'all'},
     ],
     
     selected_bwidth: bwidth_metric_list[0],

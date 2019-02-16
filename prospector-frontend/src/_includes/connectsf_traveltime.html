@@ -48,17 +48,13 @@
             </div>
             <div class="ui divider"></div>
             
-            <div class="five tiny ui buttons">
-              <button class = "tiny ui grey icon button" v-on:click="pickIncome('very_low')" 
-                v-bind:class="{ active: isIncomeVeryLow, yellow: isIncomeVeryLow}">Very Low</button>
-              <button class = "tiny ui grey icon button" v-on:click="pickIncome('low')" 
-                v-bind:class="{ active: isIncomeLow, yellow: isIncomeLow}">Low</button>
-              <button class = "tiny ui grey icon button" v-on:click="pickIncome('middle')" 
-                v-bind:class="{ active: isIncomeMiddle, yellow: isIncomeMiddle}">Middle</button>
-              <button class = "tiny ui grey icon button" v-on:click="pickIncome('moderate')" 
-                v-bind:class="{ active: isIncomeModerate, yellow: isIncomeModerate}">Moderate</button>
-              <button class = "tiny ui grey icon button" v-on:click="pickIncome('high')" 
-                v-bind:class="{ active: isIncomeHigh, yellow: isIncomeHigh}">High</button>
+            <div class="three tiny ui buttons">
+              <button class = "tiny ui grey icon button" v-on:click="pickIncome('below_200pct_poverty')" 
+                v-bind:class="{ active: isIncomeBelow, yellow: isIncomeBelow}">Below 200% Poverty</button>
+              <button class = "tiny ui grey icon button" v-on:click="pickIncome('above_200pct_poverty')" 
+                v-bind:class="{ active: isIncomeAbove, yellow: isIncomeAbove}">Above 200% Poverty</button>
+              <button class = "tiny ui grey icon button" v-on:click="pickIncome('all')" 
+                v-bind:class="{ active: isIncomeAll, yellow: isIncomeAll}">High</button>
             </div>
             <div class="ui divider"></div>
             
