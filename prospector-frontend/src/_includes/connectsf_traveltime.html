@@ -41,14 +41,6 @@
             <div class="ui divider"></div>
             
             <div class="two tiny ui buttons">
-              <button class = "tiny ui grey icon button" v-on:click="pickMetric('avg_distance')" 
-                v-bind:class="{ active: isMetricAverage, yellow: isMetricAverage}">Average Travel Time</button>
-              <button class = "tiny ui grey icon button" v-on:click="pickMetric('oneway_travel_time_mins')"
-                v-bind:class="{ active: isMetricTotal, yellow: isMetricTotal}">Total Travel Time</button>
-            </div>
-            <div class="ui divider"></div>
-            
-            <div class="two tiny ui buttons">
               <button class = "tiny ui grey icon button" v-on:click="pickPurpose('work')" 
                 v-bind:class="{ active: isPurposeWork, yellow: isPurposeWork}">Work</button>
               <button class = "tiny ui grey icon button" v-on:click="pickPurpose('school')"

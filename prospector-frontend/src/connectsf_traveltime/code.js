@@ -808,23 +808,6 @@ function pickYear(year){
   updateMap();
 }
 
-function pickMetric(metric){
-  app.selected_metric = metric;
-  app.isMetricAverage = false;
-  app.isMetricTotal = false;
-  
-  switch(metric) {
-    case 'avg_distance':
-    app.isMetricAverage = true;
-    break;
-    case 'oneway_travel_time_mins':
-    app.isMetricTotal = true;
-    break;
-  }
-    
-  updateMap();
-}
-
 function pickPurpose(purpose){
   app.selected_purpose = purpose;
   app.isPurposeWork = false;
@@ -869,15 +852,7 @@ function pickIncome(inc){
   }
     
   updateMap();
-}
-
-function isMetric(metric) {
-  if (metric == app.selected_metric) {
-    return true;
-  }
-  return false;
-}
-  
+} 
 
 let app = new Vue({
   el: '#panel',
@@ -885,8 +860,6 @@ let app = new Vue({
   data: {
     isPanelHidden: false,
     isUpdActive: false,
-    isMetricAverage: true,
-    isMetricTotal: false,
     isPurposeWork: true,
     isPurposeSchool: false,
     isIncomeVeryLow: false,
@@ -928,8 +901,8 @@ let app = new Vue({
     selected_metric: 'avg_distance',
     metric_options: [
     {text: 'Average Time', value: 'avg_distance'},
-    {text: 'Total Time', value: 'oneway_travel_time_mins'},
     ],
+    
     chartTitle: 'AVG_RIDE TREND',
     chartSubtitle: chart_deftitle,
     
@@ -983,7 +956,6 @@ let app = new Vue({
   },
   methods: {
     pickYear: pickYear,
-    pickMetric: pickMetric,
     pickPurpose: pickPurpose,
     pickIncome: pickIncome,
     updateMap: updateMap,
