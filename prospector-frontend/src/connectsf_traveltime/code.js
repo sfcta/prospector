@@ -41,7 +41,7 @@ const DATA_VIEW = 'connectsf_traveltime';
 const GEOTYPE = 'TAZ';
 const GEOID_VAR = 'taz';
 const YEAR_VAR = 'year';
-const PURP_VAR = 'purpose';
+const IMP_VAR = 'importance';
 const INC_VAR = 'income_group';
 
 const FRAC_COLS = ['oneway_travel_time_mins','avg_distance'];
@@ -174,7 +174,7 @@ async function getMapData() {
     for (let inc of app.income_group_options) {
       tmp[yr][inc.value] = {};
       base_lookup[yr][inc.value] = {};
-      for (let purp of app.purpose_options) {
+      for (let purp of app.importance_options) {
         tmp[yr][inc.value][purp.value] = {};
         base_lookup[yr][inc.value][purp.value] = {};
         for (let met of app.metric_options) {
@@ -194,13 +194,13 @@ async function getMapData() {
   }
   
   _aggregateData = {};
-  for (let purp of app.purpose_options) {
+  for (let purp of app.importance_options) {
     _aggregateData[purp.value] = [];
   }
   
   for (let yr of SCNYR_LIST) {
     for (let inc of app.income_group_options) {
-      for (let purp of app.purpose_options) {
+      for (let purp of app.importance_options) {
         let row = {};
         row['year'] = yr.toString();
         for (let met of app.metric_options) {
@@ -254,8 +254,8 @@ async function drawMapFeatures(queryMapData=true) {
       bwidth_vals = [];
       for (let feat of cleanFeatures) {
         bwidth_metric = null;
-        if (base_lookup[base_scnyr][app.selected_income_group][app.selected_purpose].hasOwnProperty(feat[GEOID_VAR])) {
-          bwidth_metric = Math.round(base_lookup[base_scnyr][app.selected_income_group][app.selected_purpose][feat[GEOID_VAR]][app.selected_bwidth]);
+        if (base_lookup[base_scnyr][app.selected_income_group][app.selected_importance].hasOwnProperty(feat[GEOID_VAR])) {
+          bwidth_metric = Math.round(base_lookup[base_scnyr][app.selected_income_group][app.selected_importance][feat[GEOID_VAR]][app.selected_bwidth]);
           if (bwidth_metric !== null) bwidth_vals.push(bwidth_metric);
         }
         //alert(bwidth_metric);
@@ -263,10 +263,10 @@ async function drawMapFeatures(queryMapData=true) {
         
         map_metric = null;
         if (app.comp_check) {
-          if (base_lookup[base_scnyr][app.selected_income_group][app.selected_purpose].hasOwnProperty(feat[GEOID_VAR])) {
-            if (base_lookup[comp_scnyr][app.selected_income_group][app.selected_purpose].hasOwnProperty(feat[GEOID_VAR])) {
-              feat['base'] = base_lookup[base_scnyr][app.selected_income_group][app.selected_purpose][feat[GEOID_VAR]][sel_metric];
-              feat['comp'] = base_lookup[comp_scnyr][app.selected_income_group][app.selected_purpose][feat[GEOID_VAR]][sel_metric];
+          if (base_lookup[base_scnyr][app.selected_income_group][app.selected_importance].hasOwnProperty(feat[GEOID_VAR])) {
+            if (base_lookup[comp_scnyr][app.selected_income_group][app.selected_importance].hasOwnProperty(feat[GEOID_VAR])) {
+              feat['base'] = base_lookup[base_scnyr][app.selected_income_group][app.selected_importance][feat[GEOID_VAR]][sel_metric];
+              feat['comp'] = base_lookup[comp_scnyr][app.selected_income_group][app.selected_importance][feat[GEOID_VAR]][sel_metric];
               map_metric = feat['comp'] - feat['base'];
               if (app.pct_check && app.comp_check) {
                 if (feat['base']>0) {
@@ -278,8 +278,8 @@ async function drawMapFeatures(queryMapData=true) {
             }  
           }
         } else {
-          if (base_lookup[base_scnyr][app.selected_income_group][app.selected_purpose].hasOwnProperty(feat[GEOID_VAR])) {
-            map_metric = base_lookup[base_scnyr][app.selected_income_group][app.selected_purpose][feat[GEOID_VAR]][sel_metric];
+          if (base_lookup[base_scnyr][app.selected_income_group][app.selected_importance].hasOwnProperty(feat[GEOID_VAR])) {
+            map_metric = base_lookup[base_scnyr][app.selected_income_group][app.selected_importance][feat[GEOID_VAR]][sel_metric];
           }
         }
         if (map_metric !== null) {
@@ -456,7 +456,7 @@ async function drawMapFeatures(queryMapData=true) {
       mapLegend.addTo(mymap);
       
       if (selectedGeo) {
-        if (base_lookup[base_scnyr][app.selected_income_group][app.selected_purpose].hasOwnProperty(selectedGeo.feature[GEOID_VAR])) {
+        if (base_lookup[base_scnyr][app.selected_income_group][app.selected_importance].hasOwnProperty(selectedGeo.feature[GEOID_VAR])) {
           buildChartHtmlFromData(selectedGeo.feature[GEOID_VAR]);
           return cleanFeatures.filter(entry => entry[GEOID_VAR] == selectedGeo.feature[GEOID_VAR])[0];
         } else {
@@ -599,7 +599,7 @@ function clickedOnFeature(e) {
   let selfeat = selectedGeo.feature;
   app.chartSubtitle = GEOTYPE + ' ' + selfeat[GEOID_VAR];
   selectedLatLng = e.latlng;
-  if (base_lookup[app.selected_year][app.selected_income_group][app.selected_purpose].hasOwnProperty(selGeoId)) {
+  if (base_lookup[app.selected_year][app.selected_income_group][app.selected_importance].hasOwnProperty(selGeoId)) {
     showGeoDetails(selectedLatLng);
     buildChartHtmlFromData(selGeoId);
   } else {
@@ -636,7 +636,7 @@ function buildChartHtmlFromData(geoid = null) {
     for (let yr of SCNYR_LIST) {
       let row = {};
       row['year'] = yr.toString();
-      row[app.selected_metric] = base_lookup[yr][app.selected_purpose][geoid][app.selected_metric];
+      row[app.selected_metric] = base_lookup[yr][app.selected_importance][geoid][app.selected_metric];
       selgeodata.push(row);
     } 
     trendChart = new Morris.Line({
@@ -654,7 +654,7 @@ function buildChartHtmlFromData(geoid = null) {
     });
   } else {
     trendChart = new Morris.Line({
-      data: _aggregateData[app.selected_purpose],
+      data: _aggregateData[app.selected_importance],
       element: 'longchart',
       gridTextColor: '#aaa',
       hideHover: true,
@@ -734,7 +734,7 @@ function bwbp4Changed(thing) {
 
 async function selectionChanged(thing) {
   app.chartTitle = app.selected_metric.toUpperCase() + ' TREND';
-  if (app.selected_year && app.selected_income_group && app.selected_metric && app.selected_purpose) {
+  if (app.selected_year && app.selected_income_group && app.selected_metric && app.selected_importance) {
     let selfeat = await drawMapFeatures();
     if (selfeat) {
       highlightSelectedSegment();
@@ -808,17 +808,17 @@ function pickYear(year){
   updateMap();
 }
 
-function pickPurpose(purpose){
-  app.selected_purpose = purpose;
-  app.isPurposeWork = false;
-  app.isPurposeSchool = false;
+function pickImportance(importance){
+  app.selected_importance = importance;
+  app.isImportanceMandatory = false;
+  app.isImportanceDiscretionary = false;
   
-  switch(purpose) {
-    case 'work':
-    app.isPurposeWork = true;
+  switch(importance) {
+    case 'mandatory':
+    app.isImportanceMandatory = true;
     break;
-    case 'school':
-    app.isPurposeSchool = true;
+    case 'discretionary':
+    app.isImportanceDiscretionary = true;
     break;
   }
     
@@ -860,8 +860,8 @@ let app = new Vue({
   data: {
     isPanelHidden: false,
     isUpdActive: false,
-    isPurposeWork: true,
-    isPurposeSchool: false,
+    isImportanceMandatory: true,
+    isImportanceDiscretionary: false,
     isIncomeVeryLow: false,
     isIncomeLow: false,
     isIncomeMiddle: true,
@@ -909,10 +909,10 @@ let app = new Vue({
     scnSlider: scnSlider,
     sliderValue: [SCNYR_LIST[0],SCNYR_LIST[SCNYR_LIST.length-1]],
     
-    selected_purpose: 'work',
-    purpose_options: [
-    {text: 'Work', value: 'work'},
-    {text: 'School', value: 'school'},
+    selected_importance: 'mandatory',
+    importance_options: [
+    {text: 'mandatory', value: 'mandatory'},
+    {text: 'discretionary', value: 'discretionary'},
     ],
 
     selected_income_group: 'middle',
@@ -937,7 +937,7 @@ let app = new Vue({
   watch: {
     sliderValue: selectionChanged,
     selected_year: selectionChanged,
-    selected_purpose: selectionChanged,
+    selected_importance: selectionChanged,
     selected_metric: selectionChanged,
     selected_income_group: selectionChanged,
     pct_check: selectionChanged,
@@ -956,7 +956,7 @@ let app = new Vue({
   },
   methods: {
     pickYear: pickYear,
-    pickPurpose: pickPurpose,
+    pickImportance: pickImportance,
     pickIncome: pickIncome,
     updateMap: updateMap,
     bwUpdateMap: bwUpdateMap,

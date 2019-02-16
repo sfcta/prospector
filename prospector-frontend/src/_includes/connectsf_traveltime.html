@@ -41,10 +41,10 @@
             <div class="ui divider"></div>
             
             <div class="two tiny ui buttons">
-              <button class = "tiny ui grey icon button" v-on:click="pickPurpose('work')" 
-                v-bind:class="{ active: isPurposeWork, yellow: isPurposeWork}">Work</button>
-              <button class = "tiny ui grey icon button" v-on:click="pickPurpose('school')"
-                v-bind:class="{ active: isPurposeSchool, yellow: isPurposeSchool}">School</button>
+              <button class = "tiny ui grey icon button" v-on:click="pickImportance('mandatory')" 
+                v-bind:class="{ active: isImportanceMandatory, yellow: isImportanceMandatory}">Mandatory</button>
+              <button class = "tiny ui grey icon button" v-on:click="pickImportance('discretionary')"
+                v-bind:class="{ active: isImportanceDiscretionary, yellow: isImportanceDiscretionary}">Discretionary</button>
             </div>
             <div class="ui divider"></div>
             
