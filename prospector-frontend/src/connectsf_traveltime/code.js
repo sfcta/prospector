@@ -72,7 +72,7 @@ const INT_COLS = ['num_tours'];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ffffcc';
 const COLORRAMP = {SEQ: ['#ffecb3','#f2ad86', '#d55175', '#963d8e','#3f324f'],
-                    DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
+                   DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
 const MIN_BWIDTH = 2;
 const MAX_BWIDTH = 10;
@@ -87,8 +87,8 @@ const BWIDTH_MAP = {
 };
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'avg_time': {'base':[15, 20, 25, 30], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
-  'num_tours': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
+  'avg_time': {'base':[15, 20, 25, 30], 'diff':[-5, -1, 1, 5], 'pctdiff':[-20, -5, 5, 20]},
+  'num_tours': {'base':[250, 500, 750, 1000], 'diff':[-5, -1, 1, 5], 'pctdiff':[-20, -5, 5, 20]},
 }
 
 const METRIC_UNITS = {'avg_time':'minutes','num_tours':'tours'}; // needed?
@@ -116,7 +116,7 @@ async function initialPrep() {
 }
 
 async function fetchMapFeatures() {
-  const geo_url = API_SERVER + GEO_VIEW + '?select=taz,geometry,nhood';
+  const geo_url = API_SERVER + GEO_VIEW + '?taz=lt.1000&select=taz,geometry,nhood';
 
   try {
     let resp = await fetch(geo_url);
@@ -147,12 +147,26 @@ infoPanel.onAdd = function(map) {
 function getInfoHtml(geo) {
   let metric_val = null;
   let retval = '<b>TAZ: </b>' + `${geo[GEOID_VAR]}<br/>`;
-
-  /*retval += `<b>${app.selected_metric.toUpperCase()}</b>` + 
-            (app.pct_check? '<b> %</b>': '') +
+  
+  retval += `<b>${app.metric_options[0]['text']}</b><br/>` ;
+  //alert(geo[GEOID_VAR]);
+  //alert(base_lookup['2015'][app.selected_income][app.selected_importance]);//[GEOID_VAR]);
+  //alert(base_lookup['2015'][app.selected_income][app.selected_importance][geo[GEOID_VAR]]);
+  //alert(Object.keys(base_lookup['2015'][app.selected_income][app.selected_importance]));
+  for (let yr of YR_LIST) {
+    if (base_lookup[yr][app.selected_income][app.selected_importance].hasOwnProperty(geo[GEOID_VAR])) {
+      metric_val = base_lookup[yr][app.selected_income][app.selected_importance][geo[GEOID_VAR]][app.selected_metric];
+      
+      if (metric_val !== null) {
+        metric_val = Math.round(metric_val*prec)/prec;
+      }
+    }
+    retval += `${yr}: ${metric_val}<br/>`;
+            /*(app.pct_check? '<b> %</b>': '') +
             (app.comp_check? '<b> Diff: </b>':'<b>: </b>') + 
             `${metric_val}` + 
             ((app.pct_check && app.comp_check && metric_val !== null)? '%':''); */
+  }
   return retval; 
 }
 
@@ -284,6 +298,13 @@ async function drawMapFeatures(queryMapData=true) {
           
         } else {
           let mode = 'base';
+          if (app.selected_year == 'diff') {
+            mode = 'diff';
+            app.selected_colorscheme = COLORRAMP.DIV;
+          } else {
+            app.selected_colorscheme = COLORRAMP.SEQ;
+          }
+          
           let custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
           sel_colorvals = [map_vals[0]];
           for (var i = 0; i < custom_bps.length; i++) {
@@ -303,6 +324,7 @@ async function drawMapFeatures(queryMapData=true) {
           
           sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
           //updateColorScheme(sel_colorvals);
+          
           sel_binsflag = true; 
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
           sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
