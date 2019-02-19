@@ -42,7 +42,7 @@ baseLayer = L.tileLayer(url, {
   accessToken:token,
 }).addTo(mymap);
 
-let url2 = 'https://api.mapbox.com/styles/v1/sfcta/cjs6q7hiu09v21fqyycuih59l/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+let url2 = 'https://api.mapbox.com/styles/v1/sfcta/cjscclu2q07qn1fpimxuf2wbd/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
 let streetLayer = L.tileLayer(url2, {
   attribution:attribution,
   maxZoom: 18,
