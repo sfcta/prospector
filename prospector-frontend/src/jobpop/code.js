@@ -341,7 +341,7 @@ async function drawMapFeatures(queryMapData=true) {
 
       mapLegend = L.control({ position: 'bottomright' });
       mapLegend.onAdd = function(map) {
-        let div = L.DomUtil.create('div', 'info legend');
+        let div = L.DomUtil.create('div', 'legend');
         let legHTML = getLegHTML(
           sel_colorvals,
           sel_colors,
