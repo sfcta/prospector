@@ -9,143 +9,150 @@
   </div> 
   
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
-      <div id="preheader">
+    <div id="preheader">
+      <hr/>
+      <h3 class="apptitle">ConnectSF Jobs Accessibility</h3>
+      <div id="helpbar">
+        <button class="ui mini right labeled icon violet button"
+                v-on:click="clickToggleHelp">
+                <i class="help circle icon"></i>
+                What is this?
+        </button>
+        &nbsp;
+        <button class="ui mini right labeled icon violet button"
+                v-on:click="this.window.open('http://www.sfcta.org/congestion','_blank')">
+                <i class="arrow right icon"></i>
+                Learn More
+        </button>
         <hr/>
-        <h3 class="apptitle">ConnectSF household Jobs</h3>
-        <div id="helpbar">
-            <button class="ui mini right labeled icon violet button"
-                    v-on:click="clickToggleHelp">
-                    <i class="help circle icon"></i>
-                    What is this?
-            </button>
-            &nbsp;
-            <button class="ui mini right labeled icon violet button"
-                    v-on:click="this.window.open('http://www.sfcta.org/congestion','_blank')">
-                    <i class="arrow right icon"></i>
-                    Learn More
-            </button>
-            <hr/>
-           </div>
-
-          <div id="picker">
-            <h5 style="margin-top:15px">CHOOSE YEAR(S)</h5>
-            <!-- <vue-slider v-bind="scnSlider" v-model="sliderValue"></vue-slider> -->
-              <button class = "tiny ui grey icon button" v-on:click="yr2015" 
-                v-bind:class="{ active: is2015, yellow: is2015}">2015</button>
-              <button class = "tiny ui grey icon button" v-on:click="yr2050"
-                v-bind:class="{ active: is2050, yellow: is2050}">2050</button>
-              <button class = "tiny ui grey icon button" v-on:click="yrdiff"
-                v-bind:class="{ active: isDIFF, yellow: isDIFF}">Change</button>
-              <br>
-            
-            <!-- <h5 style="margin-top:50px">CHOOSE MODE:</h5> -->
-            <h5>CHOOSE MODE:</h5>
-              <button class = "tiny ui grey icon button" v-on:click="pickAU" 
-                v-bind:class="{ active: isAUActive, yellow: isAUActive}"><i class="icon car"></i>Auto</button>
-              <button class = "tiny ui grey icon button" v-on:click="pickTR"
-                v-bind:class="{ active: isTRActive, yellow: isTRActive}"><i class="icon bus"></i>Transit</button>
-              <br>
-
-            <!-- <h5>CHOOSE MAP METRIC:</h5>
-            <select v-model="selected_metric">
-              <option v-for="option in metric_options" v-bind:value="option.value">
-                ${option.text}
-              </option>
-            </select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
-            <!-- <input type="checkbox" id="pct_checkbox" v-model="pct_check" v-bind:disabled="!comp_check" style="margin-top:0px">
-            <label for="pct_checkbox"><b>&nbsp;&nbsp;PERCENT DIFF</b></label> -->
-            
-            <!-- <br>
-            <input type="checkbox" id="bwidth_checkbox" v-model="bwidth_check" style="margin-top:15px">
-            <label for="bwidth_checkbox"><b>&nbsp;&nbsp;CHOOSE BAND-WIDTH METRIC:</b></label>
-            <br>
-            <select v-model="selected_bwidth" v-bind:disabled="!bwidth_check">
-              <option v-for="option in bwidth_options" v-bind:value="option.value">
-                ${option.text}
-              </option>
-            </select> -->
-            
-            <hr/>
-            
-            <!-- <h5 style="margin-top:20px">CHOOSE BREAKS:</h5>
-            <select v-model="selected_breaks">
-              <option v-for="option in break_options" v-bind:value="option.value">
-                ${option.text}
-              </option>
-            </select>
-            <input type="checkbox" id="custom_checkbox" v-model="custom_check" v-bind:disabled="custom_disable" style="margin-top:15px">
-            <label for="custom_checkbox"><b>&nbsp;&nbsp;CHOOSE CUSTOM BREAK POINTS</b></label>
-            <label><b>CHOOSE CUSTOM BREAK POINTS</b></label> -->
-            <!-- <br>
-            <input v-model.number="bp0" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488;margin-top:5px">
-            <input v-model.number.lazy="bp1" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
-            <input v-model.number.lazy="bp2" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
-            <input v-model.number.lazy="bp3" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
-            <input v-model.number.lazy="bp4" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
-            <input v-model.number="bp5" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488">            
-
-            <button v-on:click="updateMap"
-                    v-bind:class="{ active: isUpdActive, yellow: isUpdActive}"
-                     class="mini ui grey button"
-                    v-bind:disabled="!custom_check" style="margin-top:10px">
-                     Update Map!</button> -->
-                     
-            <!-- <h5 style="margin-top:15px">CHOOSE COLOR SCHEME:</h5>
-            <select v-model="selected_colorscheme">
-              <option v-for="option in color_options" v-bind:value="option.value">
-                ${option.text}
-              </option>
-            </select>             -->
-
-            <!-- <h5 style="margin-top:25px">FREQUENCY DISTRIBUTION</h5>
-            <div id="dist-chart" style="height: 200px">
-            </div> -->
-            
-            <!-- <input type="checkbox" id="bwcustom_checkbox" v-model="bwcustom_check" v-bind:disabled="bwcustom_disable" style="margin-top:15px">
-            <label for="bwcustom_checkbox"><b>&nbsp;&nbsp;CHOOSE CUSTOM BANDWIDTH</b></label>
-            <br>
-            <input v-model.number="bwbp0" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488;margin-top:5px">
-            <input v-model.number.lazy="bwbp1" type="number" step="any" v-bind:disabled="!bwcustom_check || bwcustom_disable" style="width:55px;">
-            <input v-model.number.lazy="bwbp2" type="number" step="any" v-bind:disabled="!bwcustom_check || bwcustom_disable" style="width:55px;">
-            <input v-model.number.lazy="bwbp3" type="number" step="any" v-bind:disabled="!bwcustom_check || bwcustom_disable" style="width:55px;">
-            <input v-model.number.lazy="bwbp4" type="number" step="any" v-bind:disabled="!bwcustom_check || bwcustom_disable" style="width:55px;">
-            <input v-model.number="bwbp5" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488">  
-            
-            <button v-on:click="bwUpdateMap"
-                    v-bind:class="{ active: isBWUpdActive, yellow: isBWUpdActive}"
-                     class="mini ui grey button"
-                    v-bind:disabled="!bwcustom_check" style="margin-top:10px">
-                     Update Map!</button> -->
-            
-          </div>
       </div>
-      <!-- <div id="header">
-          <div id="stats-panel">
-            <hr style="margin-bottom:-5px;" />
-            <div id="chartinfo"><h3 style="font-size: 22px;">${chartTitle}</h3></div>
-            <div id="geoinfo"><h5>${chartSubtitle}</h5></div>
-            <div id="longchart">
-                <div class="ui active dimmer">
-                  <div class="ui text loader">Loading</div>
-                </div>
+
+        <div id="picker">
+          <h5 style="margin-top:15px">CHOOSE YEAR(S)</h5>
+            <div>
+              <button v-for="item in year_options"
+                    v-on:click="yrChanged(item.value)"
+                    class="ui grey button"
+                    v-bind:class="{ active: item.value==selected_year, yellow: item.value==selected_year }">
+                    ${item.text}
+              </button>
             </div>
-          </div>
-      </div> -->
+            
+          <h5>CHOOSE MODE:</h5>
+            <div>
+              <button v-for="item in metric_options"
+                    v-on:click="metricChanged(item.value)"
+                    class = "tiny ui grey icon button"
+                    v-bind:class="{ active: item.value==selected_metric, yellow: item.value==selected_metric }">
+                    ${item.text}
+              </button>
+            <!-- </div> 
+            <button class = "tiny ui grey icon button" v-on:click="pickAU" 
+              v-bind:class="{ active: isAUActive, yellow: isAUActive}"><i class="icon car"></i>Auto</button>
+            <button class = "tiny ui grey icon button" v-on:click="pickTR"
+              v-bind:class="{ active: isTRActive, yellow: isTRActive}"><i class="icon bus"></i>Transit</button>
+            <br> -->
 
-      <div class="logo">
-            <hr/>
-            <table id="table-logo"><tr>
-              <td class="td-logo">
-                <h4 class="agency"><b><a target="_blank" href="http://www.sfcta.org/congestion">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
-              </td>
-              <td class="td-logo">
-                <a class="agency-link" target="_blank" href="http://www.sfcta.org/congestion">
-                  <img class="img-logo" src="/assets/sfcta-logo-144.png" width="80">
-                </a>
-              </td>
-            </tr></table>
-      </div>
+          <!-- <h5>CHOOSE MAP METRIC:</h5>
+          <select v-model="selected_metric">
+            <option v-for="option in metric_options" v-bind:value="option.value">
+              ${option.text}
+            </option>
+          </select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
+          <!-- <input type="checkbox" id="pct_checkbox" v-model="pct_check" v-bind:disabled="!comp_check" style="margin-top:0px">
+          <label for="pct_checkbox"><b>&nbsp;&nbsp;PERCENT DIFF</b></label> -->
+          
+          <!-- <br>
+          <input type="checkbox" id="bwidth_checkbox" v-model="bwidth_check" style="margin-top:15px">
+          <label for="bwidth_checkbox"><b>&nbsp;&nbsp;CHOOSE BAND-WIDTH METRIC:</b></label>
+          <br>
+          <select v-model="selected_bwidth" v-bind:disabled="!bwidth_check">
+            <option v-for="option in bwidth_options" v-bind:value="option.value">
+              ${option.text}
+            </option>
+          </select> -->
+          
+          <hr/>
+          
+          <!-- <h5 style="margin-top:20px">CHOOSE BREAKS:</h5>
+          <select v-model="selected_breaks">
+            <option v-for="option in break_options" v-bind:value="option.value">
+              ${option.text}
+            </option>
+          </select>
+          <input type="checkbox" id="custom_checkbox" v-model="custom_check" v-bind:disabled="custom_disable" style="margin-top:15px">
+          <label for="custom_checkbox"><b>&nbsp;&nbsp;CHOOSE CUSTOM BREAK POINTS</b></label>
+          <label><b>CHOOSE CUSTOM BREAK POINTS</b></label> -->
+          <!-- <br>
+          <input v-model.number="bp0" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488;margin-top:5px">
+          <input v-model.number.lazy="bp1" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
+          <input v-model.number.lazy="bp2" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
+          <input v-model.number.lazy="bp3" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
+          <input v-model.number.lazy="bp4" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
+          <input v-model.number="bp5" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488">            
+
+          <button v-on:click="updateMap"
+                  v-bind:class="{ active: isUpdActive, yellow: isUpdActive}"
+                    class="mini ui grey button"
+                  v-bind:disabled="!custom_check" style="margin-top:10px">
+                    Update Map!</button> -->
+                    
+          <!-- <h5 style="margin-top:15px">CHOOSE COLOR SCHEME:</h5>
+          <select v-model="selected_colorscheme">
+            <option v-for="option in color_options" v-bind:value="option.value">
+              ${option.text}
+            </option>
+          </select>             -->
+
+          <!-- <h5 style="margin-top:25px">FREQUENCY DISTRIBUTION</h5>
+          <div id="dist-chart" style="height: 200px">
+          </div> -->
+          
+          <!-- <input type="checkbox" id="bwcustom_checkbox" v-model="bwcustom_check" v-bind:disabled="bwcustom_disable" style="margin-top:15px">
+          <label for="bwcustom_checkbox"><b>&nbsp;&nbsp;CHOOSE CUSTOM BANDWIDTH</b></label>
+          <br>
+          <input v-model.number="bwbp0" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488;margin-top:5px">
+          <input v-model.number.lazy="bwbp1" type="number" step="any" v-bind:disabled="!bwcustom_check || bwcustom_disable" style="width:55px;">
+          <input v-model.number.lazy="bwbp2" type="number" step="any" v-bind:disabled="!bwcustom_check || bwcustom_disable" style="width:55px;">
+          <input v-model.number.lazy="bwbp3" type="number" step="any" v-bind:disabled="!bwcustom_check || bwcustom_disable" style="width:55px;">
+          <input v-model.number.lazy="bwbp4" type="number" step="any" v-bind:disabled="!bwcustom_check || bwcustom_disable" style="width:55px;">
+          <input v-model.number="bwbp5" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488">  
+          
+          <button v-on:click="bwUpdateMap"
+                  v-bind:class="{ active: isBWUpdActive, yellow: isBWUpdActive}"
+                    class="mini ui grey button"
+                  v-bind:disabled="!bwcustom_check" style="margin-top:10px">
+                    Update Map!</button> -->
+          
+        </div>
     </div>
+    <!-- <div id="header">
+        <div id="stats-panel">
+          <hr style="margin-bottom:-5px;" />
+          <div id="chartinfo"><h3 style="font-size: 22px;">${chartTitle}</h3></div>
+          <div id="geoinfo"><h5>${chartSubtitle}</h5></div>
+          <div id="longchart">
+              <div class="ui active dimmer">
+                <div class="ui text loader">Loading</div>
+              </div>
+          </div>
+        </div>
+    </div> -->
+
+    <div class="logo">
+      <hr/>
+      <table id="table-logo"><tr>
+        <td class="td-logo">
+          <h4 class="agency"><b><a target="_blank" href="http://www.sfcta.org/congestion">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
+        </td>
+        <td class="td-logo">
+          <a class="agency-link" target="_blank" href="http://www.sfcta.org/congestion">
+            <img class="img-logo" src="/assets/sfcta-logo-144.png" width="80">
+          </a>
+        </td>
+      </tr></table>
+    </div>
+  </div>
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
   <div v-cloak> <!-- hides everything until Vue finished loading -->

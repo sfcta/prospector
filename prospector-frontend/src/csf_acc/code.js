@@ -28,11 +28,33 @@ var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
 let getLegHTML = maplib.getLegHTML2;
 let getColorFromVal = maplib.getColorFromVal2;
-let getBWLegHTML = maplib.getBWLegHTML;
+// let getBWLegHTML = maplib.getBWLegHTML;
 let getQuantiles = maplib.getQuantiles;
+
+let baseLayer = maplib.baseLayer;
 let mymap = maplib.sfmap;
 // set map center and zoom level
 mymap.setView([37.76889, -122.440997], 13);
+mymap.removeLayer(baseLayer);
+let url = 'https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+let token = 'pk.eyJ1Ijoic2ZjdGEiLCJhIjoiY2ozdXBhNm1mMDFkaTJ3dGRmZHFqanRuOCJ9.KDmACTJBGNA6l0CyPi1Luw';
+let attribution ='<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
+                 '<a href="http://mapbox.com">Mapbox</a>';
+baseLayer = L.tileLayer(url, {
+  attribution:attribution,
+  maxZoom: 18,
+  accessToken:token,
+}).addTo(mymap);
+
+let url2 = 'https://api.mapbox.com/styles/v1/sfcta/cjrtv3hb001pe1fmzeryo0eih/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+let streetLayer = L.tileLayer(url2, {
+  attribution:attribution,
+  maxZoom: 18,
+  accessToken:token,
+  pane: 'shadowPane',
+});
+streetLayer.addTo(mymap);
+
 
 // some important global variables.
 // the data source
@@ -41,48 +63,27 @@ const GEO_VIEW = 'taz_boundaries';
 const DATA_VIEW = 'connectsf_accjobs';
 
 
-const FRAC_COLS = ['speed','time','vol','vmt','vhd','vht','pti80','pti80_vmt'];
+const FRAC_COLS = [];
 const YR_LIST = [2015,2050];
 const TRANSIT_MODE = ['auto','transit'];
 
-const INT_COLS = ['dt','at','ft2'];
+const INT_COLS = [];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ccd';
-const COLORRAMP = {SEQ: ['#ffffcc','#3f324f'],
+const COLORRAMP = {SEQ: ['#ffecb3','#f2ad86', '#d55175', '#963d8e','#3f324f'],
                     DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
-
-const MIN_BWIDTH = 2;
-const MAX_BWIDTH = 10;
-const DEF_BWIDTH = 4;
-const BWIDTH_MAP = {
-  1: DEF_BWIDTH,
-  2: DEF_BWIDTH,
-  3: [2.5, 5],
-  4: [1.6, 3.2, 4.8],
-  5: [1.25, 2.5, 3.75, 5],
-  6: [1, 2, 3, 4, 5]
-};
-const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
   'transittotal': {'2015':[200000, 400000, 550000, 650000], '2050':[300000, 600000, 750000, 900000], 'diff':[0, 150000, 225000, 300000]},
   'autototal': {'2015':[850000, 1000000, 1100000, 1200000], '2050':[1000000, 1100000, 1200000, 1300000], 'diff':[0, 50000, 100000, 150000]},
-  // need to be commit
-  'cie': {'base':[50000, 100000, 150000, 200000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 10, 20]},
-  'med': {'base':[50000, 100000, 150000, 200000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 10, 20]},
-  'mips': {'base':[50000, 100000, 150000, 200000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 10, 20]},
-  'pdr': {'base':[50000, 100000, 150000, 200000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 10, 20]},
-  'retail': {'base':[50000, 100000, 150000, 200000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 10, 20]},
-  'visitor': {'base':[50000, 100000, 150000, 200000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 10, 20]},
 }
 
-const METRIC_UNITS = {'speed':'mph','tot':'jobs'};
+const METRIC_UNITS = {};
 let modeSelect = 'auto';
 let yearSelect = '2015';
 let sel_colorvals, sel_colors, sel_binsflag;
 let sel_bwvals;
-// let bwidth_metric_list = [''];
 
-let chart_deftitle = 'All TAZs Combined';
+// let chart_deftitle = 'All TAZs Combined';
 
 let geoLayer, mapLegend;
 let _featJson;
@@ -134,23 +135,20 @@ infoPanel.onAdd = function(map) {
 };
 
 function getInfoHtml(geo) {
-  let metric_val = null;
-  if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
-  let base_val = null;
-  if (geo.base !== null) base_val = (Math.round(geo.base*100)/100).toLocaleString();
-  let comp_val = null;
-  if (geo.comp !== null) comp_val = (Math.round(geo.comp*100)/100).toLocaleString();
-  // let bwmetric_val = null;
-  // if (geo.bwmetric !== null) bwmetric_val = (Math.round(geo.bwmetric*100)/100).toLocaleString();
   let retval = '<b>TAZ: </b>' + `${geo.taz}<br/>` +
                 '<b>NEIGHBORHOOD: </b>' + `${geo.nhood}<br/><hr>`;
-  // if (app.comp_check) {
-  //   retval += `<b>${app.sliderValue[0]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${base_val}<br/>` +
-  //             `<b>${app.sliderValue[1]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${comp_val}<br/>`;
-  // }
-  retval += `<b>2015 ACCESSIBLE JOBS: </b> ` + `${base_val}<br/>` +
-            `<b>2050 ACCESSIBLE JOBS: </b> ` + `${comp_val}<br/>`;
-  retval += `<b>ACCESSIBLE JOBS CHANGE: </b>` + `${metric_val}`; 
+
+  let metric1 = app.selected_metric + YR_LIST[0];
+  let metric2 = app.selected_metric + YR_LIST[1];
+  let diff = geo[metric2] - geo[metric1];
+
+  retval += `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric1]}<br/>` +
+            `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric2]}<br/>`+
+            '<b> Change: </b>' + `${diff}`;
+  return retval; 
+  retval += `<b>2015 JOBS ACCESSIBILITY: </b> ` + `${base_val}<br/>` +
+            `<b>2050 JOBS ACCESSIBILITY: </b> ` + `${comp_val}<br/>`;
+  retval += `<b>JOBS ACCESSIBILITY CHANGE: </b>` + `${metric_val}`; 
   return retval; 
 }
 
@@ -533,12 +531,14 @@ function styleByMetricColor(feat) {
               sel_binsflag
               );
   if (!color) color = MISSING_COLOR;
-  let fo = 0.6;
+
+  // the opacity 
+  let fo = 1;
   if (feat['metric']==0) {
     fo = 0;
   }
   if (!app.bwidth_check) {
-    return { fillColor: color, opacity: 0.5, weight: 0.5, fillOpacity: fo };
+    return { fillColor: color, opacity: 0.5, weight: 0, fillOpacity: fo };
   } else {
     return { color: color, weight: feat['bwmetric_scaled'], opacity: 1.0 };
   }
@@ -780,17 +780,18 @@ function bp4Changed(thing) {
 //   app.isBWUpdActive = true;
 // }
 
-// async function selectionChanged(thing) {
-//   app.chartTitle = app.selected_metric.toUpperCase() + ' TREND';
-//   if (app.sliderValue && app.selected_metric) {
-//     let selfeat = await drawMapFeatures();
-//     console.log(selfeat)
-//     if (selfeat) {
-//       highlightSelectedSegment();
-//       popSelGeo.setContent(getInfoHtml(selfeat));
-//     }
-//   }
-// }
+async function selectionChanged(thing) {
+  // app.chartTitle = app.selected_metric.toUpperCase() + ' TREND';
+  app.chartTitle = METRIC_DESC[app.selected_metric] + ' Trend';
+  if (app.sliderValue && app.selected_metric) {
+    let selfeat = await drawMapFeatures();
+    console.log(selfeat)
+    if (selfeat) {
+      highlightSelectedSegment();
+      popSelGeo.setContent(getInfoHtml(selfeat));
+    }
+  }
+}
 
 async function updateColor(thing) {
   app.isUpdActive = false;
@@ -810,28 +811,37 @@ async function updateMap(thing) {
   }
 }
 
-function yr2015(thing){
-  yearSelect = "2015";
-  app.is2015 = true,
-  app.is2050 = false,
-  app.isDIFF = false,
-  updateMap();
-}
+// function yr2015(thing){
+//   yearSelect = "2015";
+//   app.is2015 = true,
+//   app.is2050 = false,
+//   app.isDIFF = false,
+//   updateMap();
+// }
 
-function yr2050(thing){
-  yearSelect = "2050";
-  app.is2015 = false,
-  app.is2050 = true,
-  app.isDIFF = false,
-  updateMap();
-}
+// function yr2050(thing){
+//   yearSelect = "2050";
+//   app.is2015 = false,
+//   app.is2050 = true,
+//   app.isDIFF = false,
+//   updateMap();
+// }
 
-function yrdiff(thing){
-  yearSelect = "diff";
-  app.is2015 = false,
-  app.is2050 = false,
-  app.isDIFF = true,
-  updateMap();
+// function yrdiff(thing){
+//   yearSelect = "diff";
+//   app.is2015 = false,
+//   app.is2050 = false,
+//   app.isDIFF = true,
+//   updateMap();
+// }
+
+function yrChanged(yr) {
+  app.selected_year = yr;
+  if (yr=='diff') {
+    app.sliderValue = YR_LIST;
+  } else {
+    app.sliderValue = [yr,yr];
+  }
 }
 
 function customBreakPoints(thing) {
@@ -894,19 +904,23 @@ let app = new Vue({
   data: {
     isPanelHidden: false,
     // year
-    is2015: true,
-    is2050: false,
-    isDIFF: false,
+    year_options: [
+      {text: 'Year 2015', value: '2015'},
+      {text: 'Year 2050', value: '2050'},
+      {text: 'Change', value: 'diff'},
+      ],
+    selected_year: '2015',
+    sliderValue: [YR_LIST[0],YR_LIST[0]],
 
     // transit type
-    isAUActive: true,
-    isTRActive: false,
+    // isAUActive: true,
+    // isTRActive: false,
+    selected_metric: 'auto',
+    metric_options: [
+    {text: 'auto', value: 'auto'},
+    {text: 'transit', value: 'transit'},
+    ],
 
-    // percent diff
-    // comp_check: true,
-    // pct_check: true,
-
-    // bwidth_check: false,
     custom_check: false,
     // custom_disable: false,
     
@@ -930,16 +944,16 @@ let app = new Vue({
     // bwbp4: 0.0,
     // bwbp5: 0.0,
     
-    selected_metric: 'total',
-    metric_options: [
-    {text: 'Total_Jobs', value: 'total'},
-    {text: 'CIE_Jobs', value: 'cie'},
-    {text: 'MED_Jobs', value: 'med'},
-    {text: 'MIPS_Jobs', value: 'mips'},
-    {text: 'PDR_Jobs', value: 'pdr'},
-    {text: 'RET_Jobs', value: 'retail'},
-    {text: 'VIS_Jobs', value: 'visitor'},
-    ],
+    // selected_metric: 'total',
+    // metric_options: [
+    // {text: 'Total_Jobs', value: 'total'},
+    // {text: 'CIE_Jobs', value: 'cie'},
+    // {text: 'MED_Jobs', value: 'med'},
+    // {text: 'MIPS_Jobs', value: 'mips'},
+    // {text: 'PDR_Jobs', value: 'pdr'},
+    // {text: 'RET_Jobs', value: 'retail'},
+    // {text: 'VIS_Jobs', value: 'visitor'},
+    // ],
 
     // chartTitle: 'Household Accessible Jobs TREND',
     // chartSubtitle: chart_deftitle,
@@ -968,7 +982,7 @@ let app = new Vue({
     // ]      
   },
   watch: {
-    // sliderValue: selectionChanged,
+    sliderValue: selectionChanged,
     // selected_metric: selectionChanged,
     // pct_check: selectionChanged,
     
@@ -986,9 +1000,10 @@ let app = new Vue({
     // bwidth_check: bwidthChanged,
   },
   methods: {
-    yr2015: yr2015,
-    yr2050: yr2050,
-    yrdiff: yrdiff,
+    // yr2015: yr2015,
+    // yr2050: yr2050,
+    // yrdiff: yrdiff,
+    yrChanged: yrChanged,
     pickAU: pickAU,
     pickTR: pickTR,
     updateMap: updateColor,
