@@ -10,6 +10,14 @@
     margin-bottom: 70px;
 }
 
+.ui.color1.button {
+  background-color: #f56e71;
+  color: #fff;
+}
+
+.ui.color2.button.active {
+  background-color: #38bebb;
+}
 
 
   
