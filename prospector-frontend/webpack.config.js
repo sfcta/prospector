@@ -10,8 +10,9 @@ const sfcta_components = [
      'tdt',
      'champlu',
      'tnctrn',
+     'connectsf_traveltime',
      'jobpop',
-	 'csf_acc'
+	   'csf_acc'
 	 //'cmp-v0',
 ];
 
