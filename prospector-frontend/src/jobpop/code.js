@@ -66,14 +66,15 @@ const YR_LIST = [2015,2050];
 const INT_COLS = [];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ffffcc';
-const COLORRAMP = {SEQ: ['#ffecb3','#f2ad86', '#d55175', '#963d8e','#5b2d5b'],
+const COLORRAMP = {SEQ: ['#d9f0a3','#addd8e', '#78c679', '#31a354','#006837'],
+                    //SEQ: ['#ffecb3','#f2ad86', '#d55175', '#963d8e','#5b2d5b'],
                     DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'jobpop': {'base':[10, 20, 30, 40], 'diff':[5, 10, 15, 20], 'pctdiff':[-20, -5, 5, 20]},
-  'pop': {'base':[10, 20, 30, 40], 'diff':[5, 10, 15, 20], 'pctdiff':[-20, -5, 5, 20]},
-  'tot': {'base':[10, 20, 30, 40], 'diff':[5, 10, 15, 20], 'pctdiff':[-20, -5, 5, 20]},
+  'jobpop': {'base':[30, 40, 50, 60], 'diff':[10, 15, 20, 25], 'pctdiff':[-20, -5, 5, 20]},
+  'pop': {'base':[30, 40, 50, 60], 'diff':[10, 15, 20, 25], 'pctdiff':[-20, -5, 5, 20]},
+  'tot': {'base':[30, 40, 50, 60], 'diff':[10, 15, 20, 25], 'pctdiff':[-20, -5, 5, 20]},
 };
 
 const METRIC_UNITS = {'pop': '000s per sq. mi.',
