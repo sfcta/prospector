@@ -43,7 +43,8 @@ const GEOID_VAR = 'tmc';
 const YR_VAR = 'year';
 const TOD_VAR = 'tod';
 
-const FRAC_COLS = ['avg_ride','ontime5','ons','offs','shr_hh_0veh','crowded'];
+const FRAC_COLS = ['avg_ride','ontime5','ons','offs','shr_hh_0veh','crowded','hh_den_acs','pop_den_acs',
+                  'veh_per_hh','avg_hh_size'];
 const SCNYR_LIST = [2010,2015];
 
 const INT_COLS = [''];
@@ -791,17 +792,24 @@ let app = new Vue({
     {text: 'avg_ride', value: 'avg_ride'},
     {text: 'pickups', value: 'pickups'},
     {text: 'dropoffs', value: 'dropoffs'},
+    {text: 'avg_ride_muni_rail', value: 'avg_ride_muni_rail'},
     
     {text: 'ontime5', value: 'ontime5'},
     {text: 'ons', value: 'ons'},
     {text: 'offs', value: 'offs'},
     {text: 'dwell', value: 'dwell'},
-    {text: 'headway_s', value: 'headway_s'},
+    {text: 'freq_s', value: 'freq_s'},
     {text: 'runspeed_s', value: 'runspeed_s'},
     {text: 'num_stops', value: 'num_stops'},
     {text: 'capacity', value: 'capacity'},
     {text: 'crowded', value: 'crowded'},
+    {text: 'crowdhours', value: 'crowdhours'},
     
+    {text: 'total_hh_acs', value: 'total_hh_acs'},
+    {text: 'total_pop_acs', value: 'total_pop_acs'},
+    {text: 'total_veh', value: 'total_veh'},
+    {text: 'veh_per_hh', value: 'veh_per_hh'},
+    {text: 'avg_hh_size', value: 'avg_hh_size'},
     {text: 'edd_emp', value: 'edd_emp'},
     {text: 'shr_hh_0veh', value: 'shr_hh_0veh'},
     {text: 'emp_rac_30', value: 'emp_rac_30'},
@@ -810,6 +818,8 @@ let app = new Vue({
     {text: 'emp_wac_60', value: 'emp_wac_60'},
     {text: 'housing_30', value: 'housing_30'},
     {text: 'housing_60', value: 'housing_60'},
+    {text: 'pop_den_acs', value: 'pop_den_acs'},
+    {text: 'hh_den_acs', value: 'hh_den_acs'},
     ],
     chartTitle: 'AVG_RIDE TREND',
     chartSubtitle: chart_deftitle,
