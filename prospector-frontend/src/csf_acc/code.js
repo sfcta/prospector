@@ -46,7 +46,7 @@ baseLayer = L.tileLayer(url, {
   accessToken:token,
 }).addTo(mymap);
 
-let url2 = 'https://api.mapbox.com/styles/v1/sfcta/cjrtv3hb001pe1fmzeryo0eih/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+let url2 = 'https://api.mapbox.com/styles/v1/sfcta/cjscclu2q07qn1fpimxuf2wbd/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
 let streetLayer = L.tileLayer(url2, {
   attribution:attribution,
   maxZoom: 18,
@@ -63,7 +63,7 @@ const GEO_VIEW = 'taz_boundaries';
 const DATA_VIEW = 'connectsf_accjobs';
 
 
-const FRAC_COLS = [];
+const FRAC_COLS = ['total'];
 const YR_LIST = [2015,2050];
 const TRANSIT_MODE = ['auto','transit'];
 
@@ -73,17 +73,20 @@ const MISSING_COLOR = '#ccd';
 const COLORRAMP = {SEQ: ['#ffecb3','#f2ad86', '#d55175', '#963d8e','#3f324f'],
                     DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 const CUSTOM_BP_DICT = {
-  'transittotal': {'2015':[200000, 400000, 550000, 650000], '2050':[300000, 600000, 750000, 900000], 'diff':[0, 150000, 225000, 300000]},
-  'autototal': {'2015':[850000, 1000000, 1100000, 1200000], '2050':[1000000, 1100000, 1200000, 1300000], 'diff':[0, 50000, 100000, 150000]},
+  'transittotal': {'2015':[200000, 400000, 550000, 650000],
+                   '2050':[300000, 600000, 750000, 900000],
+                   'diff':[0, 150000, 225000, 300000]},
+  'autototal': {'2015':[850000, 1000000, 1100000, 1200000],
+                '2050':[1000000, 1100000, 1200000, 1300000],
+                'diff':[0, 50000, 100000, 150000]},
 }
 
 const METRIC_UNITS = {};
 let modeSelect = 'auto';
-// let yearSelect = '2015';
 let sel_colorvals, sel_colors, sel_binsflag;
 let sel_bwvals;
 
-// let chart_deftitle = 'All TAZs Combined';
+let chart_deftitle = 'All TAZs Combined';
 
 let geoLayer, mapLegend;
 let _featJson;
@@ -106,7 +109,7 @@ async function initialPrep() {
 
 // get the taz boundary data
 async function fetchMapFeatures() {
-  const geo_url = API_SERVER + GEO_VIEW + '?select=taz,geometry,nhood';
+  const geo_url = API_SERVER + GEO_VIEW + '?taz=lt.1000&select=taz,geometry,nhood';
 
   try {
     let resp = await fetch(geo_url);
@@ -138,13 +141,13 @@ function getInfoHtml(geo) {
   let retval = '<b>TAZ: </b>' + `${geo.taz}<br/>` +
                 '<b>NEIGHBORHOOD: </b>' + `${geo.nhood}<br/><hr>`;
 
-  let metric1 = modeSelect + YR_LIST[0];
-  let metric2 = modeSelect + YR_LIST[1];
+  let metric1 = modeSelect + 'total' + YR_LIST[0];
+  let metric2 = modeSelect + 'total' + YR_LIST[1];
   let diff = geo[metric2] - geo[metric1];
 
   retval += `<b>${YR_LIST[0]}</b> `+`<b>${modeSelect}: </b>` + `${geo[metric1]}<br/>` +
             `<b>${YR_LIST[1]}</b> `+`<b>${modeSelect}: </b>` + `${geo[metric2]}<br/>`+
-            `<b>${modeSelect}: </b>` + '<b> Change: </b>' + `${diff}`;
+            `<b>${modeSelect}</b>` + '<b> Change: </b>' + `${diff}`;
   return retval; 
 }
 
@@ -173,10 +176,10 @@ async function getMapData() {
   for (let yr of YR_LIST) {
     tmp[yr] = {};
     for (let mode of TRANSIT_MODE) {
-      tmp[yr][mode] = {}
-      for (let met of app.metric_options) {
-        tmp[yr][mode][met.value] = 0;
-      }
+      tmp[yr][mode] = 0
+      // for (let met of app.metric_options) {
+      //   tmp[yr][mode][met.value] = 0;
+      // }
     }
   }
 
@@ -184,24 +187,26 @@ async function getMapData() {
     base_lookup[entry.taz] = entry;
     for (let yr of YR_LIST) {
       for (let mode of TRANSIT_MODE) {
-        for (let met of app.metric_options) {
-          tmp[yr][mode][met.value] += entry[mode+met.value+yr];
-        }
+        // for (let met of app.metric_options) {
+          // tmp[yr][mode][met.value] += entry[mode+met.value+yr];
+          tmp[yr][mode] += entry[mode+app.selected_metric+yr];
+        // }
       }
     }
   }
 
   _aggregateData = [];
   for (let yr of YR_LIST) {
+    let row = {};
+    row['year'] = yr.toString();
     for (let mode of TRANSIT_MODE) {
-      let row = {};
-      row['year'] = yr.toString();
-      row['mode'] = mode.toString()
-      for (let met of app.metric_options) {
-        row[met.value] = tmp[yr][mode][met.value];
-      }
-      _aggregateData.push(row);
+      // row['mode'] = mode.toString()
+      // for (let met of app.metric_options) {
+        // row[met.value] = tmp[yr][mode][met.value];
+        row[mode] = tmp[yr][mode];
+      // }
     }
+    _aggregateData.push(row);
   }
   // console.log(_aggregateData)
 }
@@ -218,14 +223,7 @@ async function drawMapFeatures(queryMapData=true) {
   
   let mode_metric = modeSelect + sel_metric;
   let base_metric = mode_metric + app.sliderValue[0];
-  console.log(base_metric)
   let comp_metric = mode_metric + app.sliderValue[1];
-  // if (yearSelect == "diff") {
-  //   base_metric = base_metric + "2015";
-  //   comp_metric = comp_metric + "2050";
-  // } else {
-  //   base_metric = base_metric + yearSelect;
-  // }
   if (base_metric==comp_metric) {
     app.comp_check = false;
     app.pct_check = false;
@@ -237,16 +235,22 @@ async function drawMapFeatures(queryMapData=true) {
   try {
     // draw data
     if (queryMapData) {
-      app.custom_check = false;
+      // app.custom_check = false;
       if (base_lookup == undefined) await getMapData();
       // console.log(base_lookup)
       console.log("data draw!")
       let map_metric;
-      // let bwidth_metric;
+
       map_vals = [];
-      bwidth_vals = [];
       for (let feat of cleanFeatures) {
         map_metric = null;
+
+        // get all the data first to show on hover
+        if (base_lookup.hasOwnProperty(feat.taz)) {
+          feat[modeSelect + sel_metric + YR_LIST[0]] = base_lookup[feat.taz][modeSelect + sel_metric + YR_LIST[0]];
+          feat[modeSelect + sel_metric + YR_LIST[1]] = base_lookup[feat.taz][modeSelect + sel_metric + YR_LIST[1]];
+        } 
+
         if (app.comp_check) {
           // changing num for time duration
           if (base_lookup.hasOwnProperty(feat.taz)) {
@@ -271,40 +275,14 @@ async function drawMapFeatures(queryMapData=true) {
             // console.log(map_metric)
           }
         }
-        // if (yearSelect == "diff") {
-        if (app.comp_check) {
-          // changing num for time duration
-          if (base_lookup.hasOwnProperty(feat.taz)) {
-            console.log("drawMapFeatures, 1")
-            let feat_entry = base_lookup[feat.taz];
-            map_metric = feat_entry[comp_metric] - feat_entry[base_metric];
-            feat['base'] = feat_entry[base_metric];
-            feat['comp'] = feat_entry[comp_metric];
-            // percent mode
-            // if (app.pct_check && app.comp_check) {
-            //   if (feat_entry[base_metric]>0) {
-            //     map_metric = map_metric*100/feat_entry[base_metric];
-            //   }
-            // }
-          }
-        } else {
-          // base num for a year
-          if (base_lookup.hasOwnProperty(feat.taz)) {
-            console.log("drawMapFeatures, 2")
-            map_metric = base_lookup[feat.taz][base_metric];
-            // console.log(base_lookup[feat.taz])
-            // console.log(base_metric)
-            // console.log(map_metric)
-          }
-        }
+
         if (map_metric !== null) {
           map_metric = Math.round(map_metric*prec)/prec;
           map_vals.push(map_metric);
         }
         feat['metric'] = map_metric;
       }
-      map_vals = map_vals.sort((a, b) => a - b);  
-      bwidth_vals = bwidth_vals.sort((a, b) => a - b); 
+      map_vals = map_vals.sort((a, b) => a - b);
     }
     
     // draw map color
@@ -317,28 +295,12 @@ async function drawMapFeatures(queryMapData=true) {
         
         sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
 
-        // draw the distribution plot
-        // let dist_vals = app.comp_check? map_vals.filter(entry => entry <= MAX_PCTDIFF) : map_vals;
-        // console.log(app.comp_check)
-        // console.log(dist_vals)
-        // let x = d3.scaleLinear()
-        //         .domain([dist_vals[0], dist_vals[dist_vals.length-1]])
-        // let numticks = 20;
-        // if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) numticks = sel_colorvals.length;
-        // let histogram = d3.histogram()
-        //     .domain(x.domain())
-        //     .thresholds(x.ticks(numticks));
-        // updateDistChart(histogram(dist_vals));
-
-        // console.log(sel_colorvals.length)
-        // console.log(DISCRETE_VAR_LIMIT)
         if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) {
           console.log("drawMapFeatures, 3")
           sel_binsflag = false;
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
           sel_colorvals2 = sel_colorvals.slice(0);
           
-          app.custom_disable = true;
           app.bp0 = 0;
           app.bp1 = 0;
           app.bp2 = 0;
@@ -397,17 +359,6 @@ async function drawMapFeatures(queryMapData=true) {
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
           sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
         }
-
-        // app.bwcustom_disable = false;
-        // sel_bwvals = getQuantiles(bwidth_vals, 5);
-        // bp = Array.from(sel_bwvals).sort((a, b) => a - b);
-        // app.bwbp0 = bp[0];
-        // app.bwbp1 = bp[1];
-        // app.bwbp2 = bp[2];
-        // app.bwbp3 = bp[3];
-        // app.bwbp4 = bp[4];
-        // app.bwbp5 = bp[5];
-        // sel_bwvals = Array.from(new Set(sel_bwvals)).sort((a, b) => a - b); 
       } else {
         sel_colorvals = new Set([app.bp0, app.bp1, app.bp2, app.bp3, app.bp4, app.bp5]);
         sel_colorvals = Array.from(sel_colorvals).sort((a, b) => a - b);
@@ -419,28 +370,6 @@ async function drawMapFeatures(queryMapData=true) {
         sel_bwvals = new Set([app.bwbp0, app.bwbp1, app.bwbp2, app.bwbp3, app.bwbp4, app.bwbp5]);
         sel_bwvals = Array.from(sel_bwvals).sort((a, b) => a - b);
       }
-
-      // let bw_widths;
-      // if (app.bwidth_check) {
-      //   bw_widths = BWIDTH_MAP[sel_bwvals.length]; 
-      //   for (let feat of cleanFeatures) {
-      //     if (feat['bwmetric'] !== null) {
-      //       if (sel_bwvals.length <= 2){
-      //         feat['bwmetric_scaled'] = bw_widths;
-      //       } else {
-      //         for (var i = 0; i < sel_bwvals.length-1; i++) {
-      //           if (feat['bwmetric'] <= sel_bwvals[i + 1]) {
-      //             feat['bwmetric_scaled'] = bw_widths[i];
-      //             break;
-      //           }
-      //         }
-      //       }
-      //       //feat['bwmetric_scaled'] = (feat['bwmetric']-bwidth_vals[0])*(MAX_BWIDTH-MIN_BWIDTH)/(bwidth_vals[bwidth_vals.length-1]-bwidth_vals[0])+MIN_BWIDTH;
-      //     } else {
-      //       feat['bwmetric_scaled'] = null;
-      //     }
-      //   }
-      // }
       
       sel_colors = [];
       for(let i of sel_colorvals2) {
@@ -471,10 +400,6 @@ async function drawMapFeatures(queryMapData=true) {
         );
         legHTML = '<h4>' + sel_metric.toUpperCase() + (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(sel_metric)? (' (' + METRIC_UNITS[sel_metric] + ')') : '')) +
                   '</h4>' + legHTML;
-        // if (app.bwidth_check) {
-        //   // legHTML += '<hr/>' + '<h4>' + app.selected_bwidth.toUpperCase() +  '</h4>';
-        //   legHTML += getBWLegHTML(sel_bwvals, bw_widths);
-        // }
         div.innerHTML = legHTML;
         return div;
       };
@@ -516,16 +441,10 @@ function styleByMetricColor(feat) {
               );
   if (!color) color = MISSING_COLOR;
 
-  // the opacity 
-  let fo = 1;
   if (feat['metric']==0) {
-    fo = 0;
+    color = MISSING_COLOR;
   }
-  if (!app.bwidth_check) {
-    return { fillColor: color, opacity: 0.5, weight: 0, fillOpacity: fo };
-  } else {
-    return { color: color, weight: feat['bwmetric_scaled'], opacity: 1.0 };
-  }
+  return { fillColor: color, opacity: 1, weight: 1, color: color, fillOpacity: 1};
 }
 
 let infoPanelTimeout;
@@ -565,52 +484,6 @@ function highlightSelectedSegment() {
   });
 }
 
-// let distChart = null;
-// let distLabels;
-// function updateDistChart(bins) {
-//   let data = [];
-//   distLabels = [];
-//   for (let b of bins) {
-//     let x0 = Math.round(b.x0*prec)/prec;
-//     let x1 = Math.round(b.x1*prec)/prec;
-//     data.push({x:x0, y:b.length});
-//     distLabels.push(x0 + '-' + x1);
-//   }
-
-//   if (distChart) {
-//     distChart.setData(data);
-//   } else {
-//       distChart = new Morris.Area({
-//         // ID of the element in which to draw the chart.
-//         element: 'dist-chart',
-//         data: data,
-//         // The name of the data record attribute that contains x-values.
-//         xkey: 'x',
-//         // A list of names of data record attributes that contain y-values.
-//         ykeys: 'y',
-//         ymin: 0,
-//         labels: ['Freq'],
-//         lineColors: ['#1fc231'],
-//         xLabels: 'x',
-//         xLabelAngle: 25,
-//         xLabelFormat: binFmt,
-//         //yLabelFormat: yFmt,
-//         hideHover: true,
-//         parseTime: false,
-//         fillOpacity: 0.4,
-//         pointSize: 1,
-//         behaveLikeLine: false,
-//         eventStrokeWidth: 2,
-//         eventLineColors: ['#ccc'],
-//       });
-//   }
-
-// }
-
-// function binFmt(x) {
-//   return distLabels[x.x] + ((app.pct_check && app.comp_check)? '%':'');
-// }
-
 let selGeoId;
 let selectedGeo, prevSelectedGeo;
 let selectedLatLng;
@@ -637,94 +510,73 @@ function clickedOnFeature(e) {
   }
 }
 
-// let popSelGeo;
-// function showGeoDetails(latlng) {
-//   // show popup
-//   popSelGeo = L.popup()
-//     .setLatLng(latlng)
-//     .setContent(infoPanel._div.innerHTML)
-//     .addTo(mymap);
+let popSelGeo;
+function showGeoDetails(latlng) {
+  // show popup
+  popSelGeo = L.popup()
+    .setLatLng(latlng)
+    .setContent(infoPanel._div.innerHTML)
+    .addTo(mymap);
 
-//   // Revert to overall chart when no segment selected
-//   popSelGeo.on('remove', function(e) {
-//     resetPopGeo();
-//   });
-// }
-
-// function resetPopGeo() {
-//   geoLayer.resetStyle(selectedGeo);
-//   prevSelectedGeo = selectedGeo = selGeoId = null;
-//   app.chartSubtitle = chart_deftitle;
-//   buildChartHtmlFromData();
-// }
-
-// let trendChart = null
-// function buildChartHtmlFromData(geoid = null) {
-//   document.getElementById('longchart').innerHTML = '';
-//   if (geoid) {
-//     let selgeodata = [];
-//     for (let yr of YR_LIST) {
-//       let row = {};
-//       row['year'] = yr.toString();
-//       for (let met of app.metric_options) {
-//         row[met.value] = base_lookup[geoid][met.value+yr];
-//       }
-//       selgeodata.push(row);
-//     } 
-//     trendChart = new Morris.Line({
-//       data: selgeodata,
-//       element: 'longchart',
-//       gridTextColor: '#aaa',
-//       hideHover: true,
-//       labels: [app.selected_metric.toUpperCase()],
-//       lineColors: ['#f66'],
-//       xkey: 'year',
-//       smooth: false,
-//       parseTime: false,
-//       xLabelAngle: 45,
-//       ykeys: [app.selected_metric],
-//     });
-//   } else {
-//     trendChart = new Morris.Line({
-//       data: _aggregateData,
-//       element: 'longchart',
-//       gridTextColor: '#aaa',
-//       hideHover: true,
-//       labels: [app.selected_metric.toUpperCase()],
-//       lineColors: ['#f66'],
-//       xkey: 'year',
-//       smooth: false,
-//       parseTime: false,
-//       xLabelAngle: 45,
-//       ykeys: [app.selected_metric],
-//     });
-//   }
-// }
-
-function bp1Changed(thing) {
-  if (thing < app.bp0) app.bp1 = app.bp0;
-  if (thing > app.bp2) app.bp2 = thing;
-  app.isUpdActive = true;
+  // Revert to overall chart when no segment selected
+  popSelGeo.on('remove', function(e) {
+    resetPopGeo();
+  });
 }
-function bp2Changed(thing) {
-  if (thing < app.bp1) app.bp1 = thing;
-  if (thing > app.bp3) app.bp3 = thing;
-  app.isUpdActive = true;
+
+function resetPopGeo() {
+  geoLayer.resetStyle(selectedGeo);
+  prevSelectedGeo = selectedGeo = selGeoId = null;
+  app.chartSubtitle = chart_deftitle;
+  buildChartHtmlFromData();
 }
-function bp3Changed(thing) {
-  if (thing < app.bp2) app.bp2 = thing;
-  if (thing > app.bp4) app.bp4 = thing;
-  app.isUpdActive = true;
-}
-function bp4Changed(thing) {
-  if (thing < app.bp3) app.bp3 = thing;
-  if (thing > app.bp5) app.bp4 = app.bp5;
-  app.isUpdActive = true;
+
+let trendChart = null
+function buildChartHtmlFromData(geoid = null) {
+  document.getElementById('longchart').innerHTML = '';
+  if (geoid) {
+    let selgeodata = [];
+    for (let yr of YR_LIST) {
+      let row = {};
+      row['year'] = yr.toString();
+      for (let met of TRANSIT_MODE) {
+        row[met] = base_lookup[geoid][met+"total"+yr];
+      }
+      selgeodata.push(row);
+    } 
+    console.log(selgeodata)
+    trendChart = new Morris.Line({
+      data: selgeodata,
+      element: 'longchart',
+      gridTextColor: '#aaa',
+      hideHover: true,
+      labels: [app.selected_metric.toUpperCase()],
+      lineColors: ['#f56e71'],
+      xkey: 'year',
+      smooth: false,
+      parseTime: false,
+      xLabelAngle: 45,
+      ykeys: [modeSelect],
+    });
+  } else {
+    trendChart = new Morris.Line({
+      data: _aggregateData,
+      element: 'longchart',
+      gridTextColor: '#aaa',
+      hideHover: true,
+      labels: [app.selected_metric.toUpperCase()],
+      lineColors: ['#f56e71'],
+      xkey: 'year',
+      smooth: false,
+      parseTime: false,
+      xLabelAngle: 45,
+      ykeys: [modeSelect],
+    });
+  }
 }
 
 async function selectionChanged(thing) {
-  // app.chartTitle = app.selected_metric.toUpperCase() + ' TREND';
-  // app.chartTitle = modeSelect + ' Trend';
+  app.chartTitle = modeSelect + ' Trend';
   if (app.sliderValue && app.selected_metric) {
     let selfeat = await drawMapFeatures();
     console.log(selfeat)
@@ -735,14 +587,14 @@ async function selectionChanged(thing) {
   }
 }
 
-async function updateColor(thing) {
-  app.isUpdActive = false;
-  let selfeat = await drawMapFeatures(false);
-  if (selfeat) {
-    highlightSelectedSegment();
-    popSelGeo.setContent(getInfoHtml(selfeat));
-  }
-}
+// async function updateColor(thing) {
+//   app.isUpdActive = false;
+//   let selfeat = await drawMapFeatures(false);
+//   if (selfeat) {
+//     highlightSelectedSegment();
+//     popSelGeo.setContent(getInfoHtml(selfeat));
+//   }
+// }
 
 async function updateMap(thing) {
   app.isUpdActive = false;
@@ -762,13 +614,13 @@ function yrChanged(yr) {
   }
 }
 
-function customBreakPoints(thing) {
-  if(thing) {
-    app.isUpdActive = false;
-  } else {
-    drawMapFeatures();
-  }
-}
+// function customBreakPoints(thing) {
+//   if(thing) {
+//     app.isUpdActive = false;
+//   } else {
+//     drawMapFeatures();
+//   }
+// }
 
 function pickAU(thing){
   modeSelect = "auto";
@@ -814,25 +666,21 @@ let app = new Vue({
     comp_check: false,
     pct_check: false,
     // custom break points
-    bp0: 0.0,
-    bp1: 0.0,
-    bp2: 0.0,
-    bp3: 0.0,
-    bp4: 0.0,
-    bp5: 0.0,
-    // update after change custom break points
-    isUpdActive: false,
+    // bp0: 0.0,
+    // bp1: 0.0,
+    // bp2: 0.0,
+    // bp3: 0.0,
+    // bp4: 0.0,
+    // bp5: 0.0,
+    // // update after change custom break points
+    // isUpdActive: false,
 
-    
     selected_metric: 'total',
     metric_options: [
     {text: 'Total_Jobs', value: 'total'},
     ],
-    // chartTitle: 'Household Accessible Jobs TREND',
-    // chartSubtitle: chart_deftitle,
-
-    // selected_bwidth: bwidth_metric_list[0],
-    // bwidth_options: [],    
+    chartTitle: 'Household Accessible Jobs TREND',
+    chartSubtitle: chart_deftitle, 
     
     // selected_colorscheme: COLORRAMP.DIV,
     // map color control
@@ -848,17 +696,12 @@ let app = new Vue({
   watch: {
     sliderValue: selectionChanged,
     // selected_metric: selectionChanged,
-    bp1: bp1Changed,
-    bp2: bp2Changed,
-    bp3: bp3Changed,
-    bp4: bp4Changed,
-    custom_check: customBreakPoints,
   },
   methods: {
     yrChanged: yrChanged,
     pickAU: pickAU,
     pickTR: pickTR,
-    updateMap: updateColor,
+    updateMap: updateMap,
     clickToggleHelp: clickToggleHelp,
     clickedShowHide: clickedShowHide,
   },
