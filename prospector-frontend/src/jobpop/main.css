@@ -77,13 +77,14 @@
   height: 230px;
 }
 
-h1,h3,h4,h5 {
+h1,h3,h4,h5,p {
   color: #fff; 
   margin: 1% auto;
 }
 
 hr {margin: 1% 0px; }
 
+/* Extra context layers*/
 #layer-widgets {
   border-radius: 7px 0px 0px 7px;
   background-color: #555;
@@ -91,6 +92,9 @@ hr {margin: 1% 0px; }
 }
 #layer-widgets button {
   margin: 5px 5px 5px 5px;
+}
+.ui.toggle.checkbox {
+  margin: 2% 0px;
 }
 
 /* Bottom agency and logo*/

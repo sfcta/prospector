@@ -51,6 +51,19 @@ let streetLayer = L.tileLayer(url2, {
 });
 streetLayer.addTo(mymap);
 
+const ADDLAYERS = [
+  {
+    view: 'sup_district_boundaries',
+    name: 'Supervisorial District Boundaries',
+    color: 'purple',
+  },
+  {
+    view: 'coc2017',
+    name: 'Communities of Concern',
+    color: 'orange',
+  },
+]
+
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
@@ -95,6 +108,7 @@ let geoLayer, mapLegend;
 let _featJson;
 let _aggregateData;
 let prec;
+let addLayerStore = {};
 
 async function initialPrep() {
 
@@ -106,8 +120,11 @@ async function initialPrep() {
   
   console.log('3... ');
   await buildChartHtmlFromData();
+  
+  console.log('4... ');
+  await fetchAddLayers();
 
-  console.log('4 !!!');
+  console.log('5 !!!');
 }
 
 async function fetchMapFeatures() {
@@ -126,6 +143,27 @@ async function fetchMapFeatures() {
 
   } catch (error) {
     console.log('map feature error: ' + error);
+  }
+}
+
+async function fetchAddLayers() {
+  try {
+    for (let item of ADDLAYERS) {
+      let resp = await fetch(API_SERVER + item.view);
+      let features = await resp.json();
+      for (let feat of features) {
+        feat['type'] = 'Feature';
+        feat['geometry'] = JSON.parse(feat.geometry);
+      }
+      let lyr = L.geoJSON(features, {
+        style: { opacity: 1, weight: 3, color: item.color, fillOpacity: 0, interactive: false},
+        pane: 'shadowPane',
+      }).addTo(mymap);
+      addLayerStore[item.view] = lyr;
+      mymap.removeLayer(lyr);
+    }
+  } catch (error) {
+    console.log('additional layers error: ' + error);
   }
 }
 
@@ -559,6 +597,15 @@ function getColorMode(cscheme) {
   }
 }
 
+function showExtraLayers(e) {
+  for (let lyr in addLayerStore) {
+    mymap.removeLayer(addLayerStore[lyr]);
+  }
+  for (let lyr of app.addLayers) {
+    addLayerStore[lyr].addTo(mymap);
+  }
+}
+
 
 let app = new Vue({
   el: '#panel',
@@ -567,6 +614,7 @@ let app = new Vue({
     isPanelHidden: false,
     showingMainPanel: true,
     showingLayerPanel: false,
+    extraLayers: ADDLAYERS,
     comp_check: false,
     pct_check: false,
     bp0: 0.0,
@@ -602,10 +650,12 @@ let app = new Vue({
       '#fafa6e,#2A4858': 'lch',
     },
     comment: '',
+    addLayers:[],
   },
   watch: {
     sliderValue: selectionChanged,
     selected_metric: selectionChanged,
+    addLayers: showExtraLayers,
   },
   methods: {
     clickToggleHelp: clickToggleHelp,

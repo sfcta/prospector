@@ -69,7 +69,14 @@
       </div>
       
       <div v-show="showingLayerPanel">
-        <h5>PLACE HOLDER</h5>
+        <h5>MAP LAYERS</h5>
+        <p>Add additional geographic data to the map.</p>
+        
+        <div v-for="item in extraLayers" class="ui toggle checkbox">
+          <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
+          <label><h5>${item.name}</h5></label>
+        </div>
+        
       </div>
       
       <div v-show="showingMainPanel" id="header">
