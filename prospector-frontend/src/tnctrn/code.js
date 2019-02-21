@@ -100,15 +100,28 @@ async function fetchMapFeatures() {
   const geo_url = API_SERVER + GEO_VIEW + '?select=tmc,geometry,street,intersec,direction,dir2';
 
   try {
-    let resp = await fetch(geo_url);
+    // get a list of valid TMCs
+    let trtmc_ids = [];
+    let resp = await fetch(API_SERVER + DATA_VIEW + '?select=tmc');
     let features = await resp.json();
+    for (let feat of features) {
+      trtmc_ids.push(feat.tmc);
+    }
+    trtmc_ids = Array.from(new Set(trtmc_ids));
+    
+    resp = await fetch(geo_url);
+    features = await resp.json();
 
     // do some parsing and stuff
+    let feat_filtered = [];
     for (let feat of features) {
-      feat['type'] = 'Feature';
-      feat['geometry'] = JSON.parse(feat.geometry);
+      if (trtmc_ids.includes(feat.tmc)) {
+        feat['type'] = 'Feature';
+        feat['geometry'] = JSON.parse(feat.geometry);
+        feat_filtered.push(feat);
+      }
     }
-    return features;
+    return feat_filtered;
 
   } catch (error) {
     console.log('map feature error: ' + error);
