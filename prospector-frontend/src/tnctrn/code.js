@@ -43,7 +43,7 @@ const GEOID_VAR = 'tmc';
 const YR_VAR = 'year';
 const TOD_VAR = 'tod';
 
-const FRAC_COLS = ['avg_ride','ontime5','ons','offs','shr_hh_0veh','crowded','hh_den_acs','pop_den_acs',
+const FRAC_COLS = ['freq_s','avg_ride','ontime5','ons','offs','shr_hh_0veh','crowded','hh_den_acs','pop_den_acs',
                   'veh_per_hh','avg_hh_size'];
 const SCNYR_LIST = [2010,2015];
 
