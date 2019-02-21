@@ -2,11 +2,11 @@
 
 #slide-panel {
   top: auto;
-  bottom: 50px;
+  bottom: 90px;
 }
 
 .leaflet-bottom .legend.leaflet-control {
-    margin-bottom: 70px;
+    margin-bottom: 100px;
 }
 
 .ui.color1.button {
@@ -74,7 +74,7 @@
 }
 
 #longchart {
-  height:230px;
+  height: 230px;
 }
 
 h1,h3,h4,h5 {
@@ -83,6 +83,15 @@ h1,h3,h4,h5 {
 }
 
 hr {margin: 1% 0px; }
+
+#layer-widgets {
+  border-radius: 7px 0px 0px 7px;
+  background-color: #555;
+  z-index: 7;
+}
+#layer-widgets button {
+  margin: 5px 5px 5px 5px;
+}
 
 /* Bottom agency and logo*/
 tbody tr:nth-child(odd) td, tbody th {

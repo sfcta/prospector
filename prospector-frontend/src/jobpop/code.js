@@ -565,6 +565,8 @@ let app = new Vue({
   delimiters: ['${', '}'],
   data: {
     isPanelHidden: false,
+    showingMainPanel: true,
+    showingLayerPanel: false,
     comp_check: false,
     pct_check: false,
     bp0: 0.0,
@@ -618,9 +620,12 @@ let slideapp = new Vue({
   delimiters: ['${', '}'],
   data: {
     isPanelHidden: false,
+    showingMainPanel: true,
+    showingLayerPanel: false,
   },
   methods: {
     clickedShowHide: clickedShowHide,
+    switchPanel: switchPanel,
   },
 });
 
@@ -633,6 +638,10 @@ function clickedShowHide(e) {
       mymap.invalidateSize()
     }, delay)
   }
+}
+function switchPanel(e) {
+  app.showingLayerPanel = slideapp.showingLayerPanel = !slideapp.showingLayerPanel;
+  app.showingMainPanel = slideapp.showingMainPanel = !slideapp.showingMainPanel;
 }
 
 // eat some cookies -- so we can hide the help permanently

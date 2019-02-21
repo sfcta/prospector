@@ -1,11 +1,17 @@
 <div id="container">
 
   <div id="slide-panel" v-bind:class="{ shrunken: isPanelHidden}">
-    <button class="ui tiny green icon button"
-            v-on:click="clickedShowHide">
-            <i class="angle double icon"
-            v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
-    </button>
+    <div id="layer-widgets">
+      <button class="ui tiny grey icon button" v-bind:class="{ blue: showingLayerPanel}"
+              v-on:click="switchPanel">
+              <i class="clone outline icon"></i>
+      </button></br>
+      <button class="ui tiny green icon button"
+              v-on:click="clickedShowHide">
+              <i class="angle double icon"
+              v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
+      </button>
+    </div>
   </div> 
   
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
@@ -28,7 +34,7 @@
             <hr/>
         </div>
 
-        <div id="picker">
+        <div v-show="showingMainPanel" id="picker">
           <h5>CHOOSE SCENARIO</h5>
           <div>
             <button v-for="item in year_options"
@@ -48,19 +54,25 @@
                   ${item.text}
             </button>
           </div>            
-          
+
+          <h5 style="margin-top:10px;">PROVIDE FEEDBACK</h5>
+          <form class="ui tiny equal width form" v-on:submit.prevent>
+            <div class="field">
+              <textarea v-model="comment" class="fix" maxlength="200" rows="3"
+              type="text" placeholder="What do you think about this map?"></textarea>
+            </div>
+            <button class="ui tiny button color1" type="submit">Submit</button>
+          </form>
+
         </div>
-        <h5 style="margin-top:10px;">PROVIDE FEEDBACK</h5>
-        <form class="ui tiny equal width form" v-on:submit.prevent>
-          <div class="field">
-            <textarea v-model="comment" class="fix" maxlength="200" rows="3"
-            type="text" placeholder="What do you think about this map?"></textarea>
-          </div>
-          <button class="ui tiny button color1" type="submit">Submit</button>
-        </form>
+
       </div>
       
-      <div id="header">
+      <div v-show="showingLayerPanel">
+        <h5>PLACE HOLDER</h5>
+      </div>
+      
+      <div v-show="showingMainPanel" id="header">
           <div id="stats-panel">
             <hr/>
             <div id="chartinfo"><h3 style="font-size: 22px;">${chartTitle}</h3></div>
@@ -72,7 +84,7 @@
             </div>
           </div>
       </div>
-
+      
       <div class="logo">
             <hr/>
             <table id="table-logo"><tr>
@@ -86,7 +98,8 @@
               </td>
             </tr></table>
       </div>
-    </div>
+  </div>
+  
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
   <div v-cloak> <!-- hides everything until Vue finished loading -->
