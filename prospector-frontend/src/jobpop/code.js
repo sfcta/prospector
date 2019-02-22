@@ -692,6 +692,9 @@ function clickedShowHide(e) {
 function switchPanel(e) {
   app.showingLayerPanel = slideapp.showingLayerPanel = !slideapp.showingLayerPanel;
   app.showingMainPanel = slideapp.showingMainPanel = !slideapp.showingMainPanel;
+  if(app.showingMainPanel) {
+    setTimeout(buildChartHtmlFromData, 5, selGeoId);
+  }
 }
 
 // eat some cookies -- so we can hide the help permanently
