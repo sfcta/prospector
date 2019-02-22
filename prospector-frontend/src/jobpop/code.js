@@ -121,7 +121,7 @@ async function initialPrep() {
   await drawMapFeatures();
   
   console.log('3... ');
-  await buildChartHtmlFromData();
+  //await buildChartHtmlFromData();
   
   console.log('4... ');
   await fetchAddLayers();
@@ -400,13 +400,13 @@ async function drawMapFeatures(queryMapData=true) {
       
       if (selectedGeo) {
         if (base_lookup.hasOwnProperty(selectedGeo.feature[GEOID_VAR])) {
-          buildChartHtmlFromData(selectedGeo.feature[GEOID_VAR]);
+          //buildChartHtmlFromData(selectedGeo.feature[GEOID_VAR]);
           return cleanFeatures.filter(entry => entry[GEOID_VAR] == selectedGeo.feature[GEOID_VAR])[0];
         } else {
           resetPopGeo();
         }
       } else {
-        buildChartHtmlFromData();
+        //buildChartHtmlFromData();
         return null;
       }
     }
@@ -495,7 +495,7 @@ function clickedOnFeature(e) {
   selectedLatLng = e.latlng;
   if (base_lookup.hasOwnProperty(selGeoId)) {
     showGeoDetails(selectedLatLng);
-    buildChartHtmlFromData(selGeoId);
+    //buildChartHtmlFromData(selGeoId);
   } else {
     resetPopGeo();
   }
@@ -519,7 +519,7 @@ function resetPopGeo() {
   geoLayer.resetStyle(selectedGeo);
   prevSelectedGeo = selectedGeo = selGeoId = null;
   app.chartSubtitle = chart_deftitle;
-  buildChartHtmlFromData();
+  //buildChartHtmlFromData();
 }
 
 let trendChart = null;
