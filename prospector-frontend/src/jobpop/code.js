@@ -53,14 +53,16 @@ streetLayer.addTo(mymap);
 
 const ADDLAYERS = [
   {
-    view: 'sup_district_boundaries',
-    name: 'Supervisorial District Boundaries',
-    color: 'purple',
+    view: 'sup_district_boundaries', name: 'Supervisorial District Boundaries',
+    style: { opacity: 1, weight: 3, color: 'purple', fillOpacity: 0, interactive: false},
   },
   {
-    view: 'coc2017',
-    name: 'Communities of Concern',
-    color: 'orange',
+    view: 'coc2017', name: 'Communities of Concern',
+    style: { opacity: 1, weight: 0, color: 'grey', fillOpacity: 0.4, interactive: false},
+  },
+    {
+    view: 'hin2017', name: 'High Injury Network',
+    style: { opacity: 0.4, weight: 4, color: 'orange', interactive: false},
   },
 ]
 
@@ -156,7 +158,7 @@ async function fetchAddLayers() {
         feat['geometry'] = JSON.parse(feat.geometry);
       }
       let lyr = L.geoJSON(features, {
-        style: { opacity: 1, weight: 3, color: item.color, fillOpacity: 0, interactive: false},
+        style: item.style,
         pane: 'shadowPane',
       }).addTo(mymap);
       addLayerStore[item.view] = lyr;
