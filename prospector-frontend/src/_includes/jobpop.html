@@ -2,10 +2,6 @@
 
   <div id="slide-panel" v-bind:class="{ shrunken: isPanelHidden}">
     <div id="layer-widgets">
-      <button class="ui tiny grey icon button" v-bind:class="{ blue: showingLayerPanel}"
-              v-on:click="switchPanel">
-              <i class="clone outline icon"></i>
-      </button></br>
       <button class="ui tiny green icon button"
               v-on:click="clickedShowHide">
               <i class="angle double icon"
@@ -34,7 +30,7 @@
             <hr/>
         </div>
 
-        <div v-show="showingMainPanel" id="picker">
+        <div id="picker">
           <h5>CHOOSE SCENARIO</h5>
           <div>
             <button v-for="item in year_options"
@@ -68,7 +64,7 @@
 
       </div>
       
-      <div v-show="showingLayerPanel">
+      <div>
         <h5>MAP LAYERS</h5>
         <p>Add additional geographic data to the map.</p>
         
@@ -79,7 +75,7 @@
         
       </div>
       
-      <div v-show="showingMainPanel" id="header">
+      <div id="header">
           <div id="stats-panel">
             <hr/>
             <div id="chartinfo"><h3 style="font-size: 22px;">${chartTitle}</h3></div>
