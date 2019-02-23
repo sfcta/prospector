@@ -46,6 +46,7 @@
   z-index:10;
   background-color:#444;
   float: right;
+  transition: margin 0.4s;
 }
 
 #slide-panel {
