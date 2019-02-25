@@ -43,7 +43,8 @@ const GEOID_VAR = 'tmc';
 const YR_VAR = 'year';
 const TOD_VAR = 'tod';
 
-const FRAC_COLS = ['avg_ride','ontime5','ons','offs','shr_hh_0veh','crowded'];
+const FRAC_COLS = ['freq_s','avg_ride','ontime5','ons','offs','shr_hh_0veh','crowded','hh_den_acs','pop_den_acs',
+                  'veh_per_hh','avg_hh_size'];
 const SCNYR_LIST = [2010,2015];
 
 const INT_COLS = [''];
@@ -99,15 +100,28 @@ async function fetchMapFeatures() {
   const geo_url = API_SERVER + GEO_VIEW + '?select=tmc,geometry,street,intersec,direction,dir2';
 
   try {
-    let resp = await fetch(geo_url);
+    // get a list of valid TMCs
+    let trtmc_ids = [];
+    let resp = await fetch(API_SERVER + DATA_VIEW + '?select=tmc');
     let features = await resp.json();
+    for (let feat of features) {
+      trtmc_ids.push(feat.tmc);
+    }
+    trtmc_ids = Array.from(new Set(trtmc_ids));
+    
+    resp = await fetch(geo_url);
+    features = await resp.json();
 
     // do some parsing and stuff
+    let feat_filtered = [];
     for (let feat of features) {
-      feat['type'] = 'Feature';
-      feat['geometry'] = JSON.parse(feat.geometry);
+      if (trtmc_ids.includes(feat.tmc)) {
+        feat['type'] = 'Feature';
+        feat['geometry'] = JSON.parse(feat.geometry);
+        feat_filtered.push(feat);
+      }
     }
-    return features;
+    return feat_filtered;
 
   } catch (error) {
     console.log('map feature error: ' + error);
@@ -791,17 +805,24 @@ let app = new Vue({
     {text: 'avg_ride', value: 'avg_ride'},
     {text: 'pickups', value: 'pickups'},
     {text: 'dropoffs', value: 'dropoffs'},
+    {text: 'avg_ride_muni_rail', value: 'avg_ride_muni_rail'},
     
     {text: 'ontime5', value: 'ontime5'},
     {text: 'ons', value: 'ons'},
     {text: 'offs', value: 'offs'},
     {text: 'dwell', value: 'dwell'},
-    {text: 'headway_s', value: 'headway_s'},
+    {text: 'freq_s', value: 'freq_s'},
     {text: 'runspeed_s', value: 'runspeed_s'},
     {text: 'num_stops', value: 'num_stops'},
     {text: 'capacity', value: 'capacity'},
     {text: 'crowded', value: 'crowded'},
+    {text: 'crowdhours', value: 'crowdhours'},
     
+    {text: 'total_hh_acs', value: 'total_hh_acs'},
+    {text: 'total_pop_acs', value: 'total_pop_acs'},
+    {text: 'total_veh', value: 'total_veh'},
+    {text: 'veh_per_hh', value: 'veh_per_hh'},
+    {text: 'avg_hh_size', value: 'avg_hh_size'},
     {text: 'edd_emp', value: 'edd_emp'},
     {text: 'shr_hh_0veh', value: 'shr_hh_0veh'},
     {text: 'emp_rac_30', value: 'emp_rac_30'},
@@ -810,6 +831,8 @@ let app = new Vue({
     {text: 'emp_wac_60', value: 'emp_wac_60'},
     {text: 'housing_30', value: 'housing_30'},
     {text: 'housing_60', value: 'housing_60'},
+    {text: 'pop_den_acs', value: 'pop_den_acs'},
+    {text: 'hh_den_acs', value: 'hh_den_acs'},
     ],
     chartTitle: 'AVG_RIDE TREND',
     chartSubtitle: chart_deftitle,
