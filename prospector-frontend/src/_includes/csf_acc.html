@@ -1,16 +1,18 @@
 <div id="container">
 
   <div id="slide-panel" v-bind:class="{ shrunken: isPanelHidden}">
-    <button class="ui tiny green icon button"
-            v-on:click="clickedShowHide">
-            <i class="angle double icon"
-            v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
-    </button>
+    <div id="layer-widgets">
+      <button class="ui tiny green icon button"
+              v-on:click="clickedShowHide">
+              <i class="angle double icon"
+              v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
+      </button>
+    </div>
   </div> 
   
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
     <div id="preheader">
-        <a target="_blank" href="https://connectsf.org/"><img src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png"  height="50" width="250" alt="Connect SF"/></a>
+      <a target="_blank" href="https://connectsf.org/"><img src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png"  height="50" width="250" alt="Connect SF"/></a>
       <hr/>
       <h3 class="apptitle">Jobs Accessibility</h3>
       <div id="helpbar">
@@ -25,26 +27,36 @@
                 <i class="arrow right icon"></i>
                 Learn More
         </button>
-        <hr/>
+      <hr/>
       </div>
 
       <div id="picker">
         <h5 style="margin-top:15px">CHOOSE SCENARIO</h5>
-          <div>
-            <button v-for="item in year_options"
-                  v-on:click="yrChanged(item.value)"
-                  class="ui grey button"
-                  v-bind:class="{ active: item.value==selected_year, color2: item.value==selected_year }">
-                  ${item.text}
-            </button>
-          </div>
+        <div>
+          <button v-for="item in year_options"
+                v-on:click="yrChanged(item.value)"
+                class="ui grey button"
+                v-bind:class="{ active: item.value==selected_year, color2: item.value==selected_year }">
+                ${item.text}
+          </button>
+        </div>
           
         <h5 style="margin-top:15px">CHOOSE MODE:</h5>
-          <button class = "ui grey button" v-on:click="pickAU" 
-            v-bind:class="{ active: isAUActive, color2: isAUActive}"><i class="icon car"></i>Auto</button>
-          <button class = "ui grey button" v-on:click="pickTR"
-            v-bind:class="{ active: isTRActive, color2: isTRActive}"><i class="icon bus"></i>Transit</button>
-          <br>
+        <div>
+          <button v-for="item in metric_options"
+                v-on:click="metricChanged(item.value)"
+                class="ui tiny grey button"
+                v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
+                ${item.text}
+          </button>
+        </div> 
+
+        <h5 style="margin-top:15px">MAP LAYERS</h5>
+        <p>Add additional geographic data to the map.</p>
+        <div v-for="item in extraLayers" class="ui toggle checkbox">
+          <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
+          <label><h5>${item.name}</h5></label>
+        </div>
         
         <h5 style="margin-top:15px">PROVIDE FEEDBACK:</h5>
         <form class="ui tiny equal width form" v-on:submit.prevent>
