@@ -242,7 +242,6 @@ async function getMapData() {
     }
     _aggregateData.push(row);
   }
-  console.log(_aggregateData)
 }
 
 let base_lookup;
@@ -267,7 +266,7 @@ async function drawMapFeatures(queryMapData=true) {
   try {
     if (queryMapData) {
       if (base_lookup == undefined) await getMapData();
-      console.log(base_lookup)
+      
       let map_metric;
       map_vals = [];
       for (let feat of cleanFeatures) {
