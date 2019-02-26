@@ -1,0 +1,34 @@
+---
+layout: page
+title: SF-CHAMP Highway Skims
+thumbnail: scrnshot.png
+css: main.css
+---
+
+<h2>Highway Skims</h2>
+
+<div id="panel">
+    <div class="dashboard">
+      <div id="picker">
+        <div>
+          <h4>Select Highway Skim Table</h4>
+          <v-select v-model="tableSelVal" :options="tableSelOptions"></v-select>
+        </div>
+        <div class="column1">
+          <input type="radio" v-model="dirSel" v-bind:value="dirOrig">From Origin <br>
+          <input type="radio" v-model="dirSel" v-bind:value="dirDest">To Destination
+        </div>
+        <div class="column2">
+            <h4>Select TAZ</h4>
+            <v-select v-model="tazSelVal" :options="tazSelOptions"></v-select>
+        </div>
+      </div>
+    </div>
+</div>
+
+<br/>
+
+
+<div id="sfmap"></div>
+
+<script type="application/javascript" src="/bundles/hwyskims.js"></script>

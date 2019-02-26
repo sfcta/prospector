@@ -3,6 +3,7 @@ const path = require('path');
 const sfcta_components = [
      'cmp',
      'walkskims',
+     'hwyskims',
      'tnc',
 	   'autolos',
      'tmcshp',
