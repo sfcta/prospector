@@ -62,7 +62,7 @@ const ADDLAYERS = [
   },
     {
     view: 'hin2017', name: 'High Injury Network',
-    style: { opacity: 0.4, weight: 4, color: 'orange', interactive: false},
+    style: { opacity: 1, weight: 2, color: 'orange', interactive: false},
   },
 ]
 
