@@ -21,7 +21,6 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 
 // Must use npm and babel to support IE11/Safari
 import 'isomorphic-fetch';
-import vueSlider from 'vue-slider-component';
 import Cookies from 'js-cookie';
 
 var maplib = require('../jslib/maplib');
@@ -124,7 +123,8 @@ async function initialPrep() {
   await drawMapFeatures();
   
   console.log('3... ');
-  await buildChartHtmlFromData();
+  // await buildChartHtmlFromData();
+  updateStats();
   
   console.log('4... ');
   await fetchAddLayers();
@@ -171,6 +171,14 @@ async function fetchAddLayers() {
     }
   } catch (error) {
     console.log('additional layers error: ' + error);
+  }
+}
+
+function updateStats() {
+  for (let i = 0; i < _aggregateData.length; i++) {
+    for (let m of app.metric_options) {
+      app.aggData[i][m.value] = _aggregateData[i][m.value].toLocaleString();
+    }
   }
 }
 
@@ -702,6 +710,10 @@ let app = new Vue({
     addLayers:[],
     extraLayers: ADDLAYERS,
 
+    // data view 
+    aggData: [{autototal:0,transittotal:0},
+              {autototal:0,transittotal:0}],
+
     // comment box
     comment: '',
 
@@ -742,9 +754,6 @@ let app = new Vue({
     clickToggleHelp: clickToggleHelp,   // help box
     clickedShowHide: clickedShowHide,   // hide sidebar
   },
-  components: { //
-    vueSlider,  //
-  },            //
 });
 
 let slideapp = new Vue({

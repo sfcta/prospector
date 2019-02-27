@@ -58,6 +58,14 @@
           <label><h5>${item.name}</h5></label>
         </div>
         
+        <hr/>
+        <h5 style="margin-top:15px">CITYWIDE SUMMARY</h5>
+        <table id="citywide">
+          <tr><th>Measure/Year</th><th align="right">2015</th><th align="right">2050</th></tr>
+          <tr><td>Auto</td><td align="right">${aggData[0].autototal}</td><td align="right">${aggData[1].autototal}</td></tr>
+          <tr><td>Transit</td><td align="right">${aggData[0].transittotal}</td><td align="right">${aggData[1].transittotal}</td></tr>
+        </table>
+
         <h5 style="margin-top:15px">PROVIDE FEEDBACK:</h5>
         <form class="ui tiny equal width form" v-on:submit.prevent>
           <div class="field">
