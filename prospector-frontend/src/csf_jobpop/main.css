@@ -14,6 +14,10 @@
   color: #fff;
 }
 
+.ui.color2.button {
+  background-color: #38bebb;
+  color: #fff;
+}
 .ui.color2.button.active {
   background-color: #38bebb;
 }
@@ -96,6 +100,12 @@ hr {margin: 1% 0px; }
 }
 .ui.toggle.checkbox {
   margin: 2% 0px;
+}
+.ui.toggle.checkbox input:focus:checked~label:before{
+  background-color: #f56e71!important;
+}
+.ui.toggle.checkbox input:checked~label:before{
+  background-color: #f56e71!important;
 }
 
 /* Bottom agency and logo*/
