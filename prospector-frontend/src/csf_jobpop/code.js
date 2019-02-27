@@ -51,14 +51,16 @@ let streetLayer = L.tileLayer(url2, {
 });
 streetLayer.addTo(mymap);
 
+let stripes = new L.StripePattern({weight:3,spaceWeight:3,opacity:0.6,angle:135}); stripes.addTo(mymap);
+
 const ADDLAYERS = [
   {
     view: 'sup_district_boundaries', name: 'Supervisorial District Boundaries',
     style: { opacity: 1, weight: 3, color: 'purple', fillOpacity: 0, interactive: false},
   },
   {
-    view: 'coc2017', name: 'Communities of Concern',
-    style: { opacity: 1, weight: 0, color: 'grey', fillOpacity: 0.4, interactive: false},
+    view: 'coc2017_diss', name: 'Communities of Concern',
+    style: { opacity: 1, weight: 2, color: 'grey', fillPattern: stripes, interactive: false},
   },
     {
     view: 'hin2017', name: 'High Injury Network',
