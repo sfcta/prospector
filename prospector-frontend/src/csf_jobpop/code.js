@@ -42,7 +42,7 @@ baseLayer = L.tileLayer(url, {
   accessToken:token,
 }).addTo(mymap);
 
-let url2 = 'https://api.mapbox.com/styles/v1/sfcta/cjs6q7hiu09v21fqyycuih59l/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+let url2 = 'https://api.mapbox.com/styles/v1/sfcta/cjscclu2q07qn1fpimxuf2wbd/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
 let streetLayer = L.tileLayer(url2, {
   attribution:attribution,
   maxZoom: 18,
@@ -50,6 +50,23 @@ let streetLayer = L.tileLayer(url2, {
   pane: 'shadowPane',
 });
 streetLayer.addTo(mymap);
+
+let stripes = new L.StripePattern({weight:3,spaceWeight:3,opacity:0.6,angle:135}); stripes.addTo(mymap);
+
+const ADDLAYERS = [
+  {
+    view: 'sup_district_boundaries', name: 'Supervisorial District Boundaries',
+    style: { opacity: 1, weight: 3, color: '#730073', fillOpacity: 0, interactive: false},
+  },
+  {
+    view: 'coc2017_diss', name: 'Communities of Concern',
+    style: { opacity: 1, weight: 2, color: 'grey', fillPattern: stripes, interactive: false},
+  },
+    {
+    view: 'hin2017', name: 'High Injury Network',
+    style: { opacity: 1, weight: 2, color: 'orange', interactive: false},
+  },
+]
 
 
 // some important global variables.
@@ -66,14 +83,15 @@ const YR_LIST = [2015,2050];
 const INT_COLS = [];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ffffcc';
-const COLORRAMP = {SEQ: ['#ffecb3','#f2ad86', '#d55175', '#963d8e','#3f324f'],
+const COLORRAMP = {SEQ: ['#d9f0a3','#addd8e', '#78c679', '#31a354','#006837'],
+                    //SEQ: ['#ffecb3','#f2ad86', '#d55175', '#963d8e','#5b2d5b'],
                     DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'jobpop': {'base':[10, 20, 30, 40], 'diff':[5, 10, 15, 20], 'pctdiff':[-20, -5, 5, 20]},
-  'pop': {'base':[10, 20, 30, 40], 'diff':[5, 10, 15, 20], 'pctdiff':[-20, -5, 5, 20]},
-  'tot': {'base':[10, 20, 30, 40], 'diff':[5, 10, 15, 20], 'pctdiff':[-20, -5, 5, 20]},
+  'jobpop': {'base':[20,40,60,80], 'diff':[20,40,60,80], 'pctdiff':[-20, -5, 5, 20]},
+  'pop': {'base':[20,40,60,80], 'diff':[20,40,60,80], 'pctdiff':[-20, -5, 5, 20]},
+  'tot': {'base':[20,40,60,80], 'diff':[20,40,60,80], 'pctdiff':[-20, -5, 5, 20]},
 };
 
 const METRIC_UNITS = {'pop': '000s per sq. mi.',
@@ -94,6 +112,7 @@ let geoLayer, mapLegend;
 let _featJson;
 let _aggregateData;
 let prec;
+let addLayerStore = {};
 
 async function initialPrep() {
 
@@ -104,9 +123,13 @@ async function initialPrep() {
   await drawMapFeatures();
   
   console.log('3... ');
-  await buildChartHtmlFromData();
+  //await buildChartHtmlFromData();
+  updateStats();
+  
+  console.log('4... ');
+  await fetchAddLayers();
 
-  console.log('4 !!!');
+  console.log('5 !!!');
 }
 
 async function fetchMapFeatures() {
@@ -125,6 +148,35 @@ async function fetchMapFeatures() {
 
   } catch (error) {
     console.log('map feature error: ' + error);
+  }
+}
+
+async function fetchAddLayers() {
+  try {
+    for (let item of ADDLAYERS) {
+      let resp = await fetch(API_SERVER + item.view);
+      let features = await resp.json();
+      for (let feat of features) {
+        feat['type'] = 'Feature';
+        feat['geometry'] = JSON.parse(feat.geometry);
+      }
+      let lyr = L.geoJSON(features, {
+        style: item.style,
+        pane: 'shadowPane',
+      }).addTo(mymap);
+      addLayerStore[item.view] = lyr;
+      mymap.removeLayer(lyr);
+    }
+  } catch (error) {
+    console.log('additional layers error: ' + error);
+  }
+}
+
+function updateStats() {
+  for (let i = 0; i < _aggregateData.length; i++) {
+    for (let m of app.metric_options) {
+      app.aggData[i][m.value] = _aggregateData[i][m.value].toLocaleString();
+    }
   }
 }
 
@@ -341,7 +393,7 @@ async function drawMapFeatures(queryMapData=true) {
 
       mapLegend = L.control({ position: 'bottomright' });
       mapLegend.onAdd = function(map) {
-        let div = L.DomUtil.create('div', 'info legend');
+        let div = L.DomUtil.create('div', 'legend');
         let legHTML = getLegHTML(
           sel_colorvals,
           sel_colors,
@@ -359,13 +411,13 @@ async function drawMapFeatures(queryMapData=true) {
       
       if (selectedGeo) {
         if (base_lookup.hasOwnProperty(selectedGeo.feature[GEOID_VAR])) {
-          buildChartHtmlFromData(selectedGeo.feature[GEOID_VAR]);
+          //buildChartHtmlFromData(selectedGeo.feature[GEOID_VAR]);
           return cleanFeatures.filter(entry => entry[GEOID_VAR] == selectedGeo.feature[GEOID_VAR])[0];
         } else {
           resetPopGeo();
         }
       } else {
-        buildChartHtmlFromData();
+        //buildChartHtmlFromData();
         return null;
       }
     }
@@ -454,7 +506,7 @@ function clickedOnFeature(e) {
   selectedLatLng = e.latlng;
   if (base_lookup.hasOwnProperty(selGeoId)) {
     showGeoDetails(selectedLatLng);
-    buildChartHtmlFromData(selGeoId);
+    //buildChartHtmlFromData(selGeoId);
   } else {
     resetPopGeo();
   }
@@ -478,7 +530,7 @@ function resetPopGeo() {
   geoLayer.resetStyle(selectedGeo);
   prevSelectedGeo = selectedGeo = selGeoId = null;
   app.chartSubtitle = chart_deftitle;
-  buildChartHtmlFromData();
+  //buildChartHtmlFromData();
 }
 
 let trendChart = null;
@@ -558,12 +610,22 @@ function getColorMode(cscheme) {
   }
 }
 
+function showExtraLayers(e) {
+  for (let lyr in addLayerStore) {
+    mymap.removeLayer(addLayerStore[lyr]);
+  }
+  for (let lyr of app.addLayers) {
+    addLayerStore[lyr].addTo(mymap);
+  }
+}
+
 
 let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
   data: {
     isPanelHidden: false,
+    extraLayers: ADDLAYERS,
     comp_check: false,
     pct_check: false,
     bp0: 0.0,
@@ -572,6 +634,8 @@ let app = new Vue({
     bp3: 0.0,
     bp4: 0.0,
     bp5: 0.0,
+    aggData: [{pop:0,tot:0,jobpop:0},
+              {pop:0,tot:0,jobpop:0}],
     
     year_options: [
     {text: 'Year 2015', value: '2015'},
@@ -599,10 +663,12 @@ let app = new Vue({
       '#fafa6e,#2A4858': 'lch',
     },
     comment: '',
+    addLayers:[],
   },
   watch: {
     sliderValue: selectionChanged,
     selected_metric: selectionChanged,
+    addLayers: showExtraLayers,
   },
   methods: {
     clickToggleHelp: clickToggleHelp,
@@ -633,6 +699,7 @@ function clickedShowHide(e) {
     }, delay)
   }
 }
+
 
 // eat some cookies -- so we can hide the help permanently
 let cookieShowHelp = Cookies.get('showHelp');

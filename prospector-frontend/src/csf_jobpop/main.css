@@ -1,12 +1,12 @@
-/* CSS Layout for CSF_ACC ONLY goes here */
+/* CSS Layout for JOBPOP ONLY goes here */
 
 #slide-panel {
   top: auto;
-  bottom: 50px;
+  bottom: 90px;
 }
 
-.leaflet-bottom .info.legend.leaflet-control {
-    margin-bottom: 70px;
+.leaflet-bottom .legend.leaflet-control {
+    margin-bottom: 100px;
 }
 
 .ui.color1.button {
@@ -14,9 +14,14 @@
   color: #fff;
 }
 
+.ui.color2.button {
+  background-color: #38bebb;
+  color: #fff;
+}
 .ui.color2.button.active {
   background-color: #38bebb;
 }
+
 
 /* Stand alone CSS */
 .container {
@@ -96,13 +101,23 @@ hr {margin: 1% 0px; }
 .ui.toggle.checkbox {
   margin: 2% 0px;
 }
+.ui.toggle.checkbox input:focus:checked~label:before{
+  background-color: #f56e71!important;
+}
+.ui.toggle.checkbox input:checked~label:before{
+  background-color: #f56e71!important;
+}
+
+table#citywide tbody th, td {   
+  background-color: #444;
+  color: #fff;
+  border: 0px;
+}
 
 /* Bottom agency and logo*/
 tbody tr:nth-child(odd) td, tbody th {
     background-color: #444;
-    border: 0px;
 }
-table { border: 0px; }
 .logo {
   display:table-row;
   text-align:right;
@@ -112,6 +127,7 @@ a.agency {color: #fff;}
 #table-logo {
   margin-bottom: 0px;
   background-color: #444;
+  border: 0px;
 }
 .td-logo {
   padding-right: 0px;
@@ -177,5 +193,3 @@ p.legend-row {
      z-index:20;
      box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
 }
-
-  

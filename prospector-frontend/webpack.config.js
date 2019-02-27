@@ -3,6 +3,7 @@ const path = require('path');
 const sfcta_components = [
      'cmp',
      'walkskims',
+     'hwyskims',
      'tnc',
 	   'autolos',
      'tmcshp',
@@ -11,7 +12,7 @@ const sfcta_components = [
      'champlu',
      'tnctrn',
      'csf_tt',
-     'jobpop',
+     'csf_jobpop',
 	   'csf_acc'
 	 //'cmp-v0',
 ];
