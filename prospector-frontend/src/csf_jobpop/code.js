@@ -56,7 +56,7 @@ let stripes = new L.StripePattern({weight:3,spaceWeight:3,opacity:0.6,angle:135}
 const ADDLAYERS = [
   {
     view: 'sup_district_boundaries', name: 'Supervisorial District Boundaries',
-    style: { opacity: 1, weight: 3, color: 'purple', fillOpacity: 0, interactive: false},
+    style: { opacity: 1, weight: 3, color: '#730073', fillOpacity: 0, interactive: false},
   },
   {
     view: 'coc2017_diss', name: 'Communities of Concern',
