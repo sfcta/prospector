@@ -124,6 +124,7 @@ async function initialPrep() {
   
   console.log('3... ');
   //await buildChartHtmlFromData();
+  updateStats();
   
   console.log('4... ');
   await fetchAddLayers();
@@ -168,6 +169,14 @@ async function fetchAddLayers() {
     }
   } catch (error) {
     console.log('additional layers error: ' + error);
+  }
+}
+
+function updateStats() {
+  for (let i = 0; i < _aggregateData.length; i++) {
+    for (let m of app.metric_options) {
+      app.aggData[i][m.value] = _aggregateData[i][m.value].toLocaleString();
+    }
   }
 }
 
@@ -625,6 +634,8 @@ let app = new Vue({
     bp3: 0.0,
     bp4: 0.0,
     bp5: 0.0,
+    aggData: [{pop:0,tot:0,jobpop:0},
+              {pop:0,tot:0,jobpop:0}],
     
     year_options: [
     {text: 'Year 2015', value: '2015'},

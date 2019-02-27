@@ -108,12 +108,16 @@ hr {margin: 1% 0px; }
   background-color: #f56e71!important;
 }
 
+table#citywide tbody th, td {   
+  background-color: #444;
+  color: #fff;
+  border: 0px;
+}
+
 /* Bottom agency and logo*/
 tbody tr:nth-child(odd) td, tbody th {
     background-color: #444;
-    border: 0px;
 }
-table { border: 0px; }
 .logo {
   display:table-row;
   text-align:right;
@@ -123,6 +127,7 @@ a.agency {color: #fff;}
 #table-logo {
   margin-bottom: 0px;
   background-color: #444;
+  border: 0px;
 }
 .td-logo {
   padding-right: 0px;
