@@ -72,7 +72,8 @@ const INT_COLS = ['num_tours'];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ffffcc';
 const COLORRAMP = {SEQ: ['#ffecb3','#f2ad86', '#d55175', '#963d8e','#3f324f'],
-                   DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
+                   DIV: ['#1a9641','#a6d96a','#ffffbf','#fdae61','#d7191c']};
+                   //DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
 const MIN_BWIDTH = 2;
 const MAX_BWIDTH = 10;
@@ -87,8 +88,8 @@ const BWIDTH_MAP = {
 };
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'avg_time': {'base':[15, 20, 25, 30], 'diff':[-5, -1, 1, 5], 'pctdiff':[-20, -5, 5, 20]},
-  'num_tours': {'base':[250, 500, 750, 1000], 'diff':[-5, -1, 1, 5], 'pctdiff':[-20, -5, 5, 20]},
+  'avg_time': {'base':[15, 20, 25, 30], 'diff':[-10, -5, 5, 10], 'pctdiff':[-20, -5, 5, 20]},
+  'num_tours': {'base':[250, 500, 750, 1000], 'diff':[-100, -10, 10, 100], 'pctdiff':[-20, -5, 5, 20]},
 }
 
 const METRIC_UNITS = {'avg_time':'minutes','num_tours':'tours'}; // needed?
@@ -149,10 +150,6 @@ function getInfoHtml(geo) {
   let retval = '<b>TAZ: </b>' + `${geo[GEOID_VAR]}<br/>`;
   
   retval += `<b>${app.metric_options[0]['text']}</b><br/>` ;
-  //alert(geo[GEOID_VAR]);
-  //alert(base_lookup['2015'][app.selected_income][app.selected_importance]);//[GEOID_VAR]);
-  //alert(base_lookup['2015'][app.selected_income][app.selected_importance][geo[GEOID_VAR]]);
-  //alert(Object.keys(base_lookup['2015'][app.selected_income][app.selected_importance]));
   for (let yr of YR_LIST) {
     if (base_lookup[yr][app.selected_income][app.selected_importance].hasOwnProperty(geo[GEOID_VAR])) {
       metric_val = base_lookup[yr][app.selected_income][app.selected_importance][geo[GEOID_VAR]][app.selected_metric];
@@ -162,10 +159,6 @@ function getInfoHtml(geo) {
       }
     }
     retval += `${yr}: ${metric_val}<br/>`;
-            /*(app.pct_check? '<b> %</b>': '') +
-            (app.comp_check? '<b> Diff: </b>':'<b>: </b>') + 
-            `${metric_val}` + 
-            ((app.pct_check && app.comp_check && metric_val !== null)? '%':''); */
   }
   return retval; 
 }
