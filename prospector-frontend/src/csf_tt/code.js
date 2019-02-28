@@ -87,9 +87,10 @@ const IMP_LIST = ['mandatory','discretionary']
 
 const INT_COLS = ['num_tours'];
 const DISCRETE_VAR_LIMIT = 10;
-const MISSING_COLOR = '#ffffcc';
-const COLORRAMP = {SEQ: ['#ffecb3','#f2ad86', '#d55175', '#963d8e','#3f324f'],
-                   DIV: ['#1a9641','#a6d96a','#ffffbf','#fdae61','#d7191c']};
+const MISSING_COLOR = '#f3f3f3';
+const COLORRAMP = {SEQ: ['#f3f3f3','#f6d3d2','#f6b3b1','#f29292','#ec7074'],
+                   //SEQ: ['#fff0ee','#fed1cc','#fab2ad','#f4928f','#ec7074'],//['#ffecb3','#f2ad86', '#d55175', '#963d8e','#3f324f'],
+                   DIV: ['#54bdba','#a9d7d5','#f1f1f1','#f5b2b0','#ec7074']};//['#1a9641','#a6d96a','#ffffbf','#fdae61','#d7191c']};
                    //DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
 const MIN_BWIDTH = 2;
