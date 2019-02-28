@@ -68,7 +68,7 @@
 
         <hr/>
         <h5 style="margin-top:15px">PROVIDE FEEDBACK:</h5>
-        <form class="ui tiny equal width form" v-on:submit.prevent>
+        <form class="ui tiny equal width form" v-on:submit.prevent="handleSubmit">
           <div class="field">
             <textarea v-model="comment" class="fix" maxlength="300" rows="6"
             type="text" placeholder="What do you think about this map?"></textarea>

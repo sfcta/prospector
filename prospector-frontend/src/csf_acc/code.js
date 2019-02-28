@@ -175,6 +175,7 @@ async function fetchAddLayers() {
   }
 }
 
+// CityView data
 function updateStats() {
   for (let i = 0; i < _aggregateData.length; i++) {
     for (let m of app.metric_options) {
@@ -628,6 +629,16 @@ function showExtraLayers(e) {
   }
 }
 
+// // Connect database for comment
+// var pgClient = new pg.Client(connectionString);
+// pgClient.connect();
+function handleSubmit() {
+  let timestamp = new Date
+  console.log(app.selected_year, app.selected_metric, app.addLayers, timestamp, app.comment)
+  // var query = pgClient.query("SELECT COUNT(accjobs.sftaz) AS taznum FROM connectsf.accjobs");
+  // console.log(query)
+}
+
 function getColorMode(cscheme) {
   if (app.modeMap.hasOwnProperty(cscheme.toString())) {
     console.log("getColorMode 1!")
@@ -724,6 +735,7 @@ let app = new Vue({
   methods: {
     yrChanged: yrChanged,               // year change
     metricChanged: metricChanged,       // mode change
+    handleSubmit: handleSubmit,
     clickToggleHelp: clickToggleHelp,   // help box
     clickedShowHide: clickedShowHide,   // hide sidebar
   },
