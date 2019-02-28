@@ -21,7 +21,6 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 
 // Must use npm and babel to support IE11/Safari
 import 'isomorphic-fetch';
-import vueSlider from 'vue-slider-component';
 import Cookies from 'js-cookie';
 
 var maplib = require('../jslib/maplib');
@@ -44,7 +43,7 @@ baseLayer = L.tileLayer(url, {
   accessToken:token,
 }).addTo(mymap);
 
-let url2 = 'https://api.mapbox.com/styles/v1/sfcta/cjs6q7hiu09v21fqyycuih59l/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+let url2 = 'https://api.mapbox.com/styles/v1/sfcta/cjscclu2q07qn1fpimxuf2wbd/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
 let streetLayer = L.tileLayer(url2, {
   attribution:attribution,
   maxZoom: 18,
@@ -52,6 +51,24 @@ let streetLayer = L.tileLayer(url2, {
   pane: 'shadowPane',
 });
 streetLayer.addTo(mymap);
+
+let stripes = new L.StripePattern({weight:3,spaceWeight:3,opacity:0.6,angle:135}); stripes.addTo(mymap);
+
+const ADDLAYERS = [
+  {
+    view: 'sup_district_boundaries', name: 'Supervisorial District Boundaries',
+    style: { opacity: 1, weight: 3, color: '#730073', fillOpacity: 0, interactive: false},
+  },
+  {
+    view: 'coc2017_diss', name: 'Communities of Concern',
+    style: { opacity: 1, weight: 2, color: 'grey', fillPattern: stripes, interactive: false},
+  },
+    {
+    view: 'hin2017', name: 'High Injury Network',
+    style: { opacity: 1, weight: 2, color: 'orange', interactive: false},
+  },
+]
+
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
@@ -102,6 +119,7 @@ let geoLayer, mapLegend;
 let _featJson;
 let _aggregateData;
 let prec;
+let addLayerStore = {};
 
 async function initialPrep() {
   console.log('1...');
@@ -113,7 +131,10 @@ async function initialPrep() {
   console.log('3... ');
   //await buildChartHtmlFromData();
   
-  console.log('4 !!!');
+  console.log('4... ');
+  await fetchAddLayers();
+
+  console.log('5 !!!');
 }
 
 async function fetchMapFeatures() {
@@ -135,6 +156,26 @@ async function fetchMapFeatures() {
   }
 }
 
+async function fetchAddLayers() {
+  try {
+    for (let item of ADDLAYERS) {
+      let resp = await fetch(API_SERVER + item.view);
+      let features = await resp.json();
+      for (let feat of features) {
+        feat['type'] = 'Feature';
+        feat['geometry'] = JSON.parse(feat.geometry);
+      }
+      let lyr = L.geoJSON(features, {
+        style: item.style,
+        pane: 'shadowPane',
+      }).addTo(mymap);
+      addLayerStore[item.view] = lyr;
+      mymap.removeLayer(lyr);
+    }
+  } catch (error) {
+    console.log('additional layers error: ' + error);
+  }
+}
 
 // hover panel -------------------
 let infoPanel = L.control();
@@ -564,29 +605,9 @@ function buildChartHtmlFromData(geoid = null) {
       xLabelAngle: 45,
       ykeys: [app.selected_metric],
     });
-  }
+  }    
+  
 }
-
-// SLIDER ----
-let scnSlider = {
-  data: YR_LIST,
-  //direction: 'vertical',
-  //reverse: true,
-  lazy: true,
-  height: 3,
-  //width: 'auto',
-  style: {marginTop: '10px'},
-  processDragable: true,
-  eventType: 'auto',
-  piecewise: true,
-  piecewiseLabel: true,
-  tooltip: 'always',
-  tooltipDir: 'bottom',
-  tooltipStyle: { backgroundColor: '#eaae00', borderColor: '#eaae00', marginLeft:'5px'},
-  processStyle: { backgroundColor: "#eaae00"},
-  labelStyle: {color: "#ccc", marginLeft:'5px', marginTop:'5px'},
-  piecewiseStyle: {backgroundColor: '#ccc',width: '8px',height: '8px',visibility: 'visible'},
-};
 
 function bp1Changed(thing) {
   if (thing < app.bp0) app.bp1 = app.bp0;
@@ -666,12 +687,24 @@ function getColorMode(cscheme) {
   }
 }
 
+function showExtraLayers(e) {
+  for (let lyr in addLayerStore) {
+    mymap.removeLayer(addLayerStore[lyr]);
+  }
+  for (let lyr of app.addLayers) {
+    addLayerStore[lyr].addTo(mymap);
+  }
+}
+
+
 let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
   data: {
     isPanelHidden: false,
-    isUpdActive: false,
+    extraLayers: ADDLAYERS,
+    comp_check: false,
+    pct_check: false,
     bp0: 0.0,
     bp1: 0.0,
     bp2: 0.0,
@@ -710,17 +743,22 @@ let app = new Vue({
     
     selected_colorscheme: COLORRAMP.SEQ,
     modeMap: {
+      '#ffffcc,#663399': 'lch',
+      '#ebbe5e,#3f324f': 'hsl',
       '#ffffcc,#3f324f': 'hsl',
+      '#3f324f,#ffffcc': 'hsl',
+      '#fafa6e,#2A4858': 'lch',
     },
-
+	comment: '',
+    addLayers:[],
     selected_breaks: 5,
   },
   watch: {
-    //sliderValue: selectionChanged,
     selected_year: selectionChanged,
     selected_importance: selectionChanged,
     selected_metric: selectionChanged,
     selected_income: selectionChanged,
+	addLayers: showExtraLayers,
     
     bp1: bp1Changed,
     bp2: bp2Changed,
@@ -734,9 +772,6 @@ let app = new Vue({
     updateMap: updateMap,
     clickToggleHelp: clickToggleHelp,
     clickedShowHide: clickedShowHide,
-  },
-  components: {
-    vueSlider,
   },
 });
 

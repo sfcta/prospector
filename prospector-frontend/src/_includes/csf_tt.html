@@ -1,11 +1,13 @@
 <div id="container">
 
   <div id="slide-panel" v-bind:class="{ shrunken: isPanelHidden}">
-    <button class="ui tiny green icon button"
-            v-on:click="clickedShowHide">
-            <i class="angle double icon"
-            v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
-    </button>
+    <div id="layer-widgets">
+      <button class="ui tiny green icon button"
+              v-on:click="clickedShowHide">
+              <i class="angle double icon"
+              v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
+      </button>
+    </div>
   </div> 
   
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
@@ -31,7 +33,8 @@
           <div id="picker">
             <!--NEW STUFF HERE -->
             <h5 style="margin-top:15px">CHOOSE SCENARIO:</h5>
-            <div class="three tiny ui grey buttons">
+            <!--<div class="three tiny ui grey buttons">-->
+            <div>
               <button v-for="item in year_options"
                     v-on:click="yrChanged(item.value)"
                     class="ui tiny grey button"
@@ -40,8 +43,9 @@
               </button>
             </div>
             
-            <h5 style="margin-top:15px">CHOOSE TRAVEL IMPORTANCE:</h5>
-            <div class="two tiny ui grey buttons">
+            <h5>CHOOSE TRAVEL IMPORTANCE:</h5>
+            <!--<div class="three tiny ui grey buttons">-->
+            <div>
               <button v-for="item in importance_options"
                     v-on:click="importanceChanged(item.value)"
                     class="ui tiny grey button"
@@ -50,8 +54,9 @@
               </button>
             </div> 
             
-            <h5 style="margin-top:15px">CHOOSE INCOME CATEGORY:</h5>
-            <div class="three tiny ui grey buttons">
+            <h5>CHOOSE INCOME CATEGORY:</h5>
+            <!--<div class="three tiny ui grey buttons">-->
+            <div>
               <button v-for="item in income_options"
                     v-on:click="incomeChanged(item.value)"
                     class="ui tiny grey button"
@@ -60,6 +65,12 @@
               </button>
             </div> 
             
+            <h5>MAP LAYERS</h5>
+            <p>Add additional geographic data to the map.</p>
+            <div v-for="item in extraLayers" class="ui toggle checkbox">
+              <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
+              <label><h5>${item.name}</h5></label>
+            </div>
             <!--<h5 style="margin-top:15px">CHOOSE YEAR(S)</h5>
             <vue-slider v-bind="scnSlider" v-model="sliderValue"></vue-slider>-->
             
@@ -123,10 +134,10 @@
             <hr/>
             <table id="table-logo"><tr>
               <td class="td-logo">
-                <h4 class="agency"><b><a target="_blank" href="http://www.sfcta.org/congestion">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
+                <h4><b><a class="agency" target="_blank" href="http://www.sfcta.org">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
               </td>
               <td class="td-logo">
-                <a class="agency-link" target="_blank" href="http://www.sfcta.org/congestion">
+                <a class="agency-link" target="_blank" href="http://www.sfcta.org">
                   <img class="img-logo" src="/assets/sfcta-logo-144.png" width="80">
                 </a>
               </td>

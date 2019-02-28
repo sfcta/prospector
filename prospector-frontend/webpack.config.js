@@ -13,7 +13,7 @@ const sfcta_components = [
      'tnctrn',
      'csf_tt',
      'csf_jobpop',
-	   'csf_acc'
+	   'csf_acc',
 	 //'cmp-v0',
 ];
 
