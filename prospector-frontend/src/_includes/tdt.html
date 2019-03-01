@@ -227,7 +227,9 @@
     
       <div class='ui divider'></div>
     </div>
-    <font color="888888">*SF TRAVEL DEMAND: web-based tool to visualize travel demand and trip patterns for development projects in San Francisco. This tool is a beta version. A final version is forthcoming pending additional testing.</font>      
+    <font color="888888">*SF TRAVEL DEMAND: web-based tool to visualize travel demand and trip patterns for development projects in San Francisco. This tool is a beta version. A final version is forthcoming pending additional testing.
+    <div class='ui divider'></div>
+    <b>Website version: ${version} &nbsp;&nbsp;&nbsp;&nbsp; Data version: ${data_version}</b></font>
   </div>
  
 <!-- this stuff is all only on click
@@ -236,7 +238,11 @@
     <div v-cloak> 
       <h2 style="margin-bottom:0px;">Trip generation, distribution and mode share</h2>
       <hr style="margin-bottom:5px;margin-top:5px"/>
-      This tool estimates  the number, type and common destinations of new trips that people would take to and from a new development project. The estimates are for daily and for extended weekday PM peak hour (3 to 7 p.m.). The following are some key terms:
+      This tool estimates the number, type and common destinations of new trips that people would take to and from a new development project. 
+      The estimates are for daily and for extended weekday peak hour within the p.m. peak period (3 to 7 p.m.).  For daily travel estimates, 
+      all estimates are based on observations made during the entire day.  For p.m. peak hour travel, trip generation rates for the p.m. peak 
+      hour are estimated using observations collected during the peak hour within the p.m. peak period. Origins, destinations, and other factors 
+      concerning travel are estimated from observations during the 4-hour p.m. peak period (3 to 7 p.m.). The following are some key terms:
 
       <ul>
         <li><b>Trip Generation</b> The number of person trips that the tool estimates people would take to (inbound) and from (outbound) a new development project, by trip purpose (work, non-work, or total). </li>
