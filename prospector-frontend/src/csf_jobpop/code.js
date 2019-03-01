@@ -72,7 +72,7 @@ const ADDLAYERS = [
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
-const DATA_VIEW = 'lua2017';
+const DATA_VIEW = 'connectsf_lu';
 
 const GEOTYPE = 'TAZ';
 const GEOID_VAR = 'taz';
