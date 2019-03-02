@@ -291,7 +291,7 @@ async function drawMapFeatures(queryMapData=true) {
         sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
         
         //calculate distribution
-        let dist_vals = app.comp_check? map_vals.filter(entry => entry <= MAX_PCTDIFF) : map_vals;
+        let dist_vals = (app.comp_check && app.pct_check)? map_vals.filter(entry => entry <= MAX_PCTDIFF) : map_vals;
         let x = d3.scaleLinear()
                 .domain([dist_vals[0], dist_vals[dist_vals.length-1]])
         let numticks = 20;
