@@ -21,7 +21,6 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 
 // Must use npm and babel to support IE11/Safari
 import 'isomorphic-fetch';
-import vueSlider from 'vue-slider-component';
 import Cookies from 'js-cookie';
 
 var maplib = require('../jslib/maplib');
@@ -58,18 +57,19 @@ let streetLayer = L.tileLayer(url2, {
 streetLayer.addTo(mymap);
 
 // add top layers
+let stripes = new L.StripePattern({weight:3,spaceWeight:3,opacity:0.6,angle:135}); stripes.addTo(mymap);
 const ADDLAYERS = [
   {
     view: 'sup_district_boundaries', name: 'Supervisorial District Boundaries',
-    style: { opacity: 1, weight: 3, color: 'purple', fillOpacity: 0, interactive: false},
+    style: { opacity: 1, weight: 3, color: '#730073', fillOpacity: 0, interactive: false},
   },
   {
     view: 'coc2017', name: 'Communities of Concern',
-    style: { opacity: 1, weight: 0, color: 'grey', fillOpacity: 0.4, interactive: false},
+    style: { opacity: 1, weight: 2, color: 'grey', fillPattern: stripes, interactive: false},
   },
     {
     view: 'hin2017', name: 'High Injury Network',
-    style: { opacity: 0.4, weight: 4, color: 'orange', interactive: false},
+    style: { opacity: 1, weight: 3, color: '#FF8C00', interactive: false},
   },
 ]
 
@@ -93,12 +93,12 @@ const COLORRAMP = {SEQ: ['#eaebe1','#D2DAC3','#7eb2b5','#548594','#003f5a'],
                    DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
                   //  ACC: ['#eaebe1','#D2DAC3','#789174','#517350','#004415']
 const CUSTOM_BP_DICT = {
-  'transittotal': {'2015':[200, 400, 550, 650],
-                   '2050':[300, 600, 750, 900],
+  'transittotal': {'2015':[400, 500, 600, 700],
+                   '2050':[400, 500, 600, 700],
                    'diff':[150, 200, 250, 300]},
   'autototal': {'2015':[900, 1000, 1100, 1200],
-                '2050':[1000, 1100, 1200, 1300],
-                'diff':[75, 125, 150, 175]},
+                '2050':[900, 1000, 1100, 1200],
+                'diff':[50, 125, 150, 175]},
 }
 
 // pre-def variables
@@ -124,7 +124,8 @@ async function initialPrep() {
   await drawMapFeatures();
   
   console.log('3... ');
-  await buildChartHtmlFromData();
+  // await buildChartHtmlFromData();
+  updateStats();
   
   console.log('4... ');
   await fetchAddLayers();
@@ -171,6 +172,15 @@ async function fetchAddLayers() {
     }
   } catch (error) {
     console.log('additional layers error: ' + error);
+  }
+}
+
+// CityView data
+function updateStats() {
+  for (let i = 0; i < _aggregateData.length; i++) {
+    for (let m of app.metric_options) {
+      app.aggData[i][m.value] = _aggregateData[i][m.value].toLocaleString();
+    }
   }
 }
 
@@ -328,77 +338,49 @@ async function drawMapFeatures(queryMapData=true) {
       if (queryMapData) {
         sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
 
-        // if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) {
-        //   console.log("drawMapFeatures, 3")
-        //   sel_binsflag = false;
-        //   color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
-        //   sel_colorvals2 = sel_colorvals.slice(0);
+        if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) {
+          console.log("drawMapFeatures, 3")
+          sel_binsflag = false;
+          color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
+          sel_colorvals2 = sel_colorvals.slice(0);
           
-        //   app.bp0 = 0;
-        //   app.bp1 = 0;
-        //   app.bp2 = 0;
-        //   app.bp3 = 0;
-        //   app.bp4 = 0;
-        //   app.bp5 = 1;
-          
-        // } else {
+          app.bp0 = 0;
+          app.bp1 = 0;
+          app.bp2 = 0;
+          app.bp3 = 0;
+          app.bp4 = 0;
+          app.bp5 = 1;
+        } else {
           console.log("drawMapFeatures, 4")
           // color schema breakpoints
           let mode = app.sliderValue[0];
           if (app.comp_check){
             mode = 'diff';
           }
-          let custom_bps;
-          // if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)){
-            console.log("drawMapFeatures, 5")
-            custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
-            sel_colorvals = [map_vals[0]];
-            for (var i = 0; i < custom_bps.length; i++) {
-              if (custom_bps[i]>map_vals[0] && custom_bps[i]<map_vals[map_vals.length-1]) sel_colorvals.push(custom_bps[i]);
-            }
-            sel_colorvals.push(map_vals[map_vals.length-1]);
-            // app.custom_check = true;
-          // } else {
-          //   console.log("drawMapFeatures, 6")
-          //   sel_colorvals = getQuantiles(map_vals, app.selected_breaks);
-          // }
+          let custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
+          sel_colorvals = [map_vals[0]];
+          for (var i = 0; i < custom_bps.length; i++) {
+            if (custom_bps[i]>map_vals[0] && custom_bps[i]<map_vals[map_vals.length-1]) sel_colorvals.push(custom_bps[i]);
+          }
+          sel_colorvals.push(map_vals[map_vals.length-1]);
+
           bp = Array.from(sel_colorvals).sort((a, b) => a - b);
           app.bp0 = bp[0];
           app.bp5 = bp[bp.length-1];
-          // if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)){
-            app.bp1 = custom_bps[0];
-            app.bp2 = custom_bps[1];
-            app.bp3 = custom_bps[2];
-            app.bp4 = custom_bps[3];
-            if (custom_bps[0] < app.bp0) app.bp1 = app.bp0;
-          // } else {
-          //   app.bp1 = bp[1];
-          //   app.bp4 = bp[bp.length-2];
-          //   if (app.selected_breaks==3) {
-          //     app.bp2 = app.bp3 = bp[2];
-          //   } else {
-          //     app.bp2 = bp[2];
-          //     app.bp3 = bp[3];
-          //   }
-          // } 
+          app.bp1 = custom_bps[0];
+          app.bp2 = custom_bps[1];
+          app.bp3 = custom_bps[2];
+          app.bp4 = custom_bps[3];
+          if (custom_bps[0] < app.bp0) app.bp1 = app.bp0;
 
           sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
           // updateColorScheme(sel_colorvals);
           sel_binsflag = true; 
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
           sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
-        // }
+        }
       } else {
         throw 'ERROR: This map does not support custom break points!!!';
-        // sel_colorvals = new Set([app.bp0, app.bp1, app.bp2, app.bp3, app.bp4, app.bp5]);
-        // sel_colorvals = Array.from(sel_colorvals).sort((a, b) => a - b);
-        // updateColorScheme(sel_colorvals);
-        // sel_binsflag = true; 
-        // color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
-        // sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
-        
-        // sel_bwvals = new Set([app.bwbp0, app.bwbp1, app.bwbp2, app.bwbp3, app.bwbp4, app.bwbp5]);
-        // sel_bwvals = Array.from(sel_bwvals).sort((a, b) => a - b);
       }
       
       sel_colors = [];
@@ -429,6 +411,7 @@ async function drawMapFeatures(queryMapData=true) {
           sel_colors,
           sel_binsflag,
         );
+        legHTML = '<p class="legend-row"><i style="background:' + MISSING_COLOR + '"></i> 0 or null<br>' + legHTML;
         legHTML = '<h4>' + sel_metric.toUpperCase()
                          + (METRIC_UNITS.hasOwnProperty(sel_metric)? (' (' + METRIC_UNITS[sel_metric] + ')') : '')
                          + '</h4>' + legHTML;
@@ -440,7 +423,7 @@ async function drawMapFeatures(queryMapData=true) {
       // plot chart?
       if (selectedGeo) {
         if (base_lookup.hasOwnProperty(selectedGeo.feature.taz)) {
-          buildChartHtmlFromData(selectedGeo.feature.taz);
+          // buildChartHtmlFromData(selectedGeo.feature.taz);
           return cleanFeatures.filter(entry => entry.taz == selectedGeo.feature.taz)[0];
         } else {
           resetPopGeo();
@@ -617,7 +600,6 @@ async function selectionChanged(thing) {
   app.chartTitle = METRIC_DESC[app.selected_metric] + ' Trend';
   if (app.sliderValue && app.selected_metric) {
     let selfeat = await drawMapFeatures();
-    console.log(selfeat)
     if (selfeat) {
       highlightSelectedSegment();
       popSelGeo.setContent(getInfoHtml(selfeat));
@@ -645,6 +627,16 @@ function showExtraLayers(e) {
   for (let lyr of app.addLayers) {
     addLayerStore[lyr].addTo(mymap);
   }
+}
+
+// // Connect database for comment
+// var pgClient = new pg.Client(connectionString);
+// pgClient.connect();
+function handleSubmit() {
+  let timestamp = new Date
+  console.log(app.selected_year, app.selected_metric, app.addLayers, timestamp, app.comment)
+  // var query = pgClient.query("SELECT COUNT(accjobs.sftaz) AS taznum FROM connectsf.accjobs");
+  // console.log(query)
 }
 
 function getColorMode(cscheme) {
@@ -702,6 +694,10 @@ let app = new Vue({
     addLayers:[],
     extraLayers: ADDLAYERS,
 
+    // data view 
+    aggData: [{autototal:0,transittotal:0},
+              {autototal:0,transittotal:0}],
+
     // comment box
     comment: '',
 
@@ -739,12 +735,10 @@ let app = new Vue({
   methods: {
     yrChanged: yrChanged,               // year change
     metricChanged: metricChanged,       // mode change
+    handleSubmit: handleSubmit,
     clickToggleHelp: clickToggleHelp,   // help box
     clickedShowHide: clickedShowHide,   // hide sidebar
   },
-  components: { //
-    vueSlider,  //
-  },            //
 });
 
 let slideapp = new Vue({
