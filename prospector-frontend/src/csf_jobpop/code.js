@@ -64,7 +64,7 @@ const ADDLAYERS = [
   },
     {
     view: 'hin2017', name: 'High Injury Network',
-    style: { opacity: 1, weight: 2, color: 'orange', interactive: false},
+    style: { opacity: 1, weight: 3, color: '#FF8C00', interactive: false},
   },
 ]
 
@@ -72,7 +72,7 @@ const ADDLAYERS = [
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
-const DATA_VIEW = 'lua2017';
+const DATA_VIEW = 'connectsf_lu';
 
 const GEOTYPE = 'TAZ';
 const GEOID_VAR = 'taz';
@@ -83,15 +83,15 @@ const YR_LIST = [2015,2050];
 const INT_COLS = [];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ffffcc';
-const COLORRAMP = {SEQ: ['#d9f0a3','#addd8e', '#78c679', '#31a354','#006837'],
+const COLORRAMP = {SEQ: ['#ffffcc','#d9f0a3','#addd8e', '#78c679', '#31a354','#006837'],
                     //SEQ: ['#ffecb3','#f2ad86', '#d55175', '#963d8e','#5b2d5b'],
                     DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'jobpop': {'base':[20,40,60,80], 'diff':[20,40,60,80], 'pctdiff':[-20, -5, 5, 20]},
-  'pop': {'base':[20,40,60,80], 'diff':[20,40,60,80], 'pctdiff':[-20, -5, 5, 20]},
-  'tot': {'base':[20,40,60,80], 'diff':[20,40,60,80], 'pctdiff':[-20, -5, 5, 20]},
+  'jobpop': {'base':[2,25,50,75,100], 'diff':[2,25,50,75,100], 'pctdiff':[-20, -5, 5, 20]},
+  'pop': {'base':[2,25,50,75,100], 'diff':[2,25,50,75,100], 'pctdiff':[-20, -5, 5, 20]},
+  'tot': {'base':[2,25,50,75,100], 'diff':[2,25,50,75,100], 'pctdiff':[-20, -5, 5, 20]},
 };
 
 const METRIC_UNITS = {'pop': '000s per sq. mi.',
@@ -400,7 +400,7 @@ async function drawMapFeatures(queryMapData=true) {
           sel_binsflag,
           (app.pct_check && app.comp_check)? '%': ''
         );
-        legHTML = '<p class="legend-row"><i style="background:' + MISSING_COLOR + '"></i> 0 or null<br>' + legHTML;
+
         legHTML = '<h4>' + METRIC_DESC_SHORT[sel_metric] + ' Density' +
                   (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(sel_metric)? ('<br>(' + METRIC_UNITS[sel_metric] + ')') : '')) +
                   '</h4>' + legHTML;
@@ -443,9 +443,6 @@ function styleByMetricColor(feat) {
               sel_binsflag
               );
   if (!color) color = MISSING_COLOR;
-  if (feat['metric']==0) {
-    color = MISSING_COLOR;
-  }
   return { fillColor: color, opacity: 1, weight: 1, color: color, fillOpacity: 1};
 }
 

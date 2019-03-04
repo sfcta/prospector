@@ -1,26 +1,29 @@
 <div id="container">
 
   <div id="slide-panel" v-bind:class="{ shrunken: isPanelHidden}">
-    <button class="ui tiny green icon button"
-            v-on:click="clickedShowHide">
-            <i class="angle double icon"
-            v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
-    </button>
+    <div id="layer-widgets">
+      <button class="ui tiny green icon button"
+              v-on:click="clickedShowHide">
+              <i class="angle double icon"
+              v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
+      </button>
+    </div>
   </div> 
   
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
       <div id="preheader">
+        <a target="_blank" href="https://connectsf.org/"><img src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png"  height="50" width="250" alt="Connect SF"/></a>
         <hr/>
         <h3 class="apptitle">ConnectSF Travel Time</h3>
         <div id="helpbar">
-            <button class="ui mini right labeled icon violet button"
+            <button class="ui mini right labeled icon color1 button"
                     v-on:click="clickToggleHelp">
                     <i class="help circle icon"></i>
                     What is this?
             </button>
             &nbsp;
-            <button class="ui mini right labeled icon violet button"
-                    v-on:click="this.window.open('http://www.sfcta.org/congestion','_blank')">
+            <button class="ui mini right labeled icon color1 button"
+                    v-on:click="this.window.open('https://connectsf.org/','_blank')">
                     <i class="arrow right icon"></i>
                     Learn More
             </button>
@@ -29,47 +32,45 @@
 
           <div id="picker">
             <!--NEW STUFF HERE -->
-            <h5 style="margin-top:15px">CHOOSE ATTRIBUTES:</h5>
-            <div class="three tiny ui buttons">
-              <button class = "tiny ui grey icon button" v-on:click="pickYear(2015)" 
-                v-bind:class="{ active: isYear2015, yellow: isYear2015}">2015</button>
-              <button class = "tiny ui grey icon button" v-on:click="pickYear(2050)"
-                v-bind:class="{ active: isYear2050, yellow: isYear2050}">2050</button>
-              <button class = "tiny ui grey icon button" v-on:click="pickYear('diff')"
-                v-bind:class="{ active: isYearDiff, yellow: isYearDiff}">Difference</button>
+            <h5 style="margin-top:15px">CHOOSE SCENARIO:</h5>
+            <!--<div class="three tiny ui grey buttons">-->
+            <div>
+              <button v-for="item in year_options"
+                    v-on:click="yrChanged(item.value)"
+                    class="ui tiny grey button"
+                    v-bind:class="{ active: item.value==selected_year, color2: item.value==selected_year }">
+                    ${item.text}
+              </button>
             </div>
-            <div class="ui divider"></div>
             
-            <div class="two tiny ui buttons">
-              <button class = "tiny ui grey icon button" v-on:click="pickMetric('avg_distance')" 
-                v-bind:class="{ active: isMetricAverage, yellow: isMetricAverage}">Average Travel Time</button>
-              <button class = "tiny ui grey icon button" v-on:click="pickMetric('oneway_travel_time_mins')"
-                v-bind:class="{ active: isMetricTotal, yellow: isMetricTotal}">Total Travel Time</button>
+            <h5>CHOOSE TRAVEL IMPORTANCE:</h5>
+            <!--<div class="three tiny ui grey buttons">-->
+            <div>
+              <button v-for="item in importance_options"
+                    v-on:click="importanceChanged(item.value)"
+                    class="ui tiny grey button"
+                    v-bind:class="{ active: item.value==selected_importance, color2: item.value==selected_importance }">
+                    ${item.text}
+              </button>
+            </div> 
+            
+            <h5>CHOOSE INCOME CATEGORY:</h5>
+            <!--<div class="three tiny ui grey buttons">-->
+            <div>
+              <button v-for="item in income_options"
+                    v-on:click="incomeChanged(item.value)"
+                    class="ui tiny grey button"
+                    v-bind:class="{ active: item.value==selected_income, color2: item.value==selected_income }">
+                    ${item.text}
+              </button>
+            </div> 
+            
+            <h5>MAP LAYERS</h5>
+            <p>Add additional geographic data to the map.</p>
+            <div v-for="item in extraLayers" class="ui toggle checkbox">
+              <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
+              <label><h5>${item.name}</h5></label>
             </div>
-            <div class="ui divider"></div>
-            
-            <div class="two tiny ui buttons">
-              <button class = "tiny ui grey icon button" v-on:click="pickPurpose('work')" 
-                v-bind:class="{ active: isPurposeWork, yellow: isPurposeWork}">Work</button>
-              <button class = "tiny ui grey icon button" v-on:click="pickPurpose('school')"
-                v-bind:class="{ active: isPurposeSchool, yellow: isPurposeSchool}">School</button>
-            </div>
-            <div class="ui divider"></div>
-            
-            <div class="five tiny ui buttons">
-              <button class = "tiny ui grey icon button" v-on:click="pickIncome('very_low')" 
-                v-bind:class="{ active: isIncomeVeryLow, yellow: isIncomeVeryLow}">Very Low</button>
-              <button class = "tiny ui grey icon button" v-on:click="pickIncome('low')" 
-                v-bind:class="{ active: isIncomeLow, yellow: isIncomeLow}">Low</button>
-              <button class = "tiny ui grey icon button" v-on:click="pickIncome('middle')" 
-                v-bind:class="{ active: isIncomeMiddle, yellow: isIncomeMiddle}">Middle</button>
-              <button class = "tiny ui grey icon button" v-on:click="pickIncome('moderate')" 
-                v-bind:class="{ active: isIncomeModerate, yellow: isIncomeModerate}">Moderate</button>
-              <button class = "tiny ui grey icon button" v-on:click="pickIncome('high')" 
-                v-bind:class="{ active: isIncomeHigh, yellow: isIncomeHigh}">High</button>
-            </div>
-            <div class="ui divider"></div>
-            
             <!--<h5 style="margin-top:15px">CHOOSE YEAR(S)</h5>
             <vue-slider v-bind="scnSlider" v-model="sliderValue"></vue-slider>-->
             
@@ -93,36 +94,6 @@
             </select-->
             
             <hr/>
-            
-            <!--h5 style="margin-top:20px">CHOOSE BREAKS:</h5>
-            <select v-model="selected_breaks">
-              <option v-for="option in break_options" v-bind:value="option.value">
-                ${option.text}
-              </option>
-            </select-->
-            <!--input type="checkbox" id="custom_checkbox" v-model="custom_check" v-bind:disabled="custom_disable" style="margin-top:15px">
-            <label for="custom_checkbox"><b>&nbsp;&nbsp;CHOOSE CUSTOM BREAK POINTS</b></label-->
-            <label><b>CHOOSE CUSTOM BREAK POINTS</b></label>
-            <br>
-            <input v-model.number="bp0" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488;margin-top:5px">
-            <input v-model.number.lazy="bp1" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
-            <input v-model.number.lazy="bp2" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
-            <input v-model.number.lazy="bp3" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
-            <input v-model.number.lazy="bp4" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
-            <input v-model.number="bp5" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488">            
-
-            <button v-on:click="updateMap"
-                    v-bind:class="{ active: isUpdActive, yellow: isUpdActive}"
-                     class="mini ui grey button"
-                    v-bind:disabled="!custom_check" style="margin-top:10px">
-                     Update Map!</button>
-                     
-            <!--h5 style="margin-top:15px">CHOOSE COLOR SCHEME:</h5>
-            <select v-model="selected_colorscheme">
-              <option v-for="option in color_options" v-bind:value="option.value">
-                ${option.text}
-              </option>
-            </select-->            
 
             <h5 style="margin-top:25px">FREQUENCY DISTRIBUTION</h5>
             <div id="dist-chart" style="height: 200px">
@@ -146,7 +117,7 @@
             
           </div>
       </div>
-      <div id="header">
+      <!--<div id="header">
           <div id="stats-panel">
             <hr style="margin-bottom:-5px;" />
             <div id="chartinfo"><h3 style="font-size: 22px;">${chartTitle}</h3></div>
@@ -157,16 +128,16 @@
                 </div>
             </div>
           </div>
-      </div>
+      </div>-->
 
       <div class="logo">
             <hr/>
             <table id="table-logo"><tr>
               <td class="td-logo">
-                <h4 class="agency"><b><a target="_blank" href="http://www.sfcta.org/congestion">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
+                <h4><b><a class="agency" target="_blank" href="http://www.sfcta.org">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
               </td>
               <td class="td-logo">
-                <a class="agency-link" target="_blank" href="http://www.sfcta.org/congestion">
+                <a class="agency-link" target="_blank" href="http://www.sfcta.org">
                   <img class="img-logo" src="/assets/sfcta-logo-144.png" width="80">
                 </a>
               </td>
