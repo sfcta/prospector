@@ -82,8 +82,8 @@ const DATA_VIEW = 'connectsf_accjobs';
 // sidebar select lists
 const FRAC_COLS = ['autototal']; //
 const YR_LIST = [2015,2050];
-const METRIC_DESC = {'autototal': 'Auto',
-                    'transittotal': 'Transit'};
+const METRIC_DESC = {'autototal': 'Auto Jobs Accessible in 30 mins',
+                    'transittotal': 'Transit Jobs Accessible in 45 mins'};
 
 // color schema
 const INT_COLS = []; //
@@ -100,9 +100,12 @@ const CUSTOM_BP_DICT = {
                 '2050':[900, 1000, 1100, 1200],
                 'diff':[50, 125, 150, 175]},
 }
+const METRIC_UNITS = {'autototal': '000s',
+                      'transittotal': '000s'};
+const METRIC_DESC_SHORT = {'autototal': 'Auto Jobs Accessible',
+                          'transittotal': 'Transit Jobs Accessible'};
 
 // pre-def variables
-const METRIC_UNITS = {}; //
 let sel_colorvals, sel_colors, sel_binsflag;
 let sel_bwvals;
 
@@ -203,9 +206,23 @@ function getInfoHtml(geo) {
   let metric2 = app.selected_metric + YR_LIST[1];
   let diff = geo[metric2] - geo[metric1];
 
-  retval += `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric1]}<br/>` +
-            `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric2]}<br/>`+
-            `<b>${METRIC_DESC[app.selected_metric]}</b>` + '<b> Change: </b>' + `${diff}`;
+  if (METRIC_UNITS.hasOwnProperty(app.selected_metric)) {
+    retval += `<b>${YR_LIST[0]}</b> ` +
+    `<b>${METRIC_DESC[app.selected_metric]} (</b>` +
+    `<b>${METRIC_UNITS[app.selected_metric]}): </b>` +
+    `${geo[metric1]}<br/>` +
+    `<b>${YR_LIST[1]}</b> ` +
+    `<b>${METRIC_DESC[app.selected_metric]} (</b>` +
+    `<b>${METRIC_UNITS[app.selected_metric]}): </b>` +
+    `${geo[metric2]}<br/>`+
+    `<b>${METRIC_DESC[app.selected_metric]} Change(</b>` +
+    `<b>${METRIC_UNITS[app.selected_metric]}): </b>` +
+    `${diff}`; 
+  } else {
+    retval += `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric1]}<br/>` +
+              `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric2]}<br/>`+
+              `<b>${METRIC_DESC[app.selected_metric]}</b>` + '<b> Change: </b>' + `${diff}`;
+  }
   return retval; 
 }
 
@@ -411,8 +428,8 @@ async function drawMapFeatures(queryMapData=true) {
           sel_colors,
           sel_binsflag,
         );
-        legHTML = '<p class="legend-row"><i style="background:' + MISSING_COLOR + '"></i> 0 or null<br>' + legHTML;
-        legHTML = '<h4>' + sel_metric.toUpperCase()
+        // legHTML = '<p class="legend-row"><i style="background:' + MISSING_COLOR + '"></i> 0 or null<br>' + legHTML;
+        legHTML = '<h4>' + METRIC_DESC_SHORT[sel_metric]
                          + (METRIC_UNITS.hasOwnProperty(sel_metric)? (' (' + METRIC_UNITS[sel_metric] + ')') : '')
                          + '</h4>' + legHTML;
         div.innerHTML = legHTML;
