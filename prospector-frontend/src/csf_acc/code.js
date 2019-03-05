@@ -78,6 +78,7 @@ const ADDLAYERS = [
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
 const DATA_VIEW = 'connectsf_accjobs';
+const COMMENT_VIEW = 'connectsf_comment';
 
 // sidebar select lists
 const FRAC_COLS = ['autototal']; //
@@ -629,14 +630,34 @@ function showExtraLayers(e) {
   }
 }
 
-// // Connect database for comment
-// var pgClient = new pg.Client(connectionString);
-// pgClient.connect();
+// get the taz boundary data
+async function fetchComments() {
+  const comment_url = API_SERVER + COMMENT_VIEW;
+
+  try {
+    let resp = await fetch(comment_url, {
+      method: 'POST',
+      body: JSON.stringify({}),
+      header: new Headers({
+        'Content-Type': 'application/json'
+      })
+    });
+    let response = await resp.json();
+    console.log('Success:', response);
+  } catch (error) {
+    console.log('comment error: ' + error);
+  }
+}
+
 function handleSubmit() {
   let timestamp = new Date
-  console.log(app.selected_year, app.selected_metric, app.addLayers, timestamp, app.comment)
-  // var query = pgClient.query("SELECT COUNT(accjobs.sftaz) AS taznum FROM connectsf.accjobs");
-  // console.log(query)
+  var comment = {select_year: app.selected_year,
+                 select_metric: app.selected_metric,
+                 add_layer: app.addLayers,
+                 comment_time: timestamp,
+                 comment_content: app.comment};
+  console.log(comment)
+  fetchComments()
 }
 
 function getColorMode(cscheme) {
