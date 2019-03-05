@@ -631,19 +631,17 @@ function showExtraLayers(e) {
 }
 
 // get the taz boundary data
-async function fetchComments() {
+async function fetchComments(comment) {
   const comment_url = API_SERVER + COMMENT_VIEW;
 
   try {
     let resp = await fetch(comment_url, {
       method: 'POST',
-      body: JSON.stringify({}),
-      header: new Headers({
-        'Content-Type': 'application/json'
-      })
+      body: JSON.stringify(comment),
+      headers:{
+        'Content-Type': 'application/json',
+      }
     });
-    let response = await resp.json();
-    console.log('Success:', response);
   } catch (error) {
     console.log('comment error: ' + error);
   }
@@ -653,11 +651,10 @@ function handleSubmit() {
   let timestamp = new Date
   var comment = {select_year: app.selected_year,
                  select_metric: app.selected_metric,
-                 add_layer: app.addLayers,
+                 add_layer: '',
                  comment_time: timestamp,
                  comment_content: app.comment};
-  console.log(comment)
-  fetchComments()
+  fetchComments(comment)
 }
 
 function getColorMode(cscheme) {
