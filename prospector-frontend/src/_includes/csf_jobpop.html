@@ -113,7 +113,7 @@
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
   <div v-cloak> <!-- hides everything until Vue finished loading -->
-        <h2 style="margin-bottom:0px;">Congestion in San Francisco</h2>
+        <h2 style="margin-bottom:0px;">ConnectSF: Jobs & Population</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
         Use this tool to explore performance metrics for both automobiles and buses on major San Francisco streets and highways.
         These are monitored every two years, in accordance with state law for San Francisco’s Congestion Management Program.
@@ -137,19 +137,19 @@
         </ul>
 
         <div style="margin-top:20px;">
-          <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
+          <button v-on:click="clickToggleHelp" class="small ui right floated teal button">
             &nbsp;OK&nbsp;
           </button>
 
           <button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')"
-                  class="small ui right labeled icon floated yellow button"
+                  class="small ui right labeled icon floated color1 button"
                   style="margin-right:5px">
                   <i class="icon download"></i>
                   Download data (.zip)
           </button>
 
           <button v-on:click="this.window.open('https://connectsf.org/','_blank')"
-                  class="small ui right floated basic violet button"
+                  class="small ui right floated basic teal button"
                   style="margin-right:5px">
                   Learn more&hellip;
           </button>
