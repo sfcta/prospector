@@ -98,7 +98,7 @@ const CUSTOM_BP_DICT = {
                    'diff':[150, 200, 250, 300]},
   'autototal': {'2015':[900, 1000, 1100, 1200],
                 '2050':[900, 1000, 1100, 1200],
-                'diff':[50, 125, 150, 175]},
+                'diff':[50, 100, 150, 200]},
 }
 const METRIC_UNITS = {'autototal': '000s',
                       'transittotal': '000s'};
