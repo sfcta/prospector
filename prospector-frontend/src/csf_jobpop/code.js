@@ -89,9 +89,9 @@ const COLORRAMP = {SEQ: ['#ffffcc','#d9f0a3','#addd8e', '#78c679', '#31a354','#0
 
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'jobpop': {'base':[2,25,50,75,100], 'diff':[2,25,50,75,100], 'pctdiff':[-20, -5, 5, 20]},
-  'pop': {'base':[2,25,50,75,100], 'diff':[2,25,50,75,100], 'pctdiff':[-20, -5, 5, 20]},
-  'tot': {'base':[2,25,50,75,100], 'diff':[2,25,50,75,100], 'pctdiff':[-20, -5, 5, 20]},
+  'jobpop': {'base':[25,50,100,200,400], 'diff':[25,50,100,200,400], 'pctdiff':[-20, -5, 5, 20]},
+  'pop': {'base':[25,50,100,200,400], 'diff':[25,50,100,200,400], 'pctdiff':[-20, -5, 5, 20]},
+  'tot': {'base':[25,50,100,200,400], 'diff':[25,50,100,200,400], 'pctdiff':[-20, -5, 5, 20]},
 };
 
 const METRIC_UNITS = {'pop': '000s per sq. mi.',
