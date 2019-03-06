@@ -348,11 +348,8 @@ async function drawMapFeatures(queryMapData=true) {
           }
           
           let custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
-          sel_colorvals = [map_vals[0]];
-          for (var i = 0; i < custom_bps.length; i++) {
-            if (custom_bps[i]>map_vals[0] && custom_bps[i]<map_vals[map_vals.length-1]) sel_colorvals.push(custom_bps[i]);
-          }
-          sel_colorvals.push(map_vals[map_vals.length-1]);
+          sel_colorvals = [map_vals[0]].concat(custom_bps);
+          (map_vals[map_vals.length-1] > custom_bps[custom_bps.length-1])? sel_colorvals.push(map_vals[map_vals.length-1]): sel_colorvals.push(custom_bps[custom_bps.length-1]+1);
 
           bp = Array.from(sel_colorvals).sort((a, b) => a - b);
           app.bp0 = bp[0];
