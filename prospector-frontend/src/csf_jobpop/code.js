@@ -83,7 +83,8 @@ const YR_LIST = [2015,2050];
 const INT_COLS = [];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ffffcc';
-const COLORRAMP = {SEQ: ['#ffffcc','#d9f0a3','#addd8e', '#78c679', '#31a354','#006837'],
+const COLORRAMP = {SEQ: ['#ffe207','#c3cd18','#8eb627', '#5e9d32', '#338337', '#006837'],
+                    //SEQ: ['#ffffcc','#d9f0a3','#addd8e', '#78c679', '#31a354','#006837'],
                     //SEQ: ['#ffecb3','#f2ad86', '#d55175', '#963d8e','#5b2d5b'],
                     DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
