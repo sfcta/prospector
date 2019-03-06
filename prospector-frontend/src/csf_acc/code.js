@@ -649,9 +649,10 @@ async function fetchComments(comment) {
 
 function handleSubmit() {
   let timestamp = new Date
-  var comment = {select_year: app.selected_year,
+  var comment = {select_map: "job_accessible",
+                 select_year: app.selected_year,
                  select_metric: app.selected_metric,
-                 add_layer: '',
+                 add_layer: app.ADDLAYERS,
                  comment_time: timestamp,
                  comment_content: app.comment};
   fetchComments(comment)
