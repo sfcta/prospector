@@ -23,7 +23,7 @@
         </button>
         &nbsp;
         <button class="ui mini right labeled icon color1 button"
-                v-on:click="this.window.open('http://www.sfcta.org/congestion','_blank')">
+                v-on:click="this.window.open('https://connectsf.org/','_blank')">
                 <i class="arrow right icon"></i>
                 Learn More
         </button>
@@ -65,6 +65,10 @@
           <tr><td>Auto</td><td align="right">${aggData[0].autototal}</td><td align="right">${aggData[1].autototal}</td></tr>
           <tr><td>Transit</td><td align="right">${aggData[0].transittotal}</td><td align="right">${aggData[1].transittotal}</td></tr>
         </table> -->
+        <!-- <hr/>
+        <h5 style="margin-top:25px">FREQUENCY DISTRIBUTION</h5>
+        <div id="dist-chart" style="height: 200px">
+        </div> -->
 
         <hr/>
         <h5 style="margin-top:15px">PROVIDE FEEDBACK:</h5>
@@ -141,7 +145,7 @@
                   Download data (.csv)
           </button>
 
-          <button v-on:click="this.window.open('http://www.sfcta.org/congestion','_blank')"
+          <button v-on:click="this.window.open('https://connectsf.org/','_blank')"
                   class="small ui right floated basic teal button"
                   style="margin-right:5px">
                   Learn more&hellip;

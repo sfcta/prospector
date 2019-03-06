@@ -80,44 +80,39 @@ const GEO_VIEW = 'taz_boundaries';
 const DATA_VIEW = 'connectsf_accjobs';
 
 // sidebar select lists
-const FRAC_COLS = ['autototal']; //
+const FRAC_COLS = ['auto', 'transit']; //
 const YR_LIST = [2015,2050];
-const METRIC_DESC = {'autototal': 'Auto Jobs Accessible in 30 mins',
-                    'transittotal': 'Transit Jobs Accessible in 45 mins'};
+const METRIC_DESC = {'auto': 'Auto Jobs Accessible in 30 mins',
+                    'transit': 'Transit Jobs Accessible in 45 mins'};
 
 // color schema
 const INT_COLS = []; //
 const DISCRETE_VAR_LIMIT = 10; //
 const MISSING_COLOR = '#ccd'; //
-const COLORRAMP = {SEQ: ['#eaebe1','#D2DAC3','#7eb2b5','#548594','#003f5a'],
+const COLORRAMP = {SEQ: ['#ccd', '#eaebe1','#D2DAC3','#7eb2b5','#548594', '#003f5a', '#001f2d'],
                    DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
-                  //  ACC: ['#eaebe1','#D2DAC3','#789174','#517350','#004415']
 const CUSTOM_BP_DICT = {
-  'transittotal': {'2015':[400, 500, 600, 700],
-                   '2050':[400, 500, 600, 700],
-                   'diff':[150, 200, 250, 300]},
-  'autototal': {'2015':[900, 1000, 1100, 1200],
-                '2050':[900, 1000, 1100, 1200],
-                'diff':[50, 125, 150, 175]},
+  // 'transit': {'2015':[0, 50, 150, 350, 750, 950, 1050, 1100],
+  //                  '2050':[0, 50, 150, 350, 750, 950, 1050, 1100],
+  //                  'diff':[0, 50, 150, 350, 750, 950, 1050, 1100]},
+  // 'auto': {'2015':[0, 50, 150, 350, 750, 950, 1050, 1100],
+  //               '2050':[0, 50, 150, 350, 750, 950, 1050, 1100],
+  //               'diff':[0, 50, 150, 350, 750, 950, 1050, 1100]},
+  'transit': {'2015':[0, 150, 300, 600, 750, 900, 1200],
+              '2050':[0, 150, 300, 600, 750, 900, 1200],
+              'diff':[0, 150, 300, 600, 750, 900, 1200]},
+  'auto': {'2015':[0, 150, 300, 600, 750, 900, 1200],
+          '2050':[0, 150, 300, 600, 750, 900, 1200],
+          'diff':[0, 150, 300, 600, 750, 900, 1200]},
 }
-const METRIC_UNITS = {'autototal': '000s',
-                      'transittotal': '000s'};
-const METRIC_DESC_SHORT = {'autototal': 'Auto Jobs Accessible',
-                          'transittotal': 'Transit Jobs Accessible'};
-
-// pre-def variables
-let sel_colorvals, sel_colors, sel_binsflag;
-let sel_bwvals;
-
-let chart_deftitle = 'All TAZs Combined';
-
-let geoLayer, mapLegend;
-let _featJson;
-let _aggregateData;
-let prec;
-let addLayerStore = {};
+// legend info
+const METRIC_UNITS = {'auto': '000s',
+                      'transit': '000s'};
+const METRIC_DESC_SHORT = {'auto': 'Auto Jobs Accessible',
+                          'transit': 'Transit Jobs Accessible'};
 
 // main function
+let _featJson;
 async function initialPrep() {
 
   console.log('1...');
@@ -128,7 +123,7 @@ async function initialPrep() {
   
   console.log('3... ');
   // await buildChartHtmlFromData();
-  updateStats();
+  // updateStats();
   
   console.log('4... ');
   await fetchAddLayers();
@@ -157,6 +152,7 @@ async function fetchMapFeatures() {
 }
 
 // get the top layers data
+let addLayerStore = {};
 async function fetchAddLayers() {
   try {
     for (let item of ADDLAYERS) {
@@ -178,15 +174,6 @@ async function fetchAddLayers() {
   }
 }
 
-// CityView data
-function updateStats() {
-  for (let i = 0; i < _aggregateData.length; i++) {
-    for (let m of app.metric_options) {
-      app.aggData[i][m.value] = _aggregateData[i][m.value].toLocaleString();
-    }
-  }
-}
-
 // hover panel -------------------
 let infoPanel = L.control();
 
@@ -198,7 +185,6 @@ infoPanel.onAdd = function(map) {
 
 // hover infomation format
 function getInfoHtml(geo) {
-  // console.log(geo)
   let retval = '<b>TAZ: </b>' + `${geo.taz}<br/>` +
                 '<b>NEIGHBORHOOD: </b>' + `${geo.nhood}<br/><hr>`;
 
@@ -206,32 +192,18 @@ function getInfoHtml(geo) {
   let metric2 = app.selected_metric + YR_LIST[1];
   let diff = geo[metric2] - geo[metric1];
 
-  if (METRIC_UNITS.hasOwnProperty(app.selected_metric)) {
-    retval += `<b>${YR_LIST[0]}</b> ` +
-    `<b>${METRIC_DESC[app.selected_metric]} (</b>` +
-    `<b>${METRIC_UNITS[app.selected_metric]}): </b>` +
-    `${geo[metric1]}<br/>` +
-    `<b>${YR_LIST[1]}</b> ` +
-    `<b>${METRIC_DESC[app.selected_metric]} (</b>` +
-    `<b>${METRIC_UNITS[app.selected_metric]}): </b>` +
-    `${geo[metric2]}<br/>`+
-    `<b>${METRIC_DESC[app.selected_metric]} Change(</b>` +
-    `<b>${METRIC_UNITS[app.selected_metric]}): </b>` +
-    `${diff}`; 
-  } else {
-    retval += `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric1]}<br/>` +
-              `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric2]}<br/>`+
-              `<b>${METRIC_DESC[app.selected_metric]}</b>` + '<b> Change: </b>' + `${diff}`;
-  }
+  retval += `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric1]}<br/>` +
+            `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric2]}<br/>`+
+            `<b>${METRIC_DESC[app.selected_metric]}</b>` + '<b> Change: </b>' + `${diff}`;
   return retval; 
 }
 
 // activate function
+let geoLayer;
 infoPanel.update = function(geo) {
   infoPanel._div.innerHTML = '';
   infoPanel._div.className = 'info-panel';
   if (geo) this._div.innerHTML = getInfoHtml(geo);
-
   infoPanelTimeout = setTimeout(function() {
     // use CSS to hide the info-panel
     infoPanel._div.className = 'info-panel-hide';
@@ -243,6 +215,7 @@ infoPanel.addTo(mymap);
 
 // main map ------------------
 // get data from database
+let _aggregateData;
 async function getMapData() {
   let data_url = API_SERVER + DATA_VIEW;
   let resp = await fetch(data_url);
@@ -275,12 +248,13 @@ async function getMapData() {
     }
     _aggregateData.push(row);
   }
-  // console.log(_aggregateData)
 }
 
 let base_lookup;
 let map_vals;
-let bwidth_vals; //
+let prec;
+let sel_colorvals, sel_colors, sel_binsflag;
+let mapLegend;
 async function drawMapFeatures(queryMapData=true) {
 
   // create a clean copy of the feature Json
@@ -297,7 +271,7 @@ async function drawMapFeatures(queryMapData=true) {
   } else {
     app.comp_check = true;
   }
-  prec = (FRAC_COLS.includes(sel_metric) ? 100 : 1); //???
+  prec = (FRAC_COLS.includes(sel_metric) ? 1000 : 1); //???
   
   try {
     // draw data
@@ -317,7 +291,6 @@ async function drawMapFeatures(queryMapData=true) {
           feat[sel_metric + YR_LIST[0]] = base_lookup[feat.taz][sel_metric + YR_LIST[0]];
           feat[sel_metric + YR_LIST[1]] = base_lookup[feat.taz][sel_metric + YR_LIST[1]];
         } 
-        // console.log(feat)
 
         if (app.comp_check) {
           // changing num for time duration
@@ -334,14 +307,14 @@ async function drawMapFeatures(queryMapData=true) {
           }
         }
 
-        // ???
+        // prepare for coloring
+        // round into 1000
         if (map_metric !== null) {
-          map_metric = Math.round(map_metric*prec)/prec;
+          map_metric = Math.round(map_metric/prec);
           map_vals.push(map_metric);
         }
         feat['metric'] = map_metric;
       }
-      // prepare for coloring
       map_vals = map_vals.sort((a, b) => a - b);
     }
     
@@ -354,6 +327,17 @@ async function drawMapFeatures(queryMapData=true) {
       console.log("color draw!")
       if (queryMapData) {
         sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
+        
+        // //calculate distribution
+        // let dist_vals = app.comp_check? map_vals.filter(entry => entry <= MAX_PCTDIFF) : map_vals;
+        // let x = d3.scaleLinear()
+        //         .domain([dist_vals[0], dist_vals[dist_vals.length-1]])
+        // let numticks = 20;
+        // if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) numticks = sel_colorvals.length;
+        // let histogram = d3.histogram()
+        //     .domain(x.domain())
+        //     .thresholds(x.ticks(numticks));
+        // updateDistChart(histogram(dist_vals));
 
         if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) {
           console.log("drawMapFeatures, 3")
@@ -375,36 +359,48 @@ async function drawMapFeatures(queryMapData=true) {
             mode = 'diff';
           }
           let custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
-          sel_colorvals = [map_vals[0]];
-          for (var i = 0; i < custom_bps.length; i++) {
-            if (custom_bps[i]>map_vals[0] && custom_bps[i]<map_vals[map_vals.length-1]) sel_colorvals.push(custom_bps[i]);
+          if (map_vals[0] < 0) {
+            sel_colorvals = [map_vals[0]];
+          } else {
+            sel_colorvals = [-1];
           }
-          sel_colorvals.push(map_vals[map_vals.length-1]);
 
+          for (var i = 0; i < custom_bps.length; i++) {
+            /*if (custom_bps[i]>map_vals[0] && custom_bps[i]<map_vals[map_vals.length-1]) */sel_colorvals.push(custom_bps[i]);
+          }
+          if (map_vals[map_vals.length-1]>sel_colorvals[custom_bps.length]) sel_colorvals.push(map_vals[map_vals.length-1]);
+          console.log(sel_colorvals)
           bp = Array.from(sel_colorvals).sort((a, b) => a - b);
-          app.bp0 = bp[0];
-          app.bp5 = bp[bp.length-1];
+          
+          // app.bp5 = bp[bp.length-1];
           app.bp1 = custom_bps[0];
           app.bp2 = custom_bps[1];
           app.bp3 = custom_bps[2];
           app.bp4 = custom_bps[3];
+          app.bp5 = custom_bps[4];
+          app.bp6 = custom_bps[5];
+          app.bp7 = custom_bps[6];
+          app.bp8 = custom_bps[7];
+          if (bp[bp.length-1 > custom_bps[7]]) app.bp9 = bp[bp.length-1];
           if (custom_bps[0] < app.bp0) app.bp1 = app.bp0;
 
-          sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
+          // sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
           // updateColorScheme(sel_colorvals);
           sel_binsflag = true; 
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
-          sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
+          // sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
+          // console.log("colorvals2")
+          // console.log(sel_colorvals2)
         }
       } else {
         throw 'ERROR: This map does not support custom break points!!!';
       }
       
       sel_colors = [];
-      for(let i of sel_colorvals2) {
+      for(let i of sel_colorvals) {
         sel_colors.push(color_func(i).hex());
       }
- 
+      console.log(sel_colorvals, sel_colors)
       // activate color and hover func
       if (geoLayer) mymap.removeLayer(geoLayer);
       if (mapLegend) mymap.removeControl(mapLegend);
@@ -422,12 +418,14 @@ async function drawMapFeatures(queryMapData=true) {
       // legend for color schema
       mapLegend = L.control({ position: 'bottomright' });
       mapLegend.onAdd = function(map) {
-        let div = L.DomUtil.create('div', 'info legend');
+        let div = L.DomUtil.create('div', 'legend');
+        console.log(sel_colorvals, sel_colors, sel_binsflag)
         let legHTML = getLegHTML(
           sel_colorvals,
           sel_colors,
           sel_binsflag,
         );
+        console.log(legHTML)
         // legHTML = '<p class="legend-row"><i style="background:' + MISSING_COLOR + '"></i> 0 or null<br>' + legHTML;
         legHTML = '<h4>' + METRIC_DESC_SHORT[sel_metric]
                          + (METRIC_UNITS.hasOwnProperty(sel_metric)? (' (' + METRIC_UNITS[sel_metric] + ')') : '')
@@ -446,7 +444,7 @@ async function drawMapFeatures(queryMapData=true) {
           resetPopGeo();
         }
       } else {
-        buildChartHtmlFromData();
+        // buildChartHtmlFromData();
         return null;
       }
     }
@@ -473,6 +471,7 @@ function styleByMetricColor(feat) {
               sel_colors,
               sel_binsflag
               );
+
   if (!color) color = MISSING_COLOR;
 
   if (feat['metric']==0) {
@@ -524,13 +523,14 @@ function clickedOnFeature(e) {
   selectedLatLng = e.latlng;
   if (base_lookup.hasOwnProperty(selGeoId)) {
     showGeoDetails(selectedLatLng);
-    buildChartHtmlFromData(selGeoId);
+    // buildChartHtmlFromData(selGeoId);
   } else {
     resetPopGeo();
   }
 }
 
 let popSelGeo;
+let chart_deftitle = 'All TAZs Combined';
 function showGeoDetails(latlng) {
   // show popup
   popSelGeo = L.popup()
@@ -548,7 +548,7 @@ function resetPopGeo() {
   geoLayer.resetStyle(selectedGeo);
   prevSelectedGeo = selectedGeo = selGeoId = null;
   app.chartSubtitle = chart_deftitle;
-  buildChartHtmlFromData();
+  // buildChartHtmlFromData();
 }
 
 // ????
@@ -568,49 +568,94 @@ function highlightSelectedSegment() {
 }
 
 // chart ---------------------------
-let trendChart = null
-function buildChartHtmlFromData(geoid = null) {
-  document.getElementById('longchart').innerHTML = '';
-  if (geoid) {
-    let selgeodata = [];
-    for (let yr of YR_LIST) {
-      let row = {};
-      row['year'] = yr.toString();
-      for (let met of app.metric_options) {
-        row[met] = base_lookup[geoid][met+"total"+yr];
-      }
-      selgeodata.push(row);
-    } 
-    console.log(selgeodata)
-    trendChart = new Morris.Line({
-      data: selgeodata,
-      element: 'longchart',
-      gridTextColor: '#aaa',
-      hideHover: true,
-      labels: [app.selected_metric.toUpperCase()],
-      lineColors: ['#f56e71'],
-      xkey: 'year',
-      smooth: false,
-      parseTime: false,
-      xLabelAngle: 45,
-      ykeys: [app.selected_metric],
-    });
-  } else {
-    trendChart = new Morris.Line({
-      data: _aggregateData,
-      element: 'longchart',
-      gridTextColor: '#aaa',
-      hideHover: true,
-      labels: [app.selected_metric.toUpperCase()],
-      lineColors: ['#f56e71'],
-      xkey: 'year',
-      smooth: false,
-      parseTime: false,
-      xLabelAngle: 45,
-      ykeys: [app.selected_metric],
-    });
-  }
-}
+// let distChart = null;
+// let distLabels;
+// function updateDistChart(bins) {
+//   let data = [];
+//   distLabels = [];
+//   for (let b of bins) {
+//     let x0 = Math.round(b.x0*prec)/prec;
+//     let x1 = Math.round(b.x1*prec)/prec;
+//     data.push({x:x0, y:b.length});
+//     distLabels.push(x0 + '-' + x1);
+//   }
+
+//   if (distChart) {
+//     distChart.setData(data);
+//   } else {
+//       distChart = new Morris.Area({
+//         // ID of the element in which to draw the chart.
+//         element: 'dist-chart',
+//         data: data,
+//         // The name of the data record attribute that contains x-values.
+//         xkey: 'x',
+//         // A list of names of data record attributes that contain y-values.
+//         ykeys: 'y',
+//         ymin: 0,
+//         labels: ['Freq'],
+//         lineColors: ['#1fc231'],
+//         xLabels: 'x',
+//         xLabelAngle: 25,
+//         xLabelFormat: binFmt,
+//         //yLabelFormat: yFmt,
+//         hideHover: true,
+//         parseTime: false,
+//         fillOpacity: 0.4,
+//         pointSize: 1,
+//         behaveLikeLine: false,
+//         eventStrokeWidth: 2,
+//         eventLineColors: ['#ccc'],
+//       });
+//   }
+// }
+
+// function binFmt(x) {
+//   return distLabels[x.x] + ((app.pct_check && app.comp_check)? '%':'');
+// }
+
+// let trendChart = null
+// function buildChartHtmlFromData(geoid = null) {
+//   document.getElementById('longchart').innerHTML = '';
+//   if (geoid) {
+//     let selgeodata = [];
+//     for (let yr of YR_LIST) {
+//       let row = {};
+//       row['year'] = yr.toString();
+//       for (let met of app.metric_options) {
+//         row[met] = base_lookup[geoid][met+""+yr];
+//       }
+//       selgeodata.push(row);
+//     } 
+//     console.log(selgeodata)
+//     trendChart = new Morris.Line({
+//       data: selgeodata,
+//       element: 'longchart',
+//       gridTextColor: '#aaa',
+//       hideHover: true,
+//       labels: [app.selected_metric.toUpperCase()],
+//       lineColors: ['#f56e71'],
+//       xkey: 'year',
+//       smooth: false,
+//       parseTime: false,
+//       xLabelAngle: 45,
+//       ykeys: [app.selected_metric],
+//     });
+//   } else {
+//     trendChart = new Morris.Line({
+//       data: _aggregateData,
+//       element: 'longchart',
+//       gridTextColor: '#aaa',
+//       hideHover: true,
+//       labels: [app.selected_metric.toUpperCase()],
+//       lineColors: ['#f56e71'],
+//       xkey: 'year',
+//       smooth: false,
+//       parseTime: false,
+//       xLabelAngle: 45,
+//       ykeys: [app.selected_metric],
+//     });
+//   }
+// }
 
 // functions for vue
 async function selectionChanged(thing) {
@@ -658,10 +703,8 @@ function handleSubmit() {
 
 function getColorMode(cscheme) {
   if (app.modeMap.hasOwnProperty(cscheme.toString())) {
-    console.log("getColorMode 1!")
     return app.modeMap[cscheme];
   } else {
-    console.log("getColorMode 2!")
     return 'lrgb';
   }
 }
@@ -701,10 +744,10 @@ let app = new Vue({
     pct_check: false,
 
     // transit type
-    selected_metric: 'autototal',
+    selected_metric: 'auto',
     metric_options: [
-    {text: 'Auto', value: 'autototal'},
-    {text: 'Transit', value: 'transittotal'},
+    {text: 'Auto', value: 'auto'},
+    {text: 'Transit', value: 'transit'},
     ],
     
     // top layers control
@@ -712,8 +755,8 @@ let app = new Vue({
     extraLayers: ADDLAYERS,
 
     // data view 
-    aggData: [{autototal:0,transittotal:0},
-              {autototal:0,transittotal:0}],
+    aggData: [{auto:0,transit:0},
+              {auto:0,transit:0}],
 
     // comment box
     comment: '',
@@ -735,12 +778,17 @@ let app = new Vue({
     // test for color schema
     // custom_check: false,
     // custom break points
-    // bp0: 0.0,
-    // bp1: 0.0,
-    // bp2: 0.0,
-    // bp3: 0.0,
-    // bp4: 0.0,
-    // bp5: 0.0,
+    bp0: 0.0,
+    bp1: 0.0,
+    bp2: 0.0,
+    bp3: 0.0,
+    bp4: 0.0,
+    bp5: 0.0,
+    bp6: 0.0,
+    bp7: 0.0,
+    bp8: 0.0,
+    bp9: 0.0,
+    bp10: 0.0,
     // // update after change custom break points
     // isUpdActive: false,
   },
