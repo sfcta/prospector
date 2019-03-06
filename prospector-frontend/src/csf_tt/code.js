@@ -731,14 +731,14 @@ let app = new Vue({
     
     selected_importance: 'mandatory',
     importance_options: [
-    {text: 'Mandatory', value: 'mandatory'},
-    {text: 'Discretionary', value: 'discretionary'},
+    {text: 'Work / School', value: 'mandatory'},
+    {text: 'Other', value: 'discretionary'},
     ],
 
     selected_income: 'all',
     income_options: [
-    {text: '< 200% Poverty', value: 'below_200pct_poverty'},
-    {text: '> 200% Poverty', value: 'above_200pct_poverty'},
+    {text: 'Low Income', value: 'below_200pct_poverty'},
+    {text: 'Not Low Income', value: 'above_200pct_poverty'},
     {text: 'All Incomes', value: 'all'},
     ],
     
