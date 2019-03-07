@@ -149,7 +149,23 @@
   <div v-cloak> <!-- hides everything until Vue finished loading -->
         <h2 style="margin-bottom:0px;">ConnectSF Travel Time for mandatory tours</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
-        Use this tool to explore travel times for Work and School tours
+        This visualization shows the estimated one-way travel time from home to the main destination 
+        (i.e. the total travel time to work, including any stops along the way). 
+        The data is segmented by:
+        <br/><br/>
+        <dl>
+          <dt>Year</dt>
+            <dd>- 2015</dd>
+            <dd>- 2050</dd>
+            <dd>- Change (the change from 2015 to 2050)</dd>
+          <dt>Purpose</dt>
+            <dd>- Work / School (mandatory tour purposes)</dd>
+            <dd>- Other (all other tour purposes)</dd>
+          <dt>Income</dt>
+            <dd>- Low Income (below 200% of the Federal Poverty Level)</dd>
+            <dd>- Not Low Income (above 200% of the Federal Poverty Level)</dd>
+            <dd>- All (all income categories)</dd>
+        </dl>
 
         <div style="margin-top:20px;">
           <button v-on:click="clickToggleHelp" class="small ui right floated violet button">

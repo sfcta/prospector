@@ -1021,6 +1021,8 @@ let app = new Vue({
   el: '#panel', //element is 'el' the whole right side of the map
   delimiters: ['${', '}'],
   data: {
+    version: 0.3,
+    data_version: 0.3,
     isModeAuto: true,
     isModeTransit: false,
     address: null,
@@ -1432,14 +1434,18 @@ function createDownloadObjects() {
 window.downloadCSV = function(){
   createDownloadObjects();
   let data, filename, link;
-  let csv = 'PROJECT LOCATION ATTRIBUTES';
-  if (csv == null) return;
+  let csv = 'SAN FRANCISCO TRAVEL DEMAND TOOL INFO';
+  csv += '\n------------------------';
+  csv += '\nWEBSITE VERSION: ' + app.version;
+  csv += '\nDATA VERSION: ' + app.data_version;
   
+  csv += '\n\nPROJECT LOCATION ATTRIBUTES';
   csv += '\n------------------------';
   csv += '\nAddress:, ' + address;
   csv += '\nDistrict:, ' + addressDistrictName;
   csv += '\nPlace Type:, ' + app.placetype_text;
   csv += '\nCity:, San Francisco';
+  
   csv += '\n\nSELECTED FILTERS';
   csv += '\n------------------------';
   csv += '\nTime Period:, ' + selectedTimePeriod;
