@@ -77,21 +77,22 @@ const DATA_VIEW = 'connectsf_lu';
 const GEOTYPE = 'TAZ';
 const GEOID_VAR = 'taz';
 
-const FRAC_COLS = ['pop','tot','jobpop'];
+const FRAC_COLS = [];
 const YR_LIST = [2015,2050];
 
 const INT_COLS = [];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ffffcc';
-const COLORRAMP = {SEQ: ['#ffffcc','#d9f0a3','#addd8e', '#78c679', '#31a354','#006837'],
+const COLORRAMP = {SEQ: ['#fcf78d','#cadb77','#9abe64', '#6da154', '#3f8445', '#006837'],
+                    //SEQ: ['#ffffcc','#d9f0a3','#addd8e', '#78c679', '#31a354','#006837'],
                     //SEQ: ['#ffecb3','#f2ad86', '#d55175', '#963d8e','#5b2d5b'],
                     DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'jobpop': {'base':[2,25,50,75,100], 'diff':[2,25,50,75,100], 'pctdiff':[-20, -5, 5, 20]},
-  'pop': {'base':[2,25,50,75,100], 'diff':[2,25,50,75,100], 'pctdiff':[-20, -5, 5, 20]},
-  'tot': {'base':[2,25,50,75,100], 'diff':[2,25,50,75,100], 'pctdiff':[-20, -5, 5, 20]},
+  'jobpop': {'base':[25,50,100,200,400], 'diff':[25,50,100,200,400], 'pctdiff':[-20, -5, 5, 20]},
+  'pop': {'base':[25,50,100,200,400], 'diff':[25,50,100,200,400], 'pctdiff':[-20, -5, 5, 20]},
+  'tot': {'base':[25,50,100,200,400], 'diff':[25,50,100,200,400], 'pctdiff':[-20, -5, 5, 20]},
 };
 
 const METRIC_UNITS = {'pop': '000s per sq. mi.',
@@ -199,7 +200,7 @@ function getInfoHtml(geo) {
   let metric3 = app.selected_metric + 'den' + YR_LIST[0];
   let metric4 = app.selected_metric + 'den' + YR_LIST[1];
   let diff = geo[metric2] - geo[metric1];
-  let dendiff = Math.round((geo[metric4] - geo[metric3])*100)/100;
+  let dendiff = geo[metric4] - geo[metric3];
 
   retval += `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric1]}<br/>` +
             `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric2]}<br/>` +
@@ -286,14 +287,14 @@ async function drawMapFeatures(queryMapData=true) {
         if (base_lookup.hasOwnProperty(feat[GEOID_VAR])) {
           feat[sel_metric + YR_LIST[0]] = base_lookup[feat[GEOID_VAR]][sel_metric + YR_LIST[0]];
           feat[sel_metric + YR_LIST[1]] = base_lookup[feat[GEOID_VAR]][sel_metric + YR_LIST[1]];
-          feat[sel_metric + 'den' + YR_LIST[0]] = Math.round(100*feat[sel_metric + YR_LIST[0]]/(feat['sq_mile']*1000))/100;
-          feat[sel_metric + 'den' + YR_LIST[1]] = Math.round(100*feat[sel_metric + YR_LIST[1]]/(feat['sq_mile']*1000))/100;
+          feat[sel_metric + 'den' + YR_LIST[0]] = Math.round(feat[sel_metric + YR_LIST[0]]/(feat['sq_mile']*1000));
+          feat[sel_metric + 'den' + YR_LIST[1]] = Math.round(feat[sel_metric + YR_LIST[1]]/(feat['sq_mile']*1000));
         } 
         
         if (app.comp_check) {
           if (base_lookup.hasOwnProperty(feat[GEOID_VAR])) {
             let feat_entry = base_lookup[feat[GEOID_VAR]];
-            map_metric = (feat_entry[comp_metric] - feat_entry[base_metric])/(feat['sq_mile']*1000);
+            map_metric = Math.round(feat_entry[comp_metric]/(feat['sq_mile']*1000)) - Math.round(feat_entry[base_metric]/(feat['sq_mile']*1000));
             feat['base'] = feat_entry[base_metric];
             feat['comp'] = feat_entry[comp_metric];
             if (app.pct_check && app.comp_check) {
@@ -348,11 +349,8 @@ async function drawMapFeatures(queryMapData=true) {
           }
           
           let custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
-          sel_colorvals = [map_vals[0]];
-          for (var i = 0; i < custom_bps.length; i++) {
-            if (custom_bps[i]>map_vals[0] && custom_bps[i]<map_vals[map_vals.length-1]) sel_colorvals.push(custom_bps[i]);
-          }
-          sel_colorvals.push(map_vals[map_vals.length-1]);
+          sel_colorvals = [map_vals[0]].concat(custom_bps);
+          (map_vals[map_vals.length-1] > custom_bps[custom_bps.length-1])? sel_colorvals.push(map_vals[map_vals.length-1]): sel_colorvals.push(custom_bps[custom_bps.length-1]+1);
 
           bp = Array.from(sel_colorvals).sort((a, b) => a - b);
           app.bp0 = bp[0];
