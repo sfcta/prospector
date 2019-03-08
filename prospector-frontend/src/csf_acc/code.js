@@ -89,7 +89,8 @@ const METRIC_DESC = {'auto': 'Auto Jobs Accessible in 30 mins',
 const INT_COLS = []; //
 const DISCRETE_VAR_LIMIT = 10; //
 const MISSING_COLOR = '#ccd'; //
-const COLORRAMP = {SEQ: ['#ccd', '#eaebe1','#D2DAC3','#7eb2b5','#548594', '#003f5a', '#001f2d'],
+const COLORRAMP = {//SEQ: ['#ccd', '#eaebe1','#D2DAC3','#7eb2b5','#548594', '#003f5a', '#001f2d'],
+                   SEQ: ['#eaebe1','#D2DAC3','#7eb2b5','#548594', '#003f5a', '#001f2d'],
                    DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 const CUSTOM_BP_DICT = {
   // 'transit': {'2015':[0, 50, 150, 350, 750, 950, 1050, 1100],
@@ -98,18 +99,18 @@ const CUSTOM_BP_DICT = {
   // 'auto': {'2015':[0, 50, 150, 350, 750, 950, 1050, 1100],
   //               '2050':[0, 50, 150, 350, 750, 950, 1050, 1100],
   //               'diff':[0, 50, 150, 350, 750, 950, 1050, 1100]},
-  'transit': {'2015':[0, 150, 300, 600, 750, 900, 1200],
-              '2050':[0, 150, 300, 600, 750, 900, 1200],
-              'diff':[0, 150, 300, 600, 750, 900, 1200]},
-  'auto': {'2015':[0, 150, 300, 600, 750, 900, 1200],
-          '2050':[0, 150, 300, 600, 750, 900, 1200],
-          'diff':[0, 150, 300, 600, 750, 900, 1200]}
+  'transit': {'2015':[150, 300, 600, 750, 900, 1200],
+              '2050':[150, 300, 600, 750, 900, 1200],
+              'diff':[150, 300, 600, 750, 900, 1200]},
+  'auto': {'2015':[150, 300, 600, 750, 900, 1200],
+          '2050':[150, 300, 600, 750, 900, 1200],
+          'diff':[150, 300, 600, 750, 900, 1200]}
 }
 // legend info
 const METRIC_UNITS = {'auto': '000s',
                       'transit': '000s'};
-const METRIC_DESC_SHORT = {'auto': 'Auto Jobs Accessible',
-                          'transit': 'Transit Jobs Accessible'};
+const METRIC_DESC_SHORT = {'auto': 'Jobs Accessible',
+                          'transit': 'Jobs Accessible'};
 
 // main function
 let _featJson;
@@ -359,17 +360,9 @@ async function drawMapFeatures(queryMapData=true) {
             mode = 'diff';
           }
           let custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
-          if (map_vals[0] < 0) {
-            sel_colorvals = [map_vals[0]];
-          } else {
-            sel_colorvals = [-1];
-          }
+          sel_colorvals = [map_vals[0]].concat(custom_bps);
+          (map_vals[map_vals.length-1] > custom_bps[custom_bps.length-1])? sel_colorvals.push(map_vals[map_vals.length-1]): sel_colorvals.push(custom_bps[custom_bps.length-1]+1);
 
-          for (var i = 0; i < custom_bps.length; i++) {
-            /*if (custom_bps[i]>map_vals[0] && custom_bps[i]<map_vals[map_vals.length-1]) */sel_colorvals.push(custom_bps[i]);
-          }
-          if (map_vals[map_vals.length-1]>sel_colorvals[custom_bps.length]) sel_colorvals.push(map_vals[map_vals.length-1]);
-          console.log(sel_colorvals)
           bp = Array.from(sel_colorvals).sort((a, b) => a - b);
           
           // app.bp5 = bp[bp.length-1];
