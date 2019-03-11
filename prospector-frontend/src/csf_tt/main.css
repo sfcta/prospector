@@ -1,26 +1,38 @@
-/* CSS Layout for CSF_ACC ONLY goes here */
+/* CSS Layout for CONNECTSF_TRAVELTIME ONLY goes here */
+
 
 #slide-panel {
   top: auto;
-  bottom: 50px;
+  bottom: 90px;
 }
 
-.leaflet-bottom .info.legend.leaflet-control {
-    margin-bottom: 70px;
+.leaflet-bottom .legend.leaflet-control {
+    margin-bottom: 100px;
 }
 
 .ui.color1.button {
   background-color: #f56e71;
   color: #fff;
 }
+
 .ui.color2.button {
   background-color: #38bebb;
   color: #fff;
 }
-
 .ui.color2.button.active {
   background-color: #38bebb;
 }
+
+.ui.tiny.color1.button {
+  background-color: #f56e71;
+  color: #fff;
+}
+
+.ui.tiny.color2.button.active {
+  background-color: #38bebb;
+}
+
+  
 
 /* Stand alone CSS */
 .container {
@@ -85,10 +97,6 @@ h1,h3,h4,h5,p {
   color: #fff; 
   margin: 1% auto;
 }
-.ui h2 {
-  color: #38bebb;
-}
-
 
 hr {margin: 1% 0px; }
 
@@ -196,5 +204,3 @@ p.legend-row {
      z-index:20;
      box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
 }
-
-  

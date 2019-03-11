@@ -69,11 +69,11 @@
           </div>
 
           <br><br>
-          <h5>PROVIDE FEEDBACK</h5>
+          <h5>YOUR FEEDBACK</h5>
           <form class="ui tiny equal width form" v-on:submit.prevent>
             <div class="field">
-              <textarea v-model="comment" class="fix" maxlength="200" rows="3"
-              type="text" placeholder="What do you think about this map?"></textarea>
+              <textarea v-model="comment" class="fix" maxlength="800" rows="3"
+              type="text" placeholder="Based on this data, what do you think are the city’s transportation needs? (800 characters)"></textarea>
             </div>
             <button class="ui tiny button color2" type="submit">Submit</button>
           </form>
@@ -113,43 +113,41 @@
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
   <div v-cloak> <!-- hides everything until Vue finished loading -->
-        <h2 style="margin-bottom:0px;">Congestion in San Francisco</h2>
+        <h2 style="margin-bottom:0px;">ConnectSF: Jobs & Population</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
-        Use this tool to explore performance metrics for both automobiles and buses on major San Francisco streets and highways.
-        These are monitored every two years, in accordance with state law for San Francisco’s Congestion Management Program.
+        Use this tool to explore jobs and population measures for ConnectSF.
 
-        <ul>
+        <!--ul>
         <li><b>Auto Level-of-Service (LOS)</b> grades road segments by vehicle delay with "A" describing free flow,
         and "F" describing bumper-to-bumper conditions.</li>
         <li><b>Transit Speed</b> reflects the average speeds including both when the buses are in motion as well as waiting at stops.</li>
         <li><b>Transit Reliability</b> shows the variability in transit travel speeds. A lower percentage means transit speeds are more consistent.</li>
         <li><b>Auto-Transit Speed Ratio</b> compares auto speeds to  to transit speeds, with lower values indicating where transit is more competitive with auto.
         If the ratio is 1 then auto and transit travel times are equal.</li>
-        </ul>
+        </ul-->
 
         <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
         <ul>
-        <li>Select a metric to display it on the map for all segments, for the latest year (2017).</li>
-        <li>Move the year slider to map historic data.</li>
-        <li>Choose time period to display metric for AM or PM peak.</li>
-        <li>Click on a colored roadway segment on the map to see segment-specific trends.</li>
+        <li>Select a scenario year and measure to display it at the TAZ level on the map.</li>
+        <li>Select "Change" scenario to view the difference between future (2050) and base (2015) scenarios.</li>
+        <li>Click on a colored TAZ on the map to see TAZ-specific details.</li>
         </ul>
 
         <div style="margin-top:20px;">
-          <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
+          <button v-on:click="clickToggleHelp" class="small ui right floated teal button">
             &nbsp;OK&nbsp;
           </button>
 
-          <button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')"
-                  class="small ui right labeled icon floated yellow button"
+          <button v-on:click="this.window.open('/assets/connectsf_jobpop.zip')"
+                  class="small ui right labeled icon floated color1 button"
                   style="margin-right:5px">
                   <i class="icon download"></i>
                   Download data (.zip)
           </button>
 
           <button v-on:click="this.window.open('https://connectsf.org/','_blank')"
-                  class="small ui right floated basic violet button"
+                  class="small ui right floated basic teal button"
                   style="margin-right:5px">
                   Learn more&hellip;
           </button>

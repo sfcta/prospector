@@ -135,7 +135,6 @@ let addressDistrictName;
 let addressPlaceType;
 let selectedMode = 'auto';
 let address; 
-let landUseCheck = false; //starts out as false and is set to true on the first time a user
 
 //selects a land use. it communicates that at least one land use has been specified by the user, enabling computation
 let selectedPurpose = 'work'; 
@@ -146,6 +145,17 @@ let namePopup;
 
 let infoDistrict = L.control(); 
 let infoTotals = L.control();
+
+function landUseCheck() {
+  if (app.off_sqft !== null || app.ret_sqft !== null ||
+  app.rest_sqft !== null || app.comp_sqft !== null ||
+  app.sup_sqft !== null || app.hot_rooms !== null ||
+  app.num_studios !== null || app.num_1bed !== null ||
+  app.num_2bed !== null || app.num_3bed !== null) {
+    return true;
+  }
+  return false;
+}
 
 infoDistrict.onAdd = function (map) {
   this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
@@ -159,15 +169,15 @@ infoTotals.onAdd = function (map) {
   return this._div;
 };
 
-
 infoTotals.update = function() { 
   let message = '';
-  if (addressDistrictNum == null || landUseCheck == false) {
+  
+  if (addressDistrictNum == null || landUseCheck() == false) {
     message = '<h4>Information</h4>';
     if (addressDistrictNum == null) {
       message += '<b>-Input an address</b>' ;
     }
-    if (landUseCheck == false) {
+    if (landUseCheck() == false) {
       message += '<br><b>-Select a land use and enter project details</b>';
     }
   }
@@ -209,8 +219,8 @@ infoTotals.update = function() {
     
     message += '<tr><td>Total</td><td>' + roundToNearest(totalPersonTripsByMode["total"]) + '</td>';
     message += '<td>' + roundToNearest(filteredPersonTripsByMode["total"]) + '</td>';
-    message += '<td>' + roundToNearest(totalVehicleTripsByMode["total"]) + '</td>';
-    message += '<td>' + roundToNearest(filteredVehicleTripsByMode["total"]) + '</td>';
+    message += '<td>' + roundToNearest(totalVehicleTripsByMode["auto"]+totalVehicleTripsByMode["tnc/taxi"]) + '</td>';
+    message += '<td>' + roundToNearest(filteredVehicleTripsByMode["auto"]+filteredVehicleTripsByMode["tnc/taxi"]) + '</td>';
     message += '</table>';
     message += 'Filtered by: ' + selectedTimePeriod + ' ' + selectedDirection + ' ' + selectedPurpose;
     message += '<br><br><b>Total trips:</b> all daily trips, by all modes, purposes, and directions';
@@ -223,7 +233,7 @@ infoTotals.update = function() {
 
 infoDistrict.update = function (hoverDistrict) { //hoverDistrict is the mouseover target defned in updateMap
   let message = '';
-  if (addressDistrictNum == null || landUseCheck == false) {
+  if (addressDistrictNum == null || landUseCheck() == false) {
     message = '';
   }
   else if (hoverDistrict == null) {
@@ -281,9 +291,6 @@ infoDistrict.update = function (hoverDistrict) { //hoverDistrict is the mouseove
   }
   this._div.innerHTML = message;
 };
-
-infoTotals.addTo(mymap);
-infoDistrict.addTo(mymap);
 
 function queryServer(url){
   var promise = new Promise(function(resolve, reject) {
@@ -361,7 +368,7 @@ function addCityGeoLayer(geoJsonData){
 
 function getMax() {
   let distributions = [];
-  if (selectedMode && landUseCheck && selectedPurpose && selectedDirection 
+  if (selectedMode && landUseCheck()==true && selectedPurpose && selectedDirection 
   && addressDistrictNum && selectedTimePeriod){ //not sure if this last check is correct
     for (let key of Object.keys(districtPersonTrips)){
       distributions.push(districtPersonTrips[key]["total"]);
@@ -388,18 +395,16 @@ function getDistProps(sourceGeoType, sourceGeoTypeKey, targetDistrict, mode, dir
   let data;
   let districtFieldName = "prop_dist" + targetDistrict.dist; //the field name for the target district
   
-  if (selectedMode && landUseCheck==true && selectedPurpose && selectedDirection && addressDistrictNum && selectedTimePeriod){
+  if (selectedMode && landUseCheck()==true && selectedPurpose && selectedDirection && addressDistrictNum && selectedTimePeriod){
     //this returns a number not an object
-    console.log(filterDistributionData(sourceGeoType, sourceGeoTypeKey, targetDistrict, mode, direction, landUse, timePeriod, purpose));
     data = filterDistributionData(sourceGeoType, sourceGeoTypeKey, mode, direction, landUse, timePeriod, purpose)[0][districtFieldName];
-    console.log(data)
     return data;
   }   
 }
 
 function filterModeSplitData(landUse, placetype){
   //trying to access the proportion that corresponds with a given land use, placetype and mode
-  if (selectedMode && landUseCheck==true && app.placetype != ''){
+  if (selectedMode && landUseCheck()==true && app.placetype != ''){
     return modeSplits.filter(function(piece){
       return (piece.place_type == placetype && piece.landuse == landUse);
     });
@@ -461,6 +466,9 @@ function addAddressTooltipToMap() {
 }
 
 function updateMap() {
+  if (landUseCheck() == false) { 
+  return 
+  }
   landUseToAttr = {'Residential':{'rate_key':1, 'scalar': app.num_studios+app.num_1bed+2*app.num_2bed+3*app.num_3bed,
                      'unit':'Bedrooms', 'proxyLandUse':'Residential'},
                    'Office':{'rate_key':0, 'scalar': app.off_sqft/1000,
@@ -775,12 +783,11 @@ function getFilteredTripsByDistrict(){
     districtPersonTrips[district.dist] = personTrips; //this creates a dictionary of dictionaries, with one dictionary for every district where the keys are the land uses/total
     //and the dictionary is populated by the time period
     districtVehicleTrips[district.dist] = vehicleTrips;
-    console.log(district);
   }
 }
 
 function clearAllInputs(){
-  landUseCheck = false;
+  //landUseCheck = false;
   app.isModeAuto = true;
   app.isModeTransit = false;
   app.isModeTaxi = false;
@@ -799,17 +806,16 @@ function clearAllInputs(){
   app.isDirectionBoth = false;
   app.isTimePeriodDaily = true;
   app.isTimePeriodPM = false;
-  app.off_sqft = 0;
-  app.ret_sqft = 0;
-  app.rest_sqft = 0;
-  app.comp_sqft = 0;
-  app.sup_sqft = 0;
-  app.hot_rooms = 0;
-  app.num_studios = 0;
-  app.num_1bed = 0;
-  app.num_2bed = 0;
-  app.num_3bed = 0;
-  
+  app.off_sqft = null;
+  app.ret_sqft = null;
+  app.rest_sqft = null;
+  app.comp_sqft = null;
+  app.sup_sqft = null;
+  app.hot_rooms = null;
+  app.num_studios = null;
+  app.num_1bed = null;
+  app.num_2bed = null;
+  app.num_3bed = null;
   
   app.placetype = '';
   //this doesn't seem to be doing anything
@@ -826,7 +832,7 @@ function clearAllInputs(){
 }
 
 function resetAllInputs(){
-  landUseCheck = false;
+  //landUseCheck = false;
   app.isRetail = false;
   app.isResidential = false;
   app.isOffice = false;
@@ -943,7 +949,7 @@ function pickTimePeriod(timePeriod){
 }
 
 function accord(thing){
-  landUseCheck = true;
+  //landUseCheck = true;
   $(".ui.accordion").accordion();
 }
 
@@ -1050,6 +1056,20 @@ let app = new Vue({
     placetype: '',
     placetype_text: '',
     res_tripgen_daily: '',
+    ret_tripgen_daily: '',
+    rest_tripgen_daily: '', 
+    comp_tripgen_daily: '', 
+    off_tripgen_daily: '',
+    sup_tripgen_daily: '', 
+    hot_tripgen_daily: '', 
+
+    res_tripgen_PM: '',
+    ret_tripgen_PM: '',
+    rest_tripgen_PM: '',
+    comp_tripgen_PM: '',
+    off_tripgen_PM: '',
+    sup_tripgen_PM: '',
+    hot_tripgen_PM: '',
     
   },
   watch: {
@@ -1216,6 +1236,10 @@ function drawCity() {
   }
   city_lyr = addCityGeoLayer(geoCities)
 }
+
+infoTotals.addTo(mymap);
+infoDistrict.addTo(mymap);
+
 queryServer(CTA_API_SERVER + CITY_URL)
   .then(function(data) {
   geoCities = data;
