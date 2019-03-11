@@ -647,18 +647,27 @@ async function fetchComments(comment) {
   }
 }
 
+function showPosition(position) {
+  x.innerHTML = "Latitude: " + position.coords.latitude + 
+  "<br>Longitude: " + position.coords.longitude; 
+}
+
 function handleSubmit() {
   let timestamp = new Date();
-
   var comment = {/*select_map: "job_accessible",*/
-                 select_year: app.selected_year,
-                 select_metric: app.selected_metric,
-                 add_layer: app.ADDLAYERS,
-                 comment_time: timestamp,
-                 comment_content: app.comment};
-  console.log(timestamp.toString().substr(4, 27));
-  // console.log(JSON.stringify(comment));
-  // fetchComments(comment);
+                select_year: app.selected_year,
+                select_metric: app.selected_metric,
+                add_layer: app.ADDLAYERS,
+                comment_time: timestamp,
+                // comment_timestamp: timestamp.getTimezoneOffset(),
+                comment_content: app.comment};
+  console.log(JSON.stringify(comment));
+  fetchComments(comment);
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition);
+  } else {
+    x.innerHTML = "Geolocation is not supported by this browser.";
+  }
 }
 
 function getColorMode(cscheme) {
