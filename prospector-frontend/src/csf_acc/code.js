@@ -647,27 +647,35 @@ async function fetchComments(comment) {
   }
 }
 
+let comment = {
+  select_year: '',
+  select_metric: '',
+  add_layer: '',
+  comment_time: new Date(),
+  comment_latitude: -999,
+  comment_longitude: -999,
+  comment_content: ''
+};
+
 function showPosition(position) {
-  x.innerHTML = "Latitude: " + position.coords.latitude + 
-  "<br>Longitude: " + position.coords.longitude; 
+  comment.comment_latitude = position.coords.latitude;
+  comment.comment_longitude = position.coords.longitude; 
 }
 
 function handleSubmit() {
   let timestamp = new Date();
-  var comment = {/*select_map: "job_accessible",*/
-                select_year: app.selected_year,
-                select_metric: app.selected_metric,
-                add_layer: app.ADDLAYERS,
-                comment_time: timestamp,
-                // comment_timestamp: timestamp.getTimezoneOffset(),
-                comment_content: app.comment};
-  console.log(JSON.stringify(comment));
+  comment.select_year = app.selected_year;
+  comment.select_metric = app.selected_metric;
+  comment.add_layer = app.ADDLAYERS;
+  comment.comment_time = timestamp;
+  comment.comment_content = app.comment;
   fetchComments(comment);
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(showPosition);
   } else {
-    x.innerHTML = "Geolocation is not supported by this browser.";
+    console.log("Geolocation is not supported by this browser.");
   }
+  console.log(JSON.stringify(comment));
 }
 
 function getColorMode(cscheme) {
