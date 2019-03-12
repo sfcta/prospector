@@ -78,6 +78,7 @@ const ADDLAYERS = [
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
 const DATA_VIEW = 'connectsf_accjobs';
+const COMMENT_VIEW = 'connectsf_comment';
 
 // sidebar select lists
 const FRAC_COLS = ['auto', 'transit']; //
@@ -129,7 +130,10 @@ async function initialPrep() {
   console.log('4... ');
   await fetchAddLayers();
 
-  console.log('5 !!!');
+  console.log('5... ');
+  await checkCookie();
+
+  console.log('6 !!!');
 }
 
 // get the taz boundary data
@@ -393,7 +397,6 @@ async function drawMapFeatures(queryMapData=true) {
       for(let i of sel_colorvals) {
         sel_colors.push(color_func(i).hex());
       }
-      console.log(sel_colorvals, sel_colors)
       // activate color and hover func
       if (geoLayer) mymap.removeLayer(geoLayer);
       if (mapLegend) mymap.removeControl(mapLegend);
@@ -412,13 +415,11 @@ async function drawMapFeatures(queryMapData=true) {
       mapLegend = L.control({ position: 'bottomright' });
       mapLegend.onAdd = function(map) {
         let div = L.DomUtil.create('div', 'legend');
-        console.log(sel_colorvals, sel_colors, sel_binsflag)
         let legHTML = getLegHTML(
           sel_colorvals,
           sel_colors,
           sel_binsflag,
         );
-        console.log(legHTML)
         // legHTML = '<p class="legend-row"><i style="background:' + MISSING_COLOR + '"></i> 0 or null<br>' + legHTML;
         legHTML = '<h4>' + METRIC_DESC_SHORT[sel_metric]
                          + (METRIC_UNITS.hasOwnProperty(sel_metric)? (' (' + METRIC_UNITS[sel_metric] + ')') : '')
@@ -684,14 +685,84 @@ function showExtraLayers(e) {
   }
 }
 
-// // Connect database for comment
-// var pgClient = new pg.Client(connectionString);
-// pgClient.connect();
+// get the taz boundary data
+async function fetchComments(comment) {
+  const comment_url = API_SERVER + COMMENT_VIEW;
+  // console.log(JSON.stringify(comment))
+  try {
+    await fetch(comment_url, {
+      method: 'POST',
+      body: JSON.stringify(comment),
+      headers:{
+        'Content-Type': 'application/json',
+      }
+    });
+  } catch (error) {
+    console.log('comment error: ' + error);
+  }
+}
+
+function setCookie(cname, exdays) {
+  var d = new Date();
+  d.setTime(d.getTime() + (exdays*24*60*60*1000));
+  var expires = "expires="+ d.toUTCString();
+  document.cookie = cname + "=" + d.getTime() + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+  var name = cname + "=";
+  var decodedCookie = decodeURIComponent(document.cookie);
+  var ca = decodedCookie.split(';');
+  for(var i = 0; i <ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+function checkCookie() {
+  var username = getCookie("username");
+  if (username == "") {
+    setCookie("username", 365);
+  }
+}
+
+let comment = {
+  select_year: '',
+  select_metric: '',
+  add_layer: '',
+  comment_user: '',
+  comment_time: new Date(),
+  comment_latitude: -999,
+  comment_longitude: -999,
+  comment_content: ''
+};
+
+function showPosition(position) {
+  comment.comment_latitude = position.coords.latitude;
+  comment.comment_longitude = position.coords.longitude; 
+}
+
 function handleSubmit() {
-  let timestamp = new Date
-  console.log(app.selected_year, app.selected_metric, app.addLayers, timestamp, app.comment)
-  // var query = pgClient.query("SELECT COUNT(accjobs.sftaz) AS taznum FROM connectsf.accjobs");
-  // console.log(query)
+  let timestamp = new Date();
+  comment.select_year = app.selected_year;
+  comment.select_metric = app.selected_metric;
+  comment.add_layer = app.ADDLAYERS;
+  comment.comment_user = getCookie("username");
+  comment.comment_time = timestamp;
+  comment.comment_content = app.comment;
+  fetchComments(comment);
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition);
+  } else {
+    console.log("Geolocation is not supported by this browser.");
+  }
+  console.log(JSON.stringify(comment));
 }
 
 function getColorMode(cscheme) {
