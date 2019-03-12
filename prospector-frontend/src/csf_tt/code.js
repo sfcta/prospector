@@ -89,9 +89,7 @@ const INT_COLS = ['num_tours'];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#f3f3f3';
 const COLORRAMP = {SEQ: ['#f3f3f3','#f6d3d2','#f6b3b1','#f29292','#ec7074'],
-                   //SEQ: ['#fff0ee','#fed1cc','#fab2ad','#f4928f','#ec7074'],//['#ffecb3','#f2ad86', '#d55175', '#963d8e','#3f324f'],
-                   DIV: ['#54bdba','#a9d7d5','#f1f1f1','#f5b2b0','#ec7074']};//['#1a9641','#a6d96a','#ffffbf','#fdae61','#d7191c']};
-                   //DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
+                   DIV: ['#54bdba','#a9d7d5','#f1f1f1','#f5b2b0','#ec7074']};
 
 const MIN_BWIDTH = 2;
 const MAX_BWIDTH = 10;
@@ -106,7 +104,7 @@ const BWIDTH_MAP = {
 };
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'avg_time': {'base':[15, 20, 25, 30], 'diff':[-10, -5, 5, 10], 'pctdiff':[-20, -5, 5, 20]},
+  'avg_time': {'base':[15, 20, 25, 30], 'diff':[-5, -2, 2, 5], 'pctdiff':[-20, -5, 5, 20]},
   'num_tours': {'base':[250, 500, 750, 1000], 'diff':[-100, -10, 10, 100], 'pctdiff':[-20, -5, 5, 20]},
 }
 
