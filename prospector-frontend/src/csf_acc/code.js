@@ -129,7 +129,10 @@ async function initialPrep() {
   console.log('4... ');
   await fetchAddLayers();
 
-  console.log('5 !!!');
+  console.log('5... ');
+  await checkCookie();
+
+  console.log('6 !!!');
 }
 
 // get the taz boundary data
@@ -370,7 +373,6 @@ async function drawMapFeatures(queryMapData=true) {
             /*if (custom_bps[i]>map_vals[0] && custom_bps[i]<map_vals[map_vals.length-1]) */sel_colorvals.push(custom_bps[i]);
           }
           if (map_vals[map_vals.length-1]>sel_colorvals[custom_bps.length]) sel_colorvals.push(map_vals[map_vals.length-1]);
-          console.log(sel_colorvals)
           bp = Array.from(sel_colorvals).sort((a, b) => a - b);
           
           // app.bp5 = bp[bp.length-1];
@@ -401,7 +403,6 @@ async function drawMapFeatures(queryMapData=true) {
       for(let i of sel_colorvals) {
         sel_colors.push(color_func(i).hex());
       }
-      console.log(sel_colorvals, sel_colors)
       // activate color and hover func
       if (geoLayer) mymap.removeLayer(geoLayer);
       if (mapLegend) mymap.removeControl(mapLegend);
@@ -420,13 +421,11 @@ async function drawMapFeatures(queryMapData=true) {
       mapLegend = L.control({ position: 'bottomright' });
       mapLegend.onAdd = function(map) {
         let div = L.DomUtil.create('div', 'legend');
-        console.log(sel_colorvals, sel_colors, sel_binsflag)
         let legHTML = getLegHTML(
           sel_colorvals,
           sel_colors,
           sel_binsflag,
         );
-        console.log(legHTML)
         // legHTML = '<p class="legend-row"><i style="background:' + MISSING_COLOR + '"></i> 0 or null<br>' + legHTML;
         legHTML = '<h4>' + METRIC_DESC_SHORT[sel_metric]
                          + (METRIC_UNITS.hasOwnProperty(sel_metric)? (' (' + METRIC_UNITS[sel_metric] + ')') : '')
@@ -709,10 +708,41 @@ async function fetchComments(comment) {
   }
 }
 
+function setCookie(cname, exdays) {
+  var d = new Date();
+  d.setTime(d.getTime() + (exdays*24*60*60*1000));
+  var expires = "expires="+ d.toUTCString();
+  document.cookie = cname + "=" + d.getTime() + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+  var name = cname + "=";
+  var decodedCookie = decodeURIComponent(document.cookie);
+  var ca = decodedCookie.split(';');
+  for(var i = 0; i <ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+function checkCookie() {
+  var username = getCookie("username");
+  if (username == "") {
+    setCookie("username", 365);
+  }
+}
+
 let comment = {
   select_year: '',
   select_metric: '',
   add_layer: '',
+  comment_user: '',
   comment_time: new Date(),
   comment_latitude: -999,
   comment_longitude: -999,
@@ -729,6 +759,7 @@ function handleSubmit() {
   comment.select_year = app.selected_year;
   comment.select_metric = app.selected_metric;
   comment.add_layer = app.ADDLAYERS;
+  comment.comment_user = getCookie("username");
   comment.comment_time = timestamp;
   comment.comment_content = app.comment;
   fetchComments(comment);
