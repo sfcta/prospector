@@ -95,8 +95,10 @@ const INT_COLS = []; //
 const DISCRETE_VAR_LIMIT = 10; //
 const MISSING_COLOR = '#ccd'; //
 const COLORRAMP = {//SEQ: ['#ccd', '#eaebe1','#D2DAC3','#7eb2b5','#548594', '#003f5a', '#001f2d'],
-                   SEQ: ['#eaebe1','#D2DAC3','#7eb2b5','#548594', '#003f5a', '#001f2d'],
+                   SEQ: ['#eaebe1','#D2DAC3','#7eb2b5','#548594', '#32657a', '#003f5a', '#001f2d'],
                    DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
+
+                    
 const CUSTOM_BP_DICT = {
   // 'transit': {'2015':[0, 50, 150, 350, 750, 950, 1050, 1100],
   //                  '2050':[0, 50, 150, 350, 750, 950, 1050, 1100],
@@ -104,12 +106,12 @@ const CUSTOM_BP_DICT = {
   // 'auto': {'2015':[0, 50, 150, 350, 750, 950, 1050, 1100],
   //               '2050':[0, 50, 150, 350, 750, 950, 1050, 1100],
   //               'diff':[0, 50, 150, 350, 750, 950, 1050, 1100]},
-  'transit': {'2015':[150, 300, 600, 750, 900, 1200],
-              '2050':[150, 300, 600, 750, 900, 1200],
-              'diff':[150, 300, 600, 750, 900, 1200]},
-  'auto': {'2015':[150, 300, 600, 750, 900, 1200],
-          '2050':[150, 300, 600, 750, 900, 1200],
-          'diff':[150, 300, 600, 750, 900, 1200]}
+  'transit': {'2015':[100, 300, 500, 700, 900, 1100],
+              '2050':[100, 300, 500, 700, 900, 1100],
+              'diff':[100, 300, 500, 700, 900, 1100]},
+  'auto': {'2015':[100, 300, 500, 700, 900, 1100],
+          '2050':[100, 300, 500, 700, 900, 1100],
+          'diff':[100, 300, 500, 700, 900, 1100]}
 }
 // legend info
 const METRIC_UNITS = {'auto': '000s',
@@ -288,7 +290,7 @@ async function drawMapFeatures(queryMapData=true) {
       // app.custom_check = false;
       if (base_lookup == undefined) await getMapData();
       // console.log(base_lookup)
-      console.log("data draw!")
+      //console.log("data draw!")
       
       let map_metric;
       map_vals = [];
@@ -333,7 +335,7 @@ async function drawMapFeatures(queryMapData=true) {
       let sel_colorvals2;
       let bp;
 
-      console.log("color draw!")
+      //console.log("color draw!")
       if (queryMapData) {
         sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
         
@@ -349,7 +351,7 @@ async function drawMapFeatures(queryMapData=true) {
         // updateDistChart(histogram(dist_vals));
 
         if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) {
-          console.log("drawMapFeatures, 3")
+          //console.log("drawMapFeatures, 3")
           sel_binsflag = false;
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
           sel_colorvals2 = sel_colorvals.slice(0);
@@ -361,7 +363,7 @@ async function drawMapFeatures(queryMapData=true) {
           app.bp4 = 0;
           app.bp5 = 1;
         } else {
-          console.log("drawMapFeatures, 4")
+          //console.log("drawMapFeatures, 4")
           // color schema breakpoints
           let mode = app.sliderValue[0];
           if (app.comp_check){
@@ -472,9 +474,6 @@ function styleByMetricColor(feat) {
 
   if (!color) color = MISSING_COLOR;
 
-  if (feat['metric']==0) {
-    color = MISSING_COLOR;
-  }
   return { fillColor: color, opacity: 1, weight: 1, color: color, fillOpacity: 1};
 }
 
