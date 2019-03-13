@@ -2,11 +2,11 @@
 
 #slide-panel {
   top: auto;
-  bottom: 50px;
+  bottom: 90px;
 }
 
-.leaflet-bottom .info.legend.leaflet-control {
-    margin-bottom: 70px;
+.leaflet-bottom .legend.leaflet-control {
+    margin-bottom: 100px;
 }
 
 .ui.color1.button {
