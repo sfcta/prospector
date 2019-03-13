@@ -110,7 +110,7 @@ hr {margin: 1% 0px; }
   margin: 5px 5px 5px 5px;
 }
 .ui.toggle.checkbox {
-  margin: 2% 0px;
+  margin: 2% 3%;
 }
 .ui.toggle.checkbox input:focus:checked~label:before{
   background-color: #f56e71!important;
