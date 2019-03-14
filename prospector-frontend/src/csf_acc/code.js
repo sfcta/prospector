@@ -199,12 +199,15 @@ function getInfoHtml(geo) {
   let retval = '<b>TAZ: </b>' + `${geo.taz}<br/>` +
                 '<b>NEIGHBORHOOD: </b>' + `${geo.nhood}<br/><hr>`;
 
-  let metric1 = app.selected_metric + YR_LIST[0];
-  let metric2 = app.selected_metric + YR_LIST[1];
-  let diff = geo[metric2] - geo[metric1];
+  let metcol1 = app.selected_metric + YR_LIST[0];
+  let metcol2 = app.selected_metric + YR_LIST[1];
+  
+  let metric1 = geo[metcol1].toLocaleString();
+  let metric2 = geo[metcol2].toLocaleString();
+  let diff = (geo[metcol2] - geo[metcol1]).toLocaleString();
 
-  retval += `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric1]}<br/>` +
-            `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric2]}<br/>`+
+  retval += `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${metric1}<br/>` +
+            `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${metric2}<br/>`+
             `<b>${METRIC_DESC[app.selected_metric]}</b>` + '<b> Change: </b>' + `${diff}`;
   return retval; 
 }
