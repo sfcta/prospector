@@ -74,6 +74,10 @@ const ADDLAYERS = [
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
 const DATA_VIEW = 'connectsf_traveltime';
+const FREQ_DIST_VIEW = 'connectsf_ttdist_all';
+const FREQ_BY_GEO_VIEW = 'PLACEHOLDER';
+const FREQ_DIST_BIN_VAR = 'bin';
+const FREQ_DIST_METRIC_VAR = 'avg_tours';
 
 const GEOTYPE = 'TAZ';
 const GEOID_VAR = 'taz';
@@ -125,10 +129,10 @@ async function initialPrep() {
   _featJson = await fetchMapFeatures();
 
   console.log('2... ');
-  await drawMapFeatures();
+  await getFreqDistData();
   
   console.log('3... ');
-  //await buildChartHtmlFromData();
+  await drawMapFeatures();
   
   console.log('4... ');
   await fetchAddLayers();
@@ -222,6 +226,7 @@ async function getMapData() {
   let resp = await fetch(data_url);
   let jsonData = await resp.json();
   base_lookup = {}; // collects attributes for each geometry
+  
   let tmp = {}; // aggregates attributes across all geometries
   for (let yr of YR_LIST) {
     tmp[yr] = {};
@@ -263,10 +268,39 @@ async function getMapData() {
       }
     }
   }
+}
+
+async function getFreqDistData() {
+  let data_url = API_SERVER + FREQ_DIST_VIEW;
+  let resp = await fetch(data_url);
+  let jsonData = await resp.json();
+  
+  freq_dist_lookup = {}; // collects attributes for each bin in the frequency distribution
+  
+  // build the dictionary
+  for (let yr of YR_LIST) {
+    freq_dist_lookup[yr] = {};
+    for (let inc of app.income_options) {
+      freq_dist_lookup[yr][inc.value] = {}
+      for (let imp of app.importance_options){
+        freq_dist_lookup[yr][inc.value][imp.value] = {}
+        // last loop is unnecessary
+        for (let bin=app.bin_start; bin < app.bin_stop; bin+=app.bin_step) {
+          freq_dist_lookup[yr][inc.value][imp.value][bin] = 0
+        }
+      }
+    }
+  }
+  
+  // fill the dictionary
+  for (let entry of jsonData) {
+    freq_dist_lookup[entry[YEAR_VAR]][entry[INC_VAR]][entry[IMP_VAR]][entry[FREQ_DIST_BIN_VAR]] = entry[FREQ_DIST_METRIC_VAR];
+  }
   
 }
 
 let base_lookup;
+let freq_dist_lookup;
 let map_vals;
 
 async function drawMapFeatures(queryMapData=true) {
@@ -302,21 +336,41 @@ async function drawMapFeatures(queryMapData=true) {
       let color_func;
       let sel_colorvals2;
       let bp;
-      
+      let dist_vals = [];
       if (queryMapData) {
+        // frequency distribution chart
+        let dist_vals = [];
+        let tot = 0;
+        let val;
+        let bin_tot = 0;
+        let labels = [];
+        let bin_min = app.bin_start;
+        let bin_max = bin_min + app.bin_step;
+        
+        for (let bin=app.bin_start; bin <= app.bin_stop; bin++) {
+          if (bin==bin_max) {
+            // reached the end of the last bin, push the data and lables and move to the next one
+            if (bin == app.bin_stop) {
+              labels.push('>' + bin)
+            } else {
+              labels.push(bin_min + '-' + bin_max)
+            }
+            dist_vals.push({x:bin_min, y:val});
+            
+            bin_min = bin_max;
+            bin_max = bin_min + app.bin_step;
+            bin_tot = 0;
+          }
+
+          val = Math.round(freq_dist_lookup[app.selected_year][app.selected_income][app.selected_importance][bin]);
+          bin_tot += val;
+          tot += val;
+          //console.log(bin, bin_min, bin_max, val, bin_tot, tot);
+        }
+        updateDistChart(dist_vals, labels)
+        
+        // color ramps
         sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
-        
-        //calculate distribution
-        let dist_vals = map_vals;
-        /*let x = d3.scaleLinear()
-                .domain([dist_vals[0], dist_vals[dist_vals.length-1]])
-        let numticks = 20;
-        if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) numticks = sel_colorvals.length;
-        let histogram = d3.histogram()
-            .domain(x.domain())
-            .thresholds(x.ticks(numticks));*/
-        //updateDistChart(histogram(dist_vals));
-        
         if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) {
           sel_binsflag = false;
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
@@ -479,27 +533,21 @@ function highlightSelectedSegment() {
 
 let distChart = null;
 let distLabels;
-function updateDistChart(bins) {
-  let data = [];
-  distLabels = [];
-  for (let b of bins) {
-    let x0 = Math.round(b.x0*prec)/prec;
-    let x1 = Math.round(b.x1*prec)/prec;
-    data.push({x:x0, y:b.length});
-    distLabels.push(x0 + '-' + x1);
-  }
 
+function updateDistChart(data, labels, el='dist-chart') {
+  distLabels = labels;
+  
   if (distChart) {
     distChart.setData(data);
   } else {
       distChart = new Morris.Area({
-        element: 'dist-chart',
+        element: el,
         data: data,
         xkey: 'x',
         ykeys: 'y',
         ymin: 0,
-        labels: ['Freq'],
-        lineColors: ['#1fc231'],
+        labels: ['Tours'],
+        lineColors: ['#54bdba'],
         xLabels: 'x',
         xLabelAngle: 25,
         xLabelFormat: binFmt,
@@ -512,7 +560,6 @@ function updateDistChart(bins) {
         eventLineColors: ['#ccc'],
       });
   }
-
 }
 
 function binFmt(x) {
@@ -740,6 +787,10 @@ let app = new Vue({
     {text: 'All Incomes', value: 'all'},
     ],
     
+    bin_start: 0,
+    bin_stop: 120,
+    bin_step: 5,
+    
     selected_colorscheme: COLORRAMP.SEQ,
     modeMap: {
       '#ffffcc,#663399': 'lch',
@@ -757,7 +808,7 @@ let app = new Vue({
     selected_importance: selectionChanged,
     selected_metric: selectionChanged,
     selected_income: selectionChanged,
-	addLayers: showExtraLayers,
+    addLayers: showExtraLayers,
     
     bp1: bp1Changed,
     bp2: bp2Changed,
