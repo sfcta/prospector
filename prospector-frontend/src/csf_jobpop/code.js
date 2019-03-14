@@ -199,18 +199,23 @@ function getInfoHtml(geo) {
   let retval = '<b>TAZ: </b>' + `${geo[GEOID_VAR]}<br/>` +
                 '<b>NEIGHBORHOOD: </b>' + `${geo.nhood}<br/><hr>`;
 
-  let metric1 = app.selected_metric + YR_LIST[0];
-  let metric2 = app.selected_metric + YR_LIST[1];
-  let metric3 = app.selected_metric + 'den' + YR_LIST[0];
-  let metric4 = app.selected_metric + 'den' + YR_LIST[1];
-  let diff = geo[metric2] - geo[metric1];
-  let dendiff = geo[metric4] - geo[metric3];
+  let metcol1 = app.selected_metric + YR_LIST[0];
+  let metcol2 = app.selected_metric + YR_LIST[1];
+  let metcol3 = app.selected_metric + 'den' + YR_LIST[0];
+  let metcol4 = app.selected_metric + 'den' + YR_LIST[1];
+  
+  let metric1 = geo[metcol1].toLocaleString();
+  let metric2 = geo[metcol2].toLocaleString();
+  let metric3 = geo[metcol3].toLocaleString();
+  let metric4 = geo[metcol4].toLocaleString();
+  let diff = (geo[metcol2] - geo[metcol1]).toLocaleString();
+  let dendiff = (geo[metcol4] - geo[metcol3]).toLocaleString();
 
-  retval += `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric1]}<br/>` +
-            `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo[metric2]}<br/>` +
+  retval += `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${metric1}<br/>` +
+            `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${metric2}<br/>` +
             `<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + '<b> Change: </b>' + `${diff}<br/><hr>` +
-            `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + `<b> Density (000s /sq. mi.): </b>` + `${geo[metric3]}<br/>` +
-            `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + `<b> Density (000s /sq. mi.): </b>` + `${geo[metric4]}<br/>` +
+            `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + `<b> Density (000s /sq. mi.): </b>` + `${metric3}<br/>` +
+            `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + `<b> Density (000s /sq. mi.): </b>` + `${metric4}<br/>` +
             `<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + '<b> Density Change: </b>' + `${dendiff}<br/>`;
   return retval; 
 }
