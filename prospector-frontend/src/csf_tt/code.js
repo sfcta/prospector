@@ -340,6 +340,7 @@ async function drawMapFeatures(queryMapData=true) {
       if (queryMapData) {
         // frequency distribution chart
         let dist_vals = [];
+        let pct_dist_vals = [];
         let tot = 0;
         let val;
         let bin_tot = 0;
@@ -350,13 +351,9 @@ async function drawMapFeatures(queryMapData=true) {
         for (let bin=app.bin_start; bin <= app.bin_stop; bin++) {
           if (bin==bin_max) {
             // reached the end of the last bin, push the data and lables and move to the next one
-            if (bin == app.bin_stop) {
-              labels.push('>' + bin)
-            } else {
-              labels.push(bin_min + '-' + bin_max)
-            }
-            dist_vals.push({x:bin_min, y:val});
-            
+            labels.push(bin_min + '-' + bin_max);
+            dist_vals.push({x:bin_min, y:bin_tot});
+            //console.log(bin_min, val);
             bin_min = bin_max;
             bin_max = bin_min + app.bin_step;
             bin_tot = 0;
@@ -367,7 +364,18 @@ async function drawMapFeatures(queryMapData=true) {
           tot += val;
           //console.log(bin, bin_min, bin_max, val, bin_tot, tot);
         }
-        updateDistChart(dist_vals, labels)
+        // push the overflow bin
+        dist_vals.push({x:bin_min, y:val});
+        labels.push('>' + bin_min);
+
+        //console.log(Object.keys(dist_vals))
+        for (let bin in dist_vals) {
+          console.log(dist_vals[bin].x, dist_vals[bin].y, dist_vals[bin].y/tot, tot);
+          pct_dist_vals.push({x:bin.x, y:dist_vals[bin].y/tot});
+        }
+        
+        updateDistChart(dist_vals, labels, binFmt, yFmtInt, 'dist-chart')
+        updateDistChart(pct_dist_vals, labels, binFmt, yFmtPct, 'pct-dist-chart')
         
         // color ramps
         sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
@@ -531,16 +539,16 @@ function highlightSelectedSegment() {
   });
 }
 
-let distChart = null;
+let distChart = {};
 let distLabels;
 
-function updateDistChart(data, labels, el='dist-chart') {
+function updateDistChart(data, labels, xFmt, yFmt, el='dist-chart') {
   distLabels = labels;
   
-  if (distChart) {
-    distChart.setData(data);
+  if (distChart[el]) {
+    distChart[el].setData(data);
   } else {
-      distChart = new Morris.Area({
+      distChart[el] = new Morris.Area({
         element: el,
         data: data,
         xkey: 'x',
@@ -551,6 +559,7 @@ function updateDistChart(data, labels, el='dist-chart') {
         xLabels: 'x',
         xLabelAngle: 25,
         xLabelFormat: binFmt,
+        yLabelFormat: yFmt,
         hideHover: true,
         parseTime: false,
         fillOpacity: 0.4,
@@ -564,6 +573,14 @@ function updateDistChart(data, labels, el='dist-chart') {
 
 function binFmt(x) {
   return distLabels[x.x];
+}
+
+function yFmtInt(y) {
+  return Math.round(y);
+}
+
+function yFmtPct(y) {
+  return (Math.round(y*100)).toString() + '%';
 }
 
 let selGeoId;
