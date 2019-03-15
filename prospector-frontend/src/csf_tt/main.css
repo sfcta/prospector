@@ -69,6 +69,7 @@
   right: 400px;
   z-index: 10;
   height:1%;
+  transition: margin 0.4s;
 }
 
 .shrunken {
