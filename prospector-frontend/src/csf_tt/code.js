@@ -96,9 +96,28 @@ const IMP_LIST = ['mandatory','discretionary']
 const INT_COLS = ['num_tours'];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#f3f3f3';
-const COLORRAMP = {SEQ: ['#f3f3f3','#f6d3d2','#f6b3b1','#f29292','#ec7074'],
-                   DIV: ['#54bdba','#a9d7d5','#f1f1f1','#f5b2b0','#ec7074']};
 
+//COLOR RAMPS
+/*
+#feffc2','#e2f0ad','#b9da8b','#90c36a','#74b250','#5d9a56','#437656','#205756','#054252 //pale green to dark blue-green
+#eefacd','#c5e5bf','#89c5a8','#49a895','#009485','#00807b','#116570','#164b61','#173252 //pale blue-green to dark blue
+#daf2ef','#bedceb','#9abae2','#709bd9','#5885d1','#5674b9','#585b94','#544270','#512f57 //pale blue to dark blue-purple
+#e1f9fc','#d1e3f9','#c7ccf4','#bfb1de','#baa0d2','#928cbb','#57709a','#045377','#004263 //pale blue-purple to dark blue
+#ffdcd2','#f8bdb6','#eaafbe','#dd97c4','#d687c8','#b473b4','#88599a','#5e3d7f','#442c6b //peach to purple
+#ffedff','#ffdaea','#f5c0c6','#e2a9a1','#d79a8a','#bd807e','#975d70','#6f3b5d','#562756 //off-white to maroon-purple
+#fffcd4','#fde5ba','#fdc193','#ffa175','#f28350','#d47144','#a1563b','#73464c','#3d3551 //pale yellow to dark dust-purple
+#ffe6c9','#ffd6b1','#ffbe90','#f0a76b','#e09246','#a48146','#6e6e43','#445c3b','#214236 //peach to dark green
+#fff9bf','#feefa9','#ffe28a','#ffd469','#ffc845','#eba946','#cc7b45','#995045','#7d3e43 //pale yellow to dark rust
+*/
+
+// ConnectSF brand color ramps
+/*const COLORRAMP = {SEQ: ['#f3f3f3','#f6d3d2','#f6b3b1','#f29292','#ec7074'],
+                   DIV: ['#54bdba','#a9d7d5','#f1f1f1','#f5b2b0','#ec7074']};*/
+const COLORRAMP = {SEQ: ['#eefacd','#89c5a8','#009485','#116570','#173252'],
+                   //SEQ: ['#eefacd','#c5e5bf','#89c5a8','#49a895','#009485','#00807b','#116570','#164b61','#173252'],
+                   DIV: ['#54bdba','#a9d7d5','#f1f1f1','#f5b2b0','#ec7074']};
+                   
+                   
 const MIN_BWIDTH = 2;
 const MAX_BWIDTH = 10;
 const DEF_BWIDTH = 4;
@@ -112,6 +131,7 @@ const BWIDTH_MAP = {
 };
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
+  //'avg_time': {'base':[5, 10, 15, 20, 25, 30, 35, 40], 'diff':[-5, -2, 2, 5], 'pctdiff':[-20, -5, 5, 20]},
   'avg_time': {'base':[15, 20, 25, 30], 'diff':[-5, -2, 2, 5], 'pctdiff':[-20, -5, 5, 20]},
   'num_tours': {'base':[250, 500, 750, 1000], 'diff':[-100, -10, 10, 100], 'pctdiff':[-20, -5, 5, 20]},
 }
@@ -324,7 +344,14 @@ async function buildCharts() {
   let bin_max = bin_min + app.bin_step;
   let ykeys = [];
   let ylabels = [];
+  let yMin = 'auto 0';
+  let yMax = 'auto';
   
+  //console.log(app.selected_year);
+  if (app.selected_year == 'diff') {
+    yMin = -0.03;
+    yMax = 0.03;
+  }
   for (let inc of app.income_options) {
     tots[inc.value] = {};
     bin_tots[inc.value] = {};
@@ -379,8 +406,8 @@ async function buildCharts() {
   xlabels.push('>' + bin_min);
   
   
-  updateDistChart(dist_vals, 'x', ykeys, xlabels, ylabels, binFmt, yFmtInt, 'dist-chart')
-  updateDistChart(pct_dist_vals, 'x', ykeys, xlabels, ylabels, binFmt, yFmtPct, 'pct-dist-chart')
+  //updateDistChart(dist_vals, 'x', ykeys, xlabels, ylabels, yMin, yMax, binFmt, yFmtInt, 'dist-chart')
+  updateDistChart(pct_dist_vals, 'x', ykeys, xlabels, ylabels, yMin, yMax, binFmt, yFmtPct, 'pct-dist-chart')
 }
 
 async function buildCharts_Simple() {
@@ -633,9 +660,10 @@ function highlightSelectedSegment() {
 let distChart = {};
 let distLabels;
 
-function updateDistChart(data, xKey, yKeys, xLabels, yLabels, xFmt, yFmt, el='dist-chart') {
+function updateDistChart(data, xKey, yKeys, xLabels, yLabels, yMin, yMax, xFmt, yFmt, el='dist-chart') {
   distLabels = xLabels;
-  let colors = ['#54bdba','#ec7074','#f1f1f1']
+  //let colors = ['#54bdba','#ec7074','#767676']
+  let colors = ['#89c5a8','#009485','#116570']
   if (yKeys instanceof String) {
     colors = colors.slice(0, 1)
   } else {
@@ -643,6 +671,8 @@ function updateDistChart(data, xKey, yKeys, xLabels, yLabels, xFmt, yFmt, el='di
   }
   //console.log(colors)
   if (distChart[el]) {
+    //distChart[el].ymin = yMin;
+    //distChart[el].ymax = yMax;
     distChart[el].setData(data);
   } else {
       distChart[el] = new Morris.Line({
@@ -650,7 +680,8 @@ function updateDistChart(data, xKey, yKeys, xLabels, yLabels, xFmt, yFmt, el='di
         data: data,
         xkey: xKey,
         ykeys: yKeys,
-        //ymin: 0,
+        //ymin: yMin,
+        //ymax: yMax,
         labels: yLabels,
         lineColors: colors,
         xLabels: xKey,
@@ -663,7 +694,7 @@ function updateDistChart(data, xKey, yKeys, xLabels, yLabels, xFmt, yFmt, el='di
         pointSize: 1,
         //behaveLikeLine: true,
         eventStrokeWidth: 2,
-        eventLineColors: ['#ccc'],
+        eventLineColors: ['#009485'],
       });
   }
 }
