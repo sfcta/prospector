@@ -71,27 +71,6 @@
               <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
               <label><h5>${item.name}</h5></label>
             </div>
-            <!--<h5 style="margin-top:15px">CHOOSE YEAR(S)</h5>
-            <vue-slider v-bind="scnSlider" v-model="sliderValue"></vue-slider>-->
-            
-            <!--<h5 style="margin-top:50px">CHOOSE MAP METRIC:</h5>
-            <select v-model="selected_metric">
-              <option v-for="option in metric_options" v-bind:value="option.value">
-                ${option.text}
-              </option>
-            </select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="checkbox" id="pct_checkbox" v-model="pct_check" v-bind:disabled="!comp_check" style="margin-top:0px">
-            <label for="pct_checkbox"><b>&nbsp;&nbsp;PERCENT DIFF</b></label>-->
-            
-            <!--br>
-            <input type="checkbox" id="bwidth_checkbox" v-model="bwidth_check" style="margin-top:15px">
-            <label for="bwidth_checkbox"><b>&nbsp;&nbsp;CHOOSE BAND-WIDTH METRIC:</b></label>
-            <br>
-            <select v-model="selected_bwidth" v-bind:disabled="!bwidth_check">
-              <option v-for="option in bwidth_options" v-bind:value="option.value">
-                ${option.text}
-              </option>
-            </select-->
             
             <hr/>
 
@@ -105,36 +84,8 @@
             <!--<div id='pct-dist-chart' style="height: 200px"></div>
             <div id='pct-dist-chart-simple' style="height: 200px"></div>-->
             
-            <!--input type="checkbox" id="bwcustom_checkbox" v-model="bwcustom_check" v-bind:disabled="bwcustom_disable" style="margin-top:15px">
-            <label for="bwcustom_checkbox"><b>&nbsp;&nbsp;CHOOSE CUSTOM BANDWIDTH</b></label>
-            <br>
-            <input v-model.number="bwbp0" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488;margin-top:5px">
-            <input v-model.number.lazy="bwbp1" type="number" step="any" v-bind:disabled="!bwcustom_check || bwcustom_disable" style="width:55px;">
-            <input v-model.number.lazy="bwbp2" type="number" step="any" v-bind:disabled="!bwcustom_check || bwcustom_disable" style="width:55px;">
-            <input v-model.number.lazy="bwbp3" type="number" step="any" v-bind:disabled="!bwcustom_check || bwcustom_disable" style="width:55px;">
-            <input v-model.number.lazy="bwbp4" type="number" step="any" v-bind:disabled="!bwcustom_check || bwcustom_disable" style="width:55px;">
-            <input v-model.number="bwbp5" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488">  
-            
-            <button v-on:click="bwUpdateMap"
-                    v-bind:class="{ active: isBWUpdActive, yellow: isBWUpdActive}"
-                     class="mini ui grey button"
-                    v-bind:disabled="!bwcustom_check" style="margin-top:10px">
-                     Update Map!</button-->
-            
           </div>
       </div>
-      <!--<div id="header">
-          <div id="stats-panel">
-            <hr style="margin-bottom:-5px;" />
-            <div id="chartinfo"><h3 style="font-size: 22px;">${chartTitle}</h3></div>
-            <div id="geoinfo"><h5>${chartSubtitle}</h5></div>
-            <div id="longchart">
-                <div class="ui active dimmer">
-                  <div class="ui text loader">Loading</div>
-                </div>
-            </div>
-          </div>
-      </div>-->
 
       <div class="logo">
             <hr/>
