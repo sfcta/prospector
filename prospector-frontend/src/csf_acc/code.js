@@ -95,7 +95,7 @@ const INT_COLS = []; //
 const DISCRETE_VAR_LIMIT = 10; //
 const MISSING_COLOR = '#ccd'; //
 const COLORRAMP = {//SEQ: ['#ccd', '#eaebe1','#D2DAC3','#7eb2b5','#548594', '#003f5a', '#001f2d'],
-                   SEQ: ['#eaebe1','#D2DAC3','#7eb2b5','#548594', '#32657a', '#003f5a', '#001f2d'],
+                   SEQ: ['#daf2ef','#bedceb','#9abae2','#709bd9', '#5885d1', '#585b94', '#544270'],
                    DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
                     
