@@ -82,6 +82,16 @@
               <label><h5>${item.name}</h5></label>
             </div>
             
+            <br><br>
+            <h5>YOUR FEEDBACK</h5>
+            <form class="ui tiny equal width form" v-on:submit.prevent>
+              <div class="field">
+                <textarea v-model="comment" class="fix" maxlength="800" rows="3"
+                type="text" placeholder="Based on this data, what do you think are the city’s transportation needs? (800 characters)"></textarea>
+              </div>
+              <button class="ui tiny button color2" type="submit">Submit</button>
+            </form>
+            
             <hr/>
             
           </div>
