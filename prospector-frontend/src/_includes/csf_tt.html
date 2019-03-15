@@ -96,12 +96,14 @@
             <hr/>
 
             <h5 style="margin-top:25px">TOURS BY TRAVEL TIME</h5>
-            <div id="dist-chart" style="height: 200px">
-            </div>
+            <div v-for="item in distChartName" v-bind:id='item' style="height: 200px"></div>
+            <!--<div id='dist-chart' style="height: 200px"></div>-->
+            <!--<div id='dist-chart-simple' style="height: 200px"></div>-->
             
             <h5 style="margin-top:25px">TOUR TRAVEL TIME PERCENTAGE FREQUENCY DISTRIBUTION</h5>
-            <div id="pct-dist-chart" style="height: 200px">
-            </div>
+            <div v-for="item in pctDistChartName" v-bind:id='item' style="height: 200px"></div>
+            <!--<div id='pct-dist-chart' style="height: 200px"></div>
+            <div id='pct-dist-chart-simple' style="height: 200px"></div>-->
             
             <!--input type="checkbox" id="bwcustom_checkbox" v-model="bwcustom_check" v-bind:disabled="bwcustom_disable" style="margin-top:15px">
             <label for="bwcustom_checkbox"><b>&nbsp;&nbsp;CHOOSE CUSTOM BANDWIDTH</b></label>

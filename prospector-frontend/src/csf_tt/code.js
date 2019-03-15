@@ -303,6 +303,172 @@ let base_lookup;
 let freq_dist_lookup;
 let map_vals;
 
+async function buildCharts() {
+  // frequency distribution chart
+  let dist_vals = [];
+  let pct_dist_vals = [];
+  let tots = {};
+  let val;
+  let bin_tots = {};
+  let xlabels = [];
+  let bin_min = app.bin_start;
+  let bin_max = bin_min + app.bin_step;
+  let ykeys = [];
+  let ylabels = [];
+  
+  for (let inc of app.income_options) {
+    tots[inc.value] = 0;
+    bin_tots[inc.value] = 0;
+    ykeys.push(inc.value);
+    ylabels.push(inc.text);
+  }
+  
+  for (let bin=app.bin_start; bin <= app.bin_stop; bin++) {
+    if (bin==bin_max) {
+      // reached the end of the last bin, push the data and lables and move to the next one
+      xlabels.push(bin_min + '-' + bin_max);
+      
+      let d = {};
+      d['x'] = bin_min;
+      for (let inc of app.income_options) {
+        d[inc.value] = bin_tots[inc.value]
+        bin_tots[inc.value] = 0;
+      }
+      dist_vals.push(d);
+      
+      bin_min = bin_max;
+      bin_max = bin_min + app.bin_step;
+    }
+    
+    for (let inc of app.income_options) {
+      //console.log(inc)
+      val = Math.round(freq_dist_lookup[app.selected_year][inc.value][app.selected_importance][bin]);
+      bin_tots[inc.value] += val;
+      tots[inc.value] += val;
+    }
+  }
+  // push the overflow bin
+  let d = {};
+  d['x'] = bin_min;
+  for (let inc of app.income_options) {
+    d[inc.value] = bin_tots[inc.value]
+  }
+  
+  dist_vals.push(d);
+  xlabels.push('>' + bin_min);
+  
+  if (app.selected_year=='diff') {
+    let dist_vals2 = [];
+    //this is just to get pct when diff is selected
+    bin_tots = {};
+    tots = {};
+    let vals = {};
+    for (let inc of app.income_options) {
+      tots[inc.value] = {};
+      bin_tots[inc.value] = {};
+      for (let yr of YR_LIST) {
+        tots[inc.value][yr] = 0;
+        bin_tots[inc.value][yr] = 0;
+      }
+    }
+    for (let bin=app.bin_start; bin <= app.bin_stop; bin++) {
+    if (bin==bin_max) {
+      // reached the end of the last bin, push the data and lables and move to the next one
+      let d = {};
+      d['x'] = bin_min;
+      for (let inc of app.income_options) {
+        d[inc.value] = {};
+        for (let yr of YR_LIST) {
+          d[inc.value][yr] = bin_tots[inc.value][yr]
+          bin_tots[inc.value][yr] = 0;
+        }
+      }
+      dist_vals2.push(d);
+      
+      bin_min = bin_max;
+      bin_max = bin_min + app.bin_step;
+    }
+    
+    for (let inc of app.income_options) {
+      //console.log(inc)
+      for (let yr of YR_LIST) {
+        val = Math.round(freq_dist_lookup[yr][inc.value][app.selected_importance][bin]);
+        bin_tots[inc.value][yr] += val;
+        tots[inc.value][yr] += val;
+      }
+    }
+    
+    for (let bin in dist_vals2) {
+      let d = {};
+      d['x'] = bin.x;
+      for (let inc of app.income_options) {
+        console.log(dist_vals2[bin]);
+        let d1 = dist_vals2[bin][inc.value]['2015']/tots[inc.value]['2015'];
+        let d2 = dist_vals2[bin][inc.value]['2050']/tots[inc.value]['2050'];
+        d[inc.value] = d2 - d1;
+        //console.log(d1, d2, d2-d1); 
+      }
+      pct_dist_vals.push(d);
+    }
+  }
+  } else {
+    for (let bin in dist_vals) {
+      let d = {};
+      d['x'] = bin.x;
+      for (let inc of app.income_options) {
+        d[inc.value] = dist_vals[bin][inc.value]/tots[inc.value];
+      }
+      pct_dist_vals.push(d);
+    }
+  }
+  
+  updateDistChart(dist_vals, 'x', ykeys, xlabels, ylabels, binFmt, yFmtInt, 'dist-chart')
+  updateDistChart(pct_dist_vals, 'x', ykeys, xlabels, ylabels, binFmt, yFmtPct, 'pct-dist-chart')
+}
+
+async function buildCharts_Simple() {
+  // frequency distribution chart
+  let dist_vals = [];
+  let pct_dist_vals = [];
+  let tot = 0;
+  let val;
+  let bin_tot = 0;
+  let xlabels = [];
+  let bin_min = app.bin_start;
+  let bin_max = bin_min + app.bin_step;
+  let ykeys = [];
+  let ylabels = [];
+  
+  for (let bin=app.bin_start; bin <= app.bin_stop; bin++) {
+    if (bin==bin_max) {
+      // reached the end of the last bin, push the data and lables and move to the next one
+      xlabels.push(bin_min + '-' + bin_max);
+      dist_vals.push({x:bin_min, y:bin_tot});
+      
+      bin_min = bin_max;
+      bin_max = bin_min + app.bin_step;
+      bin_tot = 0;
+    }
+    
+    for (let inc of app.income_options) {
+      //console.log(inc)
+      val = Math.round(freq_dist_lookup[app.selected_year][inc.value][app.selected_importance][bin]);
+      bin_tot += val;
+      tot += val;
+    }
+  }
+  // push the overflow bin
+  dist_vals.push({x:bin_min, y:val});
+  xlabels.push('>' + bin_min);
+
+  for (let bin in dist_vals) {
+    pct_dist_vals.push({x:bin.x, y:dist_vals[bin].y/tot});
+  }
+  
+  updateDistChart(dist_vals, 'x', 'y', xlabels, 'Tours', binFmt, yFmtInt, 'dist-chart-simple')
+  updateDistChart(pct_dist_vals, 'x', 'y', xlabels, 'Pct of Tours', binFmt, yFmtPct, 'pct-dist-chart-simple')
+}
+
 async function drawMapFeatures(queryMapData=true) {
 
   // create a clean copy of the feature Json
@@ -318,6 +484,11 @@ async function drawMapFeatures(queryMapData=true) {
       let map_metric;
       map_vals = [];
       
+      //if (app.selected_income == 'all') {
+        await buildCharts();
+      //} else {
+      //  await buildCharts_Simple();
+      //}
       for (let feat of cleanFeatures) {
         map_metric = null;
         if (base_lookup[app.selected_year][app.selected_income][app.selected_importance].hasOwnProperty(feat[GEOID_VAR])) {
@@ -338,44 +509,7 @@ async function drawMapFeatures(queryMapData=true) {
       let bp;
       let dist_vals = [];
       if (queryMapData) {
-        // frequency distribution chart
-        let dist_vals = [];
-        let pct_dist_vals = [];
-        let tot = 0;
-        let val;
-        let bin_tot = 0;
-        let labels = [];
-        let bin_min = app.bin_start;
-        let bin_max = bin_min + app.bin_step;
         
-        for (let bin=app.bin_start; bin <= app.bin_stop; bin++) {
-          if (bin==bin_max) {
-            // reached the end of the last bin, push the data and lables and move to the next one
-            labels.push(bin_min + '-' + bin_max);
-            dist_vals.push({x:bin_min, y:bin_tot});
-            //console.log(bin_min, val);
-            bin_min = bin_max;
-            bin_max = bin_min + app.bin_step;
-            bin_tot = 0;
-          }
-
-          val = Math.round(freq_dist_lookup[app.selected_year][app.selected_income][app.selected_importance][bin]);
-          bin_tot += val;
-          tot += val;
-          //console.log(bin, bin_min, bin_max, val, bin_tot, tot);
-        }
-        // push the overflow bin
-        dist_vals.push({x:bin_min, y:val});
-        labels.push('>' + bin_min);
-
-        //console.log(Object.keys(dist_vals))
-        for (let bin in dist_vals) {
-          console.log(dist_vals[bin].x, dist_vals[bin].y, dist_vals[bin].y/tot, tot);
-          pct_dist_vals.push({x:bin.x, y:dist_vals[bin].y/tot});
-        }
-        
-        updateDistChart(dist_vals, labels, binFmt, yFmtInt, 'dist-chart')
-        updateDistChart(pct_dist_vals, labels, binFmt, yFmtPct, 'pct-dist-chart')
         
         // color ramps
         sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
@@ -542,21 +676,27 @@ function highlightSelectedSegment() {
 let distChart = {};
 let distLabels;
 
-function updateDistChart(data, labels, xFmt, yFmt, el='dist-chart') {
-  distLabels = labels;
-  
+function updateDistChart(data, xKey, yKeys, xLabels, yLabels, xFmt, yFmt, el='dist-chart') {
+  distLabels = xLabels;
+  let colors = ['#54bdba','#ec7074','#f1f1f1']
+  if (yKeys instanceof String) {
+    colors = colors.slice(0, 1)
+  } else {
+    colors = colors.slice(0, yKeys.length)
+  }
+  //console.log(colors)
   if (distChart[el]) {
     distChart[el].setData(data);
   } else {
-      distChart[el] = new Morris.Area({
+      distChart[el] = new Morris.Line({
         element: el,
         data: data,
-        xkey: 'x',
-        ykeys: 'y',
-        ymin: 0,
-        labels: ['Tours'],
-        lineColors: ['#54bdba'],
-        xLabels: 'x',
+        xkey: xKey,
+        ykeys: yKeys,
+        //ymin: 0,
+        labels: yLabels,
+        lineColors: colors,
+        xLabels: xKey,
         xLabelAngle: 25,
         xLabelFormat: binFmt,
         yLabelFormat: yFmt,
@@ -564,7 +704,7 @@ function updateDistChart(data, labels, xFmt, yFmt, el='dist-chart') {
         parseTime: false,
         fillOpacity: 0.4,
         pointSize: 1,
-        behaveLikeLine: false,
+        //behaveLikeLine: true,
         eventStrokeWidth: 2,
         eventLineColors: ['#ccc'],
       });
@@ -695,6 +835,14 @@ function bp4Changed(thing) {
 
 async function selectionChanged(thing) {
   app.chartTitle = app.selected_metric.toUpperCase() + ' TREND';
+  
+  if (app.selected_income == 'all') {
+    app.distChart = ['dist-chart']
+    app.pctDistChart = ['pct-dist-chart']
+  } else {
+    app.distChart = ['dist-chart-simple']
+    app.pctDistChart = ['pct-dist-chart-simple']
+  }
   if (app.selected_year && app.selected_income && app.selected_metric && app.selected_importance) {
     let selfeat = await drawMapFeatures();
     if (selfeat) {
@@ -807,6 +955,8 @@ let app = new Vue({
     bin_start: 0,
     bin_stop: 120,
     bin_step: 5,
+    distChartName: ['dist-chart'],
+    pctDistChartName: ['pct-dist-chart'],
     
     selected_colorscheme: COLORRAMP.SEQ,
     modeMap: {
