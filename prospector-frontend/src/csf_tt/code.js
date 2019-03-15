@@ -375,7 +375,7 @@ async function buildCharts() {
   xlabels.push('>' + bin_min);
   
   
-  updateDistChart(dist_vals, 'x', ykeys, xlabels, ylabels, binFmt, yFmtInt, 'dist-chart')
+  //updateDistChart(dist_vals, 'x', ykeys, xlabels, ylabels, binFmt, yFmtInt, 'dist-chart')
   updateDistChart(pct_dist_vals, 'x', ykeys, xlabels, ylabels, binFmt, yFmtPct, 'pct-dist-chart')
 }
 
