@@ -1,0 +1,152 @@
+<div id="container">
+
+  <div id="slide-panel" v-bind:class="{ shrunken: isPanelHidden}">
+    <div id="layer-widgets">
+      <button class="ui tiny color1 icon button"
+              v-on:click="clickedShowHide">
+              <i class="angle double icon"
+              v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
+      </button>
+    </div>
+  </div> 
+  
+  <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
+    <div id="preheader">
+      <a target="_blank" href="https://connectsf.org/"><img src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png"  height="50" width="250" alt="Connect SF"/></a>
+      <hr/>
+      <h3 class="apptitle">ConnectSF Vehicle Miles Traveled</h3>
+      <div id="helpbar">
+          <button class="ui mini right labeled icon color1 button"
+                  v-on:click="clickToggleHelp">
+                  <i class="help circle icon"></i>
+                  What is this?
+          </button>
+          &nbsp;
+          <button class="ui mini right labeled icon color1 button"
+                  v-on:click="this.window.open('https://connectsf.org/','_blank')">
+                  <i class="arrow right icon"></i>
+                  Learn More
+          </button>
+          <hr/>
+      </div>
+
+      <div id="picker">
+        <!--NEW STUFF HERE -->
+        <h5 style="margin-top:15px">CHOOSE SCENARIO:</h5>
+        <!--<div class="three tiny ui grey buttons">-->
+        <div>
+          <button v-for="item in year_options"
+                v-on:click="yrChanged(item.value)"
+                class="ui tiny grey button"
+                v-bind:class="{ active: item.value==selected_year, color2: item.value==selected_year }">
+                ${item.text}
+          </button>
+        </div>
+        
+        <h5>CHOOSE Metric:</h5>
+        <!--<div class="three tiny ui grey buttons">-->
+        <div>
+          <button v-for="item in metric_options"
+                v-on:click="metricChanged(item.value)"
+                class="ui tiny grey button"
+                v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
+                ${item.text}
+          </button>
+        </div> 
+        
+        <!--<h5 style="margin-top:25px">TOURS BY TRAVEL TIME</h5>-->
+        <!--<div v-for="item in distChartName" v-bind:id='item' style="height: 200px"></div>-->
+        <!--<div id='dist-chart' style="height: 200px"></div>-->
+        <!--<div id='dist-chart-simple' style="height: 200px"></div>-->
+        
+        <!--<h5 style="margin-top:25px">TOUR TRAVEL TIME PERCENTAGE FREQUENCY DISTRIBUTION</h5>-->
+        <!--<div v-for="item in pctDistChartName" v-bind:id='item' style="height: 200px"></div>-->
+        <!--<div id='pct-dist-chart' style="height: 200px"></div>-->
+        <!--<div id='pct-dist-chart-simple' style="height: 200px"></div>-->
+        
+        <h5>MAP LAYERS</h5>
+        <p>Add additional geographic data to the map.</p>
+        <div v-for="item in extraLayers" class="ui toggle checkbox">
+          <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
+          <label><h5>${item.name}</h5></label>
+        </div>
+        
+        <br><br>
+        <h5>YOUR FEEDBACK</h5>
+        <form class="ui tiny equal width form" v-on:submit.prevent>
+          <div class="field">
+            <textarea v-model="comment" class="fix" maxlength="800" rows="3"
+            type="text" placeholder="Based on this data, what do you think are the city’s transportation needs? (800 characters)"></textarea>
+          </div>
+          <button class="ui tiny button color2" type="submit">Submit</button>
+        </form>
+        
+        <hr/>
+        
+      </div>
+    </div>
+
+    <div class="logo">
+      <hr/>
+      <table id="table-logo"><tr>
+        <td class="td-logo">
+          <h4><b><a class="agency" target="_blank" href="http://www.sfcta.org">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
+        </td>
+        <td class="td-logo">
+          <a class="agency-link" target="_blank" href="http://www.sfcta.org">
+            <img class="img-logo" src="/assets/sfcta-logo-144.png" width="80">
+          </a>
+        </td>
+      </tr></table>
+    </div>
+  </div>
+
+  <div id="helpbox" v-if="showHelp" class="ui segment">
+  <div v-cloak> <!-- hides everything until Vue finished loading -->
+    <h2 style="margin-bottom:0px;">ConnectSF Travel Time for mandatory tours</h2>
+    <hr style="margin-bottom:5px;margin-top:5px"/>
+    This visualization shows the estimated one-way travel time from home to the main destination 
+    (i.e. the total travel time to work, including any stops along the way). 
+    The data is segmented by:
+    <br/><br/>
+    <dl>
+      <dt>Year</dt>
+        <dd>- 2015</dd>
+        <dd>- 2050</dd>
+        <dd>- Change (the change from 2015 to 2050)</dd>
+      <dt>Purpose</dt>
+        <dd>- Work / School (mandatory tour purposes)</dd>
+        <dd>- Other (all other tour purposes)</dd>
+      <dt>Income</dt>
+        <dd>- Low Income (below 200% of the Federal Poverty Level)</dd>
+        <dd>- Not Low Income (above 200% of the Federal Poverty Level)</dd>
+        <dd>- All (all income categories)</dd>
+    </dl>
+
+    <div style="margin-top:20px;">
+      <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
+        &nbsp;OK&nbsp;
+      </button>
+
+      <!--<button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')"
+              class="small ui right labeled icon floated yellow button"
+              style="margin-right:5px">
+              <i class="icon download"></i>
+              Download data (.zip)
+      </button>
+
+      <button v-on:click="this.window.open('http://www.sfcta.org/congestion','_blank')"
+              class="small ui right floated basic violet button"
+              style="margin-right:5px">
+              Learn more&hellip;
+      </button>-->
+
+    </div>
+  </div>
+  </div>
+  
+
+
+  <div id="sfmap"></div>
+
+</div>
