@@ -80,15 +80,16 @@ const YR_LIST = [2015,2050];
 const INT_COLS = [];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ccd';
-const COLORRAMP = {SEQ: ['#feefa9', '#ffd469', '#cc7b45', '#7d3e43'],
+const COLORRAMP = {//SEQ: ['#feefa9', '#ffd469', '#cc7b45', '#7d3e43'],
+                    SEQ: ['#fff9bf', '#ffe28a', '#ffc845', '#eba946','#cc7b45', '#7d3e43'],
                     DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
 const DEF_BWIDTH = 4;
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
   'load': {'base':[0.5,0.85,1], 'diff':[0.5,0.85,1], 'pctdiff':[-20, -5, 5, 20]},
-  'pop': {'base':[25,50,100,200,400], 'diff':[25,50,100,200,400], 'pctdiff':[-20, -5, 5, 20]},
-  'tot': {'base':[25,50,100,200,400], 'diff':[25,50,100,200,400], 'pctdiff':[-20, -5, 5, 20]},
+  'ab_vol': {'base':[100,500,2500,10000,50000], 'diff':[100,500,2500,10000,50000], 'pctdiff':[-20, -5, 5, 20]},
+  'periodcap': {'base':[100,500,2500,10000,50000], 'diff':[100,500,2500,10000,50000], 'pctdiff':[-20, -5, 5, 20]},
 };
 
 const METRIC_UNITS = {'pop': '000s per sq. mi.',
@@ -186,8 +187,18 @@ infoPanel.onAdd = function(map) {
 };
 
 function getInfoHtml(geo) {
-  let retval = '<b>Link AB: </b>' + `${geo[GEOID_VAR]}<br/>`;
+  let metric_val = null;
+  if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
+  let base_val = null;
+  if (geo.base !== null) base_val = (Math.round(geo.base*100)/100).toLocaleString();
+  let comp_val = null;
+  if (geo.comp !== null) comp_val = (Math.round(geo.comp*100)/100).toLocaleString();
 
+  let retval = '<b>Link AB: </b>' + `${geo[GEOID_VAR]}<br/>`;
+  if (app.comp_check) {
+    retval += `<b>${app.sliderValue[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${base_val}<br/>` +
+              `<b>${app.sliderValue[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${comp_val}<br/>`;
+  }
   /*let metcol1 = app.selected_metric + YR_LIST[0];
   let metcol2 = app.selected_metric + YR_LIST[1];
   let metcol3 = app.selected_metric + 'den' + YR_LIST[0];
@@ -200,7 +211,11 @@ function getInfoHtml(geo) {
   let diff = (geo[metcol2] - geo[metcol1]).toLocaleString();
   let dendiff = (geo[metcol4] - geo[metcol3]).toLocaleString();*/
 
-  retval += `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${geo.metric}<br/>`;
+  retval += `<b>${METRIC_DESC[app.selected_metric]}: </b>` + 
+            (app.pct_check? '<b> %</b>': '') +
+            (app.comp_check? '<b> Diff: </b>':'<b>: </b>') +   
+            `${metric_val}` + 
+            ((app.pct_check && app.comp_check && metric_val !== null)? '%':'');
   return retval; 
 }
 
@@ -262,6 +277,7 @@ async function drawMapFeatures(queryMapData=true) {
   let cleanFeatures = _featJson.slice();
   let sel_metric = app.selected_metric;
   let base_scnyr = app.sliderValue[0];
+  let comp_scnyr = app.sliderValue[1];
   let base_metric = sel_metric + app.sliderValue[0];
   let comp_metric = sel_metric + app.sliderValue[1];
   if (base_metric==comp_metric) {
@@ -289,14 +305,17 @@ async function drawMapFeatures(queryMapData=true) {
         }*/ 
         
         if (app.comp_check) {
-          if (base_lookup.hasOwnProperty(feat[GEOID_VAR])) {
-            let feat_entry = base_lookup[feat[GEOID_VAR]];
-            map_metric = Math.round(feat_entry[comp_metric]/(feat['sq_mile']*1000)) - Math.round(feat_entry[base_metric]/(feat['sq_mile']*1000));
-            feat['base'] = feat_entry[base_metric];
-            feat['comp'] = feat_entry[comp_metric];
-            if (app.pct_check && app.comp_check) {
-              if (feat_entry[base_metric]>0) {
-                map_metric = map_metric*100/feat_entry[base_metric];
+          if (base_lookup[base_scnyr][app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
+            if (base_lookup[comp_scnyr][app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
+              feat['base'] = base_lookup[base_scnyr][app.selected_timep][feat[GEOID_VAR]][sel_metric];
+              feat['comp'] = base_lookup[comp_scnyr][app.selected_timep][feat[GEOID_VAR]][sel_metric];
+              map_metric = feat['comp'] - feat['base'];
+              if (app.pct_check && app.comp_check) {
+                if (feat_entry['base']>0) {
+                  map_metric = map_metric*100/feat_entry['base'];
+                } else {
+                  map_metric = 0;
+                }
               }
             }
           }
@@ -405,7 +424,7 @@ async function drawMapFeatures(queryMapData=true) {
       mapLegend.addTo(mymap);
       
       if (selectedGeo) {
-        if (base_lookup.hasOwnProperty(selectedGeo.feature[GEOID_VAR])) {
+        if (base_lookup[base_scnyr][app.selected_timep].hasOwnProperty(selectedGeo.feature[GEOID_VAR])) {
           //buildChartHtmlFromData(selectedGeo.feature[GEOID_VAR]);
           return cleanFeatures.filter(entry => entry[GEOID_VAR] == selectedGeo.feature[GEOID_VAR])[0];
         } else {
@@ -497,7 +516,7 @@ function clickedOnFeature(e) {
   let selfeat = selectedGeo.feature;
   //app.chartSubtitle = GEOTYPE + ' ' + selfeat[GEOID_VAR] + ' in ' + selfeat.nhood;
   selectedLatLng = e.latlng;
-  if (base_lookup[app.selected_year][app.selected_timep].hasOwnProperty(selGeoId)) {
+  if (base_lookup[app.sliderValue[0]][app.selected_timep].hasOwnProperty(selGeoId)) {
     showGeoDetails(selectedLatLng);
     //buildChartHtmlFromData(selGeoId);
   } else {
