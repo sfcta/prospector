@@ -316,6 +316,7 @@ async function buildChartData(){
       ylabels.push(met.text);
     }
   }
+
   for (let bin=app.bin_start; bin <= app.bin_stop; bin++) {
     if (bin==bin_max) {
       // reached the end of the last bin, push the data and lables and move to the next one
@@ -356,6 +357,7 @@ async function buildCharts() {
       ylabels.push(met.text);
     }
   }
+
   for (let bin=app.bin_start; bin <= app.bin_stop; bin++) {
     if (bin==bin_max) {
       // reached the end of the last bin, push the data and lables and move to the next one
