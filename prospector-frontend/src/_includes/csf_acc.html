@@ -57,43 +57,18 @@
           <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
           <label><h5>${item.name}</h5></label>
         </div>
-        
-        <!-- <hr/>
-        <h5 style="margin-top:15px">CITYWIDE SUMMARY</h5>
-        <table id="citywide">
-          <tr><th>Measure/Year</th><th align="right">2015</th><th align="right">2050</th></tr>
-          <tr><td>Auto</td><td align="right">${aggData[0].autototal}</td><td align="right">${aggData[1].autototal}</td></tr>
-          <tr><td>Transit</td><td align="right">${aggData[0].transittotal}</td><td align="right">${aggData[1].transittotal}</td></tr>
-        </table> -->
-        <!-- <hr/>
-        <h5 style="margin-top:25px">FREQUENCY DISTRIBUTION</h5>
-        <div id="dist-chart" style="height: 200px">
-        </div> -->
 
         <hr/>
         <h5 style="margin-top:15px">PROVIDE FEEDBACK:</h5>
         <form class="ui tiny equal width form" v-on:submit.prevent="handleSubmit">
           <div class="field">
             <textarea v-model="comment" class="fix" maxlength="200" rows="3"
-            type="text" placeholder="What do you think about this map?"></textarea>
+            type="text" placeholder="Based on this data, what do you think are the city’s transportation needs? (800 characters)"></textarea>
           </div>
           <button class="ui button color2" type="submit">Submit</button>
         </form>
       </div>
     </div>
-
-    <!-- <div id="header">
-        <div id="stats-panel">
-          <hr style="margin-bottom:-5px;" />
-          <div id="chartinfo"><h3 style="font-size: 22px;">${chartTitle}</h3></div>
-          <div id="geoinfo"><h5>${chartSubtitle}</h5></div>
-          <div id="longchart">
-              <div class="ui active dimmer">
-                <div class="ui text loader">Loading</div>
-              </div>
-          </div>
-        </div>
-    </div> -->
 
     <div class="logo">
       <hr/>
@@ -154,8 +129,6 @@
         </div>
   </div>
   </div>
-  
-
 
   <div id="sfmap"></div>
 

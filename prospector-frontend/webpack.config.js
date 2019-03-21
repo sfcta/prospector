@@ -16,6 +16,8 @@ const sfcta_components = [
 	   'csf_acc',
      'csf_vmt',
      'csf_trnload',
+     'csf_acc',
+     'csf_pattern',
      'coc',
 	 //'cmp-v0',
 ];
