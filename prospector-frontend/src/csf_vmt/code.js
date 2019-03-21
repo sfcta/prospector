@@ -128,7 +128,7 @@ const BWIDTH_MAP = {
 };
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'vmt': {'base':[2000, 4000, 6000, 80000, 10000, 20000], 'diff':[-5,-3,-1,1,3,5], 'pctdiff':[-20, -5, 5, 20]},
+  'vmt': {'base':[2000, 4000, 6000, 80000, 10000, 20000], 'diff':[-10000,-1000,-100,100,1000,10000], 'pctdiff':[-20, -5, 5, 20]},
   'vmt_per_pers': {'base':[1, 2, 3, 4, 5, 6, 7, 8], 'diff':[-5,-3,-1,1,3,5], 'pctdiff':[-20, -5, 5, 20]},
   'vmt_per_hh': {'base':[5, 10, 15, 20, 25, 30, 35, 40], 'diff':[-5,-3,-1,1,3,5], 'pctdiff':[-20, -5, 5, 20]},
 }
@@ -146,19 +146,19 @@ let prec;
 let addLayerStore = {};
 
 async function initialPrep() {
-  console.log('1...');
+  //console.log('1...');
   _featJson = await fetchMapFeatures();
 
-  console.log('2... ');
+  //console.log('2... ');
   await getFreqDistData();
   
-  console.log('3... ');
+  //console.log('3... ');
   await drawMapFeatures();
   
-  console.log('4... ');
+  //console.log('4... ');
   await fetchAddLayers();
 
-  console.log('5 !!!');
+  //console.log('5 !!!');
 }
 
 async function fetchMapFeatures() {
@@ -263,14 +263,6 @@ async function getMapData() {
       tmp[entry[YEAR_VAR]][met.value] += entry[met.value];
     }
   }
-  
-  /*for (let yr of YR_LIST) {
-    let row = {};
-    row['year'] = yr.toString();
-    for (let met of app.metric_options) {
-      row[met.value] = Math.round(tmp[yr][inc.value][imp.value][met.value]*prec)/prec;
-    }
-  }*/
 }
 
 async function getFreqDistData() {
@@ -304,84 +296,6 @@ async function getFreqDistData() {
 let base_lookup;
 let freq_dist_lookup;
 let map_vals;
-
-/*async function buildCharts() {
-  // frequency distribution chart
-  let dist_vals = [];
-  let pct_dist_vals = [];
-  let tots = {};
-  let val;
-  let bin_tots = {};
-  let xlabels = [];
-  let bin_min = app.bin_start;
-  let bin_max = bin_min + app.bin_step;
-  let ykeys = [];
-  let ylabels = [];
-  let yMin = 'auto 0';
-  let yMax = 'auto';
-  
-  //console.log(app.selected_year);
-  if (app.selected_year == 'diff') {
-    yMin = -0.03;
-    yMax = 0.03;
-  }
-  for (let inc of app.income_options) {
-    tots[inc.value] = {};
-    bin_tots[inc.value] = {};
-    ykeys.push(inc.value);
-    ylabels.push(inc.text);
-    for (let met of app.chart_metric_options) {
-      tots[inc.value][met.value] = 0;
-      bin_tots[inc.value][met.value] = 0;
-    }
-  }
-  
-  for (let bin=app.bin_start; bin <= app.bin_stop; bin++) {
-    if (bin==bin_max) {
-      // reached the end of the last bin, push the data and lables and move to the next one
-      xlabels.push(bin_min + '-' + bin_max);
-      
-      let d = {};
-      for (let met of app.chart_metric_options) {
-        d[met.value] = {};
-        d[met.value]['x'] = bin_min;
-        for (let inc of app.income_options) {
-          d[met.value][inc.value] = bin_tots[inc.value][met.value]
-          bin_tots[inc.value][met.value] = 0;
-        }
-      }
-      dist_vals.push(d['avg_tours']);
-      pct_dist_vals.push(d['pct_tours']);
-      
-      bin_min = bin_max;
-      bin_max = bin_min + app.bin_step;
-    }
-    
-    for (let inc of app.income_options) {
-      for (let met of app.chart_metric_options) {
-        val = freq_dist_lookup[app.selected_year][inc.value][met.value][bin];
-        bin_tots[inc.value][met.value] += val;
-      }
-    }
-  }
-  // push the overflow bin
-      let d = {};
-      for (let met of app.chart_metric_options) {
-        d[met.value] = {};
-        d[met.value]['x'] = bin_min;
-        for (let inc of app.income_options) {
-          d[met.value][inc.value] = bin_tots[inc.value][met.value]
-        }
-      }
-  
-  dist_vals.push(d['avg_tours']);
-  pct_dist_vals.push(d['pct_tours']);
-  xlabels.push('>' + bin_min);
-  
-  
-  //updateDistChart(dist_vals, 'x', ykeys, xlabels, ylabels, yMin, yMax, binFmt, yFmtInt, 'dist-chart')
-  updateDistChart(pct_dist_vals, 'x', ykeys, xlabels, ylabels, yMin, yMax, binFmt, yFmtPct, 'pct-dist-chart')
-}*/
 
 async function buildChartData(){
   // frequency distribution chart
@@ -456,21 +370,16 @@ async function buildCharts() {
     val = freq_dist_lookup[app.selected_year][app.selected_chart_metric][bin];
     bin_tot += val;
     tot += val;
-    //console.log(val, bin_tot, tot);
   }
   // push the overflow bin
   pct_dist_vals.push({x:bin_min, y:val});
   xlabels.push('>' + bin_min);
   
-  //console.log(pct_dist_vals)
-  //console.log(xlabels)
-  //console.log(ylabels)
   //updateDistChart(dist_vals, 'x', 'y', xlabels, 'Tours', binFmt, yFmtInt, 'dist-chart-simple')
   updateDistChart(pct_dist_vals, 'x', 'y', xlabels, ylabels, yMin, yMax, binFmt, yFmtPct, 'dist-chart')
 }
 
 async function drawMapFeatures(queryMapData=true) {
-
   // create a clean copy of the feature Json
   if (!_featJson) return;
   let cleanFeatures = _featJson.slice();
@@ -484,11 +393,8 @@ async function drawMapFeatures(queryMapData=true) {
       let map_metric;
       map_vals = [];
       
-      //if (app.selected_income == 'all') {
-        await buildCharts();
-      //} else {
-      //  await buildCharts_Simple();
-      //}
+      await buildCharts();
+        
       for (let feat of cleanFeatures) {
         map_metric = null;
         if (base_lookup[app.selected_year].hasOwnProperty(feat[GEOID_VAR])) {
@@ -679,16 +585,13 @@ let distLabels;
 function updateDistChart(data, xKey, yKeys, xLabels, yLabels, yMin, yMax, xFmt, yFmt, el='dist-chart') {
   distLabels = xLabels;
   //let colors = ['#54bdba','#ec7074','#767676']
-  let colors = ['#89c5a8','#009485','#116570']
+  let colors = ['#f28350']
   if (yKeys instanceof String) {
     colors = colors.slice(0, 1)
   } else {
     colors = colors.slice(0, yKeys.length)
   }
-  //console.log(colors)
   if (distChart[el]) {
-    //distChart[el].ymin = yMin;
-    //distChart[el].ymax = yMax;
     distChart[el].setData(data);
   } else {
       distChart[el] = new Morris.Line({
@@ -708,9 +611,9 @@ function updateDistChart(data, xKey, yKeys, xLabels, yLabels, yMin, yMax, xFmt, 
         parseTime: false,
         fillOpacity: 0.4,
         pointSize: 1,
-        behaveLikeLine: false,
+        //behaveLikeLine: true,
         eventStrokeWidth: 2,
-        eventLineColors: ['#009485'],
+        eventLineColors: ['#f28350'],
       });
   }
 }
@@ -724,7 +627,7 @@ function yFmtInt(y) {
 }
 
 function yFmtPct(y) {
-  return (Math.round(y*100)).toString() + '%';
+  return (Math.round(y*1000)/10).toString() + '%';
 }
 
 let selGeoId;
@@ -880,6 +783,11 @@ function yrChanged(yr) {
 
 function metricChanged(metric) {
   app.selected_metric = metric;
+  if (metric == 'vmt_per_hh') {
+    app.selected_chart_metric = 'pct_households';
+  } else {
+    app.selected_chart_metric = 'pct_persons';
+  }
 }
 
 function getColorMode(cscheme) {
@@ -926,7 +834,7 @@ let app = new Vue({
     metric_options: [
     {text: 'VMT per Person', value: 'vmt_per_pers'},
     {text: 'VMT per Household', value: 'vmt_per_hh'},
-    {text: 'VMT', value: 'vmt'},
+    //{text: 'VMT', value: 'vmt'},
     ],
     
     selected_chart_metric: 'pct_persons',
