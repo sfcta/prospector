@@ -150,7 +150,7 @@ async function initialPrep() {
   _featJson = await fetchMapFeatures();
 
   console.log('2... ');
-  //await getFreqDistData();
+  await getFreqDistData();
   
   console.log('3... ');
   await drawMapFeatures();
@@ -273,7 +273,7 @@ async function getMapData() {
   }*/
 }
 
-/*async function getFreqDistData() {
+async function getFreqDistData() {
   let data_url = API_SERVER + FREQ_DIST_VIEW;
   let resp = await fetch(data_url);
   let jsonData = await resp.json();
@@ -295,11 +295,11 @@ async function getMapData() {
   // fill the dictionary
   for (let entry of jsonData) {
     for (let met of app.chart_metric_options) {
-      freq_dist_lookup[entry[YEAR_VAR]][entry[INC_VAR]][entry[IMP_VAR]][met.value][entry[FREQ_DIST_BIN_VAR]] = entry[met.value];
+      freq_dist_lookup[entry[YEAR_VAR]][met.value][entry[FREQ_DIST_BIN_VAR]] = entry[met.value];
     }
   }
   
-}*/
+}
 
 let base_lookup;
 let freq_dist_lookup;
@@ -381,9 +381,49 @@ let map_vals;
   
   //updateDistChart(dist_vals, 'x', ykeys, xlabels, ylabels, yMin, yMax, binFmt, yFmtInt, 'dist-chart')
   updateDistChart(pct_dist_vals, 'x', ykeys, xlabels, ylabels, yMin, yMax, binFmt, yFmtPct, 'pct-dist-chart')
+}*/
+
+async function buildChartData(){
+  // frequency distribution chart
+  let dist_vals = {};
+  let pct_dist_vals = [];
+  let tot = 0;
+  let val;
+  let bin_tot = 0;
+  let xlabels = [];
+  let bin_min = app.bin_start;
+  let bin_max = bin_min + app.bin_step;
+  let ykeys = [];
+  let ylabels = {};
+  
+  for (let met of app.chart_metric_options) {
+    if (met.value == app.selected_chart_metric) {
+      dist_vals[met.value]
+      ylabels.push(met.text);
+    }
+  }
+  for (let bin=app.bin_start; bin <= app.bin_stop; bin++) {
+    if (bin==bin_max) {
+      // reached the end of the last bin, push the data and lables and move to the next one
+      xlabels.push(bin_min + '-' + bin_max);
+      pct_dist_vals.push({x:bin_min, y:bin_tot});
+      
+      bin_min = bin_max;
+      bin_max = bin_min + app.bin_step;
+      bin_tot = 0;
+    }
+    
+    val = freq_dist_lookup[app.selected_year][app.selected_chart_metric][bin];
+    bin_tot += val;
+    tot += val;
+    //console.log(val, bin_tot, tot);
+  }
+  // push the overflow bin
+  dist_vals.push({x:bin_min, y:val});
+  xlabels.push('>' + bin_min);
 }
 
-async function buildCharts_Simple() {
+async function buildCharts() {
   // frequency distribution chart
   let dist_vals = [];
   let pct_dist_vals = [];
@@ -393,38 +433,41 @@ async function buildCharts_Simple() {
   let xlabels = [];
   let bin_min = app.bin_start;
   let bin_max = bin_min + app.bin_step;
-  let ykeys = [];
   let ylabels = [];
+  let yMin = 'auto 0';
+  let yMax = 'auto';
   
+  for (let met of app.chart_metric_options) {
+    if (met.value == app.selected_chart_metric) {
+      ylabels.push(met.text);
+    }
+  }
   for (let bin=app.bin_start; bin <= app.bin_stop; bin++) {
     if (bin==bin_max) {
       // reached the end of the last bin, push the data and lables and move to the next one
       xlabels.push(bin_min + '-' + bin_max);
-      dist_vals.push({x:bin_min, y:bin_tot});
+      pct_dist_vals.push({x:bin_min, y:bin_tot});
       
       bin_min = bin_max;
       bin_max = bin_min + app.bin_step;
       bin_tot = 0;
     }
     
-    for (let inc of app.income_options) {
-      //console.log(inc)
-      val = freq_dist_lookup[app.selected_year][inc.value][bin];
-      bin_tot += val;
-      tot += val;
-    }
+    val = freq_dist_lookup[app.selected_year][app.selected_chart_metric][bin];
+    bin_tot += val;
+    tot += val;
+    //console.log(val, bin_tot, tot);
   }
   // push the overflow bin
-  dist_vals.push({x:bin_min, y:val});
+  pct_dist_vals.push({x:bin_min, y:val});
   xlabels.push('>' + bin_min);
-
-  for (let bin in dist_vals) {
-    pct_dist_vals.push({x:bin.x, y:dist_vals[bin].y/tot});
-  }
   
-  updateDistChart(dist_vals, 'x', 'y', xlabels, 'Tours', binFmt, yFmtInt, 'dist-chart-simple')
-  updateDistChart(pct_dist_vals, 'x', 'y', xlabels, 'Pct of Tours', binFmt, yFmtPct, 'pct-dist-chart-simple')
-}*/
+  //console.log(pct_dist_vals)
+  //console.log(xlabels)
+  //console.log(ylabels)
+  //updateDistChart(dist_vals, 'x', 'y', xlabels, 'Tours', binFmt, yFmtInt, 'dist-chart-simple')
+  updateDistChart(pct_dist_vals, 'x', 'y', xlabels, ylabels, yMin, yMax, binFmt, yFmtPct, 'dist-chart')
+}
 
 async function drawMapFeatures(queryMapData=true) {
 
@@ -442,7 +485,7 @@ async function drawMapFeatures(queryMapData=true) {
       map_vals = [];
       
       //if (app.selected_income == 'all') {
-      //  await buildCharts();
+        await buildCharts();
       //} else {
       //  await buildCharts_Simple();
       //}
@@ -546,7 +589,7 @@ async function drawMapFeatures(queryMapData=true) {
           sel_colors,
           sel_binsflag,
         );
-        legHTML = '<h4>Average Travel Time</h4>' + legHTML;
+        legHTML = '<h4>Vehicle Miles Traveled</h4>' + legHTML;
         div.innerHTML = legHTML;
         return div;
       };
@@ -653,19 +696,19 @@ function updateDistChart(data, xKey, yKeys, xLabels, yLabels, yMin, yMax, xFmt, 
         data: data,
         xkey: xKey,
         ykeys: yKeys,
-        //ymin: yMin,
-        //ymax: yMax,
+        ymin: yMin,
+        ymax: yMax,
         labels: yLabels,
         lineColors: colors,
         xLabels: xKey,
         xLabelAngle: 25,
-        xLabelFormat: binFmt,
+        xLabelFormat: xFmt,
         yLabelFormat: yFmt,
         hideHover: true,
         parseTime: false,
         fillOpacity: 0.4,
         pointSize: 1,
-        //behaveLikeLine: true,
+        behaveLikeLine: false,
         eventStrokeWidth: 2,
         eventLineColors: ['#009485'],
       });
@@ -704,7 +747,7 @@ function clickedOnFeature(e) {
   selectedLatLng = e.latlng;
   if (base_lookup[app.selected_year].hasOwnProperty(selGeoId)) {
     showGeoDetails(selectedLatLng);
-    buildChartHtmlFromData(selGeoId);
+    //buildChartHtmlFromData(selGeoId);
   } else {
     resetPopGeo();
   }
@@ -728,11 +771,11 @@ function resetPopGeo() {
   geoLayer.resetStyle(selectedGeo);
   prevSelectedGeo = selectedGeo = selGeoId = null;
   app.chartSubtitle = chart_deftitle;
-  buildChartHtmlFromData();
+  //buildChartHtmlFromData();
 }
 
 let trendChart = null
-function buildChartHtmlFromData(geoid = null) {
+/*function buildChartHtmlFromData(geoid = null) {
   document.getElementById('longchart').innerHTML = '';
   if (geoid) {
     let selgeodata = [];
@@ -771,7 +814,7 @@ function buildChartHtmlFromData(geoid = null) {
     });
   }    
   
-}
+}*/
 
 function bp1Changed(thing) {
   if (thing < app.bp0) app.bp1 = app.bp0;
@@ -886,18 +929,18 @@ let app = new Vue({
     {text: 'VMT', value: 'vmt'},
     ],
     
-    selected_chart_metric: 'avg_tours',
+    selected_chart_metric: 'pct_persons',
     chart_metric_options: [
-    {text: 'Average Tours', value: 'avg_tours'},
-    {text: 'Percent Tours', value: 'pct_tours'},
+    {text: 'Percent of Households', value: 'pct_households'},
+    {text: 'Percent of Persons', value: 'pct_persons'},
     ],
     
     chartTitle: 'AVG_RIDE TREND',
     chartSubtitle: chart_deftitle,
     
     bin_start: 0,
-    bin_stop: 120,
-    bin_step: 5,
+    bin_stop: 50,
+    bin_step: 2,
     distChartName: ['dist-chart'],
     pctDistChartName: ['pct-dist-chart'],
     
