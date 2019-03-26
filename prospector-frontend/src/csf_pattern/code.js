@@ -22,7 +22,6 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 // Must use npm and babel to support IE11/Safari
 import 'isomorphic-fetch';
 import Cookies from 'js-cookie';
-// import d3 from 'd3';
 
 // some important global variables.
 // the data source
@@ -204,8 +203,8 @@ async function getMapData() {
   console.log(_aggregateData);
 }
 
-var width = 900,
-    height = 900,
+var width = 950,
+    height = 1000,
     outerRadius = Math.min(width, height) / 2 - 120,
     innerRadius = outerRadius - 10;
 
