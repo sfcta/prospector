@@ -40,7 +40,6 @@
     "vue-input-autowidth": "^1.0.2",
     "vue-select": "^2.2.0",
     "vue-slider-component": "^2.2.7",
-    "vuetify": "^1.1.9",
-    "d3": "^3.3.7"
+    "vuetify": "^1.1.9"
   }
 }
