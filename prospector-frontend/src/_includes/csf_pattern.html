@@ -14,7 +14,7 @@
     <div id="preheader">
       <a target="_blank" href="https://connectsf.org/"><img src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png"  height="50" width="250" alt="Connect SF"/></a>
       <hr/>
-      <h3 class="apptitle">Jobs Accessibility</h3>
+      <h3 class="apptitle">Trip Patterns</h3>
       <div id="helpbar">
         <button class="ui mini right labeled icon color1 button"
                 v-on:click="clickToggleHelp">
@@ -40,23 +40,27 @@
                 ${item.text}
           </button>
         </div>
+        
+        <h5 style="margin-top:15px">CHOOSE TRAVEL IMPORTANCE:</h5>
+        <div>
+          <button v-for="item in importance_options"
+                v-on:click="importanceChanged(item.value)"
+                class="ui tiny grey button"
+                v-bind:class="{ active: item.value==selected_importance, color2: item.value==selected_importance }">
+                ${item.text}
+          </button>
+        </div> 
           
         <h5 style="margin-top:15px">CHOOSE MODE:</h5>
         <div>
           <button v-for="item in metric_options"
                 v-on:click="metricChanged(item.value)"
                 class="ui tiny grey button"
+                style="margin-top:3px"
                 v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
                 ${item.text}
           </button>
         </div> 
-
-        <h5 style="margin-top:15px">MAP LAYERS</h5>
-        <p>Add additional geographic data to the map.</p>
-        <div v-for="item in extraLayers" class="ui toggle checkbox">
-          <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
-          <label><h5>${item.name}</h5></label>
-        </div>
 
         <hr/>
         <h5 style="margin-top:15px">PROVIDE FEEDBACK:</h5>
@@ -87,7 +91,7 @@
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
   <div v-cloak> <!-- hides everything until Vue finished loading -->
-        <h2 style="margin-bottom:0px;">ConnectSF: Jobs Accessibility</h2>
+        <h2 style="margin-bottom:0px;">ConnectSF: Trip Patterns</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
         Use this tool to explore number of jobs accessible in each TAZ in 30 minutes auto or 45 minutes transit for ConnectSF.
 
@@ -129,7 +133,7 @@
         </div>
   </div>
   </div>
-
-  <div id="sfmap"></div>
+  
+  <div id="chart_placeholder"></div>
 
 </div>
