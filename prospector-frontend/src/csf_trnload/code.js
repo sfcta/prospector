@@ -66,7 +66,7 @@ const ADDLAYERS = [
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
-const GEO_VIEW = 'connectsf_tlinks_2015';
+const GEO_VIEW = 'connectsf_tlinks';
 const DATA_VIEW = 'connectsf_trnload';
 
 const GEOTYPE = 'TAZ';
