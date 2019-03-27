@@ -87,15 +87,15 @@ const COLORRAMP = {//SEQ: ['#feefa9', '#ffd469', '#cc7b45', '#7d3e43'],
 const DEF_BWIDTH = 4;
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'load': {'base':[0.5,0.85,1], 'diff':[0.5,0.85,1], 'pctdiff':[-20, -5, 5, 20]},
-  'ab_vol': {'base':[100,500,2500,10000,50000], 'diff':[100,500,2500,10000,50000], 'pctdiff':[-20, -5, 5, 20]},
-  'periodcap': {'base':[100,500,2500,10000,50000], 'diff':[100,500,2500,10000,50000], 'pctdiff':[-20, -5, 5, 20]},
+  'load': {'base':[0.85,1,1.25], 'diff':[0.85,1,1.25], 'pctdiff':[-20, -5, 5, 20]},
+  'ab_vol': {'base':[100,500,2500,10000], 'diff':[100,500,2500,10000], 'pctdiff':[-20, -5, 5, 20]},
+  'periodcap': {'base':[100,500,2500,10000], 'diff':[100,500,2500,10000], 'pctdiff':[-20, -5, 5, 20]},
 };
 
-const METRIC_UNITS = {'pop': '000s per sq. mi.',
+const METRIC_UNITS = {'load': 'V/C',
                       'tot': '000s per sq. mi.',
                       'jobpop': '000s per sq. mi.'};
-const METRIC_DESC = {'load': 'Load Factor','ab_vol': 'Volume',
+const METRIC_DESC = {'load': 'Crowding','ab_vol': 'Volume',
                       'periodcap': 'Capacity',
 };
 const METRIC_DESC_SHORT = METRIC_DESC;
@@ -416,7 +416,7 @@ async function drawMapFeatures(queryMapData=true) {
         );
 
         legHTML = '<h4>' + METRIC_DESC_SHORT[sel_metric] +
-                  (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(sel_metric)? ('<br>(' + METRIC_UNITS[sel_metric] + ')') : '')) +
+                  (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(sel_metric)? (' (' + METRIC_UNITS[sel_metric] + ')') : '')) +
                   '</h4>' + legHTML;
         div.innerHTML = legHTML;
         return div;
@@ -664,27 +664,23 @@ let app = new Vue({
     sliderValue: [YR_LIST[0],YR_LIST[0]],
     
     selected_timep: 'AM',
-    tplist: ['Daily','AM','MD','PM','EV','EA'],
-    tpmap: {'Daily':['Daily',''],
-            'EA':['3:00a-','6:00a'],
-            'AM':['6:00a-','9:00a'],
-            'MD':['9:00a-','3:30p'],
+    tplist: ['AM','PM','Daily'],
+    tpmap: {'AM':['6:00a-','9:00a'],
             'PM':['3:30p-','6:30p'],
-            'EV':['6:30p-','3:00a']},
+            'Daily':['Daily','']},
     
     selected_metric: 'load',
     metric_options: [
-    {text: 'Load', value: 'load'},
+    {text: 'Crowding', value: 'load'},
     {text: 'Volume', value: 'ab_vol'},
-    {text: 'Capacity', value: 'periodcap'},
+    //{text: 'Capacity', value: 'periodcap'},
     ],
     
     selected_op: 'muni',
     operator_options: [
-    {text: 'MUNI', value: 'muni'},
-    {text: 'BART', value: 'bart'},
-    {text: 'Caltrain', value: 'caltrain'},
-    {text: 'Reg. Bus', value: 'regbus'},     
+    {text: 'MUNI BUS', value: 'munib'},
+    {text: 'MUNI LRT', value: 'munil'},
+    {text: 'REGIONAL TRANSIT', value: 'regtrn'},   
     ],
     
     chartTitle: METRIC_DESC['pop'] + ' Trend',
