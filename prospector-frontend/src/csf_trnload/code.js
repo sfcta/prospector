@@ -667,9 +667,9 @@ let app = new Vue({
     
     selected_timep: 'AM',
     tplist: ['AM','PM','Daily'],
-    tpmap: {'AM':['6:00a-','9:00a'],
-            'PM':['3:30p-','6:30p'],
-            'Daily':['Daily','']},
+    tpmap: {'AM':'AM',
+            'PM':'PM',
+            'Daily':'Daily'},
     
     selected_metric: 'load',
     metric_options: [
