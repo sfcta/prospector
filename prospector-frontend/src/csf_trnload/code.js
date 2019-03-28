@@ -70,7 +70,7 @@ const GEO_VIEW = 'connectsf_tlinks';
 const DATA_VIEW = 'connectsf_trnload';
 
 const GEOTYPE = 'TAZ';
-const GEOID_VAR = 'a_b';
+const GEOID_VAR = 'a_b_mode';
 const YR_VAR = 'year';
 const TOD_VAR = 'tp';
 
@@ -104,6 +104,10 @@ let sel_colorvals, sel_colors, sel_binsflag;
 
 let chart_deftitle = 'All ' + GEOTYPE + 's Combined';
 
+let OPMODE_MAP = {'munib': [11,12,13],
+                  'munil': [15],
+                  'regtrn': [22,23,24,26,31,32]};
+
 let geoLayer, mapLegend;
 let _featJson;
 let _aggregateData;
@@ -129,7 +133,7 @@ async function initialPrep() {
 }
 
 async function fetchMapFeatures() {
-  const geo_url = API_SERVER + GEO_VIEW + '?select=a_b,a,b,geometry';
+  const geo_url = API_SERVER + GEO_VIEW + '?select=a_b_mode,a,b,mode,geometry';
 
   try {
     let resp = await fetch(geo_url);
@@ -233,29 +237,26 @@ infoPanel.update = function(geo) {
 };
 infoPanel.addTo(mymap);
 
+function filterOpMode(entry) {
+  for (let m of OPMODE_MAP[app.selected_op]) {
+    if (entry.mode == m) return true;
+  }
+  return false;
+}
+
 async function getMapData() {
-  let data_url = API_SERVER + DATA_VIEW;
+  let data_url = API_SERVER + DATA_VIEW + '?select=a_b_mode,mode,year,tp,load,ab_vol';;
   let resp = await fetch(data_url);
   let jsonData = await resp.json();
   base_lookup = {};
-  let tmp = {};
   for (let yr of YR_LIST) {
-    tmp[yr] = {};
     base_lookup[yr] = {};
     for (let tod of app.tplist) {
       base_lookup[yr][tod] = {};
     }
-    for (let met of app.metric_options) {
-      tmp[yr][met.value] = 0;
-    }
   }
   for (let entry of jsonData) {
     base_lookup[entry[YR_VAR]][entry[TOD_VAR]][entry[GEOID_VAR]] = entry;
-    for (let yr of YR_LIST) {
-      for (let met of app.metric_options) {
-        tmp[yr][met.value] += entry[met.value+yr];
-      }
-    }
   }
   /*_aggregateData = [];
   for (let yr of YR_LIST) {
@@ -274,7 +275,8 @@ async function drawMapFeatures(queryMapData=true) {
 
   // create a clean copy of the feature Json
   if (!_featJson) return;
-  let cleanFeatures = _featJson.slice();
+  let cleanFeatures = _featJson.filter(filterOpMode);
+  
   let sel_metric = app.selected_metric;
   let base_scnyr = app.sliderValue[0];
   let comp_scnyr = app.sliderValue[1];
@@ -617,7 +619,7 @@ function tpChanged(chosentp) {
   app.selected_timep = chosentp;
 }
 function opChanged(chosenop) {
-  //app.selected_op = chosenop;
+  app.selected_op = chosenop;
 }
 
 function getColorMode(cscheme) {
@@ -676,7 +678,7 @@ let app = new Vue({
     //{text: 'Capacity', value: 'periodcap'},
     ],
     
-    selected_op: 'muni',
+    selected_op: 'munib',
     operator_options: [
     {text: 'MUNI BUS', value: 'munib'},
     {text: 'MUNI LRT', value: 'munil'},
