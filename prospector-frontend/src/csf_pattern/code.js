@@ -203,19 +203,18 @@ async function getMapData() {
   console.log(_aggregateData);
 }
 
-var width = 950,
-    height = 1000,
+var width = window.innerWidth,
+    height = window.innerHeight,
     outerRadius = Math.min(width, height) / 2 - 120,
     innerRadius = outerRadius - 10;
 
 //create the arc path data generator for the groups
 var arc = d3.svg.arc()
-  .innerRadius(innerRadius)
-  .outerRadius(outerRadius);
+              .innerRadius(innerRadius)
+              .outerRadius(outerRadius);
 
 //create the chord path data generator for the chords
-var path = d3.svg.chord()
-  .radius(innerRadius - 4);// subtracted 4 to separate the ribbon
+var path = d3.svg.chord().radius(innerRadius - 4);// subtracted 4 to separate the ribbon
 
 /*** Initialize the visualization ***/
 var g = d3.select("#chart_placeholder")
@@ -224,8 +223,7 @@ var g = d3.select("#chart_placeholder")
           .attr("height", height)
           .append("g")
           .attr("id", "circle")
-          .attr("transform", 
-                "translate(" + width / 2 + "," + height / 2 + ")");
+          .attr("transform", "translate(" + (width-400)/2 + "," + height/2 + ")");
 g.append("circle").attr("r", outerRadius);
 
 //define the default chord layout parameters
@@ -319,8 +317,7 @@ function chordTween(oldLayout) {
             tween = d3.interpolate(old, d);
         }
         else {
-            //create a zero-width chord object
-///////////////////////////////////////////////////////////in the copy ////////////////            
+            //create a zero-width chord object           
             if (oldLayout) {
                 var oldGroups = oldLayout.groups().filter(function(group) {
                         return ( (group.index == d.source.index) ||
@@ -341,7 +338,7 @@ function chordTween(oldLayout) {
                 }
             }
             else old = d;
-/////////////////////////////////////////////////////////////////               
+
             var emptyChord = {
                 source: { startAngle: old.source.startAngle,
                         endAngle: old.source.startAngle},
@@ -500,22 +497,25 @@ async function drawMapFeatures() {
   //this is reset on every update, so it will use the latest
   //chordPaths selection
   groupG.on("mouseover", function(d) {
+    chordPaths.style("fill", DISTRICT_COLORRAMP[d.index].color);
       chordPaths.classed("fade", function (p) {
           //returns true if *neither* the source or target of the chord
           //matches the group that has been moused-over
           return ((p.source.index != d.index) && (p.target.index != d.index));
       });
   });
-  //the "unfade" is handled with CSS :hover class on g#circle
+  // the "unfade" is handled with CSS :hover class on g#circle
   //you could also do it using a mouseout event:
-  /*
   g.on("mouseout", function() {
-      if (this == g.node() )
-          //only respond to mouseout of the entire circle
-          //not mouseout events for sub-components
-          chordPaths.classed("fade", false);
+      chordPaths.style("fill", function (d) {
+                    return DISTRICT_COLORRAMP[d.source.index].color;
+                });
+
+      // if (this == g.node() )
+      //     //only respond to mouseout of the entire circle
+      //     //not mouseout events for sub-components
+      //     chordPaths.classed("fade", false);
   });
-  */
   
   last_layout = layout; //save for next update
 
@@ -713,7 +713,7 @@ function clickedShowHide(e) {
   // leaflet map needs to be force-recentered, and it is slow.
   for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
     setTimeout(function() {
-      mymap.invalidateSize()
+      // mymap.invalidateSize()
     }, delay)
   }
 }
