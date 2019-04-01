@@ -50,6 +50,7 @@ baseLayer = L.tileLayer(url, {
 let url2 = 'https://api.mapbox.com/styles/v1/sfcta/cjscclu2q07qn1fpimxuf2wbd/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
 let streetLayer = L.tileLayer(url2, {
   attribution:attribution,
+  minZoom: 10,
   maxZoom: 18,
   accessToken:token,
   pane: 'shadowPane',
