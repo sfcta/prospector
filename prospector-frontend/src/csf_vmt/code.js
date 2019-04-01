@@ -39,6 +39,7 @@ let attribution ='<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
                  '<a href="http://mapbox.com">Mapbox</a>';
 baseLayer = L.tileLayer(url, {
   attribution:attribution,
+  minZoom: 10,
   maxZoom: 18,
   accessToken:token,
 }).addTo(mymap);
