@@ -806,6 +806,133 @@ function highlightSelectedSegment() {
   });
 }
 
+// referenece map
+// get the district boundary data
+async function fetchMapFeatures() {
+  const geo_url = API_SERVER + GEO_VIEW;
+
+  try {
+    let resp = await fetch(geo_url);
+    let features = await resp.json();
+
+    // do some parsing and stuff
+    for (let feat of features) {
+      feat['type'] = 'Feature';
+      feat['geometry'] = JSON.parse(feat.geometry);
+    }
+
+    return features;
+  } catch (error) {
+    console.log('map feature error: ' + error);
+  }
+}
+
+let geoLayer;
+let stripes = new L.StripePattern({weight:3,spaceWeight:3,opacity:0.6,angle:135}); stripes.addTo(mymap);
+async function drawMapFeatures() {
+  if (!_featJson) return;
+  let cleanFeatures = _featJson.slice();
+
+  geoLayer = L.geoJSON(cleanFeatures, {
+    style: { opacity: 1, weight: 2, color: 'grey', fillPattern: stripes},
+    onEachFeature: function(feature, layer) {
+      layer.on({
+        mouseover: hoverFeature,
+        click: clickedOnFeature,
+        });
+    },
+  });
+  geoLayer.addTo(mymap);
+}
+
+// hover mouseover
+let oldHoverTarget;
+function hoverFeature(e) {
+  // don't do anything else if the feature is already clicked
+  if (selGeoId === e.target.feature.dist15name) return;
+
+  // return previously-hovered segment to its original color
+  if (oldHoverTarget && e.target.feature.dist15name != selGeoId) {
+    if (oldHoverTarget.feature.dist15name != selGeoId)
+      geoLayer.resetStyle(oldHoverTarget);
+  }
+
+  let highlightedGeo = e.target;
+  highlightedGeo.bringToFront();
+  highlightedGeo.setStyle(styles.selected);
+  oldHoverTarget = e.target; 
+}
+
+// hover clickon
+let selGeoId;
+let selectedGeo;
+let prevSelectedGeo;
+let selectedLatLng;
+function clickedOnFeature(e) {
+  e.target.setStyle(styles.popup);
+  let geo = e.target.feature;
+  selGeoId = geo.dist15name;
+
+  // unselect the previously-selected selection, if there is one
+  if (selectedGeo && selectedGeo.feature.dist15name != geo.dist15name) {
+    prevSelectedGeo = selectedGeo;
+    geoLayer.resetStyle(prevSelectedGeo);
+  }
+  selectedGeo = e.target;
+  selectedLatLng = e.latlng;
+  // groupG.on("mouseover", function(d) {
+  //   chordPaths.style("fill", DISTRICT_COLORRAMP[d.index].color);
+  //   chordPaths.classed("fade", function (p) {
+  //       //returns true if *neither* the source or target of the chord
+  //       //matches the group that has been moused-over
+  //       return ((p.source.index != d.index) && (p.target.index != d.index));
+  //   });
+  // });
+  // console.log(_aggregateData[]);
+  // if (_aggregateData.hasOwnProperty(selGeoId)) {
+    showGeoDetails(selectedLatLng);
+    // buildChartHtmlFromData(selGeoId);
+  // } else {
+  //   resetPopGeo();
+  // }
+}
+
+let popSelGeo;
+function showGeoDetails(latlng) {
+  // show popup
+  popSelGeo = L.popup()
+    .setLatLng(latlng)
+    .setContent(infoPanel._div.innerHTML)
+    .addTo(mymap);
+
+  // Revert to overall chart when no segment selected
+  popSelGeo.on('remove', function(e) {
+    resetPopGeo();
+  });
+}
+
+function resetPopGeo() {
+  geoLayer.resetStyle(selectedGeo);
+  prevSelectedGeo = selectedGeo = selGeoId = null;
+  // buildChartHtmlFromData();
+}
+
+// ????
+function highlightSelectedSegment() {
+  if (!selGeoId) return;
+
+  mymap.eachLayer(function (e) {
+    try {
+      if (e.feature.taz === selGeoId) {
+        e.bringToFront();
+        e.setStyle(styles.popup);
+        selectedGeo = e;
+        return;
+      }
+    } catch(error) {}
+  });
+}
+
 // functions for vue
 async function selectionChanged() {
   let selfeat = await drawChord();
