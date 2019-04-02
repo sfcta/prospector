@@ -26,10 +26,11 @@ import Cookies from 'js-cookie';
 // some important global variables.
 // the data source
 const API_SERVER = 'https://api.sfcta.org/api/';
+const GEO_VIEW = 'csf_dist15';
 const DATA_VIEW = 'connectsf_trippattern';
 const COMMENT_VIEW = 'connectsf_comment';
 const YEAR_LIST = ['2015', '2050'];
-const METRIC_LIST = ['walk/bike', 'transit', 'uber/lyft', 'drivealone', 'shareddrive'];
+const METRIC_LIST = ['walk/bike', 'transit', 'uber/lyft', 'drive'];
 // color schema
 
 
@@ -83,37 +84,67 @@ const DISTRICT_COLORRAMP = [{district:'Downtown', color:'#cf1130'},
 //                             {district:'Richmond',color:'#00EEEE'},
 //                             {district:'North Bay',color:'#EE82EE'}];
 
+//reference sfmap
+var maplib = require('../jslib/maplib');
+let styles = maplib.styles;
+let getLegHTML = maplib.getLegHTML2;
+let getColorFromVal = maplib.getColorFromVal2;
+// let getBWLegHTML = maplib.getBWLegHTML;
+let getQuantiles = maplib.getQuantiles;
+
+let mymap = maplib.sfmap;
+// set map center and zoom level
+mymap.setView([37.76889, -122.440997], 11);
+// // add baseLayer and streetLayer
+let baseLayer = maplib.baseLayer;
+// mymap.removeLayer(baseLayer);
+
+// let baseLayer = maplib.baseLayer;
+// mymap.removeLayer(baseLayer);
+// let url = 'https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+// let token = 'pk.eyJ1Ijoic2ZjdGEiLCJhIjoiY2ozdXBhNm1mMDFkaTJ3dGRmZHFqanRuOCJ9.KDmACTJBGNA6l0CyPi1Luw';
+// let attribution ='<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
+//                  '<a href="http://mapbox.com">Mapbox</a>';
+// baseLayer = L.tileLayer(url, {
+//   attribution:attribution,
+//   maxZoom: 18,
+//   accessToken:token,
+// }).addTo(mymap);
+
+
 //create number formatting functions
 var formatPercent = d3.format("%");
 var numberWithCommas = d3.format("0,f");
 
 // main function
+let _featJson;
 async function initialPrep() {
   console.log('1...');
   await getMapData();
 
   console.log('2... ');
-  await drawMapFeatures();
+  await drawChord();
 
   console.log('3... ');
-  
+  _featJson = await fetchMapFeatures();
+
   console.log('4... ');
+  await drawMapFeatures();
 
   console.log('5... ');
   await checkCookie();
 
   console.log('6 !!!');
+  mymap.invalidateSize();
 }
 
 // get data from database
-// let base_lookup;
 let _aggregateData;
 async function getMapData() {
   let data_url = API_SERVER + DATA_VIEW;
   let resp = await fetch(data_url);
   let jsonData = await resp.json();
 
-  // base_lookup = {};
   let tmp = {};
   for (let yr of YEAR_LIST) {
     tmp[yr] = {};
@@ -200,7 +231,6 @@ async function getMapData() {
       }
     }
   }
-  console.log(_aggregateData);
 }
 
 var width = window.innerWidth,
@@ -355,9 +385,20 @@ function chordTween(oldLayout) {
     };
 }
 
-async function drawMapFeatures() {
+async function drawChord() {
   var matrix = _aggregateData[app.selected_year][app.selected_importance][app.selected_metric];
   /* Compute chord layout. */
+  if(app.selected_direction == "inbound") {
+    let tmp = [];
+    for(let i=0; i<matrix.length; i++){
+      tmp.push([]);
+      for(let j=0; j<matrix.length; j++){
+        tmp[i].push(matrix[j][i]);
+      }
+    }
+    matrix = tmp;
+  }
+
   var layout = getDefaultLayout(); //create a new layout object
   layout.matrix(matrix);
 
@@ -498,11 +539,11 @@ async function drawMapFeatures() {
   //chordPaths selection
   groupG.on("mouseover", function(d) {
     chordPaths.style("fill", DISTRICT_COLORRAMP[d.index].color);
-      chordPaths.classed("fade", function (p) {
-          //returns true if *neither* the source or target of the chord
-          //matches the group that has been moused-over
-          return ((p.source.index != d.index) && (p.target.index != d.index));
-      });
+    chordPaths.classed("fade", function (p) {
+        //returns true if *neither* the source or target of the chord
+        //matches the group that has been moused-over
+        return ((p.source.index != d.index) && (p.target.index != d.index));
+    });
   });
   // the "unfade" is handled with CSS :hover class on g#circle
   //you could also do it using a mouseout event:
@@ -511,10 +552,10 @@ async function drawMapFeatures() {
                     return DISTRICT_COLORRAMP[d.source.index].color;
                 });
 
-      // if (this == g.node() )
-      //     //only respond to mouseout of the entire circle
-      //     //not mouseout events for sub-components
-      //     chordPaths.classed("fade", false);
+      if (this == g.node() )
+          //only respond to mouseout of the entire circle
+          //not mouseout events for sub-components
+          chordPaths.classed("fade", false);
   });
   
   last_layout = layout; //save for next update
@@ -531,18 +572,144 @@ async function drawMapFeatures() {
   */
 }
 
+// referenece map
+// get the district boundary data
+async function fetchMapFeatures() {
+  const geo_url = API_SERVER + GEO_VIEW;
+
+  try {
+    let resp = await fetch(geo_url);
+    let features = await resp.json();
+
+    // do some parsing and stuff
+    for (let feat of features) {
+      feat['type'] = 'Feature';
+      feat['geometry'] = JSON.parse(feat.geometry);
+    }
+
+    return features;
+  } catch (error) {
+    console.log('map feature error: ' + error);
+  }
+}
+
+let geoLayer;
+let stripes = new L.StripePattern({weight:3,spaceWeight:3,opacity:0.6,angle:135}); stripes.addTo(mymap);
+async function drawMapFeatures() {
+  if (!_featJson) return;
+  let cleanFeatures = _featJson.slice();
+
+  geoLayer = L.geoJSON(cleanFeatures, {
+    style: { opacity: 1, weight: 2, color: 'grey', fillPattern: stripes},
+    onEachFeature: function(feature, layer) {
+      layer.on({
+        mouseover: hoverFeature,
+        click: clickedOnFeature,
+        });
+    },
+  });
+  geoLayer.addTo(mymap);
+}
+
+// hover mouseover
+let oldHoverTarget;
+function hoverFeature(e) {
+  // don't do anything else if the feature is already clicked
+  if (selGeoId === e.target.feature.dist15name) return;
+
+  // return previously-hovered segment to its original color
+  if (oldHoverTarget && e.target.feature.dist15name != selGeoId) {
+    if (oldHoverTarget.feature.dist15name != selGeoId)
+      geoLayer.resetStyle(oldHoverTarget);
+  }
+
+  let highlightedGeo = e.target;
+  highlightedGeo.bringToFront();
+  highlightedGeo.setStyle(styles.selected);
+  oldHoverTarget = e.target; 
+}
+
+// hover clickon
+let selGeoId;
+let selectedGeo;
+let prevSelectedGeo;
+let selectedLatLng;
+function clickedOnFeature(e) {
+  e.target.setStyle(styles.popup);
+  let geo = e.target.feature;
+  selGeoId = geo.dist15name;
+
+  // unselect the previously-selected selection, if there is one
+  if (selectedGeo && selectedGeo.feature.dist15name != geo.dist15name) {
+    prevSelectedGeo = selectedGeo;
+    geoLayer.resetStyle(prevSelectedGeo);
+  }
+  selectedGeo = e.target;
+  selectedLatLng = e.latlng;
+  // groupG.on("mouseover", function(d) {
+  //   chordPaths.style("fill", DISTRICT_COLORRAMP[d.index].color);
+  //   chordPaths.classed("fade", function (p) {
+  //       //returns true if *neither* the source or target of the chord
+  //       //matches the group that has been moused-over
+  //       return ((p.source.index != d.index) && (p.target.index != d.index));
+  //   });
+  // });
+  // console.log(_aggregateData[]);
+  // if (_aggregateData.hasOwnProperty(selGeoId)) {
+    showGeoDetails(selectedLatLng);
+    // buildChartHtmlFromData(selGeoId);
+  // } else {
+  //   resetPopGeo();
+  // }
+}
+
+let popSelGeo;
+function showGeoDetails(latlng) {
+  // show popup
+  popSelGeo = L.popup()
+    .setLatLng(latlng)
+    .setContent(infoPanel._div.innerHTML)
+    .addTo(mymap);
+
+  // Revert to overall chart when no segment selected
+  popSelGeo.on('remove', function(e) {
+    resetPopGeo();
+  });
+}
+
+function resetPopGeo() {
+  geoLayer.resetStyle(selectedGeo);
+  prevSelectedGeo = selectedGeo = selGeoId = null;
+  // buildChartHtmlFromData();
+}
+
+// ????
+function highlightSelectedSegment() {
+  if (!selGeoId) return;
+
+  mymap.eachLayer(function (e) {
+    try {
+      if (e.feature.taz === selGeoId) {
+        e.bringToFront();
+        e.setStyle(styles.popup);
+        selectedGeo = e;
+        return;
+      }
+    } catch(error) {}
+  });
+}
+
 // functions for vue
 async function selectionChanged() {
-  await drawMapFeatures();
+  await drawChord();
 }
 
 function yrChanged(yr) {
   app.selected_year = yr;
-  if (yr=='diff') {
-  //   app.sliderValue = YR_LIST;
-  // } else {
-  //   app.sliderValue = [yr,yr];
-  }
+}
+
+function directionChanged(direction) {
+  app.selected_direction = direction;
 }
 
 function metricChanged(metric) {
@@ -649,6 +816,13 @@ let app = new Vue({
     // sliderValue: [YR_LIST[0],YR_LIST[0]],
     // comp_check: false,      // label for diff in time
 
+    // trip direction
+    selected_direction: 'outbound',
+    direction_options: [
+    {text: 'Outbound', value: 'outbound'},
+    {text: 'Inbound', value: 'inbound'},
+    ],
+    
     // purpose type
     selected_importance: 'mandatory',
     importance_options: [
@@ -662,32 +836,23 @@ let app = new Vue({
     {text: 'All', value: 'total'},
     {text: 'Walk/Bike', value: 'walk/bike'},
     {text: 'Transit', value: 'transit'},
-    {text: 'Uber/Lyft', value: 'uber/lyft'},
-    {text: 'Drive Alone', value: 'drivealone'},
-    {text: 'Shared Drive', value: 'shareddrive'},
+    {text: 'TNC', value: 'uber/lyft'},
+    {text: 'Auto', value: 'drive'},
     ],
 
     // comment box
     comment: '',
-
-    // map color control
-    // selected_colorscheme: COLORRAMP.SEQ,
-    // modeMap: {
-    //   '#ffffcc,#663399': 'lch',
-    //   '#ebbe5e,#3f324f': 'hsl',
-    //   '#ffffcc,#3f324f': 'hsl',
-    //   '#3f324f,#ffffcc': 'hsl',
-    //   '#fafa6e,#2A4858': 'lch',
-    // },
   },
   watch: {
     // sliderValue: selectionChanged,      // year choose
     selected_year:selectionChanged,
+    selected_direction:selectionChanged,
     selected_metric: selectionChanged,    // mode choose
     selected_importance: selectionChanged,
   },
   methods: {
     yrChanged: yrChanged,               // year change
+    directionChanged: directionChanged,
     metricChanged: metricChanged,       // mode change
     importanceChanged: importanceChanged,
     handleSubmit: handleSubmit,

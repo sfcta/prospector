@@ -1,6 +1,7 @@
 <div id="container">
 
   <div id="slide-panel" v-bind:class="{ shrunken: isPanelHidden}">
+      
     <div id="layer-widgets">
       <button class="ui tiny color1 icon button"
               v-on:click="clickedShowHide">
@@ -11,6 +12,7 @@
   </div> 
   
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
+
     <div id="preheader">
       <a target="_blank" href="https://connectsf.org/"><img src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png"  height="50" width="250" alt="Connect SF"/></a>
       <hr/>
@@ -40,7 +42,17 @@
                 ${item.text}
           </button>
         </div>
-        
+
+        <h5 style="margin-top:15px">CHOOSE DIRECTION:</h5>
+        <div>
+          <button v-for="item in direction_options"
+                v-on:click="directionChanged(item.value)"
+                class="ui tiny grey button"
+                v-bind:class="{ active: item.value==selected_direction, color2: item.value==selected_direction }">
+                ${item.text}
+          </button>
+        </div> 
+
         <h5 style="margin-top:15px">CHOOSE TRAVEL IMPORTANCE:</h5>
         <div>
           <button v-for="item in importance_options"
@@ -71,6 +83,10 @@
           </div>
           <button class="ui button color2" type="submit">Submit</button>
         </form>
+
+        <hr/>
+        <h5 style="margin-top:15px">REFERENCE MAP</h5>
+        <div id="sfmap"></div>  
       </div>
     </div>
 
@@ -135,5 +151,7 @@
   </div>
   
   <div id="chart_placeholder"></div>
+  
+  <!-- <div id="sfmap"></div> -->
 
 </div>

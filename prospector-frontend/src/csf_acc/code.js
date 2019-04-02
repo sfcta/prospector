@@ -64,7 +64,7 @@ const ADDLAYERS = [
     style: { opacity: 1, weight: 3, color: '#730073', fillOpacity: 0, interactive: false},
   },
   {
-    view: 'coc2017', name: 'Communities of Concern',
+    view: 'csf_dist15', name: 'Communities of Concern',
     style: { opacity: 1, weight: 2, color: 'grey', fillPattern: stripes, interactive: false},
   },
   {
