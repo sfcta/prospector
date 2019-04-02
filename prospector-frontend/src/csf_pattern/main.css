@@ -51,6 +51,13 @@
   transition: margin 0.4s;
 }
 
+#sfmap {
+  width:380px;
+  height:300px;
+  margin-right:0px;
+  z-index:0;
+}
+
 #slide-panel {
   position: absolute;
   right: 400px;
@@ -61,11 +68,6 @@
 
 .shrunken {
   margin-right: -394px;
-}
-
-#sfmap {
-  height:100%;
-  z-index:0;
 }
 
 .apptitle {
