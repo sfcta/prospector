@@ -27,6 +27,7 @@ var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
 let getLegHTML = maplib.getLegHTML2;
 let getColorFromVal = maplib.getColorFromVal2;
+let getBWLegHTML = maplib.getBWLegHTML;
 
 let baseLayer = maplib.baseLayer;
 let mymap = maplib.sfmap;
@@ -93,6 +94,15 @@ const CUSTOM_BP_DICT = {
   'periodcap': {'base':[100,500,2500,10000], 'diff':[100,500,2500,10000], 'pctdiff':[-20, -5, 5, 20]},
 };
 
+const BWIDTH_MAP = {
+  1: DEF_BWIDTH,
+  2: DEF_BWIDTH,
+  3: [2.5, 5],
+  4: [1.6, 3.2, 4.8],
+  5: [1, 2.5, 5, 10],
+  6: [1, 2, 3, 4, 5]
+};
+
 const METRIC_UNITS = {'load': 'V/C',
                       'tot': '000s per sq. mi.',
                       'jobpop': '000s per sq. mi.'};
@@ -102,6 +112,7 @@ const METRIC_DESC = {'load': 'Crowding','ab_vol': 'Volume',
 const METRIC_DESC_SHORT = METRIC_DESC;
 
 let sel_colorvals, sel_colors, sel_binsflag;
+let sel_bwvals;
 
 let chart_deftitle = 'All ' + GEOTYPE + 's Combined';
 
@@ -198,6 +209,9 @@ function getInfoHtml(geo) {
   if (geo.base !== null) base_val = (Math.round(geo.base*100)/100).toLocaleString();
   let comp_val = null;
   if (geo.comp !== null) comp_val = (Math.round(geo.comp*100)/100).toLocaleString();
+  
+  let bwmetric_val = null;
+  if (geo.bwmetric !== null) bwmetric_val = (Math.round(geo.bwmetric*100)/100).toLocaleString();
 
   let retval = '<b>Link AB: </b>' + `${geo[GEOID_VAR]}<br/>`;
   if (app.comp_check) {
@@ -220,7 +234,8 @@ function getInfoHtml(geo) {
             (app.pct_check? '<b> %</b>': '') +
             (app.comp_check? '<b> Diff: </b>':'<b>: </b>') +   
             `${metric_val}` + 
-            ((app.pct_check && app.comp_check && metric_val !== null)? '%':'');
+            ((app.pct_check && app.comp_check && metric_val !== null)? '%':'') + 
+            (app.bwidth_check? `<br/><b>Volume</b>` + '<b>: </b>' + bwmetric_val:'');
   return retval; 
 }
 
@@ -272,6 +287,7 @@ async function getMapData() {
 
 let base_lookup;
 let map_vals;
+let bwidth_vals;
 async function drawMapFeatures(queryMapData=true) {
 
   // create a clean copy of the feature Json
@@ -296,10 +312,12 @@ async function drawMapFeatures(queryMapData=true) {
       if (base_lookup == undefined) await getMapData();
 
       let map_metric;
+      let bwidth_metric;
       map_vals = [];
+      bwidth_vals = [];
       for (let feat of cleanFeatures) {
         map_metric = null;
-        
+        bwidth_metric = null;
         /*if (base_lookup.hasOwnProperty(feat[GEOID_VAR])) {
           feat[sel_metric + YR_LIST[0]] = base_lookup[feat[GEOID_VAR]][sel_metric + YR_LIST[0]];
           feat[sel_metric + YR_LIST[1]] = base_lookup[feat[GEOID_VAR]][sel_metric + YR_LIST[1]];
@@ -320,11 +338,15 @@ async function drawMapFeatures(queryMapData=true) {
                   map_metric = 0;
                 }
               }
+              
+              bwidth_metric = Math.round(base_lookup[base_scnyr][app.selected_timep][feat[GEOID_VAR]][app.selected_bwidth]);
             }
           }
         } else {
           if (base_lookup[base_scnyr][app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
             map_metric = base_lookup[base_scnyr][app.selected_timep][feat[GEOID_VAR]][sel_metric];
+            
+            bwidth_metric = Math.round(base_lookup[base_scnyr][app.selected_timep][feat[GEOID_VAR]][app.selected_bwidth]);
           }
         }       
         
@@ -333,8 +355,12 @@ async function drawMapFeatures(queryMapData=true) {
           map_vals.push(map_metric);
         }
         feat['metric'] = map_metric;
+        
+        if (bwidth_metric !== null) bwidth_vals.push(bwidth_metric);
+        feat['bwmetric'] = bwidth_metric;
       }
-      map_vals = map_vals.sort((a, b) => a - b);  
+      map_vals = map_vals.sort((a, b) => a - b);
+      bwidth_vals = bwidth_vals.sort((a, b) => a - b);       
     }
     
     if (map_vals.length > 0) {
@@ -385,9 +411,34 @@ async function drawMapFeatures(queryMapData=true) {
           sel_binsflag = true; 
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
           sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
+          
+          sel_bwvals = new Set([app.bwbp0, app.bwbp1, app.bwbp2, app.bwbp3, app.bwbp4, app.bwbp5]);
+          sel_bwvals = Array.from(sel_bwvals).sort((a, b) => a - b);
         }
       } else {
         throw 'ERROR: This step should not be occurring!!!';
+      }
+
+      let bw_widths;
+      if (app.bwidth_check) {
+        bw_widths = BWIDTH_MAP[sel_bwvals.length]; 
+        for (let feat of cleanFeatures) {
+          if (feat['bwmetric'] !== null) {
+            if (sel_bwvals.length <= 2){
+              feat['bwmetric_scaled'] = bw_widths;
+            } else {
+              for (var i = 0; i < sel_bwvals.length-1; i++) {
+                if (feat['bwmetric'] <= sel_bwvals[i + 1]) {
+                  feat['bwmetric_scaled'] = bw_widths[i];
+                  break;
+                }
+              }
+            }
+            //feat['bwmetric_scaled'] = (feat['bwmetric']-bwidth_vals[0])*(MAX_BWIDTH-MIN_BWIDTH)/(bwidth_vals[bwidth_vals.length-1]-bwidth_vals[0])+MIN_BWIDTH;
+          } else {
+            feat['bwmetric_scaled'] = null;
+          }
+        }
       }
       
       sel_colors = [];
@@ -421,6 +472,12 @@ async function drawMapFeatures(queryMapData=true) {
         legHTML = '<h4>' + METRIC_DESC_SHORT[sel_metric] +
                   (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(sel_metric)? (' (' + METRIC_UNITS[sel_metric] + ')') : '')) +
                   '</h4>' + legHTML;
+                  
+        if (app.bwidth_check) {
+          legHTML += '<hr/>' + '<h4>Volume</h4>';
+          legHTML += getBWLegHTML(sel_bwvals, bw_widths);
+        }
+        
         div.innerHTML = legHTML;
         return div;
       };
@@ -461,7 +518,11 @@ function styleByMetricColor(feat) {
               );
   if (!color) color = MISSING_COLOR;
   if (feat['metric']==0) color = MISSING_COLOR;
-  return {opacity: 1, weight: DEF_BWIDTH, color: color};
+  if (!app.bwidth_check) {
+    return {opacity: 1, weight: DEF_BWIDTH, color: color};
+  } else {
+    return {opacity: 1, weight: feat['bwmetric_scaled'], color: color};
+  }
 }
 
 let infoPanelTimeout;
@@ -614,6 +675,11 @@ function yrChanged(yr) {
 }
 
 function metricChanged(metric) {
+  if (metric == app.selected_bwidth) {
+    app.bwidth_check = false;
+  } else {
+    app.bwidth_check = true;
+  }
   app.selected_metric = metric;
 }
 function tpChanged(chosentp) {
@@ -657,6 +723,15 @@ let app = new Vue({
     bp5: 0.0,
     aggData: [{pop:0,tot:0,jobpop:0},
               {pop:0,tot:0,jobpop:0}],
+    
+    bwidth_check: true,
+    selected_bwidth: 'ab_vol',
+    bwbp0: 100.0,
+    bwbp1: 500.0,
+    bwbp2: 2500.0,
+    bwbp3: 5000.0,
+    bwbp4: 10000.0,
+    bwbp5: 10000.0,    
     
     year_options: [
     {text: 'Year 2015', value: '2015'},
