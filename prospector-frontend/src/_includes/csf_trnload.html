@@ -52,12 +52,12 @@
           </div>
 
           <h5>CHOOSE TIME PERIOD</h5>
-          <div class="compact ui horizontal mini buttons">
+          <div class="compact ui horizontal tiny buttons">
             <button v-for="item in tplist"
                   v-on:click="tpChanged(item)"
                   class="ui grey button"
                   v-bind:class="{ active: item==selected_timep, color2: item==selected_timep }">
-                  ${tpmap[item][0]}<br>${tpmap[item][1]}
+                  ${tpmap[item]}
             </button>
           </div>          
 
