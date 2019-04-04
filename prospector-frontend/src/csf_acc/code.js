@@ -83,7 +83,9 @@ const ADDLAYERS = [
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
 const DATA_VIEW = 'connectsf_accjobs';
-const COMMENT_VIEW = 'connectsf_comment';
+const COMMENT_SERVER = 'https://api.sfcta.org/commapi/';
+const COMMENT_VIEW = 'test_comment';
+const VIZNAME = 'csf_acc';
 
 // sidebar select lists
 const FRAC_COLS = ['auto', 'transit']; //
@@ -694,7 +696,7 @@ function showExtraLayers(e) {
 
 // get the taz boundary data
 async function fetchComments(comment) {
-  const comment_url = API_SERVER + COMMENT_VIEW;
+  const comment_url = COMMENT_SERVER + COMMENT_VIEW;
   // console.log(JSON.stringify(comment))
   try {
     await fetch(comment_url, {
@@ -740,6 +742,7 @@ function checkCookie() {
 }
 
 let comment = {
+  vizname: VIZNAME,
   select_year: '',
   select_metric: '',
   add_layer: '',
