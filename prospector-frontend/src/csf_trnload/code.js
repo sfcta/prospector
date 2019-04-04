@@ -110,6 +110,16 @@ const METRIC_DESC = {'load': 'Crowding','ab_vol': 'Volume',
                       'periodcap': 'Capacity',
 };
 const METRIC_DESC_SHORT = METRIC_DESC;
+const MODE_DESC = {11: 'Muni Local',
+                   12: 'Muni Expresss',
+                   13: 'Muni BRT',
+                   15: 'Muni Metro (LRT)',
+                   22: 'AC Transbay Buses',
+                   23: 'Golden Gate Bus',
+                   24: 'Sam Trans Express Bus',
+                   26: 'Caltrain',
+                   31: 'Ferry',
+                   32: 'BART'};
 
 let sel_colorvals, sel_colors, sel_binsflag;
 let sel_bwvals;
@@ -214,6 +224,7 @@ function getInfoHtml(geo) {
   if (geo.bwmetric !== null) bwmetric_val = (Math.round(geo.bwmetric*100)/100).toLocaleString();
 
   let retval = '<b>Link AB: </b>' + `${geo[GEOID_VAR]}<br/>`;
+  retval += '<b>Mode: </b>' + `${MODE_DESC[geo['mode']]}<br/>`;
   if (app.comp_check) {
     retval += `<b>${app.sliderValue[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${base_val}<br/>` +
               `<b>${app.sliderValue[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${comp_val}<br/>`;
