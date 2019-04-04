@@ -731,7 +731,7 @@ let app = new Vue({
     bwbp2: 2500.0,
     bwbp3: 5000.0,
     bwbp4: 10000.0,
-    bwbp5: 10000.0,    
+    bwbp5: 999999.0,    
     
     year_options: [
     {text: 'Year 2015', value: '2015'},
