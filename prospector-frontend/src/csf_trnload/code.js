@@ -219,12 +219,16 @@ function getInfoHtml(geo) {
   if (geo.base !== null) base_val = (Math.round(geo.base*100)/100).toLocaleString();
   let comp_val = null;
   if (geo.comp !== null) comp_val = (Math.round(geo.comp*100)/100).toLocaleString();
+  let basevol_val = null;
+  if (geo.basevol !== null) basevol_val = Math.round(geo.basevol).toLocaleString();
+  let compvol_val = null;
+  if (geo.compvol !== null) compvol_val = Math.round(geo.compvol).toLocaleString();  
   
   let bwmetric_val = null;
-  if (geo.bwmetric !== null) bwmetric_val = (Math.round(geo.bwmetric*100)/100).toLocaleString();
+  if (geo.bwmetric !== null) bwmetric_val = Math.round(geo.bwmetric).toLocaleString();
 
   let retval = '<b>Link AB: </b>' + `${geo[GEOID_VAR]}<br/>`;
-  retval += '<b>Mode: </b>' + `${MODE_DESC[geo['mode']]}<br/>`;
+  retval += '<b>Mode: </b>' + `${MODE_DESC[geo['mode']]}<br/><hr>`;
   if (app.comp_check) {
     retval += `<b>${app.sliderValue[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${base_val}<br/>` +
               `<b>${app.sliderValue[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${comp_val}<br/>`;
@@ -246,7 +250,13 @@ function getInfoHtml(geo) {
             (app.comp_check? '<b> Diff: </b>':'<b>: </b>') +   
             `${metric_val}` + 
             ((app.pct_check && app.comp_check && metric_val !== null)? '%':'') + 
-            (app.bwidth_check? `<br/><b>Volume</b>` + '<b>: </b>' + bwmetric_val:'');
+            ((app.bwidth_check && !app.comp_check)? `<br/><b>Volume</b>` + '<b>: </b>' + bwmetric_val:'');
+
+  if (app.comp_check) {
+    retval += `<hr><b>${app.sliderValue[0]}</b> `+`<b>${METRIC_DESC['ab_vol']}: </b>` + `${basevol_val}<br/>` +
+              `<b>${app.sliderValue[1]}</b> `+`<b>${METRIC_DESC['ab_vol']}: </b>` + `${compvol_val}<br/>`;
+  }            
+            
   return retval; 
 }
 
@@ -341,6 +351,8 @@ async function drawMapFeatures(queryMapData=true) {
             if (base_lookup[comp_scnyr][app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
               feat['base'] = base_lookup[base_scnyr][app.selected_timep][feat[GEOID_VAR]][sel_metric];
               feat['comp'] = base_lookup[comp_scnyr][app.selected_timep][feat[GEOID_VAR]][sel_metric];
+              feat['basevol'] = base_lookup[base_scnyr][app.selected_timep][feat[GEOID_VAR]]['ab_vol'];
+              feat['compvol'] = base_lookup[comp_scnyr][app.selected_timep][feat[GEOID_VAR]]['ab_vol'];
               map_metric = feat['comp'] - feat['base'];
               if (app.pct_check && app.comp_check) {
                 if (feat_entry['base']>0) {
@@ -368,7 +380,7 @@ async function drawMapFeatures(queryMapData=true) {
         feat['metric'] = map_metric;
         
         if (bwidth_metric !== null) bwidth_vals.push(bwidth_metric);
-        feat['bwmetric'] = bwidth_metric;
+        feat['bwmetric'] = Math.round(bwidth_metric);
       }
       map_vals = map_vals.sort((a, b) => a - b);
       bwidth_vals = bwidth_vals.sort((a, b) => a - b);       
