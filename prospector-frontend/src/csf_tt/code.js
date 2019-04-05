@@ -114,8 +114,9 @@ const MISSING_COLOR = '#f3f3f3';
 // ConnectSF brand color ramps
 /*const COLORRAMP = {SEQ: ['#f3f3f3','#f6d3d2','#f6b3b1','#f29292','#ec7074'],
                    DIV: ['#54bdba','#a9d7d5','#f1f1f1','#f5b2b0','#ec7074']};*/
-const COLORRAMP = {SEQ: ['#eefacd','#89c5a8','#009485','#116570','#173252'],
+const COLORRAMP = {//SEQ: ['#eefacd','#89c5a8','#009485','#116570','#173252'],
                    //SEQ: ['#eefacd','#c5e5bf','#89c5a8','#49a895','#009485','#00807b','#116570','#164b61','#173252'],
+                   SEQ: ['#c5e5bf','#89c5a8','#49a895','#009485','#00807b','#164b61','#173252'],
                    DIV: ['#54bdba','#a9d7d5','#f1f1f1','#f5b2b0','#ec7074']};
                    
                    
@@ -133,7 +134,7 @@ const BWIDTH_MAP = {
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
   //'avg_time': {'base':[5, 10, 15, 20, 25, 30, 35, 40], 'diff':[-5, -2, 2, 5], 'pctdiff':[-20, -5, 5, 20]},
-  'avg_time': {'base':[15, 20, 25, 30], 'diff':[-5, -2, 2, 5], 'pctdiff':[-20, -5, 5, 20]},
+  'avg_time': {'base':[15, 18, 21, 24, 27, 30], 'diff':[-5, -2, 2, 5], 'pctdiff':[-20, -5, 5, 20]},
   'num_tours': {'base':[250, 500, 750, 1000], 'diff':[-100, -10, 10, 100], 'pctdiff':[-20, -5, 5, 20]},
 }
 
