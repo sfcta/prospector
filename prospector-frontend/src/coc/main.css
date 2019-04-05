@@ -1,4 +1,4 @@
-/* CSS Layout for JOBPOP ONLY goes here */
+/* CSS Layout for COC ONLY goes here */
 
 #slide-panel {
   top: auto;
@@ -10,16 +10,16 @@
 }
 
 .ui.color1.button {
-  background-color: #f56e71;
+  background-color: #8cb8ca;
   color: #fff;
 }
 
 .ui.color2.button {
-  background-color: #38bebb;
+  background-color: #ffb81d;
   color: #fff;
 }
 .ui.color2.button.active {
-  background-color: #38bebb;
+  background-color: #ffb81d;
 }
 
 .ui.button {
@@ -109,11 +109,23 @@ hr {margin: 1% 0px; }
 .ui.toggle.checkbox {
   margin: 2% 3%;
 }
-.ui.toggle.checkbox input:focus:checked~label:before{
-  background-color: #f56e71!important;
+.ui.colorsup.toggle.checkbox input:focus:checked~label:before{
+  background-color: #767676!important;
 }
-.ui.toggle.checkbox input:checked~label:before{
-  background-color: #f56e71!important;
+.ui.colorsup.toggle.checkbox input:checked~label:before{
+  background-color: #767676!important;
+}
+.ui.colorhin.toggle.checkbox input:focus:checked~label:before{
+  background-color: #ff8d6d!important;
+}
+.ui.colorhin.toggle.checkbox input:checked~label:before{
+  background-color: #ff8d6d!important;
+}
+.ui.colorpar.toggle.checkbox input:focus:checked~label:before{
+  background-color: #9bae89!important;
+}
+.ui.colorpar.toggle.checkbox input:checked~label:before{
+  background-color: #9bae89!important;
 }
 
 table#citywide tbody th, td {   
