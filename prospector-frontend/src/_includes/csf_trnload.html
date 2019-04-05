@@ -14,7 +14,7 @@
       <div id="preheader">
         <a target="_blank" href="https://connectsf.org/"><img src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png"  height="50" width="250" alt="Connect SF"/></a>
         <hr/>
-        <h3 class="apptitle">Transit Loads</h3>
+        <h3 class="apptitle">Transit Crowding</h3>
         <div id="helpbar">
             <button class="ui mini right labeled icon color1 button"
                     v-on:click="clickToggleHelp">
@@ -41,7 +41,7 @@
             </button>
           </div>
           
-          <h5>CHOOSE MEASURE</h5>
+          <!--h5>CHOOSE MEASURE</h5>
           <div>
             <button v-for="item in metric_options"
                   v-on:click="metricChanged(item.value)"
@@ -49,7 +49,7 @@
                   v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
                   ${item.text}
             </button>
-          </div>
+          </div-->
 
           <h5>CHOOSE TIME PERIOD</h5>
           <div class="compact ui horizontal tiny buttons">
