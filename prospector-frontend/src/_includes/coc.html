@@ -62,11 +62,19 @@
           <h5>MAP LAYERS</h5>
           <p>Add additional geographic data to the map.</p>
         
-          <div v-for="item in extraLayers" class="ui toggle checkbox">
-            <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
-            <label><h5>${item.name}</h5></label>
+          <div class="ui colorhin toggle checkbox">
+            <input type="checkbox" value="hin2017" v-model="addLayers">
+            <label><h5>High Injury Network</h5></label>
+          </div>          
+          <div class="ui colorsup toggle checkbox">
+            <input type="checkbox" value="sup_district_boundaries" v-model="addLayers">
+            <label><h5>Supervisorial District Boundaries</h5></label>
           </div>
-
+          <div class="ui colorpar toggle checkbox">
+            <input type="checkbox" value="sfparks" v-model="addLayers">
+            <label><h5>Major Parks</h5></label>
+          </div>
+          
           <br><br>
           <h5>YOUR FEEDBACK</h5>
           <form class="ui tiny equal width form" v-on:submit.prevent>
@@ -74,7 +82,7 @@
               <textarea v-model="comment" class="fix" maxlength="800" rows="3"
               type="text" placeholder="Based on this data, what do you think are the city’s transportation needs? (800 characters)"></textarea>
             </div>
-            <button class="ui tiny button color2" type="submit">Submit</button>
+            <button class="ui tiny button color1" type="submit">Submit</button>
           </form>
 
         </div>
