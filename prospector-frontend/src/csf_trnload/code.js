@@ -753,10 +753,9 @@ let app = new Vue({
     sliderValue: [YR_LIST[0],YR_LIST[0]],
     
     selected_timep: 'AM',
-    tplist: ['AM','PM','Daily'],
+    tplist: ['AM','PM'],
     tpmap: {'AM':'AM',
-            'PM':'PM',
-            'Daily':'Daily'},
+            'PM':'PM'},
     
     selected_metric: 'load',
     metric_options: [
