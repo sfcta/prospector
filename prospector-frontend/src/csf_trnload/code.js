@@ -83,13 +83,13 @@ const INT_COLS = [];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ccd';
 const COLORRAMP = {//SEQ: ['#feefa9', '#ffd469', '#cc7b45', '#7d3e43'],
-                    SEQ: ['#fff9bf', '#ffe28a', '#ffc845', '#eba946','#cc7b45', '#7d3e43'],
+                    SEQ: ['#f5c0c6', '#d79a8a', '#975d70', '#562756'],
                     DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
 const DEF_BWIDTH = 4;
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'load': {'base':[0.85,1,1.25], 'diff':[0.85,1,1.25], 'pctdiff':[-20, -5, 5, 20]},
+  'load': {'base':[0.5,0.75,1], 'diff':[0.5,0.75,1], 'pctdiff':[-20, -5, 5, 20]},
   'ab_vol': {'base':[100,500,2500,10000], 'diff':[100,500,2500,10000], 'pctdiff':[-20, -5, 5, 20]},
   'periodcap': {'base':[100,500,2500,10000], 'diff':[100,500,2500,10000], 'pctdiff':[-20, -5, 5, 20]},
 };
@@ -100,7 +100,7 @@ const BWIDTH_MAP = {
   3: [2.5, 5],
   4: [1.6, 3.2, 4.8],
   5: [1, 2.5, 5, 10],
-  6: [2, 3, 5, 7, 9]
+  6: [1, 2, 4, 8, 16]
 };
 
 const METRIC_UNITS = {'load': 'V/C',
@@ -452,7 +452,7 @@ async function drawMapFeatures(queryMapData=true) {
             } else {
               for (var i = 0; i < sel_bwvals.length-1; i++) {
                 if (feat['bwmetric'] <= sel_bwvals[i + 1]) {
-                  feat['bwmetric_scaled'] = bw_widths[i];
+                  feat['bwmetric_scaled'] = 1.2*bw_widths[i];
                   break;
                 }
               }
