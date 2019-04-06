@@ -24,7 +24,7 @@ import 'isomorphic-fetch';
 import Cookies from 'js-cookie';
 
 var maplib = require('../jslib/maplib');
-let styles = maplib.styles;
+let styles = {selected: {"color": "#39f"},popup: {"color": "#33f"}};
 let getLegHTML = maplib.getLegHTML2;
 let getColorFromVal = maplib.getColorFromVal2;
 let getBWLegHTML = maplib.getBWLegHTML;
