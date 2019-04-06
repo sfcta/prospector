@@ -73,6 +73,8 @@ const ADDLAYERS = [
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'coc2017';
 const DATA_VIEW = 'coc2017';
+const COMMENT_SERVER = 'https://api.sfcta.org/commapi/';
+const COMMENT_VIEW = 'coc_comment';
 
 const GEOTYPE = 'CoC';
 const GEOID_VAR = 'geoid_1';
@@ -133,11 +135,10 @@ async function initialPrep() {
   await drawMapFeatures();
   
   console.log('3... ');
-  //await buildChartHtmlFromData();
-  updateStats();
+  await fetchAddLayers();
   
   console.log('4... ');
-  await fetchAddLayers();
+  await checkCookie();
 
   console.log('5 !!!');
 }
@@ -197,15 +198,6 @@ async function fetchAddLayers() {
   }
 }
 
-function updateStats() {
-  for (let i = 0; i < _aggregateData.length; i++) {
-    for (let m of app.metric_options) {
-      app.aggData[i][m.value] = _aggregateData[i][m.value].toLocaleString();
-    }
-  }
-}
-
-
 // hover panel -------------------
 let infoPanel = L.control();
 
@@ -218,25 +210,7 @@ infoPanel.onAdd = function(map) {
 function getInfoHtml(geo) {
   let retval = '<b>TRACT ID: </b>' + `${geo['tract_id']}<br/>` +
                 '<b>BLOCKGROUP ID: </b>' + `${geo['bg_id']}<br/><hr>`;
-
-  /*let metcol1 = app.selected_metric + YR_LIST[0];
-  let metcol2 = app.selected_metric + YR_LIST[1];
-  let metcol3 = app.selected_metric + 'den' + YR_LIST[0];
-  let metcol4 = app.selected_metric + 'den' + YR_LIST[1];
-  
-  let metric1 = geo[metcol1].toLocaleString();
-  let metric2 = geo[metcol2].toLocaleString();
-  let metric3 = geo[metcol3].toLocaleString();
-  let metric4 = geo[metcol4].toLocaleString();
-  let diff = (geo[metcol2] - geo[metcol1]).toLocaleString();
-  let dendiff = (geo[metcol4] - geo[metcol3]).toLocaleString();
-
-  retval += `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${metric1}<br/>` +
-            `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${metric2}<br/>` +
-            `<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + '<b> Change: </b>' + `${diff}<br/><hr>` +
-            `<b>${YR_LIST[0]}</b> `+`<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + `<b> Density (000s /sq. mi.): </b>` + `${metric3}<br/>` +
-            `<b>${YR_LIST[1]}</b> `+`<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + `<b> Density (000s /sq. mi.): </b>` + `${metric4}<br/>` +
-            `<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + '<b> Density Change: </b>' + `${dendiff}<br/>`;*/
+                
   if (app.selected_metric != 'None') {
     retval += `<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + `<b> Percent: </b>` + `${geo['metric']}` + `%`;
   }
@@ -317,14 +291,7 @@ async function drawMapFeatures(queryMapData=true) {
       map_vals = [];
       for (let feat of cleanFeatures) {
         map_metric = null;
-        
-        /*if (base_lookup.hasOwnProperty(feat[GEOID_VAR])) {
-          feat[sel_metric + YR_LIST[0]] = base_lookup[feat[GEOID_VAR]][sel_metric + YR_LIST[0]];
-          feat[sel_metric + YR_LIST[1]] = base_lookup[feat[GEOID_VAR]][sel_metric + YR_LIST[1]];
-          feat[sel_metric + 'den' + YR_LIST[0]] = Math.round(feat[sel_metric + YR_LIST[0]]/(feat['sq_mile']*1000));
-          feat[sel_metric + 'den' + YR_LIST[1]] = Math.round(feat[sel_metric + YR_LIST[1]]/(feat['sq_mile']*1000));
-        }*/ 
-        
+
         if (app.comp_check) {
           if (base_lookup.hasOwnProperty(feat[GEOID_VAR])) {
             let feat_entry = base_lookup[feat[GEOID_VAR]];
@@ -563,52 +530,6 @@ function resetPopGeo() {
   geoLayer.resetStyle(selectedGeo);
   prevSelectedGeo = selectedGeo = selGeoId = null;
   app.chartSubtitle = chart_deftitle;
-  //buildChartHtmlFromData();
-}
-
-let trendChart = null;
-function buildChartHtmlFromData(geoid = null) {
-  document.getElementById('longchart').innerHTML = '';
-
-  if (geoid) {
-    let selgeodata = [];
-    for (let yr of YR_LIST) {
-      let row = {};
-      row['year'] = yr.toString();
-      for (let met of app.metric_options) {
-        row[met.value] = base_lookup[geoid][met.value+yr];
-      }
-      selgeodata.push(row);
-    } 
-    trendChart = new Morris.Line({
-      data: selgeodata,
-      element: 'longchart',
-      gridTextColor: '#aaa',
-      hideHover: true,
-      labels: [app.selected_metric.toUpperCase()],
-      lineColors: ['#f56e71'],
-      xkey: 'year',
-      smooth: false,
-      parseTime: false,
-      xLabelAngle: 45,
-      ykeys: [app.selected_metric],
-    });
-  } else {
-    trendChart = new Morris.Line({
-      data: _aggregateData,
-      element: 'longchart',
-      gridTextColor: '#aaa',
-      hideHover: true,
-      labels: [app.selected_metric.toUpperCase()],
-      lineColors: ['#f56e71'],
-      xkey: 'year',
-      smooth: false,
-      parseTime: false,
-      xLabelAngle: 45,
-      ykeys: [app.selected_metric],
-    });
-  }    
-  
 }
 
 async function selectionChanged(thing) {
@@ -702,6 +623,7 @@ let app = new Vue({
       '#fafa6e,#2A4858': 'lch',
     },
     comment: '',
+    ph_text: 'Please provide feedback. What do you think about this map? (800 characters)',
     addLayers:[],
   },
   watch: {
@@ -714,6 +636,7 @@ let app = new Vue({
     clickedShowHide: clickedShowHide,
     yrChanged: yrChanged,
     metricChanged: metricChanged,
+    handleSubmit: handleSubmit,
   },
 });
 
@@ -769,6 +692,86 @@ let helpPanel = new Vue({
     });
   },
 });
+
+/* Cookie functions for comments*/
+function setCookie(cname, exdays) {
+  var d = new Date();
+  d.setTime(d.getTime() + (exdays*24*60*60*1000));
+  var expires = "expires="+ d.toUTCString();
+  document.cookie = cname + "=" + d.getTime() + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+  var name = cname + "=";
+  var decodedCookie = decodeURIComponent(document.cookie);
+  var ca = decodedCookie.split(';');
+  for(var i = 0; i <ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+function checkCookie() {
+  var username = getCookie("username");
+  if (username == "") {
+    setCookie("username", 365);
+  }
+}
+
+/* Code for storing comments*/
+let comment = {
+  select_metric: '',
+  add_layer: '',
+  comment_user: '',
+  comment_time: new Date(),
+  comment_latitude: -999,
+  comment_longitude: -999,
+  comment_content: ''
+};
+
+function showPosition(position) {
+  comment.comment_latitude = position.coords.latitude;
+  comment.comment_longitude = position.coords.longitude; 
+}
+
+async function fetchComments(comment) {
+  const comment_url = COMMENT_SERVER + COMMENT_VIEW;
+  // console.log(JSON.stringify(comment))
+  try {
+    await fetch(comment_url, {
+      method: 'POST',
+      body: JSON.stringify(comment),
+      headers:{
+        'Content-Type': 'application/json',
+      }
+    });
+  } catch (error) {
+    console.log('comment error: ' + error);
+  }
+}
+
+function handleSubmit() {
+  app.ph_text = 'Thank you for your feedback!';
+  app.comment = '';
+  let timestamp = new Date();
+  comment.select_metric = app.selected_metric;
+  comment.add_layer = app.ADDLAYERS;
+  comment.comment_user = getCookie("username");
+  comment.comment_time = timestamp;
+  comment.comment_content = app.comment;
+  fetchComments(comment);
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition);
+  } else {
+    console.log("Geolocation is not supported by this browser.");
+  }
+}
 
 initialPrep();
 
