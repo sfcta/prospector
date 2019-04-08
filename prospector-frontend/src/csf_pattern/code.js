@@ -33,41 +33,41 @@ const YEAR_LIST = ['2015', '2050'];
 const METRIC_LIST = ['walk/bike', 'transit', 'uber/lyft', 'drive'];
 // color schema
 
-
-const D_DISTRICT = ['downtown', 'soma', 'n_beach_and_chinatown', 'western_market',
-                  'mission_and_potrero', 'noe_and_glen_and_bernal',
-                  'marina_and_n_heights', 'richmond', 'bayshore', 'outer_mission',
-                  'hill_districts', 'sunset', 'south_bay', 'east_bay', 'north_bay'];
-const O_DISTRICT = ['Downtown', 'SoMa', 'N. Beach/Chinatown', 'Western Market',
-                    'Mission/Potrero', 'Noe/Glen/Bernal', 'Marina/N. Heights',
-                    'Richmond', 'Bayshore', 'Outer Mission', 'Hill Districts',
-                    'Sunset', 'South Bay', 'East Bay', 'North Bay'];
+// delete internal trip outside sf area
 const MUTE_DD = ['south_bay', 'east_bay', 'north_bay'];
 const MUTE_OD = ['South Bay', 'East Bay', 'North Bay'];
-const DISTRICT_COLORRAMP = [{district:'Downtown', color:'#cf1130'},
-                            {district:'SoMa',color: '#f47a8d'},
-                            {district:'N. Beach/Chinatown',color:'#f8a7b4'},
-                            {district:'Western Market',color:'#4B256D'},
-                            {district:'Mission/Potrero',color:'#6F5495'},
-                            {district:'Noe/Glen/Bernal',color:'#A09ED6'},
-                            {district:'Marina/N. Heights',color:"3F647E"},
-                            {district:'Richmond',color:'#688FAD'},
-                            {district:'Bayshore',color:'#7caac3'},
-                            {district:'Outer Mission',color:'#006466'},
-                            {district:'Hill Districts',color:'#2fa3a5'},
-                            {district:'Sunset',color:'#95D47A'},
-                            {district:'South Bay',color:'#677C8A'},
-                            {district:'East Bay',color:'#B2A296'},
-                            {district:'North Bay',color:'#a3a3a3'}];
 
-// const D_DISTRICT = ['marina_and_n_heights', 'n_beach_and_chinatown', 'downtown', 'soma', 'western_market',
+// district order & color schema for each district
+// const D_DISTRICT = ['downtown', 'soma', 'n_beach_and_chinatown', 'western_market',
 //                   'mission_and_potrero', 'noe_and_glen_and_bernal',
-//                   'bayshore', 'outer_mission',
-//                   'hill_districts',  'east_bay', 'south_bay', 'sunset', 'richmond', 'north_bay'];
-// const O_DISTRICT = ['Marina/N. Heights', 'N. Beach/Chinatown', 'Downtown', 'SoMa', 'Western Market',
-//                     'Mission/Potrero', 'Noe/Glen/Bernal', 
-//                     'Bayshore', 'Outer Mission', 'Hill Districts',
-//                     'East Bay', 'South Bay', 'Sunset', 'Richmond', 'North Bay'];
+//                   'marina_and_n_heights', 'richmond', 'bayshore', 'outer_mission',
+//                   'hill_districts', 'sunset', 'south_bay', 'east_bay', 'north_bay'];
+// const O_DISTRICT = ['Downtown', 'SoMa', 'N. Beach/Chinatown', 'Western Market',
+//                     'Mission/Potrero', 'Noe/Glen/Bernal', 'Marina/N. Heights',
+//                     'Richmond', 'Bayshore', 'Outer Mission', 'Hill Districts',
+//                     'Sunset', 'South Bay', 'East Bay', 'North Bay'];
+// const DISTRICT_COLORRAMP = [{district:'Downtown', color:'#cf1130'},
+                            // {district:'SoMa',color: '#f47a8d'},
+                            // {district:'N. Beach/Chinatown',color:'#f8a7b4'},
+                            // {district:'Western Market',color:'#4B256D'},
+                            // {district:'Mission/Potrero',color:'#6F5495'},
+                            // {district:'Noe/Glen/Bernal',color:'#A09ED6'},
+                            // {district:'Marina/N. Heights',color:"3F647E"},
+                            // {district:'Richmond',color:'#688FAD'},
+                            // {district:'Bayshore',color:'#7caac3'},
+                            // {district:'Outer Mission',color:'#006466'},
+                            // {district:'Hill Districts',color:'#2fa3a5'},
+                            // {district:'Sunset',color:'#95D47A'},
+                            // {district:'South Bay',color:'#677C8A'},
+                            // {district:'East Bay',color:'#B2A296'},
+                            // {district:'North Bay',color:'#a3a3a3'}];
+
+const D_DISTRICT = ['marina_and_n_heights', 'n_beach_and_chinatown', 'downtown', 'western_market', 'east_bay',
+                    'soma', 'mission_and_potrero', 'noe_and_glen_and_bernal', 'bayshore', 'south_bay',
+                    'outer_mission', 'hill_districts', 'sunset', 'richmond', 'north_bay'];
+const O_DISTRICT = ['Marina/N. Heights', 'N. Beach/Chinatown', 'Downtown', 'Western Market', 'East Bay',
+                    'SoMa', 'Mission/Potrero', 'Noe/Glen/Bernal', 'Bayshore', 'South Bay',
+                    'Outer Mission', 'Hill Districts', 'Sunset', 'Richmond', 'North Bay'];
 // const DISTRICT_COLORRAMP = [{district:'Marina/N. Heights',color:"#D8BFD8"},
 //                             {district:'N. Beach/Chinatown',color:'#6495ED'},
 //                             {district:'Downtown', color:'#FF00FF'},
@@ -95,25 +95,8 @@ let getQuantiles = maplib.getQuantiles;
 let mymap = maplib.sfmap;
 // set map center and zoom level
 mymap.setView([37.76889, -122.440997], 11);
-// // add baseLayer and streetLayer
-let baseLayer = maplib.baseLayer;
-// mymap.removeLayer(baseLayer);
-
-// let baseLayer = maplib.baseLayer;
-// mymap.removeLayer(baseLayer);
-// let url = 'https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
-// let token = 'pk.eyJ1Ijoic2ZjdGEiLCJhIjoiY2ozdXBhNm1mMDFkaTJ3dGRmZHFqanRuOCJ9.KDmACTJBGNA6l0CyPi1Luw';
-// let attribution ='<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
-//                  '<a href="http://mapbox.com">Mapbox</a>';
-// baseLayer = L.tileLayer(url, {
-//   attribution:attribution,
-//   maxZoom: 18,
-//   accessToken:token,
-// }).addTo(mymap);
-
 
 //create number formatting functions
-var formatPercent = d3.format("%");
 var numberWithCommas = d3.format("0,f");
 
 // main function
@@ -385,7 +368,7 @@ function chordTween(oldLayout) {
     };
 }
 
-async function drawChord() {
+async function drawChord(selectedDistrict) {
   var matrix = _aggregateData[app.selected_year][app.selected_importance][app.selected_metric];
   /* Compute chord layout. */
   if(app.selected_direction == "inbound") {
@@ -398,6 +381,24 @@ async function drawChord() {
     }
     matrix = tmp;
   }
+
+  // zero out all external trips from selected district
+  // if (selectedDistrict != undefined) {
+  //   let tmp = [];
+  //   for(let i=0; i<matrix.length; i++){
+  //     tmp.push([]);
+  //     for(let j=0; j<matrix.length; j++){
+  //       if (i == O_DISTRICT.indexOf(selectedDistrict)) {
+  //         tmp[i].push(matrix[i][j]);
+  //       } else if (j == O_DISTRICT.indexOf(selectedDistrict)) {
+  //         tmp[i].push(matrix[i][j]);
+  //       } else {
+  //         tmp[i].push(0);
+  //       }
+  //     }
+  //   }
+  //   matrix = tmp;
+  // }
 
   var layout = getDefaultLayout(); //create a new layout object
   layout.matrix(matrix);
@@ -420,46 +421,41 @@ async function drawChord() {
                         .append("g")
                         .attr("class", "group");
 
-  //Create the title tooltip for the new groups
-  newGroups.append("title");
-  //Update the (tooltip) title text based on the data
-  groupG.select("title")
-        .text(function(d, i) {
-          return numberWithCommas(d.value) 
-              + " trip from " 
-              + DISTRICT_COLORRAMP[i].district;
-        });
-
   //create the arc paths and set the constant attributes
   //(those based on the group index, not on the value)
   newGroups.append("path")
            .attr("id", function (d) {
-              return "group" + d.index;
-              //using d.index and not i to maintain consistency
-              //even if groups are sorted
+             return "group" + d.index;
+             //using d.index and not i to maintain consistency
+             //even if groups are sorted
            })
-           .style("fill", function (d) {
-              return DISTRICT_COLORRAMP[d.index].color;
-           });
+           .style("fill", "#C57879");
   
   //update the paths to match the layout
   groupG.select("path") 
         .transition()
         .duration(1500)
-        //.attr("opacity", 0.5) //optional, just to observe the transition////////////
         .attrTween("d", arcTween( last_layout ));
-        // .transition().duration(100).attr("opacity", 1); //reset opacity//////////////
   
   //create the labels
-  newGroups.append("svg:text")
-          .attr("xlink:href", function (d) {
-            return "#group" + d.index;
-          })
-          // .attr("dy", "14px")
-          // .attr("color", "white")
-          .text(function (d) {
-            return DISTRICT_COLORRAMP[d.index].district; 
-          });
+  var newGroupsText = newGroups.append("svg:text")
+                              .attr("xlink:href", function (d) {
+                                return "#group" + d.index;
+                              });
+          
+  newGroupsText.append("tspan")
+              .attr("x",0)
+              .attr("dy",0)
+              .text(function (d) {
+                return O_DISTRICT[d.index]; 
+              });
+
+  newGroupsText.append("tspan")
+              .attr("x",0)
+              .attr("dy","18px")
+              .text(function (d) {
+                return numberWithCommas(d.value);
+              });
 
   //position group labels to match layout
   groupG.select("text")
@@ -480,96 +476,139 @@ async function drawChord() {
   /* Create/update the chord paths */
   var chordPaths = g.selectAll("path.chord")
                     .data(layout.chords(), chordKey);
-          //specify a key function to match chords
-          //between updates
-      
+
   //create the new chord paths
   var newChords = chordPaths.enter()
                             .append("path")
-                            .attr("class", "chord");
-  
-  // Add title tooltip for each new chord.
-  newChords.append("title");
-  // Update all chord title texts
-  chordPaths.select("title")
-            .text(function(d) {
-                if (DISTRICT_COLORRAMP[d.target.index].district !== DISTRICT_COLORRAMP[d.source.index].district) {
-                    return [numberWithCommas(d.source.value),
-                            " trips from ",
-                            DISTRICT_COLORRAMP[d.source.index].district,
-                            " to ",
-                            DISTRICT_COLORRAMP[d.target.index].district,
-                            "\n",
-                            numberWithCommas(d.target.value),
-                            " trips from ",
-                            DISTRICT_COLORRAMP[d.target.index].district,
-                            " to ",
-                            DISTRICT_COLORRAMP[d.source.index].district
-                            ].join(""); 
-                        //joining an array of many strings is faster than
-                        //repeated calls to the '+' operator, 
-                        //and makes for neater code!
-                } 
-                else { //source and target are the same
-                    return numberWithCommas(d.source.value) 
-                        + " trips ended in " 
-                        + DISTRICT_COLORRAMP[d.source.index].district;
-                }
-            });
+                            .attr("class", function(d) {
+                              return "chord" + d.source.index;
+                            });
 
   //handle exiting paths:
-  chordPaths.exit().transition()
-      .duration(1500)
-      .attr("opacity", 0)
-      .remove();
+  chordPaths.exit()
+            .transition()
+            .attr("opacity", 0)
+            .remove();
 
   //update the path shape
   chordPaths.transition()
-      .duration(1500)
-      .attr("opacity", 0.5) //optional, just to observe the transition
-      .style("fill", function (d) {
-          return DISTRICT_COLORRAMP[d.source.index].color;
-      })
-      .attrTween("d", chordTween(last_layout))
-      .transition().duration(100).attr("opacity", 1) //reset opacity
-  ;
+            .duration(1500)
+            .attr("opacity", 0.5) //optional, just to observe the transition
+            .style("fill", "#C57879")
+            .attrTween("d", chordTween(last_layout))
+            .transition().duration(100).attr("opacity", 1) //reset opacity
+            ;
 
+  function fade(opacity) {
+      return function(k, i) {
+          g.selectAll("g.chord path")
+                  .filter(function(d) {                   
+                      return d.source.index != i && d.target.index != i;
+                  })
+                  .transition()
+                  .style("opacity", opacity);
+      };
+  }
   //add the mouseover/fade out behaviour to the groups
   //this is reset on every update, so it will use the latest
   //chordPaths selection
-  groupG.on("mouseover", function(d) {
-    chordPaths.style("fill", DISTRICT_COLORRAMP[d.index].color);
-    chordPaths.classed("fade", function (p) {
-        //returns true if *neither* the source or target of the chord
-        //matches the group that has been moused-over
-        return ((p.source.index != d.index) && (p.target.index != d.index));
-    });
-  });
+  groupG.on("mouseover", fade(.1));
+  // groupG.on("mouseover", function(d) {
+  //   // chordPaths.style("fill", DISTRICT_COLORRAMP[d.index].color);
+  //   chordPaths.classed("fade", function (p) {
+  //       //returns true if *neither* the source or target of the chord
+  //       //matches the group that has been moused-over
+  //       return ((p.source.index != d.index) && (p.target.index != d.index));
+  //   });
+
+  //   // Add title tooltip for each new chord.
+  //   newChords.append("title");
+  //   // Update all chord title texts
+  //   chordPaths.select("title")
+  //             .text(function(p) {
+  //                 if (O_DISTRICT[p.target.index] !== O_DISTRICT[p.source.index]) {
+  //                   if (p.source.index == d.index) {
+  //                     return [numberWithCommas(p.source.value),
+  //                       // " trips from ",
+  //                       // O_DISTRICT[p.source.index],
+  //                       " to ",
+  //                       O_DISTRICT[p.target.index],
+  //                       ].join(""); 
+  //                   //joining an array of many strings is faster than
+  //                   //repeated calls to the '+' operator, 
+  //                   //and makes for neater code!
+  //                   } else {
+  //                     return [numberWithCommas(p.target.value),
+  //                       // " trips from ",
+  //                       // O_DISTRICT[p.target.index],
+  //                       " to ",
+  //                       O_DISTRICT[p.source.index],
+  //                       ].join(""); 
+  //                   //joining an array of many strings is faster than
+  //                   //repeated calls to the '+' operator, 
+  //                   //and makes for neater code!
+  //                   }
+  //                 } 
+  //                 else { //source and target are the same
+  //                     return numberWithCommas(p.source.value) 
+  //                         + " trips ended in " 
+  //                         + O_DISTRICT[p.source.index];
+  //                 }
+  //             });
+  //   // hoverFeatureFromChord(d);
+  // });
   // the "unfade" is handled with CSS :hover class on g#circle
   //you could also do it using a mouseout event:
-  g.on("mouseout", function() {
-      chordPaths.style("fill", function (d) {
-                    return DISTRICT_COLORRAMP[d.source.index].color;
-                });
+  // g.on("mouseout", function() {
+  //     chordPaths.style("fill", function (d) {
+  //                   return DISTRICT_COLORRAMP[d.source.index].color;
+  //               });
 
-      if (this == g.node() )
-          //only respond to mouseout of the entire circle
-          //not mouseout events for sub-components
-          chordPaths.classed("fade", false);
-  });
+  //     if (this == g.node() )
+  //         //only respond to mouseout of the entire circle
+  //         //not mouseout events for sub-components
+  //         chordPaths.classed("fade", false);
+  // });
   
+  // groupG.on("click", function(d){
+  //   console.log(111)
+  //   if (d.chordHighlighted)
+  //       d3.selectAll("path.group" + d.index);
+  //   else{
+  //       d3.selectAll("path.group" + d.index)
+  //         .style("fill", "red");
+  //       chordPaths.classed("fade", function (p) {
+  //         //returns true if *neither* the source or target of the chord
+  //         //matches the group that has been moused-over
+  //         return ((p.source.index != d.index) && (p.target.index != d.index));
+  //     });
+  //   }
+  //   d.chordHighlighted = d.chordHighlighted ? false : true;
+  // })
+
   last_layout = layout; //save for next update
+}
 
+function hoverFeatureFromChord(e) {
+  clearTimeout(infoPanelTimeout);
+  infoPanelTimeout = setTimeout(function() {
+    // and clear the hover too
+    if (O_DISTRICT[e.index] != selGeoId) geoLayer.resetStyle(oldHoverTarget);
+  }, 2000);
 
-  /* Create OR update a chord layout from a data matrix */
-  /*
-  function disableButton(buttonNode) {
-      d3.selectAll("button")
-          .attr("disabled", function(d) {
-              return this === buttonNode? "true": null;
-          });
+  // don't do anything else if the feature is already clicked
+  if (selGeoId === O_DISTRICT[e.index]) return;
+
+  // return previously-hovered segment to its original color
+  if (oldHoverTarget && O_DISTRICT[e.index] != selGeoId) {
+    if (oldHoverTarget.feature.dist15name != selGeoId)
+      geoLayer.resetStyle(oldHoverTarget);
   }
-  */
+
+  let highlightedGeo = e.target;
+  highlightedGeo.bringToFront();
+  highlightedGeo.setStyle({opacity: 1, weight: 2, color:'#C57879', fillColor:'#C57879', fillOpacity: 1});
+  oldHoverTarget = e.target; 
 }
 
 // referenece map
@@ -593,14 +632,31 @@ async function fetchMapFeatures() {
   }
 }
 
-let geoLayer;
-let stripes = new L.StripePattern({weight:3,spaceWeight:3,opacity:0.6,angle:135}); stripes.addTo(mymap);
 async function drawMapFeatures() {
   if (!_featJson) return;
   let cleanFeatures = _featJson.slice();
-
+  
   geoLayer = L.geoJSON(cleanFeatures, {
-    style: { opacity: 1, weight: 2, color: 'grey', fillPattern: stripes},
+    style: {opacity: 1, weight: 2, color: 'grey'},
+    // style: function(feature) {
+    //     switch (feature.dist15name) {
+    //       case 'Downtown': return {opacity: 1, weight: 1, color:'#cf1130', fillColor:'#cf1130', fillOpacity: 0.6};
+    //       case 'SoMa': return {opacity: 1, weight: 1, color: '#f47a8d', fillColor: '#f47a8d', fillOpacity: 0.6};
+    //       case 'N. Beach/Chinatown': return {opacity: 1,weight: 1, color:'#f8a7b4', fillColor:'#f8a7b4', fillOpacity: 0.6};
+    //       case 'Western Market': return {opacity: 1,weight: 1, color:'#4B256D', fillColor:'#4B256D', fillOpacity: 0.6};
+    //       case 'Mission/Potrero': return {opacity: 1,weight: 1, color:'#6F5495', fillColor:'#6F5495', fillOpacity: 0.6};
+    //       case 'Noe/Glen/Bernal': return {opacity: 1,weight: 1, color:'#A09ED6', fillColor:'#A09ED6', fillOpacity: 0.6};
+    //       case 'Marina/N. Heights': return {opacity: 1,weight: 1, color:"3F647E", fillColor:"3F647E", fillOpacity: 0.6};
+    //       case 'Richmond': return {opacity: 1,weight: 1, color:'#688FAD', fillColor:'#688FAD', fillOpacity: 0.6};
+    //       case 'Bayshore': return {opacity: 1,weight: 1, color:'#7caac3', fillColor:'#7caac3', fillOpacity: 0.6};
+    //       case 'Outer Mission': return {opacity: 1,weight: 1, color:'#006466', fillColor:'#006466', fillOpacity: 0.6};
+    //       case 'Hill Districts': return {opacity: 1,weight: 1, color:'#2fa3a5', fillColor:'#2fa3a5', fillOpacity: 0.6};
+    //       case 'Sunset': return {opacity: 1,weight: 1, color:'#95D47A', fillColor:'#95D47A', fillOpacity: 0.6};
+    //       case 'South Bay': return {opacity: 1,weight: 1, color:'#677C8A', fillColor:'#677C8A', fillOpacity: 0.6};
+    //       case 'East Bay': return {opacity: 1,weight: 1, color:'#B2A296', fillColor:'#B2A296', fillOpacity: 0.6};
+    //       case 'North Bay': return {opacity: 1,weight: 1, color:'#a3a3a3', fillColor:'#a3a3a3', fillOpacity: 0.6}
+    //     }
+    // },
     onEachFeature: function(feature, layer) {
       layer.on({
         mouseover: hoverFeature,
@@ -611,9 +667,43 @@ async function drawMapFeatures() {
   geoLayer.addTo(mymap);
 }
 
+// hover panel -------------------
+let infoPanel = L.control();
+
+infoPanel.onAdd = function(map) {
+  // create a div with a class "info"
+  this._div = L.DomUtil.create('div', 'info-panel-hide');
+  return this._div;
+};
+
+// hover infomation format
+function getInfoHtml(geo) {
+  let retval = `${geo.dist15name}`;
+  return retval; 
+}
+
+// activate function
+let geoLayer;
+infoPanel.update = function(geo) {
+  infoPanel._div.innerHTML = '';
+  infoPanel._div.className = 'info-panel';
+  if (geo) this._div.innerHTML = getInfoHtml(geo);
+  infoPanelTimeout = setTimeout(function() {
+    // use CSS to hide the info-panel
+    infoPanel._div.className = 'info-panel-hide';
+    // and clear the hover too
+    if (oldHoverTarget.feature.dist15name != selGeoId) geoLayer.resetStyle(oldHoverTarget);
+  }, 2000);
+};
+infoPanel.addTo(mymap);
+
 // hover mouseover
+let infoPanelTimeout;
 let oldHoverTarget;
 function hoverFeature(e) {
+  clearTimeout(infoPanelTimeout);
+  infoPanel.update(e.target.feature);
+
   // don't do anything else if the feature is already clicked
   if (selGeoId === e.target.feature.dist15name) return;
 
@@ -625,7 +715,7 @@ function hoverFeature(e) {
 
   let highlightedGeo = e.target;
   highlightedGeo.bringToFront();
-  highlightedGeo.setStyle(styles.selected);
+  highlightedGeo.setStyle({opacity: 1, weight: 1.5, color:'grey', fillColor:'#C57879', fillOpacity: 0.6});
   oldHoverTarget = e.target; 
 }
 
@@ -634,8 +724,8 @@ let selGeoId;
 let selectedGeo;
 let prevSelectedGeo;
 let selectedLatLng;
-function clickedOnFeature(e) {
-  e.target.setStyle(styles.popup);
+async function clickedOnFeature(e) {
+  e.target.setStyle({opacity: 1, weight: 2, color:'grey', fillColor:'#C57879', fillOpacity: 0.9});
   let geo = e.target.feature;
   selGeoId = geo.dist15name;
 
@@ -643,24 +733,26 @@ function clickedOnFeature(e) {
   if (selectedGeo && selectedGeo.feature.dist15name != geo.dist15name) {
     prevSelectedGeo = selectedGeo;
     geoLayer.resetStyle(prevSelectedGeo);
+    selectedGeo = e.target;
+
+    // update the chord
+    await drawChord(selGeoId);
+  } else if (selectedGeo && selectedGeo.feature.dist15name == geo.dist15name) {
+    prevSelectedGeo = selectedGeo;
+    geoLayer.resetStyle(prevSelectedGeo);
+    selectedGeo = e.target;
+
+    // update the chord
+    await drawChord();
+  } else {
+    selectedGeo = e.target;
+
+    // update the chord
+    await drawChord(selGeoId);
   }
-  selectedGeo = e.target;
+
   selectedLatLng = e.latlng;
-  // groupG.on("mouseover", function(d) {
-  //   chordPaths.style("fill", DISTRICT_COLORRAMP[d.index].color);
-  //   chordPaths.classed("fade", function (p) {
-  //       //returns true if *neither* the source or target of the chord
-  //       //matches the group that has been moused-over
-  //       return ((p.source.index != d.index) && (p.target.index != d.index));
-  //   });
-  // });
-  // console.log(_aggregateData[]);
-  // if (_aggregateData.hasOwnProperty(selGeoId)) {
-    showGeoDetails(selectedLatLng);
-    // buildChartHtmlFromData(selGeoId);
-  // } else {
-  //   resetPopGeo();
-  // }
+  showGeoDetails(selectedLatLng);
 }
 
 let popSelGeo;
@@ -680,10 +772,9 @@ function showGeoDetails(latlng) {
 function resetPopGeo() {
   geoLayer.resetStyle(selectedGeo);
   prevSelectedGeo = selectedGeo = selGeoId = null;
-  // buildChartHtmlFromData();
 }
 
-// ????
+// keep highlight when change selections
 function highlightSelectedSegment() {
   if (!selGeoId) return;
 
@@ -701,7 +792,11 @@ function highlightSelectedSegment() {
 
 // functions for vue
 async function selectionChanged() {
-  await drawChord();
+  let selfeat = await drawChord();
+    if (selfeat) {
+      highlightSelectedSegment();
+      popSelGeo.setContent(getInfoHtml(selfeat));
+    }
 }
 
 function yrChanged(yr) {
@@ -801,10 +896,10 @@ function handleSubmit() {
 }
 
 let app = new Vue({
-  el: '#panel',
+  el: '#picker',
   delimiters: ['${', '}'],
   data: {
-    isPanelHidden: false,
+    // isPanelHidden: false,
 
     // year
     year_options: [
@@ -857,31 +952,31 @@ let app = new Vue({
     importanceChanged: importanceChanged,
     handleSubmit: handleSubmit,
     clickToggleHelp: clickToggleHelp,   // help box
-    clickedShowHide: clickedShowHide,   // hide sidebar
+    // clickedShowHide: clickedShowHide,   // hide sidebar
   },
 });
 
-let slideapp = new Vue({
-  el: '#slide-panel',
-  delimiters: ['${', '}'],
-  data: {
-    isPanelHidden: false,
-  },
-  methods: {
-    clickedShowHide: clickedShowHide,
-  },
-});
+// let slideapp = new Vue({
+//   el: '#slide-panel',
+//   delimiters: ['${', '}'],
+//   data: {
+//     isPanelHidden: false,
+//   },
+//   methods: {
+//     clickedShowHide: clickedShowHide,
+//   },
+// });
 
-function clickedShowHide(e) {
-  slideapp.isPanelHidden = !slideapp.isPanelHidden;
-  app.isPanelHidden = slideapp.isPanelHidden;
-  // leaflet map needs to be force-recentered, and it is slow.
-  for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
-    setTimeout(function() {
-      // mymap.invalidateSize()
-    }, delay)
-  }
-}
+// function clickedShowHide(e) {
+//   slideapp.isPanelHidden = !slideapp.isPanelHidden;
+//   app.isPanelHidden = slideapp.isPanelHidden;
+//   // leaflet map needs to be force-recentered, and it is slow.
+//   for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
+//     setTimeout(function() {
+//       // mymap.invalidateSize()
+//     }, delay)
+//   }
+// }
 
 // eat some cookies -- so we can hide the help permanently
 let cookieShowHelp = Cookies.get('showHelp');
