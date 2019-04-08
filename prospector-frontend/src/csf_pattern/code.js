@@ -557,34 +557,34 @@ async function drawChord(selectedDistrict) {
               });
     // hoverFeatureFromChord(d);
   });
-  the "unfade" is handled with CSS :hover class on g#circle
-  you could also do it using a mouseout event:
-  g.on("mouseout", function() {
-      chordPaths.style("fill", function (d) {
-                    return DISTRICT_COLORRAMP[d.source.index].color;
-                });
+  // the "unfade" is handled with CSS :hover class on g#circle
+  // you could also do it using a mouseout event:
+  // g.on("mouseout", function() {
+  //     chordPaths.style("fill", function (d) {
+  //                   return DISTRICT_COLORRAMP[d.source.index].color;
+  //               });
 
-      if (this == g.node() )
-          //only respond to mouseout of the entire circle
-          //not mouseout events for sub-components
-          chordPaths.classed("fade", false);
-  });
+  //     if (this == g.node() )
+  //         //only respond to mouseout of the entire circle
+  //         //not mouseout events for sub-components
+  //         chordPaths.classed("fade", false);
+  // });
   
-  groupG.on("click", function(d){
-    console.log(111)
-    if (d.chordHighlighted)
-        d3.selectAll("path.group" + d.index);
-    else{
-        d3.selectAll("path.group" + d.index)
-          .style("fill", "red");
-        chordPaths.classed("fade", function (p) {
-          //returns true if *neither* the source or target of the chord
-          //matches the group that has been moused-over
-          return ((p.source.index != d.index) && (p.target.index != d.index));
-      });
-    }
-    d.chordHighlighted = d.chordHighlighted ? false : true;
-  })
+  // groupG.on("click", function(d){
+  //   console.log(111)
+  //   if (d.chordHighlighted)
+  //       d3.selectAll("path.group" + d.index);
+  //   else{
+  //       d3.selectAll("path.group" + d.index)
+  //         .style("fill", "red");
+  //       chordPaths.classed("fade", function (p) {
+  //         //returns true if *neither* the source or target of the chord
+  //         //matches the group that has been moused-over
+  //         return ((p.source.index != d.index) && (p.target.index != d.index));
+  //     });
+  //   }
+  //   d.chordHighlighted = d.chordHighlighted ? false : true;
+  // })
 
   last_layout = layout; //save for next update
 }
