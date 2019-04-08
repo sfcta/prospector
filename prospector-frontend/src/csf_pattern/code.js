@@ -499,92 +499,92 @@ async function drawChord(selectedDistrict) {
             .transition().duration(100).attr("opacity", 1) //reset opacity
             ;
 
-  function fade(opacity) {
-      return function(k, i) {
-          g.selectAll("g.chord path")
-                  .filter(function(d) {                   
-                      return d.source.index != i && d.target.index != i;
-                  })
-                  .transition()
-                  .style("opacity", opacity);
-      };
-  }
-  //add the mouseover/fade out behaviour to the groups
-  //this is reset on every update, so it will use the latest
-  //chordPaths selection
+  // function fade(opacity) {
+  //     return function(k, i) {
+  //         g.selectAll(".chord path")
+  //                 .filter(function(d) {                   
+  //                     return d.source.index != i && d.target.index != i;
+  //                 })
+  //                 .transition()
+  //                 .style("opacity", opacity);
+  //     };
+  // }
+  // //add the mouseover/fade out behaviour to the groups
+  // //this is reset on every update, so it will use the latest
+  // //chordPaths selection
   groupG.on("mouseover", fade(.1));
-  // groupG.on("mouseover", function(d) {
-  //   // chordPaths.style("fill", DISTRICT_COLORRAMP[d.index].color);
-  //   chordPaths.classed("fade", function (p) {
-  //       //returns true if *neither* the source or target of the chord
-  //       //matches the group that has been moused-over
-  //       return ((p.source.index != d.index) && (p.target.index != d.index));
-  //   });
+  groupG.on("mouseover", function(d) {
+    // chordPaths.style("fill", DISTRICT_COLORRAMP[d.index].color);
+    chordPaths.classed("fade", function (p) {
+        //returns true if *neither* the source or target of the chord
+        //matches the group that has been moused-over
+        return ((p.source.index != d.index) && (p.target.index != d.index));
+    });
 
-  //   // Add title tooltip for each new chord.
-  //   newChords.append("title");
-  //   // Update all chord title texts
-  //   chordPaths.select("title")
-  //             .text(function(p) {
-  //                 if (O_DISTRICT[p.target.index] !== O_DISTRICT[p.source.index]) {
-  //                   if (p.source.index == d.index) {
-  //                     return [numberWithCommas(p.source.value),
-  //                       // " trips from ",
-  //                       // O_DISTRICT[p.source.index],
-  //                       " to ",
-  //                       O_DISTRICT[p.target.index],
-  //                       ].join(""); 
-  //                   //joining an array of many strings is faster than
-  //                   //repeated calls to the '+' operator, 
-  //                   //and makes for neater code!
-  //                   } else {
-  //                     return [numberWithCommas(p.target.value),
-  //                       // " trips from ",
-  //                       // O_DISTRICT[p.target.index],
-  //                       " to ",
-  //                       O_DISTRICT[p.source.index],
-  //                       ].join(""); 
-  //                   //joining an array of many strings is faster than
-  //                   //repeated calls to the '+' operator, 
-  //                   //and makes for neater code!
-  //                   }
-  //                 } 
-  //                 else { //source and target are the same
-  //                     return numberWithCommas(p.source.value) 
-  //                         + " trips ended in " 
-  //                         + O_DISTRICT[p.source.index];
-  //                 }
-  //             });
-  //   // hoverFeatureFromChord(d);
-  // });
-  // the "unfade" is handled with CSS :hover class on g#circle
-  //you could also do it using a mouseout event:
-  // g.on("mouseout", function() {
-  //     chordPaths.style("fill", function (d) {
-  //                   return DISTRICT_COLORRAMP[d.source.index].color;
-  //               });
+    // Add title tooltip for each new chord.
+    newChords.append("title");
+    // Update all chord title texts
+    chordPaths.select("title")
+              .text(function(p) {
+                  if (O_DISTRICT[p.target.index] !== O_DISTRICT[p.source.index]) {
+                    if (p.source.index == d.index) {
+                      return [numberWithCommas(p.source.value),
+                        // " trips from ",
+                        // O_DISTRICT[p.source.index],
+                        " to ",
+                        O_DISTRICT[p.target.index],
+                        ].join(""); 
+                    //joining an array of many strings is faster than
+                    //repeated calls to the '+' operator, 
+                    //and makes for neater code!
+                    } else {
+                      return [numberWithCommas(p.target.value),
+                        // " trips from ",
+                        // O_DISTRICT[p.target.index],
+                        " to ",
+                        O_DISTRICT[p.source.index],
+                        ].join(""); 
+                    //joining an array of many strings is faster than
+                    //repeated calls to the '+' operator, 
+                    //and makes for neater code!
+                    }
+                  } 
+                  else { //source and target are the same
+                      return numberWithCommas(p.source.value) 
+                          + " trips ended in " 
+                          + O_DISTRICT[p.source.index];
+                  }
+              });
+    // hoverFeatureFromChord(d);
+  });
+  the "unfade" is handled with CSS :hover class on g#circle
+  you could also do it using a mouseout event:
+  g.on("mouseout", function() {
+      chordPaths.style("fill", function (d) {
+                    return DISTRICT_COLORRAMP[d.source.index].color;
+                });
 
-  //     if (this == g.node() )
-  //         //only respond to mouseout of the entire circle
-  //         //not mouseout events for sub-components
-  //         chordPaths.classed("fade", false);
-  // });
+      if (this == g.node() )
+          //only respond to mouseout of the entire circle
+          //not mouseout events for sub-components
+          chordPaths.classed("fade", false);
+  });
   
-  // groupG.on("click", function(d){
-  //   console.log(111)
-  //   if (d.chordHighlighted)
-  //       d3.selectAll("path.group" + d.index);
-  //   else{
-  //       d3.selectAll("path.group" + d.index)
-  //         .style("fill", "red");
-  //       chordPaths.classed("fade", function (p) {
-  //         //returns true if *neither* the source or target of the chord
-  //         //matches the group that has been moused-over
-  //         return ((p.source.index != d.index) && (p.target.index != d.index));
-  //     });
-  //   }
-  //   d.chordHighlighted = d.chordHighlighted ? false : true;
-  // })
+  groupG.on("click", function(d){
+    console.log(111)
+    if (d.chordHighlighted)
+        d3.selectAll("path.group" + d.index);
+    else{
+        d3.selectAll("path.group" + d.index)
+          .style("fill", "red");
+        chordPaths.classed("fade", function (p) {
+          //returns true if *neither* the source or target of the chord
+          //matches the group that has been moused-over
+          return ((p.source.index != d.index) && (p.target.index != d.index));
+      });
+    }
+    d.chordHighlighted = d.chordHighlighted ? false : true;
+  })
 
   last_layout = layout; //save for next update
 }
