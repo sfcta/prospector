@@ -1,39 +1,27 @@
 <div id="container">
-
-  <div id="slide-panel" v-bind:class="{ shrunken: isPanelHidden}">
-      
-    <div id="layer-widgets">
-      <button class="ui tiny color1 icon button"
-              v-on:click="clickedShowHide">
-              <i class="angle double icon"
-              v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
+  <div id="panel">
+    
+  <div id="preheader">
+    <a target="_blank" href="https://connectsf.org/"><img src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png"  height="50" width="250" alt="Connect SF"/></a>
+    <hr/>
+    <h3 class="apptitle">Trip Patterns</h3>
+    <div id="helpbar">
+      <button class="ui mini right labeled icon color1 button"
+              v-on:click="clickToggleHelp">
+              <i class="help circle icon"></i>
+              What is this?
       </button>
+      &nbsp;
+      <button class="ui mini right labeled icon color1 button"
+              v-on:click="this.window.open('https://connectsf.org/','_blank')">
+              <i class="arrow right icon"></i>
+              Learn More
+      </button>
+    <hr/>
     </div>
-  </div> 
-  
-  <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
 
-    <div id="preheader">
-      <a target="_blank" href="https://connectsf.org/"><img src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png"  height="50" width="250" alt="Connect SF"/></a>
-      <hr/>
-      <h3 class="apptitle">Trip Patterns</h3>
-      <div id="helpbar">
-        <button class="ui mini right labeled icon color1 button"
-                v-on:click="clickToggleHelp">
-                <i class="help circle icon"></i>
-                What is this?
-        </button>
-        &nbsp;
-        <button class="ui mini right labeled icon color1 button"
-                v-on:click="this.window.open('https://connectsf.org/','_blank')">
-                <i class="arrow right icon"></i>
-                Learn More
-        </button>
-      </div>
-
-      <hr/>
       <div id="picker">
-        <h5 style="margin-top:15px">CHOOSE SCENARIO</h5>
+        <h5>CHOOSE SCENARIO</h5>
         <div>
           <button v-for="item in year_options"
                 v-on:click="yrChanged(item.value)"
@@ -43,7 +31,7 @@
           </button>
         </div>
 
-        <h5 style="margin-top:15px">CHOOSE DIRECTION:</h5>
+        <h5>CHOOSE DIRECTION:</h5>
         <div>
           <button v-for="item in direction_options"
                 v-on:click="directionChanged(item.value)"
@@ -53,7 +41,7 @@
           </button>
         </div> 
 
-        <h5 style="margin-top:15px">CHOOSE TRAVEL IMPORTANCE:</h5>
+        <h5>CHOOSE TRAVEL IMPORTANCE:</h5>
         <div>
           <button v-for="item in importance_options"
                 v-on:click="importanceChanged(item.value)"
@@ -63,7 +51,7 @@
           </button>
         </div> 
           
-        <h5 style="margin-top:15px">CHOOSE MODE:</h5>
+        <h5>CHOOSE MODE:</h5>
         <div>
           <button v-for="item in metric_options"
                 v-on:click="metricChanged(item.value)"
@@ -75,7 +63,7 @@
         </div> 
 
         <hr/>
-        <h5 style="margin-top:15px">PROVIDE FEEDBACK:</h5>
+        <h5>PROVIDE FEEDBACK:</h5>
         <form class="ui tiny equal width form" v-on:submit.prevent="handleSubmit">
           <div class="field">
             <textarea v-model="comment" class="fix" maxlength="200" rows="3"
@@ -84,11 +72,13 @@
           <button class="ui button color2" type="submit">Submit</button>
         </form>
 
-        <hr/>
-        <h5 style="margin-top:15px">REFERENCE MAP</h5>
-        <div id="sfmap"></div>  
+        
       </div>
     </div>
+
+    <hr/>
+    <h5>REFERENCE MAP</h5>
+    <div id="sfmap"></div>  
 
     <div class="logo">
       <hr/>
@@ -152,6 +142,6 @@
   
   <div id="chart_placeholder"></div>
   
-  <!-- <div id="sfmap"></div> -->
+  
 
 </div>

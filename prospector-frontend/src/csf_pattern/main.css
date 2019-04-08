@@ -38,6 +38,19 @@
   background-color:#ccd;
 }
 
+#xyz {
+  display:table;
+  position: relative;
+  height:100%;
+  width:400px;
+  max-height:100%;
+  padding:0px 20px 0px 20px;
+  z-index:10;
+  background-color:#444;
+  float: right;
+  transition: margin 0.4s;
+}
+
 #panel {
   display:table;
   position: relative;
@@ -53,7 +66,7 @@
 
 #sfmap {
   width:380px;
-  height:300px;
+  height:360px;
   margin-right:0px;
   z-index:0;
 }
@@ -168,6 +181,9 @@ p.legend-row {
 
 /*Info panel*/
 .info-panel {
+    position: absolute;
+    top: 4px;
+    right: 4px;
     padding: 6px 8px;
     background: rgba(255,255,255,0.8);
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
