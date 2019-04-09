@@ -223,8 +223,8 @@ var width = window.innerWidth,
 
 //create the arc path data generator for the groups
 var arc = d3.svg.arc()
-              .innerRadius(innerRadius)
-              .outerRadius(outerRadius);
+                .innerRadius(innerRadius)
+                .outerRadius(outerRadius);
 
 //create the chord path data generator for the chords
 var path = d3.svg.chord().radius(innerRadius - 4);// subtracted 4 to separate the ribbon
@@ -368,7 +368,8 @@ function chordTween(oldLayout) {
     };
 }
 
-async function drawChord(selectedDistrict) {
+let highlight = -1;
+async function drawChord() {
   var matrix = _aggregateData[app.selected_year][app.selected_importance][app.selected_metric];
   /* Compute chord layout. */
   if(app.selected_direction == "inbound") {
@@ -381,24 +382,6 @@ async function drawChord(selectedDistrict) {
     }
     matrix = tmp;
   }
-
-  // zero out all external trips from selected district
-  // if (selectedDistrict != undefined) {
-  //   let tmp = [];
-  //   for(let i=0; i<matrix.length; i++){
-  //     tmp.push([]);
-  //     for(let j=0; j<matrix.length; j++){
-  //       if (i == O_DISTRICT.indexOf(selectedDistrict)) {
-  //         tmp[i].push(matrix[i][j]);
-  //       } else if (j == O_DISTRICT.indexOf(selectedDistrict)) {
-  //         tmp[i].push(matrix[i][j]);
-  //       } else {
-  //         tmp[i].push(0);
-  //       }
-  //     }
-  //   }
-  //   matrix = tmp;
-  // }
 
   var layout = getDefaultLayout(); //create a new layout object
   layout.matrix(matrix);
@@ -480,9 +463,68 @@ async function drawChord(selectedDistrict) {
   //create the new chord paths
   var newChords = chordPaths.enter()
                             .append("path")
-                            .attr("class", function(d) {
-                              return "chord" + d.source.index;
-                            });
+                            .attr("class", "chord");
+
+  // Add title tooltip for each new chord.
+  newChords.append("title");
+  // Update all chord title texts
+  chordPaths.select("title")
+            .text(function(d) {
+                if (O_DISTRICT[d.target.index] !== O_DISTRICT[d.source.index]) {
+                    return [numberWithCommas(d.source.value),
+                            " trips from ",
+                            O_DISTRICT[d.source.index],
+                            " to ",
+                            O_DISTRICT[d.target.index],
+                            "\n",
+                            numberWithCommas(d.target.value),
+                            " trips from ",
+                            O_DISTRICT[d.target.index],
+                            " to ",
+                            O_DISTRICT[d.source.index]
+                            ].join(""); 
+                        //joining an array of many strings is faster than
+                        //repeated calls to the '+' operator, 
+                        //and makes for neater code!
+                } 
+                else { //source and target are the same
+                    return numberWithCommas(d.source.value) 
+                        + " trips ended in " 
+                        + O_DISTRICT[d.source.index];
+                }
+            });
+            
+  // chordPaths.select("title")
+  //           .text(function(p) {
+  //               if (O_DISTRICT[p.target.index] !== O_DISTRICT[p.source.index]) {
+  //                 if (p.source.index == d.index) {
+  //                   return [numberWithCommas(p.source.value),
+  //                     // " trips from ",
+  //                     // O_DISTRICT[p.source.index],
+  //                     " to ",
+  //                     O_DISTRICT[p.target.index],
+  //                     ].join(""); 
+  //                 //joining an array of many strings is faster than
+  //                 //repeated calls to the '+' operator, 
+  //                 //and makes for neater code!
+  //                 } else {
+  //                   return [numberWithCommas(p.target.value),
+  //                     // " trips from ",
+  //                     // O_DISTRICT[p.target.index],
+  //                     " to ",
+  //                     O_DISTRICT[p.source.index],
+  //                     ].join(""); 
+  //                 //joining an array of many strings is faster than
+  //                 //repeated calls to the '+' operator, 
+  //                 //and makes for neater code!
+  //                 }
+  //               } 
+  //               else { //source and target are the same
+  //                   return numberWithCommas(p.source.value) 
+  //                       + " trips ended in " 
+  //                       + O_DISTRICT[p.source.index];
+  //               }
+  //           });
 
   //handle exiting paths:
   chordPaths.exit()
@@ -496,67 +538,44 @@ async function drawChord(selectedDistrict) {
             .attr("opacity", 0.5) //optional, just to observe the transition
             .style("fill", "#C57879")
             .attrTween("d", chordTween(last_layout))
-            .transition().duration(100).attr("opacity", 1) //reset opacity
+            .transition()
+            .duration(100)
+            .attr("opacity", 1) //reset opacity
             ;
+  // newChords.on("mouseover", fade(.1))
+  //           .on("mouseout", fade(1));
 
-  // function fade(opacity) {
-  //     return function(k, i) {
-  //         g.selectAll(".chord path")
-  //                 .filter(function(d) {                   
-  //                     return d.source.index != i && d.target.index != i;
-  //                 })
-  //                 .transition()
-  //                 .style("opacity", opacity);
-  //     };
-  // }
-  // //add the mouseover/fade out behaviour to the groups
-  // //this is reset on every update, so it will use the latest
-  // //chordPaths selection
-  groupG.on("mouseover", fade(.1));
-  groupG.on("mouseover", function(d) {
-    // chordPaths.style("fill", DISTRICT_COLORRAMP[d.index].color);
-    chordPaths.classed("fade", function (p) {
-        //returns true if *neither* the source or target of the chord
-        //matches the group that has been moused-over
-        return ((p.source.index != d.index) && (p.target.index != d.index));
-    });
+  //add the mouseover/fade out behaviour to the groups
+  //this is reset on every update, so it will use the latest
+  //chordPaths selection
+  groupG.on("click", function(d){
+    if (d.chordHighlighted) {
+      fade(1, d.index);
+      // geoLayer.resetStyle(prevSelectedGeo);
+    }  
+    else {
+      if (highlight != -1) {
+        fade(1, highlight);
+      }
+      fade(.1, d.index);
 
-    // Add title tooltip for each new chord.
-    newChords.append("title");
-    // Update all chord title texts
-    chordPaths.select("title")
-              .text(function(p) {
-                  if (O_DISTRICT[p.target.index] !== O_DISTRICT[p.source.index]) {
-                    if (p.source.index == d.index) {
-                      return [numberWithCommas(p.source.value),
-                        // " trips from ",
-                        // O_DISTRICT[p.source.index],
-                        " to ",
-                        O_DISTRICT[p.target.index],
-                        ].join(""); 
-                    //joining an array of many strings is faster than
-                    //repeated calls to the '+' operator, 
-                    //and makes for neater code!
-                    } else {
-                      return [numberWithCommas(p.target.value),
-                        // " trips from ",
-                        // O_DISTRICT[p.target.index],
-                        " to ",
-                        O_DISTRICT[p.source.index],
-                        ].join(""); 
-                    //joining an array of many strings is faster than
-                    //repeated calls to the '+' operator, 
-                    //and makes for neater code!
-                    }
-                  } 
-                  else { //source and target are the same
-                      return numberWithCommas(p.source.value) 
-                          + " trips ended in " 
-                          + O_DISTRICT[p.source.index];
-                  }
-              });
-    // hoverFeatureFromChord(d);
+      // console.log(cleanFeatures.dist15name == O_DISTRICT[d.index])
+      // geoLayer.setStyle(function() {
+            // switch (O_DISTRICT[d.index]) {return {opacity: 1, weight: 2, color:'grey', fillColor:'#C57879', fillOpacity: 0.9};});
+    }
+    d.chordHighlighted = d.chordHighlighted ? false : true;
+    highlight = d.chordHighlighted ? d.index : -1;
   });
+
+  // groupG.on("mouseover", function(d) {
+  //   // chordPaths.style("fill", DISTRICT_COLORRAMP[d.index].color);
+  //   chordPaths.classed("fade", function (p) {
+  //       //returns true if *neither* the source or target of the chord
+  //       //matches the group that has been moused-over
+  //       return ((p.source.index != d.index) && (p.target.index != d.index));
+  //   });
+  //   // hoverFeatureFromChord(d);
+  // });
   // the "unfade" is handled with CSS :hover class on g#circle
   // you could also do it using a mouseout event:
   // g.on("mouseout", function() {
@@ -569,46 +588,28 @@ async function drawChord(selectedDistrict) {
   //         //not mouseout events for sub-components
   //         chordPaths.classed("fade", false);
   // });
-  
-  // groupG.on("click", function(d){
-  //   console.log(111)
-  //   if (d.chordHighlighted)
-  //       d3.selectAll("path.group" + d.index);
-  //   else{
-  //       d3.selectAll("path.group" + d.index)
-  //         .style("fill", "red");
-  //       chordPaths.classed("fade", function (p) {
-  //         //returns true if *neither* the source or target of the chord
-  //         //matches the group that has been moused-over
-  //         return ((p.source.index != d.index) && (p.target.index != d.index));
-  //     });
-  //   }
-  //   d.chordHighlighted = d.chordHighlighted ? false : true;
-  // })
 
   last_layout = layout; //save for next update
 }
 
-function hoverFeatureFromChord(e) {
-  clearTimeout(infoPanelTimeout);
-  infoPanelTimeout = setTimeout(function() {
-    // and clear the hover too
-    if (O_DISTRICT[e.index] != selGeoId) geoLayer.resetStyle(oldHoverTarget);
-  }, 2000);
-
-  // don't do anything else if the feature is already clicked
-  if (selGeoId === O_DISTRICT[e.index]) return;
-
-  // return previously-hovered segment to its original color
-  if (oldHoverTarget && O_DISTRICT[e.index] != selGeoId) {
-    if (oldHoverTarget.feature.dist15name != selGeoId)
-      geoLayer.resetStyle(oldHoverTarget);
+function fade(opacity, p) {
+  if (p != undefined) {
+    return g.selectAll("path.chord")
+            .filter(function(d) {                   
+              return d.source.index != p && d.target.index != p;
+            })
+            .transition()
+            .style("opacity", opacity)
+            .filter(function(d) {                   
+              return d.source.index == p || d.target.index == p;
+            })
+            .transition()
+            .style("opacity", 1);
+  } else {
+    return g.select(this)
+        .transition()
+        .style("opacity", opacity);
   }
-
-  let highlightedGeo = e.target;
-  highlightedGeo.bringToFront();
-  highlightedGeo.setStyle({opacity: 1, weight: 2, color:'#C57879', fillColor:'#C57879', fillOpacity: 1});
-  oldHoverTarget = e.target; 
 }
 
 // referenece map
@@ -632,9 +633,10 @@ async function fetchMapFeatures() {
   }
 }
 
+let cleanFeatures;
 async function drawMapFeatures() {
   if (!_featJson) return;
-  let cleanFeatures = _featJson.slice();
+  cleanFeatures = _featJson.slice();
   
   geoLayer = L.geoJSON(cleanFeatures, {
     style: {opacity: 1, weight: 2, color: 'grey'},
@@ -692,7 +694,12 @@ infoPanel.update = function(geo) {
     // use CSS to hide the info-panel
     infoPanel._div.className = 'info-panel-hide';
     // and clear the hover too
-    if (oldHoverTarget.feature.dist15name != selGeoId) geoLayer.resetStyle(oldHoverTarget);
+    if (oldHoverTarget.feature.dist15name != selGeoId) {
+      geoLayer.resetStyle(oldHoverTarget);
+      if (selGeoId == undefined || selGeoId == null) {
+        fade(1, O_DISTRICT.indexOf(oldHoverTarget.feature.dist15name));
+      }
+    }
   }, 2000);
 };
 infoPanel.addTo(mymap);
@@ -705,18 +712,35 @@ function hoverFeature(e) {
   infoPanel.update(e.target.feature);
 
   // don't do anything else if the feature is already clicked
-  if (selGeoId === e.target.feature.dist15name) return;
+  if (selGeoId) {
+    if (selGeoId === e.target.feature.dist15name) return;
+    else {
+      // return previously-hovered segment to its original color
+      if (oldHoverTarget && e.target.feature.dist15name != selGeoId) {
+        if (oldHoverTarget.feature.dist15name != selGeoId)
+          geoLayer.resetStyle(oldHoverTarget);
+      }
+
+      let highlightedGeo = e.target;
+      highlightedGeo.bringToFront();
+      highlightedGeo.setStyle({opacity: 1, weight: 1.5, color:'grey', fillColor:'#C57879', fillOpacity: 0.6});
+      oldHoverTarget = e.target;
+      return;
+    }
+  }
 
   // return previously-hovered segment to its original color
   if (oldHoverTarget && e.target.feature.dist15name != selGeoId) {
     if (oldHoverTarget.feature.dist15name != selGeoId)
       geoLayer.resetStyle(oldHoverTarget);
+      fade(1, O_DISTRICT.indexOf(oldHoverTarget.feature.dist15name));
   }
 
   let highlightedGeo = e.target;
   highlightedGeo.bringToFront();
   highlightedGeo.setStyle({opacity: 1, weight: 1.5, color:'grey', fillColor:'#C57879', fillOpacity: 0.6});
-  oldHoverTarget = e.target; 
+  fade(.1, O_DISTRICT.indexOf(highlightedGeo.feature.dist15name));
+  oldHoverTarget = e.target;
 }
 
 // hover clickon
@@ -725,6 +749,7 @@ let selectedGeo;
 let prevSelectedGeo;
 let selectedLatLng;
 async function clickedOnFeature(e) {
+  console.log(e.target)
   e.target.setStyle({opacity: 1, weight: 2, color:'grey', fillColor:'#C57879', fillOpacity: 0.9});
   let geo = e.target.feature;
   selGeoId = geo.dist15name;
@@ -733,23 +758,11 @@ async function clickedOnFeature(e) {
   if (selectedGeo && selectedGeo.feature.dist15name != geo.dist15name) {
     prevSelectedGeo = selectedGeo;
     geoLayer.resetStyle(prevSelectedGeo);
-    selectedGeo = e.target;
-
-    // update the chord
-    await drawChord(selGeoId);
-  } else if (selectedGeo && selectedGeo.feature.dist15name == geo.dist15name) {
-    prevSelectedGeo = selectedGeo;
-    geoLayer.resetStyle(prevSelectedGeo);
-    selectedGeo = e.target;
-
-    // update the chord
-    await drawChord();
-  } else {
-    selectedGeo = e.target;
-
-    // update the chord
-    await drawChord(selGeoId);
   }
+  selectedGeo = e.target;
+
+  // update the chord
+  fade(.1, O_DISTRICT.indexOf(selGeoId));
 
   selectedLatLng = e.latlng;
   showGeoDetails(selectedLatLng);
@@ -771,6 +784,7 @@ function showGeoDetails(latlng) {
 
 function resetPopGeo() {
   geoLayer.resetStyle(selectedGeo);
+  fade(1, O_DISTRICT.indexOf(selectedGeo.feature.dist15name));
   prevSelectedGeo = selectedGeo = selGeoId = null;
 }
 
@@ -793,10 +807,10 @@ function highlightSelectedSegment() {
 // functions for vue
 async function selectionChanged() {
   let selfeat = await drawChord();
-    if (selfeat) {
-      highlightSelectedSegment();
-      popSelGeo.setContent(getInfoHtml(selfeat));
-    }
+  if (selfeat) {
+    highlightSelectedSegment();
+    popSelGeo.setContent(getInfoHtml(selfeat));
+  }
 }
 
 function yrChanged(yr) {
