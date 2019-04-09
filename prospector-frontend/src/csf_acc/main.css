@@ -1,4 +1,4 @@
-/* CSS Layout for CSF_ACC ONLY goes here */
+/* CSS Layout for JOBPOP ONLY goes here */
 
 #slide-panel {
   top: auto;
@@ -13,14 +13,15 @@
   background-color: #f56e71;
   color: #fff;
 }
+
 .ui.color2.button {
   background-color: #38bebb;
   color: #fff;
 }
-
 .ui.color2.button.active {
   background-color: #38bebb;
 }
+
 
 /* Stand alone CSS */
 .container {
@@ -90,7 +91,6 @@ h1,h3,h4,h5,p {
   color: #38bebb;
 }
 
-
 hr {margin: 1% 0px; }
 
 /* Extra context layers*/
@@ -141,6 +141,27 @@ a.agency {color: #fff;}
   margin-bottom: 0px;
 }
 
+/* Header Title and ConnectSF Graphic*/
+#table-header {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: 0px;
+}
+.title {
+  padding-right: 0px;
+  vertical-align: center;
+  font-size: 200%;
+  width: 66%;
+  color: white;
+}
+.img-csf {
+  display: block;
+  margin-left: auto;
+  margin-right: 0px;
+  margin-bottom: 0px;
+  vertical-align: middle;
+}
+  
 /*Legend*/
 .legend {
   padding: 6px 8px;
@@ -197,5 +218,3 @@ p.legend-row {
      z-index:20;
      box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
 }
-
-  
