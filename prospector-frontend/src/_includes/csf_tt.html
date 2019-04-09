@@ -12,9 +12,18 @@
   
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
     <div id="preheader">
-      <a target="_blank" href="https://connectsf.org/"><img src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png"  height="50" width="250" alt="Connect SF"/></a>
+      <table id="table-header">
+        <tr>
+          <td class='title'>Travel Time</td>
+          <td>
+            <a target="_blank" href="https://connectsf.org/">
+              <img class="img-csf" src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png" alt="Connect SF">
+            </a>
+          </td>
+        </tr>
+      </table>
+      
       <hr/>
-      <h3 class="apptitle">ConnectSF Travel Time</h3>
       <div id="helpbar">
           <button class="ui mini right labeled icon color1 button"
                   v-on:click="clickToggleHelp">
@@ -31,9 +40,7 @@
       </div>
 
       <div id="picker">
-        <!--NEW STUFF HERE -->
-        <h5 style="margin-top:15px">CHOOSE SCENARIO:</h5>
-        <!--<div class="three tiny ui grey buttons">-->
+        <h5>CHOOSE SCENARIO</h5>
         <div>
           <button v-for="item in year_options"
                 v-on:click="yrChanged(item.value)"
@@ -43,8 +50,7 @@
           </button>
         </div>
         
-        <h5>CHOOSE TRAVEL IMPORTANCE:</h5>
-        <!--<div class="three tiny ui grey buttons">-->
+        <h5>CHOOSE PURPOSE</h5>
         <div>
           <button v-for="item in importance_options"
                 v-on:click="importanceChanged(item.value)"
@@ -54,8 +60,7 @@
           </button>
         </div> 
         
-        <h5>CHOOSE INCOME CATEGORY:</h5>
-        <!--<div class="three tiny ui grey buttons">-->
+        <h5>CHOOSE INCOME CATEGORY</h5>
         <div>
           <button v-for="item in income_options"
                 v-on:click="incomeChanged(item.value)"
@@ -65,15 +70,9 @@
           </button>
         </div> 
         
-        <!--<h5 style="margin-top:25px">TOURS BY TRAVEL TIME</h5>-->
-        <!--<div v-for="item in distChartName" v-bind:id='item' style="height: 200px"></div>-->
-        <!--<div id='dist-chart' style="height: 200px"></div>-->
-        <!--<div id='dist-chart-simple' style="height: 200px"></div>-->
-        
-        <h5 style="margin-top:25px">TOUR TRAVEL TIME PERCENTAGE FREQUENCY DISTRIBUTION</h5>
-        <!--<div v-for="item in pctDistChartName" v-bind:id='item' style="height: 200px"></div>-->
+        <hr/>
+        <h5>TOUR TRAVEL TIME PERCENTAGE FREQUENCY DISTRIBUTION</h5>
         <div id='pct-dist-chart' style="height: 200px"></div>
-        <!--<div id='pct-dist-chart-simple' style="height: 200px"></div>-->
         
         <h5>MAP LAYERS</h5>
         <p>Add additional geographic data to the map.</p>
@@ -91,8 +90,6 @@
           </div>
           <button class="ui tiny button color2" type="submit">Submit</button>
         </form>
-        
-        <hr/>
         
       </div>
     </div>
