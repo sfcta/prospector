@@ -412,7 +412,7 @@ async function drawChord() {
              //using d.index and not i to maintain consistency
              //even if groups are sorted
            })
-           .style("fill", "#C57879");
+           .style("fill", "#EC7074");
   
   //update the paths to match the layout
   groupG.select("path") 
@@ -536,7 +536,7 @@ async function drawChord() {
   chordPaths.transition()
             .duration(1500)
             .attr("opacity", 0.5) //optional, just to observe the transition
-            .style("fill", "#C57879")
+            .style("fill", "#EC7074")
             .attrTween("d", chordTween(last_layout))
             .transition()
             .duration(100)
