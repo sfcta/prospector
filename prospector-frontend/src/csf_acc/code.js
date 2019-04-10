@@ -760,27 +760,30 @@ function showPosition(position) {
 
 function handleSubmit() {
   let timestamp = new Date();
-  comment.select_year = app.selected_year;
-  comment.select_metric = app.selected_metric;
-  comment.add_layer = app.ADDLAYERS;
-  comment.comment_user = getCookie("username");
-  comment.comment_time = timestamp;
-  comment.comment_content = app.comment;
-  fetchComments(comment);
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(showPosition);
-  } else {
-    console.log("Geolocation is not supported by this browser.");
-  }
-  console.log(JSON.stringify(comment));
-}
-
-function getColorMode(cscheme) {
-  if (app.modeMap.hasOwnProperty(cscheme.toString())) {
-    return app.modeMap[cscheme];
-  } else {
-    return 'lrgb';
-  }
+  app.submit_loading = true;
+  
+  setTimeout(function() {
+    if (app.comment==null | app.comment=='') {
+      app.submit_loading = false;
+    } else {
+      comment.select_year = app.selected_year;
+      comment.select_metric = app.selected_metric;
+      comment.add_layer = app.ADDLAYERS;
+      comment.comment_user = getCookie("username");
+      comment.comment_time = timestamp;
+      comment.comment_content = app.comment;
+      fetchComments(comment);
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+      } else {
+        console.log("Geolocation is not supported by this browser.");
+      }
+      console.log(JSON.stringify(comment));
+      app.comment = "Thanks for submitting your comment!";
+      app.submit_loading = false;
+      app.submit_disabled = true;
+    }
+  }, 1000)
 }
 
 // function customBreakPoints(thing) {
@@ -808,8 +811,8 @@ let app = new Vue({
 
     // year
     year_options: [
-      {text: 'Year 2015', value: '2015'},
-      {text: 'Year 2050', value: '2050'},
+      {text: '2015', value: '2015'},
+      {text: '2050', value: '2050'},
       {text: 'Change', value: 'diff'},
       ],
     selected_year: '2015',
@@ -865,6 +868,8 @@ let app = new Vue({
     bp10: 0.0,
     // // update after change custom break points
     // isUpdActive: false,
+    submit_loading: false,
+    submit_disabled: false,
   },
   watch: {
     sliderValue: selectionChanged,      // year choose
