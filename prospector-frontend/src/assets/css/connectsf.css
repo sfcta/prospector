@@ -140,7 +140,11 @@ a.agency {color: #fff;}
   vertical-align: center;
   margin-bottom: 0px;
 }
-
+.row-label {
+  margin-left: auto;
+  margin-right: 0px;
+  font-style: italic;
+}
 /* Header Title and ConnectSF Graphic*/
 #table-header {
   margin-top: 10px;
