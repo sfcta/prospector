@@ -82,6 +82,10 @@ const DATA_VIEW = 'connectsf_lu';
 const GEOTYPE = 'TAZ';
 const GEOID_VAR = 'taz';
 
+const COMMENT_SERVER = 'https://api.sfcta.org/commapi/';
+const COMMENT_VIEW = 'test_comment';
+const VIZNAME = 'csf_jobpop';
+
 const FRAC_COLS = [];
 const YR_LIST = [2015,2050];
 
@@ -624,6 +628,96 @@ function showExtraLayers(e) {
   }
 }
 
+async function fetchComments(comment) {
+  const comment_url = COMMENT_SERVER + COMMENT_VIEW;
+  // console.log(JSON.stringify(comment))
+  try {
+    await fetch(comment_url, {
+      method: 'POST',
+      body: JSON.stringify(comment),
+      headers:{
+        'Content-Type': 'application/json',
+      }
+    });
+  } catch (error) {
+    console.log('comment error: ' + error);
+  }
+}
+
+function setCookie(cname, exdays) {
+  var d = new Date();
+  d.setTime(d.getTime() + (exdays*24*60*60*1000));
+  var expires = "expires="+ d.toUTCString();
+  document.cookie = cname + "=" + d.getTime() + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+  var name = cname + "=";
+  var decodedCookie = decodeURIComponent(document.cookie);
+  var ca = decodedCookie.split(';');
+  for(var i = 0; i <ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+function checkCookie() {
+  var username = getCookie("username");
+  if (username == "") {
+    setCookie("username", 365);
+  }
+}
+
+let comment = {
+  vizname: VIZNAME,
+  select_year: '',
+  select_metric: '',
+  add_layer: '',
+  comment_user: '',
+  comment_time: new Date(),
+  comment_latitude: -999,
+  comment_longitude: -999,
+  comment_content: ''
+};
+
+function showPosition(position) {
+  comment.comment_latitude = position.coords.latitude;
+  comment.comment_longitude = position.coords.longitude; 
+}
+
+function handleSubmit() {
+  let timestamp = new Date();
+  app.submit_loading = true;
+  
+  setTimeout(function() {
+    if (app.comment==null | app.comment=='') {
+      app.submit_loading = false;
+    } else {
+      comment.select_year = app.selected_year;
+      comment.select_metric = app.selected_metric;
+      comment.add_layer = app.ADDLAYERS;
+      comment.comment_user = getCookie("username");
+      comment.comment_time = timestamp;
+      comment.comment_content = app.comment;
+      fetchComments(comment);
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+      } else {
+        console.log("Geolocation is not supported by this browser.");
+      }
+      console.log(JSON.stringify(comment));
+      app.comment = "Thanks for submitting your comment!";
+      app.submit_loading = false;
+      app.submit_disabled = true;
+    }
+  }, 1000)
+}
 
 let app = new Vue({
   el: '#panel',
@@ -643,8 +737,8 @@ let app = new Vue({
               {pop:0,tot:0,jobpop:0}],
     
     year_options: [
-    {text: 'Year 2015', value: '2015'},
-    {text: 'Year 2050', value: '2050'},
+    {text: '2015', value: '2015'},
+    {text: '2050', value: '2050'},
     {text: 'Change', value: 'diff'},
     ],
     selected_year: '2015',
@@ -668,6 +762,8 @@ let app = new Vue({
       '#fafa6e,#2A4858': 'lch',
     },
     comment: '',
+    submit_loading: false,
+    submit_disabled: false,
     addLayers:[],
   },
   watch: {
@@ -678,6 +774,7 @@ let app = new Vue({
   methods: {
     clickToggleHelp: clickToggleHelp,
     clickedShowHide: clickedShowHide,
+    handleSubmit: handleSubmit,
     yrChanged: yrChanged,
     metricChanged: metricChanged,
   },
