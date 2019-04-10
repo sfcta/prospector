@@ -2,9 +2,19 @@
   <div id="panel">
     
   <div id="preheader">
-    <a target="_blank" href="https://connectsf.org/"><img src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png"  height="50" width="250" alt="Connect SF"/></a>
+    <table id="table-header">
+        <tr>
+          <td class='title'>Trip Patterns</td>
+          <td>
+            <a target="_blank" href="https://connectsf.org/">
+              <img class="img-csf" src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png" alt="Connect SF">
+            </a>
+          </td>
+        </tr>
+      </table>
+    
     <hr/>
-    <h3 class="apptitle">Trip Patterns</h3>
+    
     <div id="helpbar">
       <button class="ui mini right labeled icon color1 button"
               v-on:click="clickToggleHelp">
@@ -31,7 +41,7 @@
           </button>
         </div>
 
-        <h5>CHOOSE DIRECTION:</h5>
+        <!--<h5>CHOOSE DIRECTION:</h5>
         <div>
           <button v-for="item in direction_options"
                 v-on:click="directionChanged(item.value)"
@@ -39,9 +49,9 @@
                 v-bind:class="{ active: item.value==selected_direction, color2: item.value==selected_direction }">
                 ${item.text}
           </button>
-        </div> 
+        </div>--> 
 
-        <h5>CHOOSE TRAVEL IMPORTANCE:</h5>
+        <h5>CHOOSE TRAVEL PURPOSE:</h5>
         <div>
           <button v-for="item in importance_options"
                 v-on:click="importanceChanged(item.value)"
@@ -65,14 +75,14 @@
         <hr/>
         <h5>PROVIDE FEEDBACK:</h5>
         <form class="ui tiny equal width form" v-on:submit.prevent="handleSubmit">
-          <div class="field">
+          <div class="ui field">
             <textarea v-model="comment" class="fix" maxlength="200" rows="3"
+            v-bind:disabled="submit_disabled==true"
             type="text" placeholder="Based on this data, what do you think are the city’s transportation needs? (800 characters)"></textarea>
           </div>
-          <button class="ui button color2" type="submit">Submit</button>
+          <button class="ui button color2" type="submit"
+          v-bind:class="{loading: submit_loading==true, disabled: submit_disabled==true}">Submit</button>
         </form>
-
-        
       </div>
     </div>
 
