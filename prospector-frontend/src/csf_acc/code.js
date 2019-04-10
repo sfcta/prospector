@@ -694,6 +694,14 @@ function showExtraLayers(e) {
   }
 }
 
+function getColorMode(cscheme) {
+  if (app.modeMap.hasOwnProperty(cscheme.toString())) {
+    return app.modeMap[cscheme];
+  } else {
+    return 'lrgb';
+  }
+}
+
 // get the taz boundary data
 async function fetchComments(comment) {
   const comment_url = COMMENT_SERVER + COMMENT_VIEW;
