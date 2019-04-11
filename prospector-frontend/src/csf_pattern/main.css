@@ -233,7 +233,7 @@ path.chord {
   transition: opacity 0.3s;
 }
 #circle:hover path.fade {
-  opacity: 0;
+  opacity: 0.1;
 }
 /*text is regions name only on chord diagram and scroll text*/
 text {

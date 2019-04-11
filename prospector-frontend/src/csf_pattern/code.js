@@ -30,7 +30,7 @@ const GEO_VIEW = 'csf_dist15';
 const DATA_VIEW = 'connectsf_trippattern';
 const COMMENT_VIEW = 'connectsf_comment';
 const YEAR_LIST = ['2015', '2050'];
-const METRIC_LIST = ['walk/bike', 'transit', 'uber/lyft', 'drive'];
+
 // color schema
 
 // delete internal trip outside sf area
@@ -87,10 +87,6 @@ const O_DISTRICT = ['Marina/N. Heights', 'N. Beach/Chinatown', 'Downtown', 'West
 //reference sfmap
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
-let getLegHTML = maplib.getLegHTML2;
-let getColorFromVal = maplib.getColorFromVal2;
-// let getBWLegHTML = maplib.getBWLegHTML;
-let getQuantiles = maplib.getQuantiles;
 
 let mymap = maplib.sfmap;
 // set map center and zoom level
@@ -133,12 +129,12 @@ async function getMapData() {
     tmp[yr] = {};
     for (let imp of app.importance_options) {
       tmp[yr][imp.value] = {};
-      for (let met of METRIC_LIST) {
-        tmp[yr][imp.value][met] = {};
+      for (let met of app.metric_options) {
+        tmp[yr][imp.value][met.value] = {};
         for (let od of O_DISTRICT) {
-          tmp[yr][imp.value][met][od] = {};
+          tmp[yr][imp.value][met.value][od] = {};
           for (let dd of D_DISTRICT) {
-            tmp[yr][imp.value][met][od][dd] = 0;
+            tmp[yr][imp.value][met.value][od][dd] = 0;
           }
         }
       }
@@ -167,36 +163,15 @@ async function getMapData() {
 
   for (let yr of YEAR_LIST) {
     for (let imp of app.importance_options) {
-      for (let met of METRIC_LIST) {
+      for (let met of app.metric_options) {
         for (let i=0; i<O_DISTRICT.length; i++) {
           let od = O_DISTRICT[i];
           for (let dd of D_DISTRICT) {
             if (MUTE_OD.includes(od) && MUTE_DD.includes(dd)) {
-              _aggregateData[yr][imp.value][met][i].push(0);
+              _aggregateData[yr][imp.value][met.value][i].push(0);
             } else {
-              _aggregateData[yr][imp.value][met][i].push(tmp[yr][imp.value][met][od][dd]);
+              _aggregateData[yr][imp.value][met.value][i].push(tmp[yr][imp.value][met.value][od][dd]);
             }
-          }
-        }
-      }
-    }
-  }
-  
-  // calculate the aggregate "total" in mode metric
-  for (let yr of YEAR_LIST) {
-    for (let imp of app.importance_options) {
-      for (let i=0; i<O_DISTRICT.length; i++) {
-        let od = O_DISTRICT[i];
-        for (let dd of D_DISTRICT) {
-          _aggregateData[yr][imp.value]['total'][i][dd] = 0;
-          let total_data = 0;
-          for (let met of METRIC_LIST) {
-            total_data += tmp[yr][imp.value][met][od][dd];
-          }
-          if (MUTE_OD.includes(od) && MUTE_DD.includes(dd)) {
-            _aggregateData[yr][imp.value]['total'][i].push(0);
-          } else {
-            _aggregateData[yr][imp.value]['total'][i].push(total_data);
           }
         }
       }
@@ -271,6 +246,7 @@ function arcTween(oldLayout) {
     var oldGroups = {};
     if (oldLayout) {
         oldLayout.groups().forEach( function(groupData) {
+          // console.log(groupData)
             oldGroups[ groupData.index ] = groupData;
         });
     }
@@ -279,6 +255,7 @@ function arcTween(oldLayout) {
         var tween;
         var old = oldGroups[d.index];
         if (old) { //there's a matching old group
+            // console.log(old, d)
             tween = d3.interpolate(old, d);
         }
         else {
@@ -369,19 +346,10 @@ function chordTween(oldLayout) {
 }
 
 let highlight = -1;
+let chordHighlighted;
+let matrix;
 async function drawChord() {
-  var matrix = _aggregateData[app.selected_year][app.selected_importance][app.selected_metric];
-  /* Compute chord layout. */
-  if(app.selected_direction == "inbound") {
-    let tmp = [];
-    for(let i=0; i<matrix.length; i++){
-      tmp.push([]);
-      for(let j=0; j<matrix.length; j++){
-        tmp[i].push(matrix[j][i]);
-      }
-    }
-    matrix = tmp;
-  }
+  matrix = _aggregateData[app.selected_year][app.selected_importance][app.selected_metric];
 
   var layout = getDefaultLayout(); //create a new layout object
   layout.matrix(matrix);
@@ -421,24 +389,34 @@ async function drawChord() {
         .attrTween("d", arcTween( last_layout ));
   
   //create the labels
-  var newGroupsText = newGroups.append("svg:text")
-                              .attr("xlink:href", function (d) {
-                                return "#group" + d.index;
-                              });
-          
-  newGroupsText.append("tspan")
-              .attr("x",0)
-              .attr("dy",0)
-              .text(function (d) {
-                return O_DISTRICT[d.index]; 
-              });
+  newGroups.append("svg:text")
+          .attr("xlink:href", function (d) {
+            return "#group" + d.index;
+          });
 
-  newGroupsText.append("tspan")
-              .attr("x",0)
-              .attr("dy","18px")
-              .text(function (d) {
-                return numberWithCommas(d.value);
-              });
+  newGroups.select("text")
+          .append("tspan")
+          .attr("class", "name")
+          .attr("x",0)
+          .attr("dy",0)
+          .text(function (d) {
+            return O_DISTRICT[d.index]; 
+          });
+  newGroups.select("text")
+          .append("tspan")
+          .attr("class", "number")
+          .attr("x",0)
+          .attr("dy","18px")
+          .text(function (d) {
+            return numberWithCommas(d.value);
+        });
+  
+  groupG.select("tspan.number")
+        .text(function (d) {
+          return numberWithCommas(d.value);
+      })
+        .transition()
+        .duration(1500);
 
   //position group labels to match layout
   groupG.select("text")
@@ -542,16 +520,18 @@ async function drawChord() {
             .duration(100)
             .attr("opacity", 1) //reset opacity
             ;
-  // newChords.on("mouseover", fade(.1))
-  //           .on("mouseout", fade(1));
 
   //add the mouseover/fade out behaviour to the groups
   //this is reset on every update, so it will use the latest
   //chordPaths selection
   groupG.on("click", function(d){
-    if (d.chordHighlighted) {
+    if (selectedGeo) {
+      resetPopGeo();
+    }
+    if (highlight == d.index) {
       fade(1, d.index);
       // geoLayer.resetStyle(prevSelectedGeo);
+      chordHighlighted = false;
     }  
     else {
       if (highlight != -1) {
@@ -559,57 +539,60 @@ async function drawChord() {
       }
       fade(.1, d.index);
 
+      chordHighlighted = true;
       // console.log(cleanFeatures.dist15name == O_DISTRICT[d.index])
       // geoLayer.setStyle(function() {
             // switch (O_DISTRICT[d.index]) {return {opacity: 1, weight: 2, color:'grey', fillColor:'#C57879', fillOpacity: 0.9};});
     }
-    d.chordHighlighted = d.chordHighlighted ? false : true;
-    highlight = d.chordHighlighted ? d.index : -1;
+
+    highlight = chordHighlighted ? d.index : -1;
   });
-
-  // groupG.on("mouseover", function(d) {
-  //   // chordPaths.style("fill", DISTRICT_COLORRAMP[d.index].color);
-  //   chordPaths.classed("fade", function (p) {
-  //       //returns true if *neither* the source or target of the chord
-  //       //matches the group that has been moused-over
-  //       return ((p.source.index != d.index) && (p.target.index != d.index));
-  //   });
-  //   // hoverFeatureFromChord(d);
-  // });
-  // the "unfade" is handled with CSS :hover class on g#circle
-  // you could also do it using a mouseout event:
-  // g.on("mouseout", function() {
-  //     chordPaths.style("fill", function (d) {
-  //                   return DISTRICT_COLORRAMP[d.source.index].color;
-  //               });
-
-  //     if (this == g.node() )
-  //         //only respond to mouseout of the entire circle
-  //         //not mouseout events for sub-components
-  //         chordPaths.classed("fade", false);
-  // });
 
   last_layout = layout; //save for next update
 }
 
 function fade(opacity, p) {
-  if (p != undefined) {
-    return g.selectAll("path.chord")
-            .filter(function(d) {                   
-              return d.source.index != p && d.target.index != p;
-            })
-            .transition()
-            .style("opacity", opacity)
-            .filter(function(d) {                   
-              return d.source.index == p || d.target.index == p;
-            })
-            .transition()
-            .style("opacity", 1);
+  if (opacity == 1) {
+    g.selectAll("tspan.number")
+      .text(function (d) {
+        return numberWithCommas(d.value);
+      })
+      .transition()
+      .duration(1500);
   } else {
-    return g.select(this)
-        .transition()
-        .style("opacity", opacity);
+    g.selectAll("tspan.number")
+      .text(function (d) {
+        if (p == d.index) {
+          return numberWithCommas(d.value);
+        } else {
+          return numberWithCommas(matrix[p][d.index]);
+        }
+      })
+      .transition()
+      .duration(1500);
   }
+  return g.selectAll("path.chord")
+          .filter(function(d) {                   
+            return d.source.index != p && d.target.index != p;
+          })
+          .transition()
+          .style("opacity", opacity)
+          .filter(function(d) {                   
+            return d.source.index == p || d.target.index == p;
+          })
+          .transition()
+          .style("opacity", 1);
+}
+
+function pathfade(opacity) {
+  var me = this;
+  console.log(1)
+  return g.selectAll("path.chord")
+          .filter(function(d) {                   
+            return this != me;
+          })
+          .transition()
+          .style("opacity", opacity);
 }
 
 // referenece map
@@ -696,7 +679,7 @@ infoPanel.update = function(geo) {
     // and clear the hover too
     if (oldHoverTarget.feature.dist15name != selGeoId) {
       geoLayer.resetStyle(oldHoverTarget);
-      if (selGeoId == undefined || selGeoId == null) {
+      if ((selGeoId == undefined || selGeoId == null) && highlight == -1) {
         fade(1, O_DISTRICT.indexOf(oldHoverTarget.feature.dist15name));
       }
     }
@@ -712,15 +695,26 @@ function hoverFeature(e) {
   infoPanel.update(e.target.feature);
 
   // don't do anything else if the feature is already clicked
-  if (selGeoId) {
-    if (selGeoId === e.target.feature.dist15name) return;
-    else {
-      // return previously-hovered segment to its original color
-      if (oldHoverTarget && e.target.feature.dist15name != selGeoId) {
-        if (oldHoverTarget.feature.dist15name != selGeoId)
+  if (selGeoId || highlight != -1) {
+    if (selGeoId) {
+      if (selGeoId === e.target.feature.dist15name) return;
+      else {
+        // return previously-hovered segment to its original color
+        if (oldHoverTarget && e.target.feature.dist15name != selGeoId) {
+          if (oldHoverTarget.feature.dist15name != selGeoId)
+            geoLayer.resetStyle(oldHoverTarget);
+        }
+  
+        let highlightedGeo = e.target;
+        highlightedGeo.bringToFront();
+        highlightedGeo.setStyle({opacity: 1, weight: 1.5, color:'grey', fillColor:'#C57879', fillOpacity: 0.6});
+        oldHoverTarget = e.target;
+        return;
+      }
+    } else {
+      if (oldHoverTarget) {
           geoLayer.resetStyle(oldHoverTarget);
       }
-
       let highlightedGeo = e.target;
       highlightedGeo.bringToFront();
       highlightedGeo.setStyle({opacity: 1, weight: 1.5, color:'grey', fillColor:'#C57879', fillOpacity: 0.6});
@@ -749,11 +743,9 @@ let selectedGeo;
 let prevSelectedGeo;
 let selectedLatLng;
 async function clickedOnFeature(e) {
-  console.log(e.target)
   e.target.setStyle({opacity: 1, weight: 2, color:'grey', fillColor:'#C57879', fillOpacity: 0.9});
   let geo = e.target.feature;
   selGeoId = geo.dist15name;
-
   // unselect the previously-selected selection, if there is one
   if (selectedGeo && selectedGeo.feature.dist15name != geo.dist15name) {
     prevSelectedGeo = selectedGeo;
@@ -762,7 +754,18 @@ async function clickedOnFeature(e) {
   selectedGeo = e.target;
 
   // update the chord
-  fade(.1, O_DISTRICT.indexOf(selGeoId));
+  if (highlight != -1 && highlight ==  O_DISTRICT.indexOf(selGeoId)) {
+  }
+  else if (highlight != -1 && highlight !=  O_DISTRICT.indexOf(selGeoId)) {
+    fade(1, highlight);
+    fade(.1, O_DISTRICT.indexOf(selGeoId));
+    highlight = O_DISTRICT.indexOf(selGeoId);
+  }
+  else {
+    fade(.1, O_DISTRICT.indexOf(selGeoId));
+    highlight = O_DISTRICT.indexOf(selGeoId);
+    chordHighlighted = true;
+  }
 
   selectedLatLng = e.latlng;
   showGeoDetails(selectedLatLng);
@@ -815,10 +818,6 @@ async function selectionChanged() {
 
 function yrChanged(yr) {
   app.selected_year = yr;
-}
-
-function directionChanged(direction) {
-  app.selected_direction = direction;
 }
 
 function metricChanged(metric) {
@@ -922,19 +921,11 @@ let app = new Vue({
       {text: 'Change', value: 'diff'},
       ],
     selected_year: '2015',
-    // sliderValue: [YR_LIST[0],YR_LIST[0]],
-    // comp_check: false,      // label for diff in time
-
-    // trip direction
-    selected_direction: 'outbound',
-    direction_options: [
-    {text: 'Outbound', value: 'outbound'},
-    {text: 'Inbound', value: 'inbound'},
-    ],
     
     // purpose type
-    selected_importance: 'mandatory',
+    selected_importance: 'total',
     importance_options: [
+    {text: 'All', value: 'total'},
     {text: 'Work / School', value: 'mandatory'},
     {text: 'Other', value: 'discretionary'},
     ],
@@ -953,44 +944,18 @@ let app = new Vue({
     comment: '',
   },
   watch: {
-    // sliderValue: selectionChanged,      // year choose
     selected_year:selectionChanged,
-    selected_direction:selectionChanged,
     selected_metric: selectionChanged,    // mode choose
     selected_importance: selectionChanged,
   },
   methods: {
     yrChanged: yrChanged,               // year change
-    directionChanged: directionChanged,
     metricChanged: metricChanged,       // mode change
     importanceChanged: importanceChanged,
     handleSubmit: handleSubmit,
     clickToggleHelp: clickToggleHelp,   // help box
-    // clickedShowHide: clickedShowHide,   // hide sidebar
   },
 });
-
-// let slideapp = new Vue({
-//   el: '#slide-panel',
-//   delimiters: ['${', '}'],
-//   data: {
-//     isPanelHidden: false,
-//   },
-//   methods: {
-//     clickedShowHide: clickedShowHide,
-//   },
-// });
-
-// function clickedShowHide(e) {
-//   slideapp.isPanelHidden = !slideapp.isPanelHidden;
-//   app.isPanelHidden = slideapp.isPanelHidden;
-//   // leaflet map needs to be force-recentered, and it is slow.
-//   for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
-//     setTimeout(function() {
-//       // mymap.invalidateSize()
-//     }, delay)
-//   }
-// }
 
 // eat some cookies -- so we can hide the help permanently
 let cookieShowHelp = Cookies.get('showHelp');
