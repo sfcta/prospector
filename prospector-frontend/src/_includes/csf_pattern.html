@@ -31,7 +31,7 @@
           </button>
         </div>
 
-        <h5>CHOOSE DIRECTION:</h5>
+        <!-- <h5>CHOOSE DIRECTION:</h5>
         <div>
           <button v-for="item in direction_options"
                 v-on:click="directionChanged(item.value)"
@@ -39,9 +39,9 @@
                 v-bind:class="{ active: item.value==selected_direction, color2: item.value==selected_direction }">
                 ${item.text}
           </button>
-        </div> 
+        </div>  -->
 
-        <h5>CHOOSE TRAVEL IMPORTANCE:</h5>
+        <h5>CHOOSE PURPOSE:</h5>
         <div>
           <button v-for="item in importance_options"
                 v-on:click="importanceChanged(item.value)"
