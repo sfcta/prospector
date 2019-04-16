@@ -811,11 +811,13 @@ function highlightSelectedSegment() {
 
 // functions for vue
 async function selectionChanged() {
+  if (highlight != -1) fade(1, highlight);
   let selfeat = await drawChord();
   if (selfeat) {
     highlightSelectedSegment();
     popSelGeo.setContent(getInfoHtml(selfeat));
   }
+  if (highlight != -1) fade(.1, highlight);
 }
 
 function yrChanged(yr) {
