@@ -438,9 +438,7 @@ async function drawChord() {
   
   /* Create/update the chord paths */
   var chordPaths = g.selectAll("path.chord")
-                    .data(layout.chords(), chordKey)
-                    .on("mouseover", pathfade(.1))
-                    .on("mouseout", pathfade(1));
+                    .data(layout.chords(), chordKey);
 
   //create the new chord paths
   var newChords = chordPaths.enter()
@@ -475,38 +473,6 @@ async function drawChord() {
                         + O_DISTRICT[d.source.index];
                 }
             });
-            
-  // chordPaths.select("title")
-  //           .text(function(p) {
-  //               if (O_DISTRICT[p.target.index] !== O_DISTRICT[p.source.index]) {
-  //                 if (p.source.index == d.index) {
-  //                   return [numberWithCommas(p.source.value),
-  //                     // " trips from ",
-  //                     // O_DISTRICT[p.source.index],
-  //                     " to ",
-  //                     O_DISTRICT[p.target.index],
-  //                     ].join(""); 
-  //                 //joining an array of many strings is faster than
-  //                 //repeated calls to the '+' operator, 
-  //                 //and makes for neater code!
-  //                 } else {
-  //                   return [numberWithCommas(p.target.value),
-  //                     // " trips from ",
-  //                     // O_DISTRICT[p.target.index],
-  //                     " to ",
-  //                     O_DISTRICT[p.source.index],
-  //                     ].join(""); 
-  //                 //joining an array of many strings is faster than
-  //                 //repeated calls to the '+' operator, 
-  //                 //and makes for neater code!
-  //                 }
-  //               } 
-  //               else { //source and target are the same
-  //                   return numberWithCommas(p.source.value) 
-  //                       + " trips ended in " 
-  //                       + O_DISTRICT[p.source.index];
-  //               }
-  //           });
 
   //handle exiting paths:
   chordPaths.exit()
@@ -552,6 +518,17 @@ async function drawChord() {
     highlight = chordHighlighted ? d.index : -1;
   });
 
+  chordPaths.on("mouseover", pathfade(.1))
+            .on("mouseout", function(d){
+              pathfade(1);
+              if (selectedGeo) {
+                fade(.1, O_DISTRICT.indexOf(selectedGeo.feature.dist15name));
+              }
+              if (highlight != -1) {
+                fade(.1, highlight);
+              }
+            });
+
   last_layout = layout; //save for next update
 }
 
@@ -589,14 +566,22 @@ function fade(opacity, p) {
 }
 
 function pathfade(opacity) {
-  var me = this;
-  console.log(1)
-  return g.selectAll("path.chord")
-          .filter(function(d) {                   
-            return this != me;
-          })
-          .transition()
-          .style("opacity", opacity);
+  if (opacity !== 1) {
+    return function() {
+      var me = this;
+      g.selectAll("path.chord")
+        .filter(function(d) {                   
+          return this != me;
+        })
+        .transition()
+        .style("opacity", opacity);
+    };
+  } else {
+    return g.selectAll("path.chord")
+    .transition()
+    .style("opacity", opacity);
+  }
+
 }
 
 // referenece map
@@ -750,6 +735,7 @@ async function clickedOnFeature(e) {
   e.target.setStyle({opacity: 1, weight: 2, color:'grey', fillColor:'#C57879', fillOpacity: 0.9});
   let geo = e.target.feature;
   selGeoId = geo.dist15name;
+  // console.log(highlight, O_DISTRICT.indexOf(selGeoId))
   // unselect the previously-selected selection, if there is one
   if (selectedGeo && selectedGeo.feature.dist15name != geo.dist15name) {
     prevSelectedGeo = selectedGeo;
