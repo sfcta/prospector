@@ -12,9 +12,18 @@
   
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
     <div id="preheader">
-      <a target="_blank" href="https://connectsf.org/"><img src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png"  height="50" width="250" alt="Connect SF"/></a>
+      <table id="table-header">
+        <tr>
+          <td class='title'>Vehicle Miles</td>
+          <td>
+            <a target="_blank" href="https://connectsf.org/">
+              <img class="img-csf" src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png" alt="Connect SF">
+            </a>
+          </td>
+        </tr>
+      </table>
+        
       <hr/>
-      <h3 class="apptitle">ConnectSF Vehicle Miles Traveled</h3>
       <div id="helpbar">
           <button class="ui mini right labeled icon color1 button"
                   v-on:click="clickToggleHelp">
@@ -31,9 +40,7 @@
       </div>
 
       <div id="picker">
-        <!--NEW STUFF HERE -->
-        <h5 style="margin-top:15px">CHOOSE SCENARIO:</h5>
-        <!--<div class="three tiny ui grey buttons">-->
+        <!--<h5>CHOOSE SCENARIO</h5>
         <div>
           <button v-for="item in year_options"
                 v-on:click="yrChanged(item.value)"
@@ -43,8 +50,7 @@
           </button>
         </div>
         
-        <h5>CHOOSE METRIC:</h5>
-        <!--<div class="three tiny ui grey buttons">-->
+        <h5>CHOOSE MEASURE</h5>
         <div>
           <button v-for="item in metric_options"
                 v-on:click="metricChanged(item.value)"
@@ -52,9 +58,31 @@
                 v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
                 ${item.text}
           </button>
-        </div> 
+        </div> -->
         
-        <h5 style="margin-top:25px">DISTRIBUTION OF VMT PER PERSON</h5>
+        <table style="border:0px;margin-bottom:0px">
+          <tr>
+            <td class='row-label'>Year</td>
+            <td><button v-for="item in year_options"
+                    v-on:click="yrChanged(item.value)"
+                    class="ui tiny grey button"
+                    v-bind:class="{ active: item.value==selected_year, color2: item.value==selected_year }">
+                    ${item.text}
+            </button></td>
+          </tr>
+          <tr>
+            <td class='row-label'>Measure</td>
+            <td><button v-for="item in metric_options"
+                v-on:click="metricChanged(item.value)"
+                class="ui tiny grey button"
+                v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
+                ${item.text}
+          </button></td>
+          </tr>
+        </table>
+        <hr/>
+        
+        <h5>DISTRIBUTION OF VMT PER PERSON</h5>
         <div id='dist-chart' style="height: 200px"></div>
         
         <h5>MAP LAYERS</h5>
@@ -66,16 +94,15 @@
         
         <br><br>
         <h5>YOUR FEEDBACK</h5>
-        <form class="ui tiny equal width form" v-on:submit.prevent>
-          <div class="field">
-            <textarea v-model="comment" class="fix" maxlength="800" rows="3"
+        <form class="ui tiny equal width form" v-on:submit.prevent="handleSubmit">
+          <div class="ui field">
+            <textarea v-model="comment" class="fix" maxlength="200" rows="3"
+            v-bind:disabled="submit_disabled==true"
             type="text" placeholder="Based on this data, what do you think are the city’s transportation needs? (800 characters)"></textarea>
           </div>
-          <button class="ui tiny button color2" type="submit">Submit</button>
+          <button class="ui button color2" type="submit"
+          v-bind:class="{loading: submit_loading==true, disabled: submit_disabled==true}">Submit</button>
         </form>
-        
-        <hr/>
-        
       </div>
     </div>
 

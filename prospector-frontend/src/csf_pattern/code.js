@@ -28,7 +28,9 @@ import Cookies from 'js-cookie';
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'csf_dist15';
 const DATA_VIEW = 'connectsf_trippattern';
-const COMMENT_VIEW = 'connectsf_comment';
+const COMMENT_SERVER = 'https://api.sfcta.org/commapi/';
+const COMMENT_VIEW = 'test_comment';
+const VIZNAME = 'csf_pattern';
 const YEAR_LIST = ['2015', '2050'];
 
 // color schema
@@ -380,7 +382,7 @@ async function drawChord() {
              //using d.index and not i to maintain consistency
              //even if groups are sorted
            })
-           .style("fill", "#C57879");
+           .style("fill", "#EC7074");
   
   //update the paths to match the layout
   groupG.select("path") 
@@ -516,7 +518,7 @@ async function drawChord() {
   chordPaths.transition()
             .duration(1500)
             .attr("opacity", 0.5) //optional, just to observe the transition
-            .style("fill", "#C57879")
+            .style("fill", "#EC7074")
             .attrTween("d", chordTween(last_layout))
             .transition()
             .duration(100)
@@ -811,11 +813,13 @@ function highlightSelectedSegment() {
 
 // functions for vue
 async function selectionChanged() {
+  if (highlight != -1) fade(1, highlight);
   let selfeat = await drawChord();
   if (selfeat) {
     highlightSelectedSegment();
     popSelGeo.setContent(getInfoHtml(selfeat));
   }
+  if (highlight != -1) fade(.1, highlight);
 }
 
 function yrChanged(yr) {
@@ -830,9 +834,8 @@ function importanceChanged(importance) {
   app.selected_importance = importance;
 }
 
-// get the taz boundary data
 async function fetchComments(comment) {
-  const comment_url = API_SERVER + COMMENT_VIEW;
+  const comment_url = COMMENT_SERVER + COMMENT_VIEW;
   // console.log(JSON.stringify(comment))
   try {
     await fetch(comment_url, {
@@ -878,6 +881,7 @@ function checkCookie() {
 }
 
 let comment = {
+  vizname: VIZNAME,
   select_year: '',
   select_metric: '',
   add_layer: '',
@@ -895,19 +899,30 @@ function showPosition(position) {
 
 function handleSubmit() {
   let timestamp = new Date();
-  comment.select_year = app.selected_year;
-  comment.select_metric = app.selected_metric;
-  comment.add_layer = app.ADDLAYERS;
-  comment.comment_user = getCookie("username");
-  comment.comment_time = timestamp;
-  comment.comment_content = app.comment;
-  fetchComments(comment);
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(showPosition);
-  } else {
-    console.log("Geolocation is not supported by this browser.");
-  }
-  console.log(JSON.stringify(comment));
+  app.submit_loading = true;
+  
+  setTimeout(function() {
+    if (app.comment==null | app.comment=='') {
+      app.submit_loading = false;
+    } else {
+      comment.select_year = app.selected_year;
+      comment.select_metric = app.selected_metric;
+      comment.add_layer = app.ADDLAYERS;
+      comment.comment_user = getCookie("username");
+      comment.comment_time = timestamp;
+      comment.comment_content = app.comment;
+      fetchComments(comment);
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+      } else {
+        console.log("Geolocation is not supported by this browser.");
+      }
+      console.log(JSON.stringify(comment));
+      app.comment = "Thanks for submitting your comment!";
+      app.submit_loading = false;
+      app.submit_disabled = true;
+    }
+  }, 1000)
 }
 
 let app = new Vue({
@@ -944,6 +959,8 @@ let app = new Vue({
 
     // comment box
     comment: '',
+    submit_loading: false,
+    submit_disabled: false,
   },
   watch: {
     selected_year:selectionChanged,

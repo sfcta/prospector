@@ -12,9 +12,18 @@
   
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
       <div id="preheader">
-        <a target="_blank" href="https://connectsf.org/"><img src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png"  height="50" width="250" alt="Connect SF"/></a>
+        <table id="table-header">
+          <tr>
+            <td class='title'>Population & Jobs</td>
+            <td>
+              <a target="_blank" href="https://connectsf.org/">
+                <img class="img-csf" src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png" alt="Connect SF">
+              </a>
+            </td>
+          </tr>
+        </table>
+        
         <hr/>
-        <h3 class="apptitle">Population & Jobs</h3>
         <div id="helpbar">
             <button class="ui mini right labeled icon color1 button"
                     v-on:click="clickToggleHelp">
@@ -62,7 +71,6 @@
           
           <h5>MAP LAYERS</h5>
           <p>Add additional geographic data to the map.</p>
-        
           <div v-for="item in extraLayers" class="ui toggle checkbox">
             <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
             <label><h5>${item.name}</h5></label>
@@ -70,30 +78,17 @@
 
           <br><br>
           <h5>YOUR FEEDBACK</h5>
-          <form class="ui tiny equal width form" v-on:submit.prevent>
-            <div class="field">
-              <textarea v-model="comment" class="fix" maxlength="800" rows="3"
+          <form class="ui tiny equal width form" v-on:submit.prevent="handleSubmit">
+            <div class="ui field">
+              <textarea v-model="comment" class="fix" maxlength="200" rows="3"
+              v-bind:disabled="submit_disabled==true"
               type="text" placeholder="Based on this data, what do you think are the city’s transportation needs? (800 characters)"></textarea>
             </div>
-            <button class="ui tiny button color2" type="submit">Submit</button>
+            <button class="ui button color2" type="submit"
+            v-bind:class="{loading: submit_loading==true, disabled: submit_disabled==true}">Submit</button>
           </form>
-
         </div>
-
       </div>
-
-      <!--div id="header">
-          <div id="stats-panel">
-            <hr/>
-            <div id="chartinfo"><h3 style="font-size: 22px;">${chartTitle}</h3></div>
-            <div id="geoinfo"><h5>${chartSubtitle}</h5></div>
-            <div id="longchart">
-                <div class="ui active dimmer">
-                  <div class="ui text loader">Loading</div>
-                </div>
-            </div>
-          </div>
-      </div-->
       
       <div class="logo">
             <hr/>
