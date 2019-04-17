@@ -436,7 +436,9 @@ async function drawChord() {
   
   /* Create/update the chord paths */
   var chordPaths = g.selectAll("path.chord")
-                    .data(layout.chords(), chordKey);
+                    .data(layout.chords(), chordKey)
+                    .on("mouseover", pathfade(.1))
+                    .on("mouseout", pathfade(1));
 
   //create the new chord paths
   var newChords = chordPaths.enter()
