@@ -366,7 +366,7 @@ async function drawChord() {
 
   groupG.exit()
         .transition()
-        .duration(1500)
+        // .duration(1500)
         .attr("opacity", 0)
         .remove(); //remove after transitions are complete
   
@@ -387,7 +387,7 @@ async function drawChord() {
   //update the paths to match the layout
   groupG.select("path") 
         .transition()
-        .duration(1500)
+        .duration(300)
         .attrTween("d", arcTween( last_layout ));
   
   //create the labels
@@ -413,17 +413,30 @@ async function drawChord() {
             return numberWithCommas(d.value);
         });
   
-  groupG.select("tspan.number")
-        .text(function (d) {
-          return numberWithCommas(d.value);
-      })
-        .transition()
-        .duration(1500);
+  // groupG.select("tspan.number")
+  //       .text(function (d) {
+  //         return numberWithCommas(d.value);
+  //     });
+  if (highlight !== -1) {
+    groupG.select("tspan.number")
+          .text(function (d) {
+            if (highlight == d.index) {
+              return numberWithCommas(d.value);
+            } else {
+              return numberWithCommas(matrix[highlight][d.index]);
+            }
+          });
+  } else {
+    groupG.select("tspan.number")
+          .text(function (d) {
+            return numberWithCommas(d.value);
+          });
+  }
 
   //position group labels to match layout
   groupG.select("text")
         .transition()
-        .duration(1500)
+        .duration(1000)
         .attr("transform", function(d) {
             d.angle = (d.startAngle + d.endAngle) / 2;
             //store the midpoint angle in the data object
@@ -473,38 +486,6 @@ async function drawChord() {
                         + O_DISTRICT[d.source.index];
                 }
             });
-            
-  // chordPaths.select("title")
-  //           .text(function(p) {
-  //               if (O_DISTRICT[p.target.index] !== O_DISTRICT[p.source.index]) {
-  //                 if (p.source.index == d.index) {
-  //                   return [numberWithCommas(p.source.value),
-  //                     // " trips from ",
-  //                     // O_DISTRICT[p.source.index],
-  //                     " to ",
-  //                     O_DISTRICT[p.target.index],
-  //                     ].join(""); 
-  //                 //joining an array of many strings is faster than
-  //                 //repeated calls to the '+' operator, 
-  //                 //and makes for neater code!
-  //                 } else {
-  //                   return [numberWithCommas(p.target.value),
-  //                     // " trips from ",
-  //                     // O_DISTRICT[p.target.index],
-  //                     " to ",
-  //                     O_DISTRICT[p.source.index],
-  //                     ].join(""); 
-  //                 //joining an array of many strings is faster than
-  //                 //repeated calls to the '+' operator, 
-  //                 //and makes for neater code!
-  //                 }
-  //               } 
-  //               else { //source and target are the same
-  //                   return numberWithCommas(p.source.value) 
-  //                       + " trips ended in " 
-  //                       + O_DISTRICT[p.source.index];
-  //               }
-  //           });
 
   //handle exiting paths:
   chordPaths.exit()
@@ -513,15 +494,24 @@ async function drawChord() {
             .remove();
 
   //update the path shape
-  chordPaths.transition()
-            .duration(1500)
-            .attr("opacity", 0.5) //optional, just to observe the transition
-            .style("fill", "#EC7074")
-            .attrTween("d", chordTween(last_layout))
-            .transition()
-            .duration(100)
-            .attr("opacity", 1) //reset opacity
-            ;
+  if (highlight !== -1) {
+    console.log(highlight)
+    chordPaths.transition()
+              // .duration(300)
+              .style("opacity", 1) //optional, just to observe the transition
+              .style("fill", "#EC7074")
+              .attrTween("d", chordTween(last_layout))
+              .filter(function(d) {
+                return d.source.index != highlight && d.target.index != highlight;
+              })
+              .style("opacity", .1);
+  } else {
+    chordPaths.transition()
+              .duration(300)
+              .style("opacity", 1) //optional, just to observe the transition
+              .style("fill", "#EC7074")
+              .attrTween("d", chordTween(last_layout));
+  }
 
   //add the mouseover/fade out behaviour to the groups
   //this is reset on every update, so it will use the latest
@@ -550,6 +540,17 @@ async function drawChord() {
     highlight = chordHighlighted ? d.index : -1;
   });
 
+  chordPaths.on("mouseover", pathfade(.1))
+            .on("mouseout", function(d){
+              pathfade(1);
+              if (selectedGeo) {
+                fade(.1, O_DISTRICT.indexOf(selectedGeo.feature.dist15name));
+              }
+              if (highlight != -1) {
+                fade(.1, highlight);
+              }
+            });
+
   last_layout = layout; //save for next update
 }
 
@@ -559,8 +560,7 @@ function fade(opacity, p) {
       .text(function (d) {
         return numberWithCommas(d.value);
       })
-      .transition()
-      .duration(1500);
+      .transition();
   } else {
     g.selectAll("tspan.number")
       .text(function (d) {
@@ -570,16 +570,15 @@ function fade(opacity, p) {
           return numberWithCommas(matrix[p][d.index]);
         }
       })
-      .transition()
-      .duration(1500);
+      .transition();
   }
   return g.selectAll("path.chord")
-          .filter(function(d) {                   
+          .filter(function(d) {
             return d.source.index != p && d.target.index != p;
           })
           .transition()
           .style("opacity", opacity)
-          .filter(function(d) {                   
+          .filter(function(d) {             
             return d.source.index == p || d.target.index == p;
           })
           .transition()
@@ -587,14 +586,21 @@ function fade(opacity, p) {
 }
 
 function pathfade(opacity) {
-  var me = this;
-  console.log(1)
-  return g.selectAll("path.chord")
-          .filter(function(d) {                   
-            return this != me;
-          })
-          .transition()
-          .style("opacity", opacity);
+  if (opacity !== 1) {
+    return function() {
+      var me = this;
+      g.selectAll("path.chord")
+        .filter(function(d) {                   
+          return this != me;
+        })
+        .transition()
+        .style("opacity", opacity);
+    };
+  } else {
+    return g.selectAll("path.chord")
+    .transition()
+    .style("opacity", opacity);
+  }
 }
 
 // referenece map
@@ -742,16 +748,15 @@ function hoverFeature(e) {
 // hover clickon
 let selGeoId;
 let selectedGeo;
-let prevSelectedGeo;
 let selectedLatLng;
 async function clickedOnFeature(e) {
   e.target.setStyle({opacity: 1, weight: 2, color:'grey', fillColor:'#C57879', fillOpacity: 0.9});
   let geo = e.target.feature;
   selGeoId = geo.dist15name;
+
   // unselect the previously-selected selection, if there is one
   if (selectedGeo && selectedGeo.feature.dist15name != geo.dist15name) {
-    prevSelectedGeo = selectedGeo;
-    geoLayer.resetStyle(prevSelectedGeo);
+    geoLayer.resetStyle(selectedGeo);
   }
   selectedGeo = e.target;
 
@@ -777,9 +782,9 @@ let popSelGeo;
 function showGeoDetails(latlng) {
   // show popup
   popSelGeo = L.popup()
-    .setLatLng(latlng)
-    .setContent(infoPanel._div.innerHTML)
-    .addTo(mymap);
+              .setLatLng(latlng)
+              .setContent(infoPanel._div.innerHTML)
+              .addTo(mymap);
 
   // Revert to overall chart when no segment selected
   popSelGeo.on('remove', function(e) {
@@ -790,7 +795,9 @@ function showGeoDetails(latlng) {
 function resetPopGeo() {
   geoLayer.resetStyle(selectedGeo);
   fade(1, O_DISTRICT.indexOf(selectedGeo.feature.dist15name));
-  prevSelectedGeo = selectedGeo = selGeoId = null;
+  selectedGeo = selGeoId = null;
+  highlight = -1;
+  chordHighlighted = false;
 }
 
 // keep highlight when change selections
@@ -811,13 +818,8 @@ function highlightSelectedSegment() {
 
 // functions for vue
 async function selectionChanged() {
-  if (highlight != -1) fade(1, highlight);
-  let selfeat = await drawChord();
-  if (selfeat) {
-    highlightSelectedSegment();
-    popSelGeo.setContent(getInfoHtml(selfeat));
-  }
-  if (highlight != -1) fade(.1, highlight);
+  await drawChord();
+  highlightSelectedSegment();
 }
 
 function yrChanged(yr) {
