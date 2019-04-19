@@ -625,36 +625,28 @@ async function fetchMapFeatures() {
 }
 
 let cleanFeatures;
+let geoLayer;
 async function drawMapFeatures() {
   if (!_featJson) return;
   cleanFeatures = _featJson.slice();
   
   geoLayer = L.geoJSON(cleanFeatures, {
-    style: {opacity: 1, weight: 2, color: 'grey'},
-    // style: function(feature) {
-    //     switch (feature.dist15name) {
-    //       case 'Downtown': return {opacity: 1, weight: 1, color:'#cf1130', fillColor:'#cf1130', fillOpacity: 0.6};
-    //       case 'SoMa': return {opacity: 1, weight: 1, color: '#f47a8d', fillColor: '#f47a8d', fillOpacity: 0.6};
-    //       case 'N. Beach/Chinatown': return {opacity: 1,weight: 1, color:'#f8a7b4', fillColor:'#f8a7b4', fillOpacity: 0.6};
-    //       case 'Western Market': return {opacity: 1,weight: 1, color:'#4B256D', fillColor:'#4B256D', fillOpacity: 0.6};
-    //       case 'Mission/Potrero': return {opacity: 1,weight: 1, color:'#6F5495', fillColor:'#6F5495', fillOpacity: 0.6};
-    //       case 'Noe/Glen/Bernal': return {opacity: 1,weight: 1, color:'#A09ED6', fillColor:'#A09ED6', fillOpacity: 0.6};
-    //       case 'Marina/N. Heights': return {opacity: 1,weight: 1, color:"3F647E", fillColor:"3F647E", fillOpacity: 0.6};
-    //       case 'Richmond': return {opacity: 1,weight: 1, color:'#688FAD', fillColor:'#688FAD', fillOpacity: 0.6};
-    //       case 'Bayshore': return {opacity: 1,weight: 1, color:'#7caac3', fillColor:'#7caac3', fillOpacity: 0.6};
-    //       case 'Outer Mission': return {opacity: 1,weight: 1, color:'#006466', fillColor:'#006466', fillOpacity: 0.6};
-    //       case 'Hill Districts': return {opacity: 1,weight: 1, color:'#2fa3a5', fillColor:'#2fa3a5', fillOpacity: 0.6};
-    //       case 'Sunset': return {opacity: 1,weight: 1, color:'#95D47A', fillColor:'#95D47A', fillOpacity: 0.6};
-    //       case 'South Bay': return {opacity: 1,weight: 1, color:'#677C8A', fillColor:'#677C8A', fillOpacity: 0.6};
-    //       case 'East Bay': return {opacity: 1,weight: 1, color:'#B2A296', fillColor:'#B2A296', fillOpacity: 0.6};
-    //       case 'North Bay': return {opacity: 1,weight: 1, color:'#a3a3a3', fillColor:'#a3a3a3', fillOpacity: 0.6}
-    //     }
+    // pointToLayer: function(feature, latlng) {
+    //   label = String(feature.dist15name) // .bindTooltip can't use straight 'feature.properties.attribute'
+    //   console.log(label);
+    //   return L.circleMarker(latlng).bindTooltip(label, {permanent: true, opacity: 0.7}).openTooltip();
     // },
+    style: {opacity: 1, weight: 2, color: 'grey'},
     onEachFeature: function(feature, layer) {
       layer.on({
         mouseover: hoverFeature,
         click: clickedOnFeature,
         });
+      // layer.bindTooltip(feature.dist15name, {
+      //   permanent: true,
+      //   direction: "center",
+      //   className: "district-name"
+      // });
     },
   });
   geoLayer.addTo(mymap);
@@ -676,7 +668,6 @@ function getInfoHtml(geo) {
 }
 
 // activate function
-let geoLayer;
 infoPanel.update = function(geo) {
   infoPanel._div.innerHTML = '';
   infoPanel._div.className = 'info-panel';
@@ -701,7 +692,6 @@ let oldHoverTarget;
 function hoverFeature(e) {
   clearTimeout(infoPanelTimeout);
   infoPanel.update(e.target.feature);
-
   // don't do anything else if the feature is already clicked
   if (selGeoId || highlight != -1) {
     if (selGeoId) {
@@ -819,7 +809,7 @@ function highlightSelectedSegment() {
 // functions for vue
 async function selectionChanged() {
   await drawChord();
-  highlightSelectedSegment();
+  // highlightSelectedSegment();
 }
 
 function yrChanged(yr) {
