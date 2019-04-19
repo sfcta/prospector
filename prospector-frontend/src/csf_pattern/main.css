@@ -9,6 +9,15 @@
     margin-bottom: 100px;
 }
 
+.leaflet-tooltip.district-name {
+  background-color: transparent;
+  border: transparent;
+  box-shadow: none;
+  font-weight: bold;
+  /* font-size: 20px; */
+  }
+
+
 .ui.color1.button {
   background-color: #f56e71;
   color: #fff;
