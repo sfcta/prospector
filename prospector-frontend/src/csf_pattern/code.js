@@ -207,13 +207,28 @@ var arc = d3.svg.arc()
 var path = d3.svg.chord().radius(innerRadius - 4);// subtracted 4 to separate the ribbon
 
 /*** Initialize the visualization ***/
-var g = d3.select("#chart_placeholder")
-          .append("svg")
-          .attr("width", width)
-          .attr("height", height)
-          .append("g")
-          .attr("id", "circle")
-          .attr("transform", "translate(" + (width-400)/2 + "," + height/2 + ")");
+var svg = d3.select("#chart_placeholder")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+svg.append("rect")
+  .attr("id", "overlay")
+  .attr("width", width)
+  .attr("height", height)
+  .attr("fill-opacity", "0")
+  .on("click", function() {
+    console.log(1)
+    if (chordHighlighted === true) {
+      resetPopGeo();
+    }
+  });
+
+var g = svg.append("g")
+           .attr("id", "circle")
+           .attr("transform", "translate(" + (width-400)/2 + "," + height/2 + ")");
+
+
 g.append("circle").attr("r", outerRadius);
 
 //define the default chord layout parameters
