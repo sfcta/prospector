@@ -115,38 +115,34 @@
   </div>
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
-  <div v-cloak> <!-- hides everything until Vue finished loading -->
-    <h2 style="margin-bottom:0px;">ConnectSF Travel Time for mandatory tours</h2>
-    <hr style="margin-bottom:5px;margin-top:5px"/>
-    This visualization shows the estimated vehicle miles traveled (VMT) per person and per household 
-    for 2015 and 2050.
-    <br/><br/>
+    <div v-cloak> <!-- hides everything until Vue finished loading -->
+      <h2 style="margin-bottom:0px;">ConnectSF Travel Time for mandatory tours</h2>
+      <hr style="margin-bottom:5px;margin-top:5px"/>
+      This visualization shows the estimated vehicle miles traveled (VMT) per person and per household 
+      for 2015 and 2050.
+      <br/><br/>
 
 
-    <div style="margin-top:20px;">
-      <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
-        &nbsp;OK&nbsp;
-      </button>
+      <div style="margin-top:20px;">
+        <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
+          &nbsp;OK&nbsp;
+        </button>
 
-      <!--<button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')"
-              class="small ui right labeled icon floated yellow button"
-              style="margin-right:5px">
-              <i class="icon download"></i>
-              Download data (.zip)
-      </button>
+        <!--<button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')"
+                class="small ui right labeled icon floated yellow button"
+                style="margin-right:5px">
+                <i class="icon download"></i>
+                Download data (.zip)
+        </button>
 
-      <button v-on:click="this.window.open('http://www.sfcta.org/congestion','_blank')"
-              class="small ui right floated basic violet button"
-              style="margin-right:5px">
-              Learn more&hellip;
-      </button>-->
+        <button v-on:click="this.window.open('http://www.sfcta.org/congestion','_blank')"
+                class="small ui right floated basic violet button"
+                style="margin-right:5px">
+                Learn more&hellip;
+        </button>-->
 
+      </div>
     </div>
   </div>
-  </div>
-  
-
-
   <div id="sfmap"></div>
-
 </div>

@@ -11,135 +11,130 @@
   </div> 
   
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
-      <div id="preheader">
-        <table id="table-header">
-          <tr>
-            <td class='title'>Population & Jobs</td>
-            <td>
-              <a target="_blank" href="https://connectsf.org/">
-                <img class="img-csf" src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png" alt="Connect SF">
-              </a>
-            </td>
-          </tr>
+    <div id="preheader">
+      <table id="table-header">
+        <tr>
+          <td class='title'>Population & Jobs</td>
+          <td>
+            <a target="_blank" href="https://connectsf.org/">
+              <img class="img-csf" src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png" alt="Connect SF">
+            </a>
+          </td>
+        </tr>
+      </table>
+      
+      <hr/>
+      <div id="helpbar">
+          <button class="ui mini right labeled icon color1 button"
+                  v-on:click="clickToggleHelp">
+                  <i class="help circle icon"></i>
+                  What is this?
+          </button>
+          &nbsp;
+          <button class="ui mini right labeled icon color1 button"
+                  v-on:click="this.window.open('https://connectsf.org/','_blank')">
+                  <i class="arrow right icon"></i>
+                  Learn More
+          </button>
+          <hr/>
+      </div>
+
+      <div id="picker">
+        <h5>CHOOSE SCENARIO</h5>
+        <div>
+          <button v-for="item in year_options"
+                v-on:click="yrChanged(item.value)"
+                class="ui tiny grey button"
+                v-bind:class="{ active: item.value==selected_year, color2: item.value==selected_year }">
+                ${item.text}
+          </button>
+        </div>
+        
+        <h5>CHOOSE MEASURE</h5>
+        <div>
+          <button v-for="item in metric_options"
+                v-on:click="metricChanged(item.value)"
+                class="ui tiny grey button"
+                v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
+                ${item.text}
+          </button>
+        </div>
+        
+        <hr/>
+        <h5>CITYWIDE SUMMARY</h5>
+        <table id="citywide">
+          <tr><th>Measure/Year</th><th align="right">2010</th><th align="right">2050</th></tr>
+          <tr><td>Population</td><td align="right">${aggData[0].pop}</td><td align="right">${aggData[1].pop}</td></tr>
+          <tr><td>Jobs</td><td align="right">${aggData[0].tot}</td><td align="right">${aggData[1].tot}</td></tr>
+          <tr><td>Jobs+Population</td><td align="right">${aggData[0].jobpop}</td><td align="right">${aggData[1].jobpop}</td></tr>
         </table>
         
-        <hr/>
-        <div id="helpbar">
-            <button class="ui mini right labeled icon color1 button"
-                    v-on:click="clickToggleHelp">
-                    <i class="help circle icon"></i>
-                    What is this?
-            </button>
-            &nbsp;
-            <button class="ui mini right labeled icon color1 button"
-                    v-on:click="this.window.open('https://connectsf.org/','_blank')">
-                    <i class="arrow right icon"></i>
-                    Learn More
-            </button>
-            <hr/>
+        <h5>MAP LAYERS</h5>
+        <p>Add additional geographic data to the map.</p>
+        <div v-for="item in extraLayers" class="ui toggle checkbox">
+          <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
+          <label><h5>${item.name}</h5></label>
         </div>
 
-        <div id="picker">
-          <h5>CHOOSE SCENARIO</h5>
-          <div>
-            <button v-for="item in year_options"
-                  v-on:click="yrChanged(item.value)"
-                  class="ui tiny grey button"
-                  v-bind:class="{ active: item.value==selected_year, color2: item.value==selected_year }">
-                  ${item.text}
-            </button>
+        <br><br>
+        <h5>YOUR FEEDBACK</h5>
+        <form class="ui tiny equal width form" v-on:submit.prevent="handleSubmit">
+          <div class="ui field">
+            <textarea v-model="comment" class="fix" maxlength="200" rows="3"
+            v-bind:disabled="submit_disabled==true"
+            type="text" placeholder="Based on this data, what do you think are the city’s transportation needs? (800 characters)"></textarea>
           </div>
-          
-          <h5>CHOOSE MEASURE</h5>
-          <div>
-            <button v-for="item in metric_options"
-                  v-on:click="metricChanged(item.value)"
-                  class="ui tiny grey button"
-                  v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
-                  ${item.text}
-            </button>
-          </div>
-          
-          <hr/>
-          <h5>CITYWIDE SUMMARY</h5>
-          <table id="citywide">
-            <tr><th>Measure/Year</th><th align="right">2010</th><th align="right">2050</th></tr>
-            <tr><td>Population</td><td align="right">${aggData[0].pop}</td><td align="right">${aggData[1].pop}</td></tr>
-            <tr><td>Jobs</td><td align="right">${aggData[0].tot}</td><td align="right">${aggData[1].tot}</td></tr>
-            <tr><td>Jobs+Population</td><td align="right">${aggData[0].jobpop}</td><td align="right">${aggData[1].jobpop}</td></tr>
-          </table>
-          
-          <h5>MAP LAYERS</h5>
-          <p>Add additional geographic data to the map.</p>
-          <div v-for="item in extraLayers" class="ui toggle checkbox">
-            <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
-            <label><h5>${item.name}</h5></label>
-          </div>
-
-          <br><br>
-          <h5>YOUR FEEDBACK</h5>
-          <form class="ui tiny equal width form" v-on:submit.prevent="handleSubmit">
-            <div class="ui field">
-              <textarea v-model="comment" class="fix" maxlength="200" rows="3"
-              v-bind:disabled="submit_disabled==true"
-              type="text" placeholder="Based on this data, what do you think are the city’s transportation needs? (800 characters)"></textarea>
-            </div>
-            <button class="ui button color2" type="submit"
-            v-bind:class="{loading: submit_loading==true, disabled: submit_disabled==true}">Submit</button>
-          </form>
-        </div>
+          <button class="ui button color2" type="submit"
+          v-bind:class="{loading: submit_loading==true, disabled: submit_disabled==true}">Submit</button>
+        </form>
       </div>
-      
-      <div class="logo">
-        <hr/>
-        <a class="agency-link" target="_blank" href="http://www.sfcta.org">
-          <img class="img-logo" src="/assets/SFCTA Logo dark-background.svg" width="80%">
-        </a>
-      </div>
+    </div>
+    
+    <div class="logo">
+      <hr/>
+      <a class="agency-link" target="_blank" href="http://www.sfcta.org">
+        <img class="img-logo" src="/assets/SFCTA Logo dark-background.svg" width="80%">
+      </a>
+    </div>
   </div>
-  
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
-  <div v-cloak> <!-- hides everything until Vue finished loading -->
-        <h2 style="margin-bottom:0px;">Modeling the transportation system in 2015 and 2050: Residents and Jobs</h2>
-        <hr style="margin-bottom:5px;margin-top:5px"/>
-        What are the City’s Transportation needs? How might they change by 2050? To help inform these questions, ConnectSF modeled transportation in the City and region based on current and future development. The information is shown in Transportation Analysis Zones (TAZs) – the shapes you see in this map.<br><br>
-        The estimate of where people lived and worked in 2015 is based on data from the City’s land use database, US census data, and jobs data from Dunn & Bradstreet.<br><br>
-        
-        The forecast of where people might live and work in 2050 is based on the City’s Development pipeline and added possible new housing and jobs based on the City’s housing and office production goals and policies, existing and potential land-use regulations and plans, and the development potential of under-utilized sites.
+    <div v-cloak> <!-- hides everything until Vue finished loading -->
+          <h2 style="margin-bottom:0px;">Modeling the transportation system in 2015 and 2050: Residents and Jobs</h2>
+          <hr style="margin-bottom:5px;margin-top:5px"/>
+          What are the City’s Transportation needs? How might they change by 2050? To help inform these questions, ConnectSF modeled transportation in the City and region based on current and future development. The information is shown in Transportation Analysis Zones (TAZs) – the shapes you see in this map.<br><br>
+          The estimate of where people lived and worked in 2015 is based on data from the City’s land use database, US census data, and jobs data from Dunn & Bradstreet.<br><br>
+          
+          The forecast of where people might live and work in 2050 is based on the City’s Development pipeline and added possible new housing and jobs based on the City’s housing and office production goals and policies, existing and potential land-use regulations and plans, and the development potential of under-utilized sites.
 
-        <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
-        <hr style="margin-bottom:5px;margin-top:5px"/>
-        <ul>
-        <li>To display data at the TAZ level on the map, select a YEAR and DATA TYPE.</li>
-        <li>Select the "Change" scenario to view the difference between 2015 and 2050.</li>
-        <li>Click on any TAZ on the map to see TAZ-specific details.</li>
-        </ul>
+          <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
+          <hr style="margin-bottom:5px;margin-top:5px"/>
+          <ul>
+          <li>To display data at the TAZ level on the map, select a YEAR and DATA TYPE.</li>
+          <li>Select the "Change" scenario to view the difference between 2015 and 2050.</li>
+          <li>Click on any TAZ on the map to see TAZ-specific details.</li>
+          </ul>
 
-        <div style="margin-top:20px;">
-          <button v-on:click="clickToggleHelp" class="small ui right floated teal button">
-            &nbsp;OK&nbsp;
-          </button>
+          <div style="margin-top:20px;">
+            <button v-on:click="clickToggleHelp" class="small ui right floated teal button">
+              &nbsp;OK&nbsp;
+            </button>
 
-          <button v-on:click="this.window.open('/assets/connectsf_jobpop.zip')"
-                  class="small ui right labeled icon floated color1 button"
-                  style="margin-right:5px">
-                  <i class="icon download"></i>
-                  Download data (.zip)
-          </button>
+            <button v-on:click="this.window.open('/assets/connectsf_jobpop.zip')"
+                    class="small ui right labeled icon floated color1 button"
+                    style="margin-right:5px">
+                    <i class="icon download"></i>
+                    Download data (.zip)
+            </button>
 
-          <button v-on:click="this.window.open('https://connectsf.org/','_blank')"
-                  class="small ui right floated basic teal button"
-                  style="margin-right:5px">
-                  Learn more&hellip;
-          </button>
-
-        </div>
+            <button v-on:click="this.window.open('https://connectsf.org/','_blank')"
+                    class="small ui right floated basic teal button"
+                    style="margin-right:5px">
+                    Learn more&hellip;
+            </button>
+          </div>
+    </div>
   </div>
-  </div>
-  
-
 
   <div id="sfmap"></div>
-
 </div>
