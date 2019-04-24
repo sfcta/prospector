@@ -545,9 +545,12 @@ function styleByMetricColor(feat) {
   if (!color) color = MISSING_COLOR;
   if (feat['metric']==0) color = MISSING_COLOR;
   if (!app.bwidth_check) {
-    return {opacity: 1, weight: DEF_BWIDTH, color: color};
+    return {opacity: 1, weight: DEF_BWIDTH, offset:0, color: color};
   } else {
-    return {opacity: 1, weight: feat['bwmetric_scaled'], color: color};
+    return {opacity: 1, 
+            weight: feat['bwmetric_scaled'], 
+            offset:(feat['bwmetric_scaled']/2) + 0.1, 
+            color: color};
   }
 }
 
