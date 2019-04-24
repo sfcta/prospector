@@ -1,4 +1,4 @@
-/* CSS Layout for JOBPOP ONLY goes here */
+/* CSS Layout for ConnectSF ONLY goes here */
 
 #slide-panel {
   top: auto;
@@ -136,10 +136,15 @@ a.agency {color: #fff;}
 .td-logo {
   padding-right: 0px;
 }
+
 .img-logo {
-  vertical-align: center;
-  margin-bottom: 0px;
+  display:block;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-right: auto;
+  width: 60%
 }
+
 .row-label {
   margin-left: auto;
   margin-right: 0px;
