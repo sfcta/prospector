@@ -8,7 +8,7 @@ const sfcta_components = [
 	   'autolos',
      'tmcshp',
      'viz-template',
-     'tdt',
+     'sftraveldemand',
      'champlu',
      'tnctrn',
      'csf_tt',
