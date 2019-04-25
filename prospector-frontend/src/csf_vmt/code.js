@@ -501,7 +501,7 @@ async function drawMapFeatures(queryMapData=true) {
           sel_colors,
           sel_binsflag,
         );
-        legHTML = '<h4>Vehicle Miles Traveled</h4>' + legHTML;
+        legHTML = '<h4>Vehicle Miles Traveled <br> per Person</h4>' + legHTML;
         div.innerHTML = legHTML;
         return div;
       };
@@ -929,13 +929,13 @@ let app = new Vue({
     selected_metric: 'vmt_per_pers',
     metric_options: [
     {text: 'VMT per Person', value: 'vmt_per_pers'},
-    {text: 'VMT per Household', value: 'vmt_per_hh'},
+    //{text: 'VMT per Household', value: 'vmt_per_hh'},
     //{text: 'VMT', value: 'vmt'},
     ],
     
     selected_chart_metric: 'pct_persons',
     chart_metric_options: [
-    {text: 'Percent of Households', value: 'pct_households'},
+    //{text: 'Percent of Households', value: 'pct_households'},
     {text: 'Percent of Persons', value: 'pct_persons'},
     ],
     
