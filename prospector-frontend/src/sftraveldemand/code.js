@@ -1021,7 +1021,7 @@ let app = new Vue({
   el: '#panel', //element is 'el' the whole right side of the map
   delimiters: ['${', '}'],
   data: {
-    version: '0.3.1',
+    version: '0.3.2',
     data_version: '0.3',
     isModeAuto: true,
     isModeTransit: false,
