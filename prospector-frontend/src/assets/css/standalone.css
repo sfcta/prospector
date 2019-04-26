@@ -103,6 +103,7 @@ hr {margin: 1% 0px; }
   background-color: #555;
   z-index: 7;
 }
+
 #layer-widgets button {
   margin: 5px 5px 5px 5px;
 }
@@ -135,18 +136,15 @@ table#citywide tbody th, td {
 }
 
 /* Bottom agency and logo*/
-tbody tr:nth-child(odd) td, tbody th {
-    background-color: #444;
-}
 .logo {
   display:table-row;
   text-align:right;
   height:80px;
 }
 a.agency {color: #fff;}
-#table-logo {
+table#table-logo {
   margin-bottom: 0px;
-  background-color: #444;
+  background-color: transparent;
   border: 0px;
 }
 .td-logo {
@@ -158,6 +156,9 @@ a.agency {color: #fff;}
   margin-bottom: 20px;
   margin-right: auto;
   width: 60%
+}
+table#table-logo tbody tr:nth-child(odd) td, tbody th {
+    background-color: transparent;
 }
 
 /*Legend*/
