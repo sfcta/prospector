@@ -64,7 +64,7 @@
   display:table;
   position: relative;
   height:100%;
-  width:400px;
+  width:500px;
   max-height:100%;
   padding:0px 20px 0px 20px;
   z-index:10;
@@ -74,8 +74,8 @@
 }
 
 #sfmap {
-  width:380px;
-  height:360px;
+  width:480px;
+  height:480px;
   margin-right:0px;
   z-index:0;
 }
