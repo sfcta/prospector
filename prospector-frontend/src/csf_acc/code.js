@@ -98,8 +98,12 @@ const INT_COLS = []; //
 const DISCRETE_VAR_LIMIT = 10; //
 const MISSING_COLOR = '#ccd'; //
 const COLORRAMP = {//SEQ: ['#ccd', '#eaebe1','#D2DAC3','#7eb2b5','#548594', '#003f5a', '#001f2d'],
-                   SEQ: ['#daf2ef','#bedceb','#9abae2','#709bd9', '#5885d1', '#5674b9', '#585b94', '#544270', '#512f57'],
-                   DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
+                   //SEQ: ['#daf2ef','#bedceb','#9abae2','#709bd9', '#5885d1', '#5674b9', '#585b94', '#544270', '#512f57'],
+                   SEQ: ['#eaf8f8','#d3f1f0','#b5e8e6','#8edcd8','#69d0cc','#47c6c1','#31bfb9','#26a4a3','#1b888b'],
+                   DIV: ['#c73232','#dd4f51','#f26e72','#f47d80','#f69497','#f8afb1','#facacc','#fde0e2','#fef0f1',
+                         '#eeeeef','#eaf8f8','#d3f1f0','#b5e8e6','#8edcd8','#69d0cc','#47c6c1','#31bfb9','#26a4a3','#1b888b']};
+                   //DIV: ['#54bdba','#a9d7d5','#f1f1f1','#f5b2b0','#ec7074']};
+                   //DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
                     
 const CUSTOM_BP_DICT = {
@@ -111,10 +115,10 @@ const CUSTOM_BP_DICT = {
   //               'diff':[0, 50, 150, 350, 750, 950, 1050, 1100]},
   'transit': {'2015':[100, 300, 500, 700, 900, 1000, 1100, 1200],
               '2050':[100, 300, 500, 700, 900, 1000, 1100, 1200],
-              'diff':[100, 300, 500, 700, 900, 1000, 1100, 1200]},
+              'diff':[-1200,-1100,-1000,-900,-700,-500,-300,-100,100, 300, 500, 700, 900, 1000, 1100, 1200]},
   'auto': {'2015':[100, 300, 500, 700, 900, 1000, 1100, 1200],
           '2050':[100, 300, 500, 700, 900, 1000, 1100, 1200],
-          'diff':[100, 300, 500, 700, 900, 1000, 1100, 1200]}
+          'diff':[-1200,-1100,-1000,-900,-700,-500,-300,-100,100, 300, 500, 700, 900, 1000, 1100, 1200]}
 }
 // legend info
 const METRIC_UNITS = {'auto': '000s',
@@ -372,9 +376,16 @@ async function drawMapFeatures(queryMapData=true) {
           //console.log("drawMapFeatures, 4")
           // color schema breakpoints
           let mode = app.sliderValue[0];
-          if (app.comp_check){
+          /*if (app.comp_check){
             mode = 'diff';
+          }*/
+          if (app.selected_year == 'diff') {
+            mode = 'diff';
+            app.selected_colorscheme = COLORRAMP.DIV;
+          } else {
+            app.selected_colorscheme = COLORRAMP.SEQ;
           }
+          
           let custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
           sel_colorvals = [map_vals[0]].concat(custom_bps);
           (map_vals[map_vals.length-1] > custom_bps[custom_bps.length-1])? sel_colorvals.push(map_vals[map_vals.length-1]): sel_colorvals.push(custom_bps[custom_bps.length-1]+1);
@@ -382,7 +393,7 @@ async function drawMapFeatures(queryMapData=true) {
           bp = Array.from(sel_colorvals).sort((a, b) => a - b);
           
           // app.bp5 = bp[bp.length-1];
-          app.bp1 = custom_bps[0];
+          /*app.bp1 = custom_bps[0];
           app.bp2 = custom_bps[1];
           app.bp3 = custom_bps[2];
           app.bp4 = custom_bps[3];
@@ -391,9 +402,9 @@ async function drawMapFeatures(queryMapData=true) {
           app.bp7 = custom_bps[6];
           app.bp8 = custom_bps[7];
           if (bp[bp.length-1 > custom_bps[7]]) app.bp9 = bp[bp.length-1];
-          if (custom_bps[0] < app.bp0) app.bp1 = app.bp0;
+          if (custom_bps[0] < app.bp0) app.bp1 = app.bp0;*/
 
-          // sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
+          sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
           // updateColorScheme(sel_colorvals);
           sel_binsflag = true; 
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);

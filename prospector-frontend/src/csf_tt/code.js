@@ -119,7 +119,8 @@ const MISSING_COLOR = '#f3f3f3';
                    DIV: ['#54bdba','#a9d7d5','#f1f1f1','#f5b2b0','#ec7074']};*/
 const COLORRAMP = {//SEQ: ['#eefacd','#89c5a8','#009485','#116570','#173252'],
                    //SEQ: ['#eefacd','#c5e5bf','#89c5a8','#49a895','#009485','#00807b','#116570','#164b61','#173252'],
-                   SEQ: ['#c5e5bf','#89c5a8','#49a895','#009485','#00807b','#164b61','#173252'],
+                   //SEQ: ['#c5e5bf','#89c5a8','#49a895','#009485','#00807b','#164b61','#173252'],
+                   SEQ: ['#fef0f1','#fde0e2','#facacc','#f8afb1','#f69497','#f47d80','#f26e72','#dd4f51','#c73232'],
                    DIV: ['#54bdba','#a9d7d5','#f1f1f1','#f5b2b0','#ec7074']};
                    
                    
@@ -530,7 +531,7 @@ async function drawMapFeatures(queryMapData=true) {
           }
           sel_colorvals.push(map_vals[map_vals.length-1]);
           
-          bp = Array.from(sel_colorvals).sort((a, b) => a - b);
+          /*bp = Array.from(sel_colorvals).sort((a, b) => a - b);
           app.bp0 = bp[0];
           app.bp5 = bp[bp.length-1];
           app.bp1 = custom_bps[0];
@@ -538,7 +539,7 @@ async function drawMapFeatures(queryMapData=true) {
           app.bp3 = custom_bps[2];
           app.bp4 = custom_bps[3];
           
-          if (custom_bps[0] < app.bp0) app.bp1 = app.bp0;
+          if (custom_bps[0] < app.bp0) app.bp1 = app.bp0;*/
           
           sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
           //updateColorScheme(sel_colorvals);

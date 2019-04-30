@@ -115,8 +115,13 @@ const MISSING_COLOR = '#f3f3f3';
 /*const COLORRAMP = {SEQ: ['#f3f3f3','#f6d3d2','#f6b3b1','#f29292','#ec7074'],
                    DIV: ['#54bdba','#a9d7d5','#f1f1f1','#f5b2b0','#ec7074']};*/
 const COLORRAMP = {//SEQ: ['#fffcd4','#fdc193','#f28350','#a1563b','#3d3551'],
-                   SEQ: ['#fffcd4','#fde5ba','#fdc193','#ffa175','#f28350','#d47144','#a1563b','#73464c','#3d3551'],
-                   DIV: ['#54bdba','#a9d7d5','#f1f1f1','#f5b2b0','#ec7074']};
+                   //SEQ: ['#fffcd4','#fde5ba','#fdc193','#ffa175','#f28350','#d47144','#a1563b','#73464c','#3d3551'],
+                   SEQ: ['#fef0f1','#fde0e2','#facacc','#f8afb1','#f69497','#f47d80','#f26e72','#dd4f51','#c73232'],
+                   //DIV: ['#c73232','#dd4f51','#f26e72','#f47d80','#f69497','#f8afb1','#facacc','#fde0e2','#fef0f1',
+                   //      '#eeeeef','#eaf8f8','#d3f1f0','#b5e8e6','#8edcd8','#69d0cc','#47c6c1','#31bfb9','#26a4a3','#1b888b']};
+                   DIV: ['#1b888b','#26a4a3','#31bfb9','#47c6c1','#69d0cc','#8edcd8','#b5e8e6','#d3f1f0','#eaf8f8','#eeeeef',
+                         '#fef0f1','#fde0e2','#facacc','#f8afb1','#f69497','#f47d80','#f26e72','#dd4f51','#c73232']};
+                   //DIV: ['#54bdba','#a9d7d5','#f1f1f1','#f5b2b0','#ec7074']};
                    
                    
 const MIN_BWIDTH = 2;
@@ -133,7 +138,7 @@ const BWIDTH_MAP = {
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
   'vmt': {'base':[2000, 4000, 6000, 80000, 10000, 20000], 'diff':[-10000,-1000,-100,100,1000,10000], 'pctdiff':[-20, -5, 5, 20]},
-  'vmt_per_pers': {'base':[1, 2, 3, 4, 5, 6, 7, 8], 'diff':[-5,-3,-1,1,3,5], 'pctdiff':[-20, -5, 5, 20]},
+  'vmt_per_pers': {'base':[1, 2, 3, 4, 5, 6, 7, 8], 'diff':[-8,-7,-6,-5,-4,-3,-1,-1,1,2,3,4,5,6,7,8], 'pctdiff':[-20, -5, 5, 20]},
   'vmt_per_hh': {'base':[5, 10, 15, 20, 25, 30, 35, 40], 'diff':[-5,-3,-1,1,3,5], 'pctdiff':[-20, -5, 5, 20]},
 }
 
