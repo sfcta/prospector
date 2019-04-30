@@ -92,7 +92,20 @@ let styles = maplib.styles;
 
 let mymap = maplib.sfmap;
 // set map center and zoom level
-mymap.setView([37.76889, -122.440997], 11);
+mymap.setView([37.76889, -122.440997], 12);
+let baseLayer = maplib.baseLayer;
+mymap.removeLayer(baseLayer);
+
+let url = 'https://api.mapbox.com/styles/v1/crystal6lan/cjuvxevh90f7f1fqwef3bfou8/tiles/256/{z}/{x}/{y}@2x?access_token={accessToken}';
+let token = 'pk.eyJ1IjoiY3J5c3RhbDZsYW4iLCJhIjoiY2p1bGticDN2MGc2djN5czhobXNpbHJ3dyJ9.1adhBxSE0u5YKRO2soCPxQ';
+let attribution ='<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
+                 '<a href="http://mapbox.com">Mapbox</a>';
+baseLayer = L.tileLayer(url, {
+  attribution:attribution,
+  maxZoom: 18,
+  accessToken:token,
+}).addTo(mymap);
+
 
 //create number formatting functions
 var numberWithCommas = d3.format("0,f");
@@ -226,7 +239,7 @@ svg.append("rect")
 
 var g = svg.append("g")
            .attr("id", "circle")
-           .attr("transform", "translate(" + (width-400)/2 + "," + height/2 + ")");
+           .attr("transform", "translate(" + (width-500)/2 + "," + height/2 + ")");
 
 
 g.append("circle").attr("r", outerRadius);
@@ -236,9 +249,9 @@ g.append("circle").attr("r", outerRadius);
 //that way, you can create multiple chord layouts
 function getDefaultLayout() {
   return d3.layout.chord()
-  .padding(0.03)
-  .sortSubgroups(d3.descending)
-  .sortChords(d3.ascending);
+                  .padding(0.03)
+                  .sortSubgroups(d3.descending)
+                  .sortChords(d3.ascending);
 }  
 var last_layout; //store layout between updates
 
@@ -646,11 +659,6 @@ async function drawMapFeatures() {
         click: clickedOnFeature,
         });
       layer._polygonId = O_DISTRICT.indexOf(feature.dist15name);
-      // layer.bindTooltip(feature.dist15name, {
-      //   permanent: true,
-      //   direction: "center",
-      //   className: "district-name"
-      // });
     },
   });
   geoLayer.addTo(mymap);
