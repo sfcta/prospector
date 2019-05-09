@@ -93,7 +93,7 @@ const COLORRAMP = {//SEQ: ['#feefa9', '#ffd469', '#cc7b45', '#7d3e43'],
 const DEF_BWIDTH = 4;
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'load': {'base':[0.5,0.75,1], 'diff':[0.5,0.75,1], 'pctdiff':[-20, -5, 5, 20]},
+  'load': {'base':[0.5,0.85,1], 'diff':[0.5,0.85,1], 'pctdiff':[-20, -5, 5, 20]},
   'ab_vol': {'base':[100,500,2500,10000], 'diff':[100,500,2500,10000], 'pctdiff':[-20, -5, 5, 20]},
   'periodcap': {'base':[100,500,2500,10000], 'diff':[100,500,2500,10000], 'pctdiff':[-20, -5, 5, 20]},
 };
