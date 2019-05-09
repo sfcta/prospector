@@ -92,7 +92,7 @@ let styles = maplib.styles;
 
 let mymap = maplib.sfmap;
 // set map center and zoom level
-mymap.setView([37.76889, -122.440997], 12);
+mymap.setView([37.76889, -122.440997], 11.5);
 let baseLayer = maplib.baseLayer;
 mymap.removeLayer(baseLayer);
 
@@ -207,8 +207,8 @@ async function getMapData() {
 }
 
 var width = window.innerWidth,
-    height = window.innerHeight,
-    outerRadius = Math.min(width, height) / 2 - 120,
+    height = window.innerHeight - 10,
+    outerRadius = Math.min(width, height) / 2 - 140,
     innerRadius = outerRadius - 10;
 
 //create the arc path data generator for the groups

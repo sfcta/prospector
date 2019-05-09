@@ -86,8 +86,9 @@ const INT_COLS = [];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ccd';
 const COLORRAMP = {//SEQ: ['#feefa9', '#ffd469', '#cc7b45', '#7d3e43'],
-                    SEQ: ['#f5c0c6', '#d79a8a', '#975d70', '#562756'],
-                    DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
+                   //SEQ: ['#f5c0c6', '#d79a8a', '#975d70', '#562756'],
+                   SEQ: ['#fde0e2','#facacc','#f8afb1','#f69497','#f47d80','#f26e72','#dd4f51','#c73232'],
+                   DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
 const DEF_BWIDTH = 4;
 const MAX_PCTDIFF = 200;
