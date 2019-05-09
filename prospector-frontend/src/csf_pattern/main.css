@@ -11,6 +11,13 @@
   white-space: normal;
 }
 
+#container {
+  background-color: #eee;
+  background-image: url('background_map_xlight.jpg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
 #sfmap {
   width:380px;
   height:380px;
@@ -20,12 +27,13 @@
 
 /*chord diagram*/
 #chart_placeholder {
+  position: relative
   text-align: center;
   float:left;
-  /* color:#fff; */
   width: 1000px;
-  height: 80%;
+  height: 100%;
 }
+
 #circle circle {
   fill: none;
   pointer-events: all;
