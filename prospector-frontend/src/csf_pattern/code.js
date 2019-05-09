@@ -86,25 +86,49 @@ const O_DISTRICT = ['Marina/N. Heights', 'N. Beach/Chinatown', 'Downtown', 'West
 //                             {district:'Richmond',color:'#00EEEE'},
 //                             {district:'North Bay',color:'#EE82EE'}];
 
+const DISTRICT_POSITION = {'Marina/N. Heights':[5,-20],
+                            'N. Beach/Chinatown':[-20,-15],
+                            'Downtown':[0,0],
+                            'SoMa':[95,-15],
+                            'Western Market':[-10,0],
+                            'Mission/Potrero':[-5,0],
+                            'Noe/Glen/Bernal':[-10,0],
+                            'Bayshore':[0,0],
+                            'Outer Mission':[-10,-5],
+                            'Hill Districts':[-10,0],
+                            'East Bay':[350,530],
+                            'South Bay':[150,1050],
+                            'Sunset':[-760,80],
+                            'Richmond':[-45,0],
+                            'North Bay':[120,-25]};
+
+const DISTRICT_NAME = {'Marina/N. Heights':'Marina & N.Heights',
+                      'N. Beach/Chinatown':'N.Beach & Chinatown',
+                      'Downtown':'Downtown',
+                      'SoMa':'SoMa',
+                      'Western Market':'Western Market',
+                      'Mission/Potrero':'Mission & Potrero',
+                      'Noe/Glen/Bernal':'Noe & Glen & Bernal',
+                      'Bayshore':'Bayshore',
+                      'Outer Mission':'Outer Mission',
+                      'Hill Districts':'Hill Districts',
+                      'East Bay':'East Bay',
+                      'South Bay':'South Bay',
+                      'Sunset':'Sunset',
+                      'Richmond':'Richmond',
+                      'North Bay':'North Bay'};
+
 //reference sfmap
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
 
 let mymap = maplib.sfmap;
 // set map center and zoom level
-mymap.setView([37.76889, -122.440997], 12);
-let baseLayer = maplib.baseLayer;
-mymap.removeLayer(baseLayer);
-
-let url = 'https://api.mapbox.com/styles/v1/crystal6lan/cjuvxevh90f7f1fqwef3bfou8/tiles/256/{z}/{x}/{y}@2x?access_token={accessToken}';
-let token = 'pk.eyJ1IjoiY3J5c3RhbDZsYW4iLCJhIjoiY2p1bGticDN2MGc2djN5czhobXNpbHJ3dyJ9.1adhBxSE0u5YKRO2soCPxQ';
-let attribution ='<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
-                 '<a href="http://mapbox.com">Mapbox</a>';
-baseLayer = L.tileLayer(url, {
-  attribution:attribution,
-  maxZoom: 18,
-  accessToken:token,
-}).addTo(mymap);
+mymap.setView([37.76889, -122.440997], 11);
+mymap.zoomControl.remove();
+mymap.scrollWheelZoom.disable();
+// let baseLayer = maplib.baseLayer;
+// mymap.removeLayer(baseLayer);
 
 
 //create number formatting functions
@@ -637,6 +661,8 @@ async function fetchMapFeatures() {
     for (let feat of features) {
       feat['type'] = 'Feature';
       feat['geometry'] = JSON.parse(feat.geometry);
+      feat['position'] = DISTRICT_POSITION[feat.dist15name];
+      feat['distname'] = DISTRICT_NAME[feat.dist15name]
     }
 
     return features;
@@ -652,13 +678,19 @@ async function drawMapFeatures() {
   cleanFeatures = _featJson.slice();
   
   geoLayer = L.geoJSON(cleanFeatures, {
-    style: {opacity: 1, weight: 2, color: 'grey'},
+    style: {opacity: 1, weight: 2, color:'#b3b3b3', fillColor:'#e6e6e6', fillOpacity: 0.6},
     onEachFeature: function(feature, layer) {
       layer.on({
         mouseover: hoverFeature,
         click: clickedOnFeature,
         });
       layer._polygonId = O_DISTRICT.indexOf(feature.dist15name);
+      layer.bindTooltip(feature.distname, {
+        permanent: true,
+        offset: feature.position,
+        direction: "center",
+        className: "district-name"
+      });
     },
   });
   geoLayer.addTo(mymap);
@@ -700,7 +732,7 @@ infoPanel.addTo(mymap);
 
 function setHighlighted(highlightedGeo) {
   highlightedGeo.bringToFront();
-  highlightedGeo.setStyle({opacity: 1, weight: 1.5, color:'grey', fillColor:'#C57879', fillOpacity: 0.6});
+  highlightedGeo.setStyle({opacity: 0.5, weight: 2, color:'#b3b3b3', fillColor:'#C57879', fillOpacity: 0.6});
 }
 
 // hover mouseover
@@ -740,7 +772,7 @@ function hoverFeature(e) {
 // hover clickon
 let selectedGeo;
 async function clickedOnFeature(e) {
-  e.target.setStyle({opacity: 1, weight: 2, color:'grey', fillColor:'#C57879', fillOpacity: 0.9});
+  e.target.setStyle({opacity: 0.5, weight: 2, color:'#b3b3b3', fillColor:'#C57879', fillOpacity: 0.6});
 
   // unselect the previously-selected selection, if there is one
   if (selectedGeo && selectedGeo.feature.dist15name != e.target.feature.dist15name) {
