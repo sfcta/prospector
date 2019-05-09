@@ -30,16 +30,6 @@
         </div>
 
         <div id="picker">
-          <!--h5>CHOOSE SCENARIO</h5>
-          <div>
-            <button v-for="item in year_options"
-                  v-on:click="yrChanged(item.value)"
-                  class="ui tiny grey button"
-                  v-bind:class="{ active: item.value==selected_year, color2: item.value==selected_year }">
-                  ${item.text}
-            </button>
-          </div-->
-          
           <h5>CHOOSE MEASURE</h5>
           <div>
             <button v-for="item in metric_options"
@@ -51,13 +41,6 @@
           </div>
           
           <hr/>
-          <!--h5>CITYWIDE SUMMARY</h5>
-          <table id="citywide">
-            <tr><th>Measure/Year</th><th align="right">2010</th><th align="right">2050</th></tr>
-            <tr><td>Population</td><td align="right">${aggData[0].pop}</td><td align="right">${aggData[1].pop}</td></tr>
-            <tr><td>Jobs</td><td align="right">${aggData[0].tot}</td><td align="right">${aggData[1].tot}</td></tr>
-            <tr><td>Jobs+Population</td><td align="right">${aggData[0].jobpop}</td><td align="right">${aggData[1].jobpop}</td></tr>
-          </table-->
           
           <h5>MAP LAYERS</h5>
           <p>Add additional geographic data to the map.</p>
@@ -88,50 +71,20 @@
         </div>
 
       </div>
-
-      <!--div id="header">
-          <div id="stats-panel">
-            <hr/>
-            <div id="chartinfo"><h3 style="font-size: 22px;">${chartTitle}</h3></div>
-            <div id="geoinfo"><h5>${chartSubtitle}</h5></div>
-            <div id="longchart">
-                <div class="ui active dimmer">
-                  <div class="ui text loader">Loading</div>
-                </div>
-            </div>
-          </div>
-      </div-->
       
       <div class="logo">
-            <hr/>
-            <table id="table-logo"><tr>
-              <td class="td-logo">
-                <h4><b><a class="agency" target="_blank" href="http://www.sfcta.org">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
-              </td>
-              <td class="td-logo">
-                <a class="agency-link" target="_blank" href="http://www.sfcta.org">
-                  <img class="img-logo" src="/assets/sfcta-logo-144.png" width="80">
-                </a>
-              </td>
-            </tr></table>
+        <hr/>
+        <a class="agency-link" target="_blank" href="http://www.sfcta.org">
+          <img class="img-logo" src="/assets/SFCTA Logo dark-background.svg">
+        </a>
       </div>
   </div>
-  
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
   <div v-cloak> <!-- hides everything until Vue finished loading -->
         <h2 style="margin-bottom:0px;">Communities of Concern 2017</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
         Use this tool to explore Communities of Concern (CoC) identified for San Francisco.
-
-        <!--ul>
-        <li><b>Auto Level-of-Service (LOS)</b> grades road segments by vehicle delay with "A" describing free flow,
-        and "F" describing bumper-to-bumper conditions.</li>
-        <li><b>Transit Speed</b> reflects the average speeds including both when the buses are in motion as well as waiting at stops.</li>
-        <li><b>Transit Reliability</b> shows the variability in transit travel speeds. A lower percentage means transit speeds are more consistent.</li>
-        <li><b>Auto-Transit Speed Ratio</b> compares auto speeds to  to transit speeds, with lower values indicating where transit is more competitive with auto.
-        If the ratio is 1 then auto and transit travel times are equal.</li>
-        </ul-->
 
         <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
@@ -161,8 +114,5 @@
   </div>
   </div>
   
-
-
   <div id="sfmap"></div>
-
 </div>

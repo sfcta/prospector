@@ -24,7 +24,7 @@
   float:left;
   /* color:#fff; */
   width: 1000px;
-  height: 100%;
+  height: 80%;
 }
 #circle circle {
   fill: none;
@@ -48,11 +48,7 @@ text {
 svg {
   font-size: 10px;
   color: green;
-  min-height: 100%;
-  min-width: 100%;
 }  
-
-
 
 .link {
   margin-left: 30px;

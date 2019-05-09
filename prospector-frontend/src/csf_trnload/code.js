@@ -86,8 +86,9 @@ const INT_COLS = [];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ccd';
 const COLORRAMP = {//SEQ: ['#feefa9', '#ffd469', '#cc7b45', '#7d3e43'],
-                    SEQ: ['#f5c0c6', '#d79a8a', '#975d70', '#562756'],
-                    DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
+                   //SEQ: ['#f5c0c6', '#d79a8a', '#975d70', '#562756'],
+                   SEQ: ['#fde0e2','#facacc','#f8afb1','#f69497','#f47d80','#f26e72','#dd4f51','#c73232'],
+                   DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
 const DEF_BWIDTH = 4;
 const MAX_PCTDIFF = 200;
@@ -545,9 +546,12 @@ function styleByMetricColor(feat) {
   if (!color) color = MISSING_COLOR;
   if (feat['metric']==0) color = MISSING_COLOR;
   if (!app.bwidth_check) {
-    return {opacity: 1, weight: DEF_BWIDTH, color: color};
+    return {opacity: 1, weight: DEF_BWIDTH, offset:0, color: color};
   } else {
-    return {opacity: 1, weight: feat['bwmetric_scaled'], color: color};
+    return {opacity: 1, 
+            weight: feat['bwmetric_scaled'], 
+            offset:(feat['bwmetric_scaled']/2) + 0.1, 
+            color: color};
   }
 }
 
