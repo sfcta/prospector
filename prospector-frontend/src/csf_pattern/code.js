@@ -957,7 +957,7 @@ let app = new Vue({
     {text: 'All', value: 'total'},
     {text: 'Walk/Bike', value: 'walk/bike'},
     {text: 'Transit', value: 'transit'},
-    {text: 'TNC', value: 'uber/lyft'},
+    {text: 'Uber/Lyft', value: 'uber/lyft'},
     {text: 'Auto', value: 'drive'},
     ],
 
