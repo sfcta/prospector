@@ -162,6 +162,7 @@ a.agency {color: #fff;}
   font-size: 200%;
   width: 66%;
   color: white;
+  white-space: nowrap;
 }
 .img-csf {
   display: block;
