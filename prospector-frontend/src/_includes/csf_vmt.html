@@ -90,7 +90,9 @@
         <p>Add additional geographic data to the map.</p>
         <div v-for="item in extraLayers" class="ui toggle checkbox">
           <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
-          <label><h5>${item.name}</h5></label>
+          <label><h5>${item.name}
+          <a class="icon" target="_blank" v-bind:href="item.info"><i v-if="item.info" class="question circle icon"></i></a>
+          </h5></label>
         </div>
         
         <br><br>

@@ -111,6 +111,9 @@ hr {margin: 1% 0px; }
 .ui.toggle.checkbox input:checked~label:before{
   background-color: #f56e71!important;
 }
+a.icon {
+  color: #fff;
+}
 
 table#citywide tbody th, td {   
   background-color: #444;
