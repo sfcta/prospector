@@ -114,7 +114,7 @@ const METRIC_UNITS = {'pop': '000s per sq. mi.',
 const METRIC_DESC = {'pop': 'Population','tot': 'Jobs',
                       'jobpop': 'Jobs+Population',
 };
-const METRIC_DESC_SHORT = {'pop': 'Pop','tot': 'Jobs',
+const METRIC_DESC_SHORT = {'pop': 'Population','tot': 'Jobs',
                       'jobpop': 'Jobs+Pop',
 };
 
@@ -189,7 +189,7 @@ async function fetchAddLayers() {
 function updateStats() {
   for (let i = 0; i < _aggregateData.length; i++) {
     for (let m of app.metric_options) {
-      app.aggData[i][m.value] = _aggregateData[i][m.value].toLocaleString();
+      app.aggData[i][m.value] = (Math.round(_aggregateData[i][m.value]/100)*100).toLocaleString();
     }
   }
 }
