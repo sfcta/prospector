@@ -107,45 +107,35 @@
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
   <div v-cloak> <!-- hides everything until Vue finished loading -->
-    <h2 style="margin-bottom:0px;">ConnectSF Travel Time for mandatory tours</h2>
+    <h2 style="margin-bottom:0px;">Average Travel Time by Trip Purpose</h2>
     <hr style="margin-bottom:5px;margin-top:5px"/>
-    This visualization shows the estimated one-way travel time from home to the main destination 
-    (i.e. the total travel time to work, including any stops along the way). 
-    The data is segmented by:
-    <br/><br/>
-    <dl>
-      <dt>Year</dt>
-        <dd>- 2015</dd>
-        <dd>- 2050</dd>
-        <dd>- Change (the change from 2015 to 2050)</dd>
-      <dt>Purpose</dt>
-        <dd>- Work / School (mandatory tour purposes)</dd>
-        <dd>- Other (all other tour purposes)</dd>
-      <dt>Income</dt>
-        <dd>- Low Income (below 200% of the Federal Poverty Level)</dd>
-        <dd>- Not Low Income (above 200% of the Federal Poverty Level)</dd>
-        <dd>- All (all income categories)</dd>
-    </dl>
+          <b>This map shows</b> the average time it takes San Francisco residents to reach their job or school.<br><br>
+          
+          <b>The big takeaway is</b> people who live closer to job centers like Downtown San Francisco have shorter travel times in general.<br><br>
+          
+          <b>The need identified is</b> for additional transportation options serving the outer neighborhoods and the region to shorten travel times. Adding jobs and schools near where people live can also help shorten average travel times.<br><br>
+          
+          <b>Disclaimers/Sources:</b> Average travel times shown are modeled from current and future conditions.<br><br>
 
-    <div style="margin-top:20px;">
-      <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
-        &nbsp;OK&nbsp;
-      </button>
 
-      <!--<button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')"
-              class="small ui right labeled icon floated yellow button"
-              style="margin-right:5px">
-              <i class="icon download"></i>
-              Download data (.zip)
-      </button>
+          <div style="margin-top:20px;">
+            <button v-on:click="clickToggleHelp" class="small ui right floated teal button">
+              &nbsp;OK&nbsp;
+            </button>
 
-      <button v-on:click="this.window.open('http://www.sfcta.org/congestion','_blank')"
-              class="small ui right floated basic violet button"
-              style="margin-right:5px">
-              Learn more&hellip;
-      </button>-->
+            <button v-on:click="this.window.open('/assets/connectsf/traveltime.zip')"
+                    class="small ui right labeled icon floated color1 button"
+                    style="margin-right:5px">
+                    <i class="icon download"></i>
+                    Download data (.zip)
+            </button>
 
-    </div>
+            <button v-on:click="this.window.open('https://connectsf.org/','_blank')"
+                    class="small ui right floated basic teal button"
+                    style="margin-right:5px">
+                    Learn more&hellip;
+            </button>
+          </div>
   </div>
   </div>
   
