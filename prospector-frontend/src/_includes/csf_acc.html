@@ -95,37 +95,35 @@
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
   <div v-cloak> <!-- hides everything until Vue finished loading -->
-        <h2 style="margin-bottom:0px;">ConnectSF: Jobs Accessibility</h2>
+        <h2 style="margin-bottom:0px;">Jobs Accessibility</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
-        Use this tool to explore number of jobs accessible in each TAZ in 30 minutes auto or 45 minutes transit for ConnectSF.
+          <b>This map shows</b> the average number of jobs that a San Francisco household can access within a 30-minute auto trip or a 45-minute transit trip. The jobs that can be accessed are <u>both</u> within and outside of San Francisco today and in the future.<br><br>
+          
+          <b>The big takeaway is</b> in both 2015 and 2050 neighborhoods closer to Downtown San Francisco have higher access to jobs by transit. Neighborhoods closer to Downtown and adjacent to freeways have the highest access to jobs by auto. By 2050, San Francisco residents on average continue to have access to many more jobs by auto than by transit. Also, the change in the average number of jobs accessible by transit is greater than the change in the number of jobs accessible by auto.<br><br>
+          
+          <b>The need identified is</b> for improvements to transit across the board to provide economic opportunity similar to auto.<br><br>
+          
+          <b>Disclaimers/Sources:</b>  Time periods of 30 and 45 minutes are used for auto and transit trips respectively because they represent the approximate average commute time for Bay Area residents by those modes. The jobs accessible are modeled in SFCTA’s travel model and represent the sum of all the jobs in the entire Bay Area accessible by travel mode and time threshold for a given San Francisco travel analysis zone.<br><br>
 
-        <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
-        <hr style="margin-bottom:5px;margin-top:5px"/>
-        <ul>
-        <li>Select a scenario year and mode to display it at the TAZ level on the map.</li>
-        <li>Select "Change" scenario to view the difference between future (2050) and base (2015) scenarios.</li>
-        <li>Click on a colored TAZ on the map to see TAZ-specific details.</li>
-        </ul>
 
-        <div style="margin-top:20px;">
-          <button v-on:click="clickToggleHelp" class="small ui right floated teal button">
-            &nbsp;OK&nbsp;
-          </button>
+          <div style="margin-top:20px;">
+            <button v-on:click="clickToggleHelp" class="small ui right floated teal button">
+              &nbsp;OK&nbsp;
+            </button>
 
-          <button v-on:click="this.window.open('/assets/data_accjobs.csv')"
-                  class="small ui right labeled icon floated color1 button"
-                  style="margin-right:5px">
-                  <i class="icon download"></i>
-                  Download data (.csv)
-          </button>
+            <button v-on:click="this.window.open('/assets/connectsf/jobacc.zip')"
+                    class="small ui right labeled icon floated color1 button"
+                    style="margin-right:5px">
+                    <i class="icon download"></i>
+                    Download data (.zip)
+            </button>
 
-          <button v-on:click="this.window.open('https://connectsf.org/','_blank')"
-                  class="small ui right floated basic teal button"
-                  style="margin-right:5px">
-                  Learn more&hellip;
-          </button>
-
-        </div>
+            <button v-on:click="this.window.open('https://connectsf.org/','_blank')"
+                    class="small ui right floated basic teal button"
+                    style="margin-right:5px">
+                    Learn more&hellip;
+            </button>
+          </div>
   </div>
   </div>
 
