@@ -89,32 +89,35 @@
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
     <div v-cloak> <!-- hides everything until Vue finished loading -->
-      <h2 style="margin-bottom:0px;">ConnectSF Travel Time for mandatory tours</h2>
+      <h2 style="margin-bottom:0px;">Daily Vehicle Miles Traveled</h2>
       <hr style="margin-bottom:5px;margin-top:5px"/>
-      This visualization shows the estimated vehicle miles traveled (VMT) per person and per household 
-      for 2015 and 2050.
-      <br/><br/>
+          <b>This map shows</b> average daily Vehicle Miles Traveled (VMT) per person based on the traffic analysis zone in which they live.<br><br>
+          
+          <b>The big takeaway is</b> for much of the city, VMT per person decreases or stays about the same between 2015 and 2050. However, VMT per person increases in some low-vmt areas near Downtown and South of Market. These changes may be due to an increase in population, increased access to jobs within a shorter distance for some, and congested conditions causing more people to travel shorter distances. While VMT per person declined on average, the tota VMT in 2050 increases compared to 2015.<br><br>
+          
+          <b>The need identified is</b> for policies, programs, and transportation investments that reduce reliance on automobiles in order to reduce VMT.<br><br>
+          
+          <b>Disclaimers/Sources:</b> VMT are based on estimates for an average weekday and for trips that start, end, or are within San Francisco.<br><br>
 
 
-      <div style="margin-top:20px;">
-        <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
-          &nbsp;OK&nbsp;
-        </button>
+          <div style="margin-top:20px;">
+            <button v-on:click="clickToggleHelp" class="small ui right floated teal button">
+              &nbsp;OK&nbsp;
+            </button>
 
-        <button v-on:click="this.window.open('/assets/connectsf/vmt.zip')"
-                class="small ui right labeled icon floated yellow button"
-                style="margin-right:5px">
-                <i class="icon download"></i>
-                Download data (.zip)
-        </button>
+            <button v-on:click="this.window.open('/assets/connectsf/vmt.zip')"
+                    class="small ui right labeled icon floated color1 button"
+                    style="margin-right:5px">
+                    <i class="icon download"></i>
+                    Download data (.zip)
+            </button>
 
-        <button v-on:click="this.window.open('https://connectsf.org','_blank')"
-                class="small ui right floated basic violet button"
-                style="margin-right:5px">
-                Learn more&hellip;
-        </button>
-
-      </div>
+            <button v-on:click="this.window.open('https://connectsf.org/','_blank')"
+                    class="small ui right floated basic teal button"
+                    style="margin-right:5px">
+                    Learn more&hellip;
+            </button>
+          </div>
     </div>
   </div>
   <div id="sfmap"></div>
