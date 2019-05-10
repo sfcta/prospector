@@ -102,27 +102,22 @@
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
     <div v-cloak> <!-- hides everything until Vue finished loading -->
-          <h2 style="margin-bottom:0px;">Modeling the transportation system in 2015 and 2050: Residents and Jobs</h2>
+          <h2 style="margin-bottom:0px;">Projected Jobs and Housing Growth</h2>
           <hr style="margin-bottom:5px;margin-top:5px"/>
-          What are the City’s Transportation needs? How might they change by 2050? To help inform these questions, ConnectSF modeled transportation in the City and region based on current and future development. The information is shown in Transportation Analysis Zones (TAZs) – the shapes you see in this map.<br><br>
-          The estimate of where people lived and worked in 2015 is based on data from the City’s land use database, US census data, and jobs data from Dunn & Bradstreet.<br><br>
+          <b>This map shows</b> where people live and work in 2015 and in 2050. Different colors indicate different densities of people per square mile. Hover over an individual shape to see the number of residents and jobs in each Travel Analysis Zone (TAZ). Use the buttons to select residents or jobs, or both, and to look at our estimates for 2015, our projection for 2050, or our projection of the change between 2015 to 2050.<br><br>
           
-          The forecast of where people might live and work in 2050 is based on the City’s Development pipeline and added possible new housing and jobs based on the City’s housing and office production goals and policies, existing and potential land-use regulations and plans, and the development potential of under-utilized sites.
-
-          <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
-          <hr style="margin-bottom:5px;margin-top:5px"/>
-          <ul>
-          <li>To display data at the TAZ level on the map, select a YEAR and DATA TYPE.</li>
-          <li>Select the "Change" scenario to view the difference between 2015 and 2050.</li>
-          <li>Click on any TAZ on the map to see TAZ-specific details.</li>
-          </ul>
+          <b>The big takeaway is</b> the number of people living and working in the City will continue to grow. While many areas of the City will have more residents and jobs in the future, the eastern part of the City is projected to house relatively higher concentrations of jobs and residents than it does today.<br><br>
+          
+          <b>The need identified is</b> that new transportation investments are required to support the additional residents and jobs projected by 2050.<br><br>
+          
+          <b>Disclaimers/Sources:</b> The estimate of where people lived and worked in 2015 is based on the City’s land use database, US census data, and jobs data from Dun & Bradstreet. The 2050 forecast is based on the projects in the City’s development pipeline, and additional new housing and jobs based on the City’s housing and office production goals and policies, existing and potential land-use regulations and plans, and the development potential of under-utilized sites.<br><br>
 
           <div style="margin-top:20px;">
             <button v-on:click="clickToggleHelp" class="small ui right floated teal button">
               &nbsp;OK&nbsp;
             </button>
 
-            <button v-on:click="this.window.open('/assets/connectsf_jobpop.zip')"
+            <button v-on:click="this.window.open('/assets/connectsf/jobpop.zip')"
                     class="small ui right labeled icon floated color1 button"
                     style="margin-right:5px">
                     <i class="icon download"></i>
