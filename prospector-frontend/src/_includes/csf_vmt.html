@@ -14,7 +14,7 @@
     <div id="preheader">
       <table id="table-header">
         <tr>
-          <td class='title'>Vehicle Miles</td>
+          <td class='title'>Vehicle Miles Traveled</td>
           <td>
             <a target="_blank" href="https://connectsf.org/">
               <img class="img-csf" src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png" alt="Connect SF">
@@ -50,41 +50,11 @@
           </button>
         </div>
         
-        <!--
-        <h5>CHOOSE MEASURE</h5>
-        <div>
-          <button v-for="item in metric_options"
-                v-on:click="metricChanged(item.value)"
-                class="ui tiny grey button"
-                v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
-                ${item.text}
-          </button>
-        </div> -->
-        
-        <!--<table style="border:0px;margin-bottom:0px">
-          <tr>
-            <td class='row-label'>Year</td>
-            <td><button v-for="item in year_options"
-                    v-on:click="yrChanged(item.value)"
-                    class="ui tiny grey button"
-                    v-bind:class="{ active: item.value==selected_year, color2: item.value==selected_year }">
-                    ${item.text}
-            </button></td>
-          </tr>
-          <tr>
-            <td class='row-label'>Measure</td>
-            <td><button v-for="item in metric_options"
-                v-on:click="metricChanged(item.value)"
-                class="ui tiny grey button"
-                v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
-                ${item.text}
-          </button></td>
-          </tr>
-        </table>-->
         <hr/>
         
-        <h5>DISTRIBUTION OF VMT PER PERSON</h5>
+        <h5>DISTRIBUTION OF VEHICLE MILES TRAVELED PER PERSON</h5>
         <div id='dist-chart' style="height: 200px"></div>
+        <div id='chart-label'>Vehicle Miles Traveled per Person</div>
         
         <h5>MAP LAYERS</h5>
         <p>Add additional geographic data to the map.</p>
@@ -131,18 +101,18 @@
           &nbsp;OK&nbsp;
         </button>
 
-        <!--<button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')"
+        <button v-on:click="this.window.open('/assets/connectsf/vmt.zip')"
                 class="small ui right labeled icon floated yellow button"
                 style="margin-right:5px">
                 <i class="icon download"></i>
                 Download data (.zip)
         </button>
 
-        <button v-on:click="this.window.open('http://www.sfcta.org/congestion','_blank')"
+        <button v-on:click="this.window.open('https://connectsf.org','_blank')"
                 class="small ui right floated basic violet button"
                 style="margin-right:5px">
                 Learn more&hellip;
-        </button>-->
+        </button>
 
       </div>
     </div>
