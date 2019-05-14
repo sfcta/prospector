@@ -40,7 +40,7 @@
       </div>
 
       <div id="picker">
-        <h5>CHOOSE SCENARIO</h5>
+        <h5>CHOOSE YEAR</h5>
         <div>
           <button v-for="item in year_options"
                 v-on:click="yrChanged(item.value)"
@@ -108,15 +108,17 @@
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
   <div v-cloak> <!-- hides everything until Vue finished loading -->
-    <h2 style="margin-bottom:0px;">Average Travel Time by Trip Purpose</h2>
+    <h2 style="margin-bottom:0px;">Average Travel Times</h2>
     <hr style="margin-bottom:5px;margin-top:5px"/>
-          <b>This map shows</b> the average time it takes San Francisco residents to reach their job or school.<br><br>
-          
-          <b>The big takeaway is</b> people who live closer to job centers like Downtown San Francisco have shorter travel times in general.<br><br>
-          
-          <b>The need identified is</b> for additional transportation options serving the outer neighborhoods and the region to shorten travel times. Adding jobs and schools near where people live can also help shorten average travel times.<br><br>
-          
-          <b>Disclaimers/Sources:</b> Average travel times shown are modeled from current and future conditions.<br><br>
+      This map shows the average travel time from home in 2015 and 2050 by travel purpose and income level.  These estimates are summarized to Travel Analysis Zones (TAZs) which are spatial units used in travel modeling and analysis.  
+      <br><br>
+      Use the buttons on the side panel to select the data you want to view.  Data selection options include: 
+      <ul>
+      <li><b>Year:</b> 2015, 2050, or Change to view the difference between 2015 and 2015.  
+      <li><b>Purpose:</b> Work/School (often thought of as “mandatory” travel), or Other for all other travel purposes
+      <li><b>Income category:</b> Low Income (below 200% of the poverty line), Not Low Income (above 200% of the poverty line), and All Incomes.
+      </ul>
+      You can also add additional context layers under “Map Layers”.
 
 
           <div style="margin-top:20px;">

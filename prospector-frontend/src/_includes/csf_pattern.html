@@ -31,7 +31,7 @@
           <hr/>
         </div>
 
-      <h5>CHOOSE SCENARIO</h5>
+      <h5>CHOOSE YEAR</h5>
         <div>
           <button v-for="item in year_options"
                 v-on:click="yrChanged(item.value)"
@@ -92,13 +92,17 @@
     <div v-cloak> <!-- hides everything until Vue finished loading -->
           <h2 style="margin-bottom:0px;">Daily Trip-Making Patterns</h2>
           <hr style="margin-bottom:5px;margin-top:5px"/>
-          <b>This map shows</b> patterns for where trips start and end. Thicker bands indicate that there are higher numbers of trips between two neighborhoods.<br><br>
-          
-          <b>The big takeaway is</b> by 2050 jobs and housing growth along the eastern half of San Francisco are projected to drive demand for more transit trips for work and school, with the greatest increases in both school and work trips going to the SoMa and Downtown. Regionally, the highest number of work-related trips on transit will originate from the East Bay and go to the northeast part of San Francisco.<br><br>
-          
-          <b>The need identified is</b> that there will be a need to control vehicular movement in Downtown and SOMA in particular in order to prevent increased congestion. Additional transportation investments will also need to be made to keep up with growing trip demands.<br><br>
-          
-          <b>Disclaimers/Sources:</b> Information for 2015 and 2050 is based on outputs from SFCTA travel model.<br><br>
+            This map shows where people are traveling to and from in San Francisco.  The data are summarized to districts.  Districts are represented by “arcs” along the circumference of the circle, and the size of the arc represents the number of trips to and from that district.  Travel flows between each district are represented by “chords” connecting two arcs.  The width of the chord represents the volume of travel between the two district.    
+            <br><br>
+            Use the buttons on the side panel to select the data you want to view.  Data selection options include: 
+            <ul>
+            <li><b>Year:</b> 2015, 2050, or Change to view the difference between 2015 and 2015.  
+            <li><b>Purpose:</b> All (for all purposes combined), Work/School (often thought of as “mandatory” travel), or Other for all other travel purposes
+            <li><b>Travel mode:</b> All, Walk/Bike, Transit, Uber/Lyft, Auto
+            </ul>
+            You can examine flows more closely by selecting a district, either direction on the chord chart or on the map in the sidebar. 
+            <br>
+            You can also add additional context layers under “Map Layers”.
 
 
           <div style="margin-top:20px;">
