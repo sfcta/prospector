@@ -15,23 +15,23 @@
     
       <hr/>
       
-      <div id="helpbar">
-        <button class="ui mini right labeled icon color1 button"
-                v-on:click="clickToggleHelp">
-                <i class="help circle icon"></i>
-                What is this?
-        </button>
-        &nbsp;
-        <button class="ui mini right labeled icon color1 button"
-                v-on:click="this.window.open('https://connectsf.org/','_blank')">
-                <i class="arrow right icon"></i>
-                Learn More
-        </button>
-        <hr/>
-      </div>
-
       <div id="picker">
-        <h5>CHOOSE SCENARIO</h5>
+        <div id="helpbar">
+          <button class="ui mini right labeled icon color1 button"
+                  v-on:click="clickToggleHelp">
+                  <i class="help circle icon"></i>
+                  What is this?
+          </button>
+          &nbsp;
+          <button class="ui mini right labeled icon color1 button"
+                  v-on:click="this.window.open('https://connectsf.org/','_blank')">
+                  <i class="arrow right icon"></i>
+                  Learn More
+          </button>
+          <hr/>
+        </div>
+
+      <h5>CHOOSE SCENARIO</h5>
         <div>
           <button v-for="item in year_options"
                 v-on:click="yrChanged(item.value)"
