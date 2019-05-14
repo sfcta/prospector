@@ -562,7 +562,7 @@ async function drawMapFeatures(queryMapData=true) {
           sel_colors,
           sel_binsflag,
         );
-        legHTML = '<h4>Average Travel Time</h4>' + legHTML;
+        legHTML = '<h4>Average Travel Time <br>(minutes)</h4>' + legHTML;
         div.innerHTML = legHTML;
         return div;
       };
