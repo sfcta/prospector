@@ -38,7 +38,7 @@
         </div>
 
         <div id="picker">
-          <h5>CHOOSE SCENARIO</h5>
+          <h5>CHOOSE YEAR</h5>
           <div>
             <button v-for="item in year_options"
                   v-on:click="yrChanged(item.value)"
@@ -59,7 +59,7 @@
             </button>
           </div>          
 
-          <h5>CHOOSE OPERATOR</h5>
+          <h5>CHOOSE TRANSIT MODE TYPE</h5>
           <div>
             <button v-for="item in operator_options"
                   v-on:click="opChanged(item.value)"
@@ -107,15 +107,16 @@
     <div v-cloak> <!-- hides everything until Vue finished loading -->
           <h2 style="margin-bottom:0px;">ConnectSF: Jobs & Population</h2>
           <hr style="margin-bottom:5px;margin-top:5px"/>
-          Use this tool to explore jobs and population measures for ConnectSF.
+            This map shows how many people are riding transit (volume) and how crowded it is in 2015 and 2050.  The width of each line represents volume and the color represents crowding.  These estimates are summarized to stop-to-stop transit segments, which may be served by multiple transit lines.  
+            <br><br>
+            Use the buttons on the side panel to select the data you want to view.  Data selection options include: 
+            <ul>
+            <li><b>Year:</b> 2015, 2050, or Change to view the difference between 2015 and 2015.  
+            <li><b>Time period:</b> AM (6:00 am to 9:00 am) or PM (3:30 pm to 6:30 pm)
+            <li><b>Transit mode type:</b> Muni Bus, Muni Rail, or Regional Transit (including BART, Caltrain, Ferries, and regional bus service that serves San Francisco)
+            </ul>
+            You can also add additional context layers under “Map Layers”.
 
-          <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
-          <hr style="margin-bottom:5px;margin-top:5px"/>
-          <ul>
-          <li>Select a scenario year and measure to display it at the TAZ level on the map.</li>
-          <li>Select "Change" scenario to view the difference between future (2050) and base (2015) scenarios.</li>
-          <li>Click on a colored TAZ on the map to see TAZ-specific details.</li>
-          </ul>
 
           <div style="margin-top:20px;">
             <button v-on:click="clickToggleHelp" class="small ui right floated teal button">

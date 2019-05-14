@@ -40,7 +40,7 @@
       </div>
 
       <div id="picker">
-        <h5>CHOOSE SCENARIO</h5>
+        <h5>CHOOSE YEAR</h5>
         <div>
           <button v-for="item in year_options"
                 v-on:click="yrChanged(item.value)"
@@ -91,13 +91,13 @@
     <div v-cloak> <!-- hides everything until Vue finished loading -->
       <h2 style="margin-bottom:0px;">Daily Vehicle Miles Traveled</h2>
       <hr style="margin-bottom:5px;margin-top:5px"/>
-          <b>This map shows</b> average daily Vehicle Miles Traveled (VMT) per person based on the traffic analysis zone in which they live.<br><br>
-          
-          <b>The big takeaway is</b> for much of the city, VMT per person decreases or stays about the same between 2015 and 2050. However, VMT per person increases in some low-vmt areas near Downtown and South of Market. These changes may be due to an increase in population, increased access to jobs within a shorter distance for some, and congested conditions causing more people to travel shorter distances. While VMT per person declined on average, the tota VMT in 2050 increases compared to 2015.<br><br>
-          
-          <b>The need identified is</b> for policies, programs, and transportation investments that reduce reliance on automobiles in order to reduce VMT.<br><br>
-          
-          <b>Disclaimers/Sources:</b> VMT are based on estimates for an average weekday and for trips that start, end, or are within San Francisco.<br><br>
+        This map shows the average daily vehicle miles traveled in 2015 and 2050 by home location.  These estimates are summarized to Travel Analysis Zones (TAZs) which are spatial units used in travel modeling and analysis.  
+        <br><br>
+        Use the buttons on the side panel to select the data you want to view.  Data selection options include: 
+        <ul>
+        <li><b>Year:</b> 2015, 2050, or Change to view the difference between 2015 and 2015.  
+        </ul>
+        You can also add additional context layers under “Map Layers”.
 
 
           <div style="margin-top:20px;">

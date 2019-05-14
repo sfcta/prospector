@@ -879,7 +879,7 @@ let app = new Vue({
     selected_op: 'munib',
     operator_options: [
     {text: 'MUNI BUS', value: 'munib'},
-    {text: 'MUNI LRT', value: 'munil'},
+    {text: 'MUNI RAIL', value: 'munil'},
     {text: 'REGIONAL TRANSIT', value: 'regtrn'},   
     ],
     

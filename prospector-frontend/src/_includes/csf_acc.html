@@ -40,7 +40,7 @@
       </div>
 
       <div id="picker">
-        <h5>CHOOSE SCENARIO</h5>
+        <h5>CHOOSE YEAR</h5>
         <div>
           <button v-for="item in year_options"
                 v-on:click="yrChanged(item.value)"
@@ -50,7 +50,7 @@
           </button>
         </div>
           
-        <h5>CHOOSE MODE</h5>
+        <h5>CHOOSE MODE OF TRAVEL</h5>
         <div>
           <button v-for="item in metric_options"
                 v-on:click="metricChanged(item.value)"
@@ -97,13 +97,14 @@
   <div v-cloak> <!-- hides everything until Vue finished loading -->
         <h2 style="margin-bottom:0px;">Jobs Accessibility</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
-          <b>This map shows</b> the average number of jobs that a San Francisco household can access within a 30-minute auto trip or a 45-minute transit trip. The jobs that can be accessed are <u>both</u> within and outside of San Francisco today and in the future.<br><br>
-          
-          <b>The big takeaway is</b> in both 2015 and 2050 neighborhoods closer to Downtown San Francisco have higher access to jobs by transit. Neighborhoods closer to Downtown and adjacent to freeways have the highest access to jobs by auto. By 2050, San Francisco residents on average continue to have access to many more jobs by auto than by transit. Also, the change in the average number of jobs accessible by transit is greater than the change in the number of jobs accessible by auto.<br><br>
-          
-          <b>The need identified is</b> for improvements to transit across the board to provide economic opportunity similar to auto.<br><br>
-          
-          <b>Disclaimers/Sources:</b>  Time periods of 30 and 45 minutes are used for auto and transit trips respectively because they represent the approximate average commute time for Bay Area residents by those modes. The jobs accessible are modeled in SFCTA’s travel model and represent the sum of all the jobs in the entire Bay Area accessible by travel mode and time threshold for a given San Francisco travel analysis zone.<br><br>
+          This map shows the number of jobs that person can access within a 30-minute auto trip or a 45-minute transit trip in 2015 and 2050.  This includes jobs location in San Francisco and other counties.  These estimates are summarized to Travel Analysis Zones (TAZs) which are spatial units used in travel modeling and analysis.  
+          <br><br>
+          Use the buttons on the side panel to select the data you want to view.  Data selection options include:
+          <ul>
+          <li><b>Year:</b> 2015, 2050, or Change to view the difference between 2015 and 2015.  
+          <li><b>Mode:</b> Auto or Transit
+          </ul>
+          You can also add additional context layers under “Map Layers”.
 
 
           <div style="margin-top:20px;">

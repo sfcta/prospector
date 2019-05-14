@@ -40,7 +40,7 @@
       </div>
 
       <div id="picker">
-        <h5>CHOOSE SCENARIO</h5>
+        <h5>CHOOSE YEAR</h5>
         <div>
           <button v-for="item in year_options"
                 v-on:click="yrChanged(item.value)"
@@ -104,14 +104,17 @@
     <div v-cloak> <!-- hides everything until Vue finished loading -->
           <h2 style="margin-bottom:0px;">Projected Jobs and Housing Growth</h2>
           <hr style="margin-bottom:5px;margin-top:5px"/>
-          <b>This map shows</b> where people live and work in 2015 and in 2050. Different colors indicate different densities of people per square mile. Hover over an individual shape to see the number of residents and jobs in each Travel Analysis Zone (TAZ). Use the buttons to select residents or jobs, or both, and to look at our estimates for 2015, our projection for 2050, or our projection of the change between 2015 to 2050.<br><br>
+          This map shows where people live and work in 2015 and 2050.  Population and Job estimates are summarized to Travel Analysis Zones (TAZs) which are spatial units used in travel modeling and analysis.  
+          <br><br>
+          Use the buttons on the side panel to select the data you want to view.  Data selection options include: 
+          <ul>
+          <li><b>Year:</b> 2015, 2050, or Change to view the difference between 2015 and 2015.  
+          <li><b>Measure:</b> Population, Jobs, or Jobs + Population
+          </ul>
           
-          <b>The big takeaway is</b> the number of people living and working in the City will continue to grow. While many areas of the City will have more residents and jobs in the future, the eastern part of the City is projected to house relatively higher concentrations of jobs and residents than it does today.<br><br>
-          
-          <b>The need identified is</b> that new transportation investments are required to support the additional residents and jobs projected by 2050.<br><br>
-          
-          <b>Disclaimers/Sources:</b> The estimate of where people lived and worked in 2015 is based on the City’s land use database, US census data, and jobs data from Dun & Bradstreet. The 2050 forecast is based on the projects in the City’s development pipeline, and additional new housing and jobs based on the City’s housing and office production goals and policies, existing and potential land-use regulations and plans, and the development potential of under-utilized sites.<br><br>
-
+          You can also add additional context layers under “Map Layers”.
+          <br><br>
+          These estimates were developed by the San Francisco Planning Department using the City’s land use database, US census data, and jobs data from Dun & Bradstreet. The 2050 forecast is based on the projects in the City’s development pipeline, and additional new housing and jobs based on the City’s housing and office production goals and policies, existing and potential land-use regulations and plans, and the development potential of under-utilized sites.
           <div style="margin-top:20px;">
             <button v-on:click="clickToggleHelp" class="small ui right floated teal button">
               &nbsp;OK&nbsp;
