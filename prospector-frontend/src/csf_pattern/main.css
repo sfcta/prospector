@@ -5,10 +5,9 @@
   border: transparent;
   box-shadow: none;
   font-weight: bold;
-  font-size: 10px;
+  font-size: 11px;
+  line-height: 0.95;
   font-family: 'Open Sans';
-  width: 65px;
-  white-space: normal;
 }
 
 #container {
