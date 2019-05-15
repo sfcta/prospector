@@ -105,7 +105,7 @@
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
     <div v-cloak> <!-- hides everything until Vue finished loading -->
-          <h2 style="margin-bottom:0px;">ConnectSF: Jobs & Population</h2>
+          <h2 style="margin-bottom:0px;">Transit Crowding</h2>
           <hr style="margin-bottom:5px;margin-top:5px"/>
             This map shows how many people are riding transit (volume) and how crowded it is in 2015 and 2050.  The width of each line represents volume and the color represents crowding.  These estimates are summarized to stop-to-stop transit segments, which may be served by multiple transit lines.  
             <br><br>
@@ -123,7 +123,7 @@
               &nbsp;OK&nbsp;
             </button>
 
-            <button v-on:click="this.window.open('/assets/connectsf_jobpop.zip')"
+            <button v-on:click="this.window.open('/assets/connectsf/trncrowding.zip')"
                     class="small ui right labeled icon floated color1 button"
                     style="margin-right:5px">
                     <i class="icon download"></i>
