@@ -53,9 +53,9 @@
         <h5>CHOOSE MODE OF TRAVEL</h5>
         <div>
           <button v-for="item in metric_options"
-                v-on:click="metricChanged(item.value)"
-                class="ui tiny grey button"
-                v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
+                  v-on:click="metricChanged(item.value)"
+                  class="ui tiny grey button"
+                  v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
                 ${item.text}
           </button>
         </div> 
@@ -74,13 +74,22 @@
         <br><br>
         <h5>YOUR FEEDBACK:</h5>
         <form class="ui tiny equal width form" v-on:submit.prevent="handleSubmit">
-          <div class="ui field">
+          <div class="ui field">             
             <textarea v-model="comment" class="fix" maxlength="200" rows="3"
-            v-bind:disabled="submit_disabled==true"
-            type="text" placeholder="Based on this data, what do you think are the city’s transportation needs? (800 characters)"></textarea>
+                      v-bind:disabled="submit_disabled==true"
+                      type="text" :placeholder="[[ comment_instruction ]]"></textarea>
           </div>
-          <button class="ui button color2" type="submit"
-          v-bind:class="{loading: submit_loading==true, disabled: submit_disabled==true}">Submit</button>
+          <div>
+              <vue-recaptcha ref="recaptcha" @verify="onCaptchaVerified"
+                             @expired="onCaptchaExpired" size="invisible"
+                             sitekey="6Le7GqIUAAAAAKWquavN0Mm6RV0DlI_eLS-aaPpU">
+              </vue-recaptcha>
+              <p>This site is protected by reCAPTCHA and the Google
+              <a href="https://policies.google.com/privacy">Privacy Policy</a> and
+              <a href="https://policies.google.com/terms">Terms of Service</a> apply.</p>
+              <button class="ui button color2" type="submit"
+                    v-bind:class="{loading: submit_loading==true, disabled: submit_disabled==true}">Submit</button>
+          </div>
         </form>
       </div>
     </div>

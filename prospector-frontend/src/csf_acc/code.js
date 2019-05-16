@@ -22,6 +22,7 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 // Must use npm and babel to support IE11/Safari
 import 'isomorphic-fetch';
 import Cookies from 'js-cookie';
+// import VueRecaptcha from 'vue-recaptcha';
 
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
@@ -576,7 +577,7 @@ function getColorMode(cscheme) {
 }
 
 // get the taz boundary data
-async function fetchComments(comment) {
+async function postComments(comment) {
   const comment_url = COMMENT_SERVER + COMMENT_VIEW;
   // console.log(JSON.stringify(comment))
   try {
@@ -640,6 +641,7 @@ function showPosition(position) {
 }
 
 function handleSubmit() {
+  this.$refs.recaptcha.execute();
   let timestamp = new Date();
   app.submit_loading = true;
   
@@ -653,23 +655,57 @@ function handleSubmit() {
       comment.comment_user = getCookie("username");
       comment.comment_time = timestamp;
       comment.comment_content = app.comment;
-      fetchComments(comment);
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition);
       } else {
         console.log("Geolocation is not supported by this browser.");
       }
       console.log(JSON.stringify(comment));
-      app.comment = "Thanks for submitting your comment!";
+      postComments(comment);
+      app.comment_instruction = "Thanks for submitting your comment!";
       app.submit_loading = false;
-      app.submit_disabled = true;
+      // app.submit_disabled = true;
     }
   }, 1000)
+}
+s
+function onCaptchaVerified(recaptchaToken) {
+  const self = this;
+  self.$refs.recaptcha.reset();
+  if (!recaptchaToken) {
+    return console.log("recaptchaToken is required");
+  }
+
+  const verifyCaptchaOptions = {
+    secret: "6Le7GqIUAAAAAOmfXozDNDNWQwJE_0dIleut8q16",
+    response: recaptchaToken
+  };
+
+  fetch("https://www.google.com/recaptcha/api/siteverify", {
+    method: 'POST',
+    mode: 'no-cors',
+    body: JSON.stringify(verifyCaptchaOptions),
+    headers:{
+      'Content-Type': 'application/json',
+    }
+  })
+  .catch(error => console.error('Error:', error))
+  .then(response => function (response) {
+    // JSON.stringify(response)
+    console.log("Congratulations! We think you are human.");
+  });
+}
+
+function onCaptchaExpired() {
+  this.$refs.recaptcha.reset();
 }
 
 let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
+  components: {
+    'vue-recaptcha': VueRecaptcha
+  },
   data: {
     isPanelHidden: false,
 
@@ -700,6 +736,7 @@ let app = new Vue({
               {auto:0,transit:0}],
 
     // comment box
+    comment_instruction: 'Based on this data, what do you think are the city’s transportation needs? (800 characters)',
     comment: '',
 
     // title for chart
@@ -733,6 +770,8 @@ let app = new Vue({
     handleSubmit: handleSubmit,
     clickToggleHelp: clickToggleHelp,   // help box
     clickedShowHide: clickedShowHide,   // hide sidebar
+    onCaptchaVerified: onCaptchaVerified,
+    onCaptchaExpired: onCaptchaExpired,
   },
 });
 

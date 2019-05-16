@@ -77,6 +77,10 @@
     gtag('config', 'UA-100715169-2');
   </script>
 
+  <!-- Google reCAPTCHA -->
+  <script src="https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLoaded&render=explicit" async defer></script>
+  <script src="https://unpkg.com/vue-recaptcha@latest/dist/vue-recaptcha.min.js"></script>
+
   <!-- Page CSS -->
   {% if page.css %}
     {% for css in page.css %}

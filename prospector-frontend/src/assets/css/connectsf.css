@@ -237,3 +237,5 @@ p.legend-row {
   color: #999;
   font-size: 0.75em;
 }
+
+.grecaptcha-badge { visibility: hidden; }
