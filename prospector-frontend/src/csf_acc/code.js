@@ -668,7 +668,7 @@ function handleSubmit() {
     }
   }, 1000)
 }
-s
+
 function onCaptchaVerified(recaptchaToken) {
   const self = this;
   self.$refs.recaptcha.reset();
