@@ -22,6 +22,7 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 // Must use npm and babel to support IE11/Safari
 import 'isomorphic-fetch';
 import Cookies from 'js-cookie';
+// import VueRecaptcha from 'vue-recaptcha';
 
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
@@ -460,15 +461,6 @@ async function drawMapFeatures(queryMapData=true) {
   }
 }
 
-// function updateColorScheme(colorvals) {
-//   if (colorvals[0] * colorvals[colorvals.length-1] >= 0) {
-//     app.selected_colorscheme = COLORRAMP.SEQ;
-//   } else {
-//     // app.selected_colorscheme = COLORRAMP.DIV;
-//     app.selected_colorscheme = COLORRAMP.SEQ;
-//   } 
-// }
-
 // map color style
 function styleByMetricColor(feat) {
   let color = getColorFromVal(
@@ -570,96 +562,6 @@ function highlightSelectedSegment() {
   });
 }
 
-// chart ---------------------------
-// let distChart = null;
-// let distLabels;
-// function updateDistChart(bins) {
-//   let data = [];
-//   distLabels = [];
-//   for (let b of bins) {
-//     let x0 = Math.round(b.x0*prec)/prec;
-//     let x1 = Math.round(b.x1*prec)/prec;
-//     data.push({x:x0, y:b.length});
-//     distLabels.push(x0 + '-' + x1);
-//   }
-
-//   if (distChart) {
-//     distChart.setData(data);
-//   } else {
-//       distChart = new Morris.Area({
-//         // ID of the element in which to draw the chart.
-//         element: 'dist-chart',
-//         data: data,
-//         // The name of the data record attribute that contains x-values.
-//         xkey: 'x',
-//         // A list of names of data record attributes that contain y-values.
-//         ykeys: 'y',
-//         ymin: 0,
-//         labels: ['Freq'],
-//         lineColors: ['#1fc231'],
-//         xLabels: 'x',
-//         xLabelAngle: 25,
-//         xLabelFormat: binFmt,
-//         //yLabelFormat: yFmt,
-//         hideHover: true,
-//         parseTime: false,
-//         fillOpacity: 0.4,
-//         pointSize: 1,
-//         behaveLikeLine: false,
-//         eventStrokeWidth: 2,
-//         eventLineColors: ['#ccc'],
-//       });
-//   }
-// }
-
-// function binFmt(x) {
-//   return distLabels[x.x] + ((app.pct_check && app.comp_check)? '%':'');
-// }
-
-// let trendChart = null
-// function buildChartHtmlFromData(geoid = null) {
-//   document.getElementById('longchart').innerHTML = '';
-//   if (geoid) {
-//     let selgeodata = [];
-//     for (let yr of YR_LIST) {
-//       let row = {};
-//       row['year'] = yr.toString();
-//       for (let met of app.metric_options) {
-//         row[met] = base_lookup[geoid][met+""+yr];
-//       }
-//       selgeodata.push(row);
-//     } 
-//     console.log(selgeodata)
-//     trendChart = new Morris.Line({
-//       data: selgeodata,
-//       element: 'longchart',
-//       gridTextColor: '#aaa',
-//       hideHover: true,
-//       labels: [app.selected_metric.toUpperCase()],
-//       lineColors: ['#f56e71'],
-//       xkey: 'year',
-//       smooth: false,
-//       parseTime: false,
-//       xLabelAngle: 45,
-//       ykeys: [app.selected_metric],
-//     });
-//   } else {
-//     trendChart = new Morris.Line({
-//       data: _aggregateData,
-//       element: 'longchart',
-//       gridTextColor: '#aaa',
-//       hideHover: true,
-//       labels: [app.selected_metric.toUpperCase()],
-//       lineColors: ['#f56e71'],
-//       xkey: 'year',
-//       smooth: false,
-//       parseTime: false,
-//       xLabelAngle: 45,
-//       ykeys: [app.selected_metric],
-//     });
-//   }
-// }
-
 // functions for vue
 async function selectionChanged(thing) {
   app.chartTitle = METRIC_DESC[app.selected_metric] + ' Trend';
@@ -703,7 +605,7 @@ function getColorMode(cscheme) {
 }
 
 // get the taz boundary data
-async function fetchComments(comment) {
+async function postComments(comment) {
   const comment_url = COMMENT_SERVER + COMMENT_VIEW;
   // console.log(JSON.stringify(comment))
   try {
@@ -767,6 +669,7 @@ function showPosition(position) {
 }
 
 function handleSubmit() {
+  this.$refs.recaptcha.execute();
   let timestamp = new Date();
   app.submit_loading = true;
   
@@ -780,40 +683,57 @@ function handleSubmit() {
       comment.comment_user = getCookie("username");
       comment.comment_time = timestamp;
       comment.comment_content = app.comment;
-      fetchComments(comment);
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition);
       } else {
         console.log("Geolocation is not supported by this browser.");
       }
       console.log(JSON.stringify(comment));
-      app.comment = "Thanks for submitting your comment!";
+      postComments(comment);
+      app.comment_instruction = "Thanks for submitting your comment!";
       app.submit_loading = false;
-      app.submit_disabled = true;
+      // app.submit_disabled = true;
     }
   }, 1000)
 }
 
-// function customBreakPoints(thing) {
-//   if(thing) {
-//     app.isUpdActive = false;
-//   } else {
-//     drawMapFeatures();
-//   }
-// }
+function onCaptchaVerified(recaptchaToken) {
+  const self = this;
+  self.$refs.recaptcha.reset();
+  if (!recaptchaToken) {
+    return console.log("recaptchaToken is required");
+  }
 
-// async function updateColor(thing) {
-//   app.isUpdActive = false;
-//   let selfeat = await drawMapFeatures(false);
-//   if (selfeat) {
-//     highlightSelectedSegment();
-//     popSelGeo.setContent(getInfoHtml(selfeat));
-//   }
-// }
+  const verifyCaptchaOptions = {
+    secret: "6Le7GqIUAAAAAOmfXozDNDNWQwJE_0dIleut8q16",
+    response: recaptchaToken
+  };
+
+  fetch("https://www.google.com/recaptcha/api/siteverify", {
+    method: 'POST',
+    mode: 'no-cors',
+    body: JSON.stringify(verifyCaptchaOptions),
+    headers:{
+      'Content-Type': 'application/json',
+    }
+  })
+  .catch(error => console.error('Error:', error))
+  .then(response => function (response) {
+    // JSON.stringify(response)
+    console.log("Congratulations! We think you are human.");
+  });
+}
+
+function onCaptchaExpired() {
+  this.$refs.recaptcha.reset();
+}
 
 let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
+  components: {
+    'vue-recaptcha': VueRecaptcha
+  },
   data: {
     isPanelHidden: false,
 
@@ -844,6 +764,7 @@ let app = new Vue({
               {auto:0,transit:0}],
 
     // comment box
+    comment_instruction: 'Based on this data, what do you think are the city’s transportation needs? (800 characters)',
     comment: '',
 
     // title for chart
@@ -890,6 +811,8 @@ let app = new Vue({
     handleSubmit: handleSubmit,
     clickToggleHelp: clickToggleHelp,   // help box
     clickedShowHide: clickedShowHide,   // hide sidebar
+    onCaptchaVerified: onCaptchaVerified,
+    onCaptchaExpired: onCaptchaExpired,
   },
 });
 
