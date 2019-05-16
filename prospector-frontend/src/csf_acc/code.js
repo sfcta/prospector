@@ -88,7 +88,7 @@ const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
 const DATA_VIEW = 'connectsf_accjobs';
 const COMMENT_SERVER = 'https://api.sfcta.org/commapi/';
-const COMMENT_VIEW = 'test_comment';
+const COMMENT_VIEW = 'csf_acc_comment';
 const VIZNAME = 'csf_acc';
 
 // sidebar select lists
@@ -626,7 +626,7 @@ function checkCookie() {
 let comment = {
   vizname: VIZNAME,
   select_year: '',
-  select_metric: '',
+  select_mode: '',
   add_layer: '',
   comment_user: '',
   comment_time: new Date(),
@@ -650,7 +650,7 @@ function handleSubmit() {
       app.submit_loading = false;
     } else {
       comment.select_year = app.selected_year;
-      comment.select_metric = app.selected_metric;
+      comment.select_mode = app.selected_metric;
       comment.add_layer = app.ADDLAYERS;
       comment.comment_user = getCookie("username");
       comment.comment_time = timestamp;
