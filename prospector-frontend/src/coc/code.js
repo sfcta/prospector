@@ -577,6 +577,9 @@ function showExtraLayers(e) {
 let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
+  components: {
+    'vue-recaptcha': VueRecaptcha
+  },  
   data: {
     isPanelHidden: false,
     extraLayers: ADDLAYERS,
@@ -623,7 +626,9 @@ let app = new Vue({
       '#fafa6e,#2A4858': 'lch',
     },
     comment: '',
-    ph_text: 'Please provide feedback. What do you think about this map? (800 characters)',
+    comment_instruction: 'Please provide feedback. What do you think about this map? (800 maximum characters)',
+    submit_loading: false,
+    submit_disabled: false,
     addLayers:[],
   },
   watch: {
@@ -637,6 +642,8 @@ let app = new Vue({
     yrChanged: yrChanged,
     metricChanged: metricChanged,
     handleSubmit: handleSubmit,
+    onCaptchaVerified: onCaptchaVerified,
+    onCaptchaExpired: onCaptchaExpired,
   },
 });
 
@@ -740,7 +747,7 @@ function showPosition(position) {
   comment.comment_longitude = position.coords.longitude; 
 }
 
-async function fetchComments(comment) {
+async function postComments(comment) {
   const comment_url = COMMENT_SERVER + COMMENT_VIEW;
   // console.log(JSON.stringify(comment))
   try {
@@ -757,21 +764,64 @@ async function fetchComments(comment) {
 }
 
 function handleSubmit() {
-  app.ph_text = 'Thank you for your feedback!';
-  app.comment = '';
+  this.$refs.recaptcha.execute();
   let timestamp = new Date();
-  comment.select_metric = app.selected_metric;
-  comment.add_layer = app.ADDLAYERS;
-  comment.comment_user = getCookie("username");
-  comment.comment_time = timestamp;
-  comment.comment_content = app.comment;
-  fetchComments(comment);
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(showPosition);
-  } else {
-    console.log("Geolocation is not supported by this browser.");
-  }
+  app.submit_loading = true;
+  
+  setTimeout(function() {
+    if (app.comment==null | app.comment=='') {
+      app.submit_loading = false;
+    } else {
+      comment.select_metric = app.selected_metric;
+      comment.add_layer = app.addLayers;
+      comment.comment_user = getCookie("username");
+      comment.comment_time = timestamp;
+      comment.comment_content = app.comment;
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+      } else {
+        console.log("Geolocation is not supported by this browser.");
+      }
+      postComments(comment);
+      app.comment_instruction = 'Thank you for your feedback!';
+      app.comment = '';
+      app.submit_loading = false;
+    }
+  }, 1000)
 }
+
+/* Captcha functions*/
+function onCaptchaVerified(recaptchaToken) {
+  const self = this;
+  self.$refs.recaptcha.reset();
+  if (!recaptchaToken) {
+    return console.log("recaptchaToken is required");
+  }
+
+  const verifyCaptchaOptions = {
+    secret: "6Leo_KMUAAAAAANqRfq4isW7Q50pAslnNdYbI8Pa",
+    response: recaptchaToken
+  };
+
+  fetch("https://www.google.com/recaptcha/api/siteverify", {
+    method: 'POST',
+    mode: 'no-cors',
+    body: JSON.stringify(verifyCaptchaOptions),
+    headers:{
+      'Content-Type': 'application/json',
+    }
+  })
+  .catch(error => console.error('Error:', error))
+  .then(response => function (response) {
+    // JSON.stringify(response)
+    console.log("Congratulations! We think you are human.");
+  });
+}
+
+function onCaptchaExpired() {
+  this.$refs.recaptcha.reset();
+}
+
 
 initialPrep();
 

@@ -61,11 +61,24 @@
           <br><br>
           <h5>YOUR FEEDBACK</h5>
           <form class="ui tiny equal width form" v-on:submit.prevent="handleSubmit">
-            <div class="field">
+            <div class="ui field">
               <textarea v-model="comment" class="fix" maxlength="800" rows="3"
-              type="text" v-bind:placeholder="ph_text"></textarea>
+                        v-bind:disabled="submit_disabled==true"
+                        type="text" v-bind:placeholder="comment_instruction"></textarea>
             </div>
-            <button class="ui tiny button color1" type="submit">Submit</button>
+
+            <div>
+                <vue-recaptcha ref="recaptcha" @verify="onCaptchaVerified"
+                               @expired="onCaptchaExpired" size="invisible"
+                               sitekey="6Leo_KMUAAAAAFvGkrID2dHLQxe7gZefS2-xlV7w">
+                </vue-recaptcha>
+                <p>This site is protected by reCAPTCHA and the Google
+                <a href="https://policies.google.com/privacy">Privacy Policy</a> and
+                <a href="https://policies.google.com/terms">Terms of Service</a> apply.</p>
+                <button class="ui tiny button color1" type="submit"
+                      v-bind:class="{loading: submit_loading==true, disabled: submit_disabled==true}">Submit</button>
+            </div>            
+
           </form>
 
         </div>
