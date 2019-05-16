@@ -660,9 +660,10 @@ function handleSubmit() {
       } else {
         console.log("Geolocation is not supported by this browser.");
       }
-      console.log(JSON.stringify(comment));
+      //console.log(JSON.stringify(comment));
       postComments(comment);
-      app.comment_instruction = "Thanks for submitting your comment!";
+      app.comment_instruction = 'Thank you for your feedback!';
+      app.comment = '';
       app.submit_loading = false;
       // app.submit_disabled = true;
     }

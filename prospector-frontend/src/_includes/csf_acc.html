@@ -77,7 +77,7 @@
           <div class="ui field">             
             <textarea v-model="comment" class="fix" maxlength="200" rows="3"
                       v-bind:disabled="submit_disabled==true"
-                      type="text" :placeholder="[[ comment_instruction ]]"></textarea>
+                      type="text" :placeholder="comment_instruction"></textarea>
           </div>
           <div>
               <vue-recaptcha ref="recaptcha" @verify="onCaptchaVerified"
