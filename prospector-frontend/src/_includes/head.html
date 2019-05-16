@@ -14,7 +14,7 @@
 
   <!-- Icons -->
   <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ site.baseurl }}assets/sfcta-logo-144.png">
-  <link rel="shortcut icon" href="http://www.sfcta.org/sites/all/themes/sfcta/favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="shortcut icon" href="{{ site.baseurl }}assets/favicon.ico" type="image/vnd.microsoft.icon" />
 
   <!-- RSS -->
   <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
@@ -24,6 +24,8 @@
   <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
   <!-- LEAFLET PATTERN -->
   <script src="https://teastman.github.io/Leaflet.pattern/leaflet.pattern.js"></script>
+  <!-- LEAFLET POLYLINE OFFSET -->
+  <script src="https://unpkg.com/leaflet-polylineoffset/leaflet.polylineoffset.js"></script>
 
   <!-- VUE -->
   <script src="https://cdn.jsdelivr.net/npm/vue"></script>
@@ -87,7 +89,7 @@
   {% endif %}
 
   <!-- Google fonts -->
-  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans|PT+Sans:400,400italic,700">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans|PT+Sans:400,400italic,700">
   <link href="https://fonts.googleapis.com/css?family=Alegreya+SC:900i|Merriweather|Oleo+Script+Swash+Caps:700" rel="stylesheet">
 
 </head>

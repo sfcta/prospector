@@ -40,7 +40,7 @@
       </div>
 
       <div id="picker">
-        <!--<h5>CHOOSE SCENARIO</h5>
+        <h5>CHOOSE SCENARIO</h5>
         <div>
           <button v-for="item in year_options"
                 v-on:click="yrChanged(item.value)"
@@ -50,6 +50,7 @@
           </button>
         </div>
         
+        <!--
         <h5>CHOOSE MEASURE</h5>
         <div>
           <button v-for="item in metric_options"
@@ -60,7 +61,7 @@
           </button>
         </div> -->
         
-        <table style="border:0px;margin-bottom:0px">
+        <!--<table style="border:0px;margin-bottom:0px">
           <tr>
             <td class='row-label'>Year</td>
             <td><button v-for="item in year_options"
@@ -79,7 +80,7 @@
                 ${item.text}
           </button></td>
           </tr>
-        </table>
+        </table>-->
         <hr/>
         
         <h5>DISTRIBUTION OF VMT PER PERSON</h5>
@@ -108,52 +109,41 @@
 
     <div class="logo">
       <hr/>
-      <table id="table-logo"><tr>
-        <td class="td-logo">
-          <h4><b><a class="agency" target="_blank" href="http://www.sfcta.org">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4>
-        </td>
-        <td class="td-logo">
-          <a class="agency-link" target="_blank" href="http://www.sfcta.org">
-            <img class="img-logo" src="/assets/sfcta-logo-144.png" width="80">
-          </a>
-        </td>
-      </tr></table>
+      <a class="agency-link" target="_blank" href="http://www.sfcta.org">
+        <img class="img-logo" src="/assets/SFCTA Logo dark-background.svg">
+      </a>
     </div>
   </div>
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
-  <div v-cloak> <!-- hides everything until Vue finished loading -->
-    <h2 style="margin-bottom:0px;">ConnectSF Travel Time for mandatory tours</h2>
-    <hr style="margin-bottom:5px;margin-top:5px"/>
-    This visualization shows the estimated vehicle miles traveled (VMT) per person and per household 
-    for 2015 and 2050.
-    <br/><br/>
+    <div v-cloak> <!-- hides everything until Vue finished loading -->
+      <h2 style="margin-bottom:0px;">ConnectSF Travel Time for mandatory tours</h2>
+      <hr style="margin-bottom:5px;margin-top:5px"/>
+      This visualization shows the estimated vehicle miles traveled (VMT) per person and per household 
+      for 2015 and 2050.
+      <br/><br/>
 
 
-    <div style="margin-top:20px;">
-      <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
-        &nbsp;OK&nbsp;
-      </button>
+      <div style="margin-top:20px;">
+        <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
+          &nbsp;OK&nbsp;
+        </button>
 
-      <!--<button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')"
-              class="small ui right labeled icon floated yellow button"
-              style="margin-right:5px">
-              <i class="icon download"></i>
-              Download data (.zip)
-      </button>
+        <!--<button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')"
+                class="small ui right labeled icon floated yellow button"
+                style="margin-right:5px">
+                <i class="icon download"></i>
+                Download data (.zip)
+        </button>
 
-      <button v-on:click="this.window.open('http://www.sfcta.org/congestion','_blank')"
-              class="small ui right floated basic violet button"
-              style="margin-right:5px">
-              Learn more&hellip;
-      </button>-->
+        <button v-on:click="this.window.open('http://www.sfcta.org/congestion','_blank')"
+                class="small ui right floated basic violet button"
+                style="margin-right:5px">
+                Learn more&hellip;
+        </button>-->
 
+      </div>
     </div>
   </div>
-  </div>
-  
-
-
   <div id="sfmap"></div>
-
 </div>

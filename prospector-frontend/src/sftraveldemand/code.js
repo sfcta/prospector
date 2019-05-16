@@ -51,7 +51,7 @@ const CITY_URL = 'tia_san_francisco';
 const TRIP_DISTRIBUTION = 'tia_distribution';
 const TRIP_GEN_RTS = 'tia_tripgen';
 const MODE_SPLITS = 'tia_modesplit';
-const PLANNING_GEOCODER_baseurl = 'http://sfplanninggis.org/cpc_geocode/?search=';
+const PLANNING_GEOCODER_baseurl = 'https://sfplanninggis.org/cpc_geocode/?search=';
 const AVO_DATA = 'tia_avo';
 
 let geoDistricts;
@@ -1021,8 +1021,8 @@ let app = new Vue({
   el: '#panel', //element is 'el' the whole right side of the map
   delimiters: ['${', '}'],
   data: {
-    version: 0.3,
-    data_version: 0.3,
+    version: '0.3.2',
+    data_version: '0.3',
     isModeAuto: true,
     isModeTransit: false,
     address: null,

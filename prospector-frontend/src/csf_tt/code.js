@@ -119,7 +119,11 @@ const MISSING_COLOR = '#f3f3f3';
                    DIV: ['#54bdba','#a9d7d5','#f1f1f1','#f5b2b0','#ec7074']};*/
 const COLORRAMP = {//SEQ: ['#eefacd','#89c5a8','#009485','#116570','#173252'],
                    //SEQ: ['#eefacd','#c5e5bf','#89c5a8','#49a895','#009485','#00807b','#116570','#164b61','#173252'],
-                   SEQ: ['#c5e5bf','#89c5a8','#49a895','#009485','#00807b','#164b61','#173252'],
+                   //SEQ: ['#c5e5bf','#89c5a8','#49a895','#009485','#00807b','#164b61','#173252'],
+                   SEQ: ['#fef0f1','#fde0e2','#facacc','#f8afb1','#f69497','#f47d80','#f26e72','#dd4f51','#c73232'],
+                   //DIV: ['#eaf8f8', //negative
+                   //      '#eeeeef', //neutral
+                   //      '#fef0f1','#fde0e2','#f8afb1','#f69497','#f47d80','#f26e72','#dd4f51','#c73232']}; //positive
                    DIV: ['#54bdba','#a9d7d5','#f1f1f1','#f5b2b0','#ec7074']};
                    
                    
@@ -137,7 +141,7 @@ const BWIDTH_MAP = {
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
   //'avg_time': {'base':[5, 10, 15, 20, 25, 30, 35, 40], 'diff':[-5, -2, 2, 5], 'pctdiff':[-20, -5, 5, 20]},
-  'avg_time': {'base':[15, 18, 21, 24, 27, 30], 'diff':[-5, -2, 2, 5], 'pctdiff':[-20, -5, 5, 20]},
+  'avg_time': {'base':[15, 18, 21, 24, 27, 30], 'diff':[-5,-2,2,5], 'pctdiff':[-20, -5, 5, 20]},
   'num_tours': {'base':[250, 500, 750, 1000], 'diff':[-100, -10, 10, 100], 'pctdiff':[-20, -5, 5, 20]},
 }
 
@@ -506,14 +510,6 @@ async function drawMapFeatures(queryMapData=true) {
           sel_binsflag = false;
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
           sel_colorvals2 = sel_colorvals.slice(0);
-          
-          app.bp0 = 0;
-          app.bp1 = 0;
-          app.bp2 = 0;
-          app.bp3 = 0;
-          app.bp4 = 0;
-          app.bp5 = 1;
-          
         } else {
           let mode = 'base';
           if (app.selected_year == 'diff') {
@@ -524,25 +520,10 @@ async function drawMapFeatures(queryMapData=true) {
           }
           
           let custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
-          sel_colorvals = [map_vals[0]];
-          for (var i = 0; i < custom_bps.length; i++) {
-            if (custom_bps[i]>map_vals[0] && custom_bps[i]<map_vals[map_vals.length-1]) sel_colorvals.push(custom_bps[i]);
-          }
-          sel_colorvals.push(map_vals[map_vals.length-1]);
-          
-          bp = Array.from(sel_colorvals).sort((a, b) => a - b);
-          app.bp0 = bp[0];
-          app.bp5 = bp[bp.length-1];
-          app.bp1 = custom_bps[0];
-          app.bp2 = custom_bps[1];
-          app.bp3 = custom_bps[2];
-          app.bp4 = custom_bps[3];
-          
-          if (custom_bps[0] < app.bp0) app.bp1 = app.bp0;
+          sel_colorvals = [custom_bps[0]-100].concat(custom_bps);
+          (map_vals[map_vals.length-1] > custom_bps[custom_bps.length-1])? sel_colorvals.push(map_vals[map_vals.length-1]): sel_colorvals.push(custom_bps[custom_bps.length-1]+1);
           
           sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
-          //updateColorScheme(sel_colorvals);
-          
           sel_binsflag = true; 
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
           sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
@@ -667,8 +648,7 @@ let distLabels;
 
 function updateDistChart(data, xKey, yKeys, xLabels, yLabels, yMin, yMax, xFmt, yFmt, el='dist-chart') {
   distLabels = xLabels;
-  //let colors = ['#54bdba','#ec7074','#767676']
-  let colors = ['#89c5a8','#009485','#116570']
+  let colors = ['#31bfb9','#f26e72','#575b60']
   if (yKeys instanceof String) {
     colors = colors.slice(0, 1)
   } else {
@@ -713,7 +693,7 @@ function yFmtInt(y) {
 }
 
 function yFmtPct(y) {
-  return (Math.round(y*100)).toString() + '%';
+  return (Math.round(y*1000)/10).toString() + '%';
 }
 
 let selGeoId;

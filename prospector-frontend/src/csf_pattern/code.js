@@ -124,12 +124,12 @@ let styles = maplib.styles;
 
 let mymap = maplib.sfmap;
 // set map center and zoom level
+
 mymap.setView([37.76889, -122.440997], 11);
 mymap.zoomControl.remove();
 mymap.scrollWheelZoom.disable();
 // let baseLayer = maplib.baseLayer;
 // mymap.removeLayer(baseLayer);
-
 
 //create number formatting functions
 var numberWithCommas = d3.format("0,f");
@@ -231,8 +231,8 @@ async function getMapData() {
 }
 
 var width = window.innerWidth,
-    height = window.innerHeight,
-    outerRadius = Math.min(width, height) / 2 - 120,
+    height = window.innerHeight - 10,
+    outerRadius = Math.min(width, height) / 2 - 140,
     innerRadius = outerRadius - 10;
 
 //create the arc path data generator for the groups
