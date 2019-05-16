@@ -58,10 +58,12 @@ const ADDLAYERS = [
   {
     view: 'coc2017_diss', name: 'Communities of Concern',
     style: { opacity: 1, weight: 2, color: 'grey', fillPattern: stripes, interactive: false},
+    info: 'https://www.arcgis.com/home/item.html?id=1501fe1552414d569ca747e0e23628ff',
   },
   {
     view: 'hin2017', name: 'High Injury Network',
     style: { opacity: 1, weight: 3, color: '#FF8C00', interactive: false},
+    info: 'https://www.visionzerosf.org/maps-data/',
   },
   {
     view: 'sfparks', name: 'Major Parks',
@@ -70,6 +72,7 @@ const ADDLAYERS = [
   {
     view: 'sup_district_boundaries', name: 'Supervisorial District Boundaries',
     style: { opacity: 1, weight: 3, color: '#730073', fillOpacity: 0, interactive: false},
+    info: 'https://sfbos.org/',
   },
 ]
 
@@ -111,7 +114,7 @@ const METRIC_UNITS = {'pop': '000s per sq. mi.',
 const METRIC_DESC = {'pop': 'Population','tot': 'Jobs',
                       'jobpop': 'Jobs+Population',
 };
-const METRIC_DESC_SHORT = {'pop': 'Pop','tot': 'Jobs',
+const METRIC_DESC_SHORT = {'pop': 'Population','tot': 'Jobs',
                       'jobpop': 'Jobs+Pop',
 };
 
@@ -186,7 +189,7 @@ async function fetchAddLayers() {
 function updateStats() {
   for (let i = 0; i < _aggregateData.length; i++) {
     for (let m of app.metric_options) {
-      app.aggData[i][m.value] = _aggregateData[i][m.value].toLocaleString();
+      app.aggData[i][m.value] = (Math.round(_aggregateData[i][m.value]/100)*100).toLocaleString();
     }
   }
 }

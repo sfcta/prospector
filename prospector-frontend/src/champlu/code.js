@@ -36,10 +36,10 @@ mymap.setView([37.76889, -122.440997], 13);
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
-const DATA_VIEW = 'lua2017';
+const DATA_VIEW = 'lua2017_v3';
 
 const FRAC_COLS = ['speed','time','vol','vmt','vhd','vht','pti80','pti80_vmt'];
-const YR_LIST = [2015,2020,2025,2030,2035,2040,2050];
+const YR_LIST = [2015,2020,2025,2030,2035,2040];
 
 const INT_COLS = ['dt','at','ft2'];
 const DISCRETE_VAR_LIMIT = 10;
@@ -305,11 +305,8 @@ async function drawMapFeatures(queryMapData=true) {
           let custom_bps;
           if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)){
             custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
-            sel_colorvals = [map_vals[0]];
-            for (var i = 0; i < custom_bps.length; i++) {
-              if (custom_bps[i]>map_vals[0] && custom_bps[i]<map_vals[map_vals.length-1]) sel_colorvals.push(custom_bps[i]);
-            }
-            sel_colorvals.push(map_vals[map_vals.length-1]);
+            (map_vals[0]<custom_bps[0]) ? sel_colorvals = [map_vals[0]].concat(custom_bps): sel_colorvals = [custom_bps[0]-1].concat(custom_bps);
+            (map_vals[map_vals.length-1] > custom_bps[custom_bps.length-1])? sel_colorvals.push(map_vals[map_vals.length-1]): sel_colorvals.push(custom_bps[custom_bps.length-1]+1);
             app.custom_check = true;
           } else {
             sel_colorvals = getQuantiles(map_vals, app.selected_breaks);
@@ -385,7 +382,7 @@ async function drawMapFeatures(queryMapData=true) {
           }
         }
       }
-      
+
       sel_colors = [];
       for(let i of sel_colorvals2) {
         sel_colors.push(color_func(i).hex());

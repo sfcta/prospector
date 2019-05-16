@@ -111,6 +111,9 @@ hr {margin: 1% 0px; }
 .ui.toggle.checkbox input:checked~label:before{
   background-color: #f56e71!important;
 }
+a.icon {
+  color: #fff;
+}
 
 table#citywide tbody th, td {   
   background-color: #444;
@@ -162,6 +165,7 @@ a.agency {color: #fff;}
   font-size: 200%;
   width: 66%;
   color: white;
+  white-space: nowrap;
 }
 .img-csf {
   display: block;
@@ -226,6 +230,12 @@ p.legend-row {
      width: 500px;
      z-index:20;
      box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
+}
+
+#chart-label {
+  text-align: center;
+  color: #999;
+  font-size: 0.75em;
 }
 
 .grecaptcha-badge { visibility: hidden; }

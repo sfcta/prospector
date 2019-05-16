@@ -1,8 +1,8 @@
 <div id="container">
   <div id="panel">
     
-  <div id="preheader">
-    <table id="table-header">
+    <div id="preheader">
+      <table id="table-header">
         <tr>
           <td class='title'>Trip Patterns</td>
           <td>
@@ -13,25 +13,25 @@
         </tr>
       </table>
     
-    <hr/>
-    
-    <div id="helpbar">
-      <button class="ui mini right labeled icon color1 button"
-              v-on:click="clickToggleHelp">
-              <i class="help circle icon"></i>
-              What is this?
-      </button>
-      &nbsp;
-      <button class="ui mini right labeled icon color1 button"
-              v-on:click="this.window.open('https://connectsf.org/','_blank')">
-              <i class="arrow right icon"></i>
-              Learn More
-      </button>
-    <hr/>
-    </div>
-
+      <hr/>
+      
       <div id="picker">
-        <h5>CHOOSE SCENARIO</h5>
+        <div id="helpbar">
+          <button class="ui mini right labeled icon color1 button"
+                  v-on:click="clickToggleHelp">
+                  <i class="help circle icon"></i>
+                  What is this?
+          </button>
+          &nbsp;
+          <button class="ui mini right labeled icon color1 button"
+                  v-on:click="this.window.open('https://connectsf.org/','_blank')">
+                  <i class="arrow right icon"></i>
+                  Learn More
+          </button>
+          <hr/>
+        </div>
+
+      <h5>CHOOSE YEAR</h5>
         <div>
           <button v-for="item in year_options"
                 v-on:click="yrChanged(item.value)"
@@ -51,11 +51,11 @@
           </button>
         </div> 
           
-        <h5>CHOOSE MODE:</h5>
+        <h5>CHOOSE MODE OF TRAVEL:</h5>
         <div>
           <button v-for="item in metric_options"
                 v-on:click="metricChanged(item.value)"
-                class="ui tiny grey button"
+                class="ui mini grey button"
                 style="margin-top:3px"
                 v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
                 ${item.text}
@@ -90,28 +90,31 @@
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
     <div v-cloak> <!-- hides everything until Vue finished loading -->
-          <h2 style="margin-bottom:0px;">ConnectSF: Trip Patterns</h2>
+          <h2 style="margin-bottom:0px;">Daily Trip-Making Patterns</h2>
           <hr style="margin-bottom:5px;margin-top:5px"/>
-          Use this tool to explore number of jobs accessible in each TAZ in 30 minutes auto or 45 minutes transit for ConnectSF.
+            This map shows where people are traveling to and from in San Francisco.  The data are summarized to districts.  Districts are represented by “arcs” along the circumference of the circle, and the size of the arc represents the number of trips to and from that district.  Travel flows between each district are represented by “chords” connecting two arcs.  The width of the chord represents the volume of travel between the two district.    
+            <br><br>
+            Use the buttons on the side panel to select the data you want to view.  Data selection options include: 
+            <ul>
+            <li><b>Year:</b> 2015, 2050, or Change to view the difference between 2015 and 2015.  
+            <li><b>Purpose:</b> All (for all purposes combined), Work/School (often thought of as “mandatory” travel), or Other for all other travel purposes
+            <li><b>Travel mode:</b> All, Walk/Bike, Transit, Uber/Lyft, Auto
+            </ul>
+            You can examine flows more closely by selecting a district, either direction on the chord chart or on the map in the sidebar. 
+            <br>
+            You can also add additional context layers under “Map Layers”.
 
-          <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
-          <hr style="margin-bottom:5px;margin-top:5px"/>
-          <ul>
-          <li>Select a scenario year and mode to display it at the TAZ level on the map.</li>
-          <li>Select "Change" scenario to view the difference between future (2050) and base (2015) scenarios.</li>
-          <li>Click on a colored TAZ on the map to see TAZ-specific details.</li>
-          </ul>
 
           <div style="margin-top:20px;">
             <button v-on:click="clickToggleHelp" class="small ui right floated teal button">
               &nbsp;OK&nbsp;
             </button>
 
-            <button v-on:click="this.window.open('/assets/data_accjobs.csv')"
+            <button v-on:click="this.window.open('/assets/connectsf/trippattern.zip')"
                     class="small ui right labeled icon floated color1 button"
                     style="margin-right:5px">
                     <i class="icon download"></i>
-                    Download data (.csv)
+                    Download data (.zip)
             </button>
 
             <button v-on:click="this.window.open('https://connectsf.org/','_blank')"
@@ -119,7 +122,6 @@
                     style="margin-right:5px">
                     Learn more&hellip;
             </button>
-
           </div>
     </div>
   </div>

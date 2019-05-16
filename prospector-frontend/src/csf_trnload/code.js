@@ -50,10 +50,12 @@ const ADDLAYERS = [
   {
     view: 'coc2017_diss', name: 'Communities of Concern',
     style: { opacity: 1, weight: 2, color: 'grey', fillPattern: stripes, interactive: false},
+    info: 'https://www.arcgis.com/home/item.html?id=1501fe1552414d569ca747e0e23628ff',
   },
   {
     view: 'hin2017', name: 'High Injury Network',
     style: { opacity: 1, weight: 3, color: '#FF8C00', interactive: false},
+    info: 'https://www.visionzerosf.org/maps-data/',
   },
   {
     view: 'sfparks', name: 'Major Parks',
@@ -62,6 +64,7 @@ const ADDLAYERS = [
   {
     view: 'sup_district_boundaries', name: 'Supervisorial District Boundaries',
     style: { opacity: 1, weight: 3, color: '#730073', fillOpacity: 0, interactive: false},
+    info: 'https://sfbos.org/',
   },
 ]
 
@@ -93,7 +96,7 @@ const COLORRAMP = {//SEQ: ['#feefa9', '#ffd469', '#cc7b45', '#7d3e43'],
 const DEF_BWIDTH = 4;
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'load': {'base':[0.5,0.75,1], 'diff':[0.5,0.75,1], 'pctdiff':[-20, -5, 5, 20]},
+  'load': {'base':[0.5,0.85,1], 'diff':[0.5,0.85,1], 'pctdiff':[-20, -5, 5, 20]},
   'ab_vol': {'base':[100,500,2500,10000], 'diff':[100,500,2500,10000], 'pctdiff':[-20, -5, 5, 20]},
   'periodcap': {'base':[100,500,2500,10000], 'diff':[100,500,2500,10000], 'pctdiff':[-20, -5, 5, 20]},
 };
@@ -876,7 +879,7 @@ let app = new Vue({
     selected_op: 'munib',
     operator_options: [
     {text: 'MUNI BUS', value: 'munib'},
-    {text: 'MUNI LRT', value: 'munil'},
+    {text: 'MUNI RAIL', value: 'munil'},
     {text: 'REGIONAL TRANSIT', value: 'regtrn'},   
     ],
     

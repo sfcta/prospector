@@ -14,7 +14,7 @@
     <div id="preheader">
       <table id="table-header">
         <tr>
-          <td class='title'>Vehicle Miles</td>
+          <td class='title'>Vehicle Miles Traveled</td>
           <td>
             <a target="_blank" href="https://connectsf.org/">
               <img class="img-csf" src="https://connectsf.wpengine.com/wp-content/uploads/2016/07/connectsf-logo-color.png" alt="Connect SF">
@@ -40,7 +40,7 @@
       </div>
 
       <div id="picker">
-        <h5>CHOOSE SCENARIO</h5>
+        <h5>CHOOSE YEAR</h5>
         <div>
           <button v-for="item in year_options"
                 v-on:click="yrChanged(item.value)"
@@ -50,47 +50,19 @@
           </button>
         </div>
         
-        <!--
-        <h5>CHOOSE MEASURE</h5>
-        <div>
-          <button v-for="item in metric_options"
-                v-on:click="metricChanged(item.value)"
-                class="ui tiny grey button"
-                v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
-                ${item.text}
-          </button>
-        </div> -->
-        
-        <!--<table style="border:0px;margin-bottom:0px">
-          <tr>
-            <td class='row-label'>Year</td>
-            <td><button v-for="item in year_options"
-                    v-on:click="yrChanged(item.value)"
-                    class="ui tiny grey button"
-                    v-bind:class="{ active: item.value==selected_year, color2: item.value==selected_year }">
-                    ${item.text}
-            </button></td>
-          </tr>
-          <tr>
-            <td class='row-label'>Measure</td>
-            <td><button v-for="item in metric_options"
-                v-on:click="metricChanged(item.value)"
-                class="ui tiny grey button"
-                v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
-                ${item.text}
-          </button></td>
-          </tr>
-        </table>-->
         <hr/>
         
-        <h5>DISTRIBUTION OF VMT PER PERSON</h5>
+        <h5>DISTRIBUTION OF VEHICLE MILES TRAVELED PER PERSON</h5>
         <div id='dist-chart' style="height: 200px"></div>
+        <div id='chart-label'>Vehicle Miles Traveled per Person</div>
         
         <h5>MAP LAYERS</h5>
         <p>Add additional geographic data to the map.</p>
         <div v-for="item in extraLayers" class="ui toggle checkbox">
           <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
-          <label><h5>${item.name}</h5></label>
+          <label><h5>${item.name}
+          <a class="icon" target="_blank" v-bind:href="item.info"><i v-if="item.info" class="question circle icon"></i></a>
+          </h5></label>
         </div>
         
         <br><br>
@@ -117,32 +89,35 @@
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
     <div v-cloak> <!-- hides everything until Vue finished loading -->
-      <h2 style="margin-bottom:0px;">ConnectSF Travel Time for mandatory tours</h2>
+      <h2 style="margin-bottom:0px;">Daily Vehicle Miles Traveled</h2>
       <hr style="margin-bottom:5px;margin-top:5px"/>
-      This visualization shows the estimated vehicle miles traveled (VMT) per person and per household 
-      for 2015 and 2050.
-      <br/><br/>
+        This map shows the average daily vehicle miles traveled in 2015 and 2050 by home location.  These estimates are summarized to Travel Analysis Zones (TAZs) which are spatial units used in travel modeling and analysis.  
+        <br><br>
+        Use the buttons on the side panel to select the data you want to view.  Data selection options include: 
+        <ul>
+        <li><b>Year:</b> 2015, 2050, or Change to view the difference between 2015 and 2015.  
+        </ul>
+        You can also add additional context layers under “Map Layers”.
 
 
-      <div style="margin-top:20px;">
-        <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
-          &nbsp;OK&nbsp;
-        </button>
+          <div style="margin-top:20px;">
+            <button v-on:click="clickToggleHelp" class="small ui right floated teal button">
+              &nbsp;OK&nbsp;
+            </button>
 
-        <!--<button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')"
-                class="small ui right labeled icon floated yellow button"
-                style="margin-right:5px">
-                <i class="icon download"></i>
-                Download data (.zip)
-        </button>
+            <button v-on:click="this.window.open('/assets/connectsf/vmt.zip')"
+                    class="small ui right labeled icon floated color1 button"
+                    style="margin-right:5px">
+                    <i class="icon download"></i>
+                    Download data (.zip)
+            </button>
 
-        <button v-on:click="this.window.open('http://www.sfcta.org/congestion','_blank')"
-                class="small ui right floated basic violet button"
-                style="margin-right:5px">
-                Learn more&hellip;
-        </button>-->
-
-      </div>
+            <button v-on:click="this.window.open('https://connectsf.org/','_blank')"
+                    class="small ui right floated basic teal button"
+                    style="margin-right:5px">
+                    Learn more&hellip;
+            </button>
+          </div>
     </div>
   </div>
   <div id="sfmap"></div>

@@ -40,7 +40,7 @@
       </div>
 
       <div id="picker">
-        <h5>CHOOSE SCENARIO</h5>
+        <h5>CHOOSE YEAR</h5>
         <div>
           <button v-for="item in year_options"
                 v-on:click="yrChanged(item.value)"
@@ -73,12 +73,15 @@
         <hr/>
         <h5>TOUR TRAVEL TIME PERCENTAGE FREQUENCY DISTRIBUTION</h5>
         <div id='pct-dist-chart' style="height: 200px"></div>
+        <div id='chart-label'>Travel Time (minutes)</div>
         
         <h5>MAP LAYERS</h5>
         <p>Add additional geographic data to the map.</p>
         <div v-for="item in extraLayers" class="ui toggle checkbox">
           <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
-          <label><h5>${item.name}</h5></label>
+          <label><h5>${item.name}
+          <a class="icon" target="_blank" v-bind:href="item.info"><i v-if="item.info" class="question circle icon"></i></a>
+          </h5></label>
         </div>
         
         <br><br>
@@ -105,45 +108,37 @@
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
   <div v-cloak> <!-- hides everything until Vue finished loading -->
-    <h2 style="margin-bottom:0px;">ConnectSF Travel Time for mandatory tours</h2>
+    <h2 style="margin-bottom:0px;">Average Travel Times</h2>
     <hr style="margin-bottom:5px;margin-top:5px"/>
-    This visualization shows the estimated one-way travel time from home to the main destination 
-    (i.e. the total travel time to work, including any stops along the way). 
-    The data is segmented by:
-    <br/><br/>
-    <dl>
-      <dt>Year</dt>
-        <dd>- 2015</dd>
-        <dd>- 2050</dd>
-        <dd>- Change (the change from 2015 to 2050)</dd>
-      <dt>Purpose</dt>
-        <dd>- Work / School (mandatory tour purposes)</dd>
-        <dd>- Other (all other tour purposes)</dd>
-      <dt>Income</dt>
-        <dd>- Low Income (below 200% of the Federal Poverty Level)</dd>
-        <dd>- Not Low Income (above 200% of the Federal Poverty Level)</dd>
-        <dd>- All (all income categories)</dd>
-    </dl>
+      This map shows the average travel time from home in 2015 and 2050 by travel purpose and income level.  These estimates are summarized to Travel Analysis Zones (TAZs) which are spatial units used in travel modeling and analysis.  
+      <br><br>
+      Use the buttons on the side panel to select the data you want to view.  Data selection options include: 
+      <ul>
+      <li><b>Year:</b> 2015, 2050, or Change to view the difference between 2015 and 2015.  
+      <li><b>Purpose:</b> Work/School (often thought of as “mandatory” travel), or Other for all other travel purposes
+      <li><b>Income category:</b> Low Income (below 200% of the poverty line), Not Low Income (above 200% of the poverty line), and All Incomes.
+      </ul>
+      You can also add additional context layers under “Map Layers”.
 
-    <div style="margin-top:20px;">
-      <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
-        &nbsp;OK&nbsp;
-      </button>
 
-      <!--<button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')"
-              class="small ui right labeled icon floated yellow button"
-              style="margin-right:5px">
-              <i class="icon download"></i>
-              Download data (.zip)
-      </button>
+          <div style="margin-top:20px;">
+            <button v-on:click="clickToggleHelp" class="small ui right floated teal button">
+              &nbsp;OK&nbsp;
+            </button>
 
-      <button v-on:click="this.window.open('http://www.sfcta.org/congestion','_blank')"
-              class="small ui right floated basic violet button"
-              style="margin-right:5px">
-              Learn more&hellip;
-      </button>-->
+            <button v-on:click="this.window.open('/assets/connectsf/traveltime.zip')"
+                    class="small ui right labeled icon floated color1 button"
+                    style="margin-right:5px">
+                    <i class="icon download"></i>
+                    Download data (.zip)
+            </button>
 
-    </div>
+            <button v-on:click="this.window.open('https://connectsf.org/','_blank')"
+                    class="small ui right floated basic teal button"
+                    style="margin-right:5px">
+                    Learn more&hellip;
+            </button>
+          </div>
   </div>
   </div>
   

@@ -59,10 +59,12 @@ const ADDLAYERS = [
   {
     view: 'coc2017_diss', name: 'Communities of Concern',
     style: { opacity: 1, weight: 2, color: 'grey', fillPattern: stripes, interactive: false},
+    info: 'https://www.arcgis.com/home/item.html?id=1501fe1552414d569ca747e0e23628ff',
   },
   {
     view: 'hin2017', name: 'High Injury Network',
     style: { opacity: 1, weight: 3, color: '#FF8C00', interactive: false},
+    info: 'https://www.visionzerosf.org/maps-data/',
   },
   {
     view: 'sfparks', name: 'Major Parks',
@@ -71,6 +73,7 @@ const ADDLAYERS = [
   {
     view: 'sup_district_boundaries', name: 'Supervisorial District Boundaries',
     style: { opacity: 1, weight: 3, color: '#730073', fillOpacity: 0, interactive: false},
+    info: 'https://sfbos.org/',
   },
 ]
 
@@ -559,7 +562,7 @@ async function drawMapFeatures(queryMapData=true) {
           sel_colors,
           sel_binsflag,
         );
-        legHTML = '<h4>Average Travel Time</h4>' + legHTML;
+        legHTML = '<h4>Average Travel Time <br>(minutes)</h4>' + legHTML;
         div.innerHTML = legHTML;
         return div;
       };
