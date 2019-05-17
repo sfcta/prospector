@@ -75,7 +75,7 @@
         <h5>YOUR FEEDBACK:</h5>
         <form class="ui tiny equal width form" v-on:submit.prevent="handleSubmit">
           <div class="ui field">             
-            <textarea v-model="comment" class="fix" maxlength="200" rows="3"
+            <textarea v-model="comment" class="fix" maxlength="800" rows="3"
                       v-bind:disabled="submit_disabled==true"
                       type="text" :placeholder="comment_instruction"></textarea>
           </div>

@@ -651,7 +651,7 @@ function handleSubmit() {
     } else {
       comment.select_year = app.selected_year;
       comment.select_mode = app.selected_metric;
-      comment.add_layer = app.ADDLAYERS;
+      comment.add_layer = app.addLayers;
       comment.comment_user = getCookie("username");
       comment.comment_time = timestamp;
       comment.comment_content = app.comment;

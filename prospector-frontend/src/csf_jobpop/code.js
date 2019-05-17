@@ -86,7 +86,7 @@ const GEOTYPE = 'TAZ';
 const GEOID_VAR = 'taz';
 
 const COMMENT_SERVER = 'https://api.sfcta.org/commapi/';
-const COMMENT_VIEW = 'test_comment';
+const COMMENT_VIEW = 'csf_jobpop_comment';
 const VIZNAME = 'csf_jobpop';
 
 const FRAC_COLS = [];
@@ -696,6 +696,7 @@ function showPosition(position) {
 }
 
 function handleSubmit() {
+  this.$refs.recaptcha.execute();
   let timestamp = new Date();
   app.submit_loading = true;
   
@@ -705,27 +706,78 @@ function handleSubmit() {
     } else {
       comment.select_year = app.selected_year;
       comment.select_metric = app.selected_metric;
-      comment.add_layer = app.ADDLAYERS;
+      comment.add_layer = app.addLayers;
       comment.comment_user = getCookie("username");
       comment.comment_time = timestamp;
       comment.comment_content = app.comment;
-      fetchComments(comment);
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition);
       } else {
         console.log("Geolocation is not supported by this browser.");
       }
-      console.log(JSON.stringify(comment));
-      app.comment = "Thanks for submitting your comment!";
+      //console.log(JSON.stringify(comment));
+      postComments(comment);
+      app.comment_instruction = 'Thank you for your feedback!';
+      app.comment = '';
       app.submit_loading = false;
-      app.submit_disabled = true;
+      // app.submit_disabled = true;
     }
   }, 1000)
+}
+
+async function postComments(comment) {
+  const comment_url = COMMENT_SERVER + COMMENT_VIEW;
+  // console.log(JSON.stringify(comment))
+  try {
+    await fetch(comment_url, {
+      method: 'POST',
+      body: JSON.stringify(comment),
+      headers:{
+        'Content-Type': 'application/json',
+      }
+    });
+  } catch (error) {
+    console.log('comment error: ' + error);
+  }
+}
+
+function onCaptchaVerified(recaptchaToken) {
+  const self = this;
+  self.$refs.recaptcha.reset();
+  if (!recaptchaToken) {
+    return console.log("recaptchaToken is required");
+  }
+
+  const verifyCaptchaOptions = {
+    secret: "6Le7GqIUAAAAAOmfXozDNDNWQwJE_0dIleut8q16",
+    response: recaptchaToken
+  };
+
+  fetch("https://www.google.com/recaptcha/api/siteverify", {
+    method: 'POST',
+    mode: 'no-cors',
+    body: JSON.stringify(verifyCaptchaOptions),
+    headers:{
+      'Content-Type': 'application/json',
+    }
+  })
+  .catch(error => console.error('Error:', error))
+  .then(response => function (response) {
+    // JSON.stringify(response)
+    console.log("Congratulations! We think you are human.");
+  });
+}
+
+function onCaptchaExpired() {
+  this.$refs.recaptcha.reset();
 }
 
 let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
+  components: {
+    'vue-recaptcha': VueRecaptcha
+  },  
   data: {
     isPanelHidden: false,
     extraLayers: ADDLAYERS,
@@ -766,6 +818,7 @@ let app = new Vue({
       '#fafa6e,#2A4858': 'lch',
     },
     comment: '',
+    comment_instruction: 'Based on this data, what do you think are the city’s transportation needs? (800 characters)',
     submit_loading: false,
     submit_disabled: false,
     addLayers:[],
@@ -781,6 +834,8 @@ let app = new Vue({
     handleSubmit: handleSubmit,
     yrChanged: yrChanged,
     metricChanged: metricChanged,
+    onCaptchaVerified: onCaptchaVerified,
+    onCaptchaExpired: onCaptchaExpired,    
   },
 });
 
