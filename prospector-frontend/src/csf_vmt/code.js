@@ -154,6 +154,7 @@ async function initialPrep() {
   await fetchAddLayers();
 
   //console.log('5 !!!');
+  await checkCookie();
 }
 
 async function fetchMapFeatures() {

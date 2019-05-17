@@ -173,7 +173,10 @@ async function initialPrep() {
   console.log('4... ');
   await fetchAddLayers();
 
-  console.log('5 !!!');
+  console.log('5... ');
+  await checkCookie();  
+
+  console.log('6 !!!');
 }
 
 async function fetchMapFeatures() {
