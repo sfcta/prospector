@@ -35,8 +35,8 @@ mymap.setView([37.76889, -122.440997], 13);
 mymap.removeLayer(baseLayer);
 let url = 'https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
 let token = 'pk.eyJ1Ijoic2ZjdGEiLCJhIjoiY2ozdXBhNm1mMDFkaTJ3dGRmZHFqanRuOCJ9.KDmACTJBGNA6l0CyPi1Luw';
-let attribution ='<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
-                 '<a href="http://mapbox.com">Mapbox</a>';
+let attribution ='<a href="https://openstreetmap.org">OpenStreetMap</a> | ' +
+                 '<a href="https://mapbox.com">Mapbox</a>';
 baseLayer = L.tileLayer(url, {
   attribution:attribution,
   minZoom: 10,
@@ -83,7 +83,7 @@ const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
 const DATA_VIEW = 'connectsf_vmt';
 const COMMENT_SERVER = 'https://api.sfcta.org/commapi/';
-const COMMENT_VIEW = 'test_comment';
+const COMMENT_VIEW = 'csf_vmt_comment';
 const VIZNAME = 'csf_vmt';
 const FREQ_DIST_VIEW = 'connectsf_vmt_dist_all';
 const FREQ_BY_GEO_VIEW = 'PLACEHOLDER';
@@ -765,22 +765,6 @@ function showExtraLayers(e) {
   }
 }
 
-async function fetchComments(comment) {
-  const comment_url = COMMENT_SERVER + COMMENT_VIEW;
-  // console.log(JSON.stringify(comment))
-  try {
-    await fetch(comment_url, {
-      method: 'POST',
-      body: JSON.stringify(comment),
-      headers:{
-        'Content-Type': 'application/json',
-      }
-    });
-  } catch (error) {
-    console.log('comment error: ' + error);
-  }
-}
-
 function setCookie(cname, exdays) {
   var d = new Date();
   d.setTime(d.getTime() + (exdays*24*60*60*1000));
@@ -814,7 +798,6 @@ function checkCookie() {
 let comment = {
   vizname: VIZNAME,
   select_year: '',
-  select_metric: '',
   add_layer: '',
   comment_user: '',
   comment_time: new Date(),
@@ -828,7 +811,24 @@ function showPosition(position) {
   comment.comment_longitude = position.coords.longitude; 
 }
 
+async function postComments(comment) {
+  const comment_url = COMMENT_SERVER + COMMENT_VIEW;
+  // console.log(JSON.stringify(comment))
+  try {
+    await fetch(comment_url, {
+      method: 'POST',
+      body: JSON.stringify(comment),
+      headers:{
+        'Content-Type': 'application/json',
+      }
+    });
+  } catch (error) {
+    console.log('comment error: ' + error);
+  }
+}
+
 function handleSubmit() {
+  this.$refs.recaptcha.execute();
   let timestamp = new Date();
   app.submit_loading = true;
   
@@ -837,28 +837,62 @@ function handleSubmit() {
       app.submit_loading = false;
     } else {
       comment.select_year = app.selected_year;
-      comment.select_metric = app.selected_metric;
-      comment.add_layer = app.ADDLAYERS;
+      comment.add_layer = app.addLayers;
       comment.comment_user = getCookie("username");
       comment.comment_time = timestamp;
       comment.comment_content = app.comment;
-      fetchComments(comment);
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition);
       } else {
         console.log("Geolocation is not supported by this browser.");
       }
-      console.log(JSON.stringify(comment));
-      app.comment = "Thanks for submitting your comment!";
+      //console.log(JSON.stringify(comment));
+      postComments(comment);
+      app.comment_instruction = 'Thank you for your feedback!';
+      app.comment = '';
       app.submit_loading = false;
-      app.submit_disabled = true;
+      // app.submit_disabled = true;
     }
   }, 1000)
+}
+
+function onCaptchaVerified(recaptchaToken) {
+  const self = this;
+  self.$refs.recaptcha.reset();
+  if (!recaptchaToken) {
+    return console.log("recaptchaToken is required");
+  }
+
+  const verifyCaptchaOptions = {
+    secret: "6Le7GqIUAAAAAOmfXozDNDNWQwJE_0dIleut8q16",
+    response: recaptchaToken
+  };
+
+  fetch("https://www.google.com/recaptcha/api/siteverify", {
+    method: 'POST',
+    mode: 'no-cors',
+    body: JSON.stringify(verifyCaptchaOptions),
+    headers:{
+      'Content-Type': 'application/json',
+    }
+  })
+  .catch(error => console.error('Error:', error))
+  .then(response => function (response) {
+    // JSON.stringify(response)
+    console.log("Congratulations! We think you are human.");
+  });
+}
+
+function onCaptchaExpired() {
+  this.$refs.recaptcha.reset();
 }
 
 let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
+  components: {
+    'vue-recaptcha': VueRecaptcha
+  },  
   data: {
     isPanelHidden: false,
     extraLayers: ADDLAYERS,
@@ -903,6 +937,7 @@ let app = new Vue({
       '#fafa6e,#2A4858': 'lch',
     },
     comment: '',
+    comment_instruction: 'Based on this data, what do you think are the city’s transportation needs? (800 characters)',
     addLayers:[],
     selected_breaks: 5,
     submit_loading: false,
@@ -920,6 +955,8 @@ let app = new Vue({
     handleSubmit: handleSubmit,
     clickToggleHelp: clickToggleHelp,
     clickedShowHide: clickedShowHide,
+    onCaptchaVerified: onCaptchaVerified,
+    onCaptchaExpired: onCaptchaExpired,
   },
 });
 

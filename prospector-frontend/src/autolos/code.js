@@ -25,7 +25,7 @@ import 'isomorphic-fetch';
 import vueSlider from 'vue-slider-component';
 
 
-let api_server = 'http://api.sfcta.org/api/';
+let api_server = 'https://api.sfcta.org/api/';
 let data_view = 'cmp_auto';
 
 let segmentLayer;

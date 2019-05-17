@@ -24,7 +24,7 @@ import 'babel-polyfill';
 import 'isomorphic-fetch';
 //import vueSlider from 'vue-slider-component';
 
-let api_server = 'http://api.sfcta.org/';
+let api_server = 'https://api.sfcta.org/';
 
 // add the SF Map using Leafleft and MapBox
 let mymap = L.map('sfmap').setView([37.79, -122.44], 14);

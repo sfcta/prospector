@@ -26,7 +26,7 @@ import vueSlider from 'vue-slider-component';
 import vSelect from 'vue-select';
 Vue.component('v-select', vSelect);
 
-let api_server = 'http://api.sfcta.org/api/';
+let api_server = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
 const TABLES_VIEW = 'walkskim_tables';
 const MISSING_COLOR = '#ccc';
