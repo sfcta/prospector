@@ -80,15 +80,15 @@
                       type="text" :placeholder="comment_instruction"></textarea>
           </div>
           <div>
-              <vue-recaptcha ref="recaptcha" @verify="onCaptchaVerified"
-                             @expired="onCaptchaExpired" size="invisible"
-                             sitekey="6Le7GqIUAAAAAKWquavN0Mm6RV0DlI_eLS-aaPpU">
-              </vue-recaptcha>
-              <p>This site is protected by reCAPTCHA and the Google
-              <a href="https://policies.google.com/privacy">Privacy Policy</a> and
-              <a href="https://policies.google.com/terms">Terms of Service</a> apply.</p>
+            <p>This site is protected by reCAPTCHA and the Google
+            <a href="https://policies.google.com/privacy">Privacy Policy</a> and
+            <a href="https://policies.google.com/terms">Terms of Service</a> apply.</p>
+            <vue-recaptcha ref="recaptcha" @verify="onCaptchaVerified"
+                            @expired="onCaptchaExpired" size="invisible"
+                            sitekey="6LdSkKQUAAAAAOXWN_tbnvWy0fOdW8kzp922Vzys">
               <button class="ui button color2" type="submit"
-                    v-bind:class="{loading: submit_loading==true, disabled: submit_disabled==true}">Submit</button>
+                      v-bind:class="{loading: submit_loading==true, disabled: submit_disabled==true}">Submit</button>
+            </vue-recaptcha>
           </div>
         </form>
       </div>
