@@ -697,7 +697,7 @@ function onCaptchaVerified(recaptchaToken) {
       app.submit_loading = false;
     } else {
       comment.select_year = app.selected_year;
-      comment.select_mode = app.selected_metric;
+      comment.select_metric = app.selected_metric;
       comment.add_layer = app.addLayers;
       comment.comment_user = getCookie("username");
       comment.comment_time = timestamp;
@@ -709,7 +709,7 @@ function onCaptchaVerified(recaptchaToken) {
       }
       //console.log(JSON.stringify(comment));
       postComments(comment);
-      app.comment_instruction = 'Thank you for your feedback! You can provide more.';
+      app.comment_instruction = 'Thank you for your feedback!';
       app.comment = '';
       app.submit_loading = false;
       // app.submit_disabled = true;
