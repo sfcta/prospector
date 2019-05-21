@@ -667,7 +667,7 @@ function onCaptchaVerified(recaptchaToken) {
       }
       //console.log(JSON.stringify(comment));
       postComments(comment);
-      app.comment_instruction = 'Thank you for your feedback! You can provide more.';
+      app.comment_instruction = 'Thank you for your feedback!';
       app.comment = '';
       app.submit_loading = false;
       // app.submit_disabled = true;
