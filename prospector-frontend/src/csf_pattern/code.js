@@ -885,9 +885,10 @@ function showPosition(position) {
   comment.comment_latitude = position.coords.latitude;
   comment.comment_longitude = position.coords.longitude; 
 }
+
 function handleSubmit() {
-  this.$refs.recaptcha.execute();
   app.submit_loading = true;
+  this.$refs.recaptcha.execute();
 }
 
 function onCaptchaVerified(recaptchaToken) {
