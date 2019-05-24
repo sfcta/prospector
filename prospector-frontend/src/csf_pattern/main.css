@@ -25,17 +25,8 @@
 }
 
 #panel {
-  display:table;
   position: absolute;
-  height:100%;
-  width:400px;
   right: 20px;
-  max-height:100%;
-  padding:0px 20px 0px 20px;
-  z-index:10;
-  background-color:#444;
-  float: right;
-  transition: margin 0.4s;
 }
 
 /*chord diagram*/
@@ -44,9 +35,7 @@
   text-align: center;
   float:left;
   width: 100%;
-  height: 100%;
-  /* overflow-y: hidden;*/
-  overflow-x: scroll; 
+  overflow-x: scroll;
 }
 
 #circle circle {
