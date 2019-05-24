@@ -77,9 +77,9 @@
             <vue-recaptcha ref="recaptcha" @verify="onCaptchaVerified"
                             @expired="onCaptchaExpired" size="invisible"
                             sitekey="6LdSkKQUAAAAAOXWN_tbnvWy0fOdW8kzp922Vzys">
-              <button class="ui button color2" type="submit"
-                      v-bind:class="{loading: submit_loading==true, disabled: submit_disabled==true}">Submit</button>
             </vue-recaptcha>
+            <button class="ui button color2" type="submit"
+                    v-bind:class="{loading: submit_loading==true, disabled: submit_disabled==true}">Submit</button>
           </div>        
         </form>
       </div>
@@ -102,6 +102,8 @@
           <h2 style="margin-bottom:0px;">Daily Trip-Making Patterns</h2>
           <hr style="margin-bottom:5px;margin-top:5px"/>
             This map shows where people are traveling to and from in San Francisco.  The data are summarized to districts.  Districts are represented by “arcs” along the circumference of the circle, and the size of the arc represents the number of trips to and from that district.  Travel flows between each district are represented by “chords” connecting two arcs.  The width of the chord represents the volume of travel between the two district.    
+            <br><br>
+            <b>If you are not seeing the Trip Patterns circle, please adjust the zoom on your browser until the circle appears.</b>
             <br><br>
             Use the buttons on the side panel to select the data you want to view.  Data selection options include: 
             <ul>
