@@ -24,13 +24,18 @@
   z-index:0;
 }
 
+#panel {
+  position: absolute;
+  right: 20px;
+}
+
 /*chord diagram*/
 #chart_placeholder {
-  position: relative
+  position: fixed;
   text-align: center;
   float:left;
-  width: 1000px;
-  height: 100%;
+  width: 100%;
+  overflow-x: scroll;
 }
 
 #circle circle {
