@@ -252,6 +252,8 @@ async function drawMapFeatures(queryMapData=true) {
         feat['bwmetric'] = bwidth_metric;
         
         map_metric = null;
+        feat['base'] = null;
+        feat['comp'] = null;
         if (app.comp_check) {
           if (base_lookup[base_scnyr][app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
             if (base_lookup[comp_scnyr][app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
@@ -265,7 +267,11 @@ async function drawMapFeatures(queryMapData=true) {
                   map_metric = 0;
                 }
               }
-            }  
+            } else {
+              feat['base'] = base_lookup[base_scnyr][app.selected_timep][feat[GEOID_VAR]][sel_metric];
+            }
+          } else {
+            if (base_lookup[comp_scnyr][app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) feat['comp'] = base_lookup[comp_scnyr][app.selected_timep][feat[GEOID_VAR]][sel_metric];
           }
         } else {
           if (base_lookup[base_scnyr][app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
