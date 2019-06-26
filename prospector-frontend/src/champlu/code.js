@@ -36,10 +36,10 @@ mymap.setView([37.76889, -122.440997], 13);
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
-const DATA_VIEW = 'lua2017_v3';
+const DATA_VIEW = 'lua2017_v4';
 
 const FRAC_COLS = ['speed','time','vol','vmt','vhd','vht','pti80','pti80_vmt'];
-const YR_LIST = [2015,2020,2025,2030,2035,2040];
+const YR_LIST = [2010,2015,2020,2025,2030,2035,2040];
 
 const INT_COLS = ['dt','at','ft2'];
 const DISCRETE_VAR_LIMIT = 10;
@@ -803,7 +803,7 @@ let app = new Vue({
     chartSubtitle: chart_deftitle,
     
     scnSlider: scnSlider,
-    sliderValue: [YR_LIST[0],YR_LIST[YR_LIST.length-1]],
+    sliderValue: [YR_LIST[1],YR_LIST[YR_LIST.length-1]],
 
     selected_bwidth: bwidth_metric_list[0],
     bwidth_options: [],    
