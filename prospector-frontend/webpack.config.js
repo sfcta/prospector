@@ -20,6 +20,7 @@ const sfcta_components = [
      'csf_vmt',
      'coc',
      'cmptest',
+     'cmpqa',
 	 //'cmp-v0',
 ];
 
