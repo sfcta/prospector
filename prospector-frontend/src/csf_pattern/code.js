@@ -530,7 +530,7 @@ async function drawChord() {
                 } 
                 else { //source and target are the same
                     return numberWithCommas(d.source.value) 
-                        + " trips ended in " 
+                        + " trips begin in " 
                         + O_DISTRICT[d.source.index];
                 }
             });
