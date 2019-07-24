@@ -193,7 +193,7 @@ async function fetchMapFeatures() {
   }
 }
 
-let ft_filter = 'ft=neq.6&ft=neq.9';
+let ft_filter = 'ft=neq.6&ft=lt.9';
 async function fetchAllCmpSegmentData() {
   //FIXME this should be a map()
   let data_url = API_SERVER + DATA_VIEW + '?limit=100' + '&' + ft_filter;
@@ -541,22 +541,22 @@ function hoverFeature(e) {
   clearTimeout(infoPanelTimeout);
   infoPanel.update(e.target.feature);
 
-  // // don't do anything else if the feature is already clicked
-  // if (selGeoId === e.target.feature.a+'_'+e.target.feature.b) return;
+  // don't do anything else if the feature is already clicked
+  if (selGeoId === e.target.feature.a+'_'+e.target.feature.b) return;
 
-  // // return previously-hovered segment to its original color
-  // if (oldHoverTarget && e.target.feature.a+'_'+e.target.feature.b != selGeoId) {
-  //   if (oldHoverTarget.target.feature.a+'_'+oldHoverTarget.target.feature.b != selGeoId)
-  //     geoLayer.resetStyle(oldHoverTarget);
-  // }
+  // return previously-hovered segment to its original color
+  if (oldHoverTarget && e.target.feature.a+'_'+e.target.feature.b != selGeoId) {
+    if (oldHoverTarget.feature.a+'_'+oldHoverTarget.feature.b != selGeoId)
+      geoLayer.resetStyle(oldHoverTarget);
+  }
 
-  // let highlightedGeo = e.target;
-  // highlightedGeo.bringToFront();
+  let highlightedGeo = e.target;
+  highlightedGeo.bringToFront();
 
-  // if (highlightedGeo.target.feature.a+'_'+highlightedGeo.target.feature.b != selGeoId) {
-  //   highlightedGeo.setStyle(styles.selected);
-  //   oldHoverTarget = e.target;
-  // }
+  if (highlightedGeo.feature.a+'_'+highlightedGeo.feature.b != selGeoId) {
+    highlightedGeo.setStyle(styles.selected);
+    oldHoverTarget = e.target;
+  }
 }
 
 let _selectedGeo;
