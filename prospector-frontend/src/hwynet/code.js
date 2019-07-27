@@ -174,7 +174,7 @@ async function initialPrep() {
 }
 
 async function fetchMapFeatures() {
-  const geo_url = API_SERVER + GEO_VIEW + '?select=geometry,a,b';
+  const geo_url = API_SERVER + GEO_VIEW + '?select=geometry,a,b' + '&' + ft_filter;
 
   try {
     let resp = await fetch(geo_url);
