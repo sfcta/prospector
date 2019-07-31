@@ -185,7 +185,6 @@ async function fetchMapFeatures() {
       feat['type'] = 'Feature';
       feat['geometry'] = JSON.parse(feat.geometry);
     }
-
     return features;
 
   } catch (error) {
@@ -487,7 +486,7 @@ async function drawMapFeatures(queryMapData=true) {
         onEachFeature: function(feature, layer) {
           layer.on({
             mouseover: hoverFeature,
-        //    click: clickedOnFeature,
+            click: clickedOnFeature,
             });
         },
       });
@@ -624,33 +623,38 @@ function binFmt(x) {
   return distLabels[x.x] + ('');
 }
 
-// function clickedOnFeature(e) {
-//   e.target.setStyle(styles.popup);
+function clickedOnFeature(e) {
+  e.target.setStyle(styles.popup);
 
-//   let geo = e.target.feature;
-//   selGeoId = geo.a+'_'+geo.b;
+  let geo = e.target.feature;
+  selGeoId = geo.a+'_'+geo.b;
 
-//   // unselect the previously-selected selection, if there is one
-//   if (selectedSegment && selectedSegment.feature.cmp_segid != geo.cmp_segid) {
-//     prevselectedSegment = selectedSegment;
-//     geoLayer.resetStyle(prevselectedSegment);
-//   }
-//   selectedSegment = e.target;
+  // unselect the previously-selected selection, if there is one
+  if (selectedSegment && selectedSegment.feature.cmp_segid != geo.cmp_segid) {
+    prevselectedSegment = selectedSegment;
+    geoLayer.resetStyle(prevselectedSegment);
+  }
+  selectedSegment = e.target;
 
-//   let tmptxt = `${geo.cmp_name} ${geo.direction}-bound`;
-//   app.chartSubtitle = `${tmptxt} [${geo.cmp_from} to ${geo.cmp_to}]`;
+  let tmptxt = `${geo.cmp_name} ${geo.direction}-bound`;
+  app.chartSubtitle = `${tmptxt} [${geo.cmp_from} to ${geo.cmp_to}]`;
 
-//   showSegmentDetails(geo, e.latlng);
-// }
+  showSegmentDetails(geo, e.latlng);
+}
 
 function showSegmentDetails(geo, latlng) {
   _selectedGeo = geo;
   _selectedLatLng = latlng;
-
-  // show popup
-  let popupText =
-    `<b>${geo.cmp_name} ${geo.direction}-bound</b><br/>` +
-    `${geo.cmp_from} to ${geo.cmp_to}`;
+  let popupText = '';
+  let metric_val = null;
+  //SIMPLIFY 
+  if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
+  if (geo) {
+    // show popup
+    popupText =
+      `<b>${app.selected_metric.toUpperCase()}</b><b>: </b>${metric_val}` + 
+      (app.bwidth_check? `<br/><b>${app.selected_bwidth.toUpperCase()}</b>` + '<b>: </b>' + bwmetric_val:'');
+  }
 
   popSelSegment = L.popup()
     .setLatLng(latlng)
@@ -665,22 +669,22 @@ function showSegmentDetails(geo, latlng) {
     // buildChartHtmlFromCmpData();
   });
 
-  showVizChartForSelectedSegment();
+  // showVizChartForSelectedSegment();
 }
 
-// Show chart (filter json results for just the selected segment)
-function showVizChartForSelectedSegment() {
+// // Show chart (filter json results for just the selected segment)
+// function showVizChartForSelectedSegment() {
 
-  let metric_col = selviz_metric;
-  // show actual speeds in chart, not A-F LOS categories
-  if (selviz_metric == 'los_hcm85') metric_col = 'auto_speed';
+//   let metric_col = selviz_metric;
+//   // show actual speeds in chart, not A-F LOS categories
+//   if (selviz_metric == 'los_hcm85') metric_col = 'auto_speed';
 
-  let segmentData = _allCmpData
-    .filter(row => row.cmp_segid == _selectedGeo.cmp_segid)
-    .filter(row => row[metric_col] != null);
+//   let segmentData = _allCmpData
+//     .filter(row => row.cmp_segid == _selectedGeo.cmp_segid)
+//     .filter(row => row[metric_col] != null);
 
-  // buildChartHtmlFromCmpData(segmentData);
-}
+//   // buildChartHtmlFromCmpData(segmentData);
+// }
 
 // function buildChartHtmlFromCmpData(json = null) {
 //   document.getElementById('longchart').innerHTML = '';
