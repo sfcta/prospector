@@ -121,9 +121,8 @@ const METRIC_UNITS = {'speed':'mph','inrix_speed':'mph'};
 
 let sel_colorvals, sel_colors, sel_binsflag;
 let sel_bwvals;
-let init_selected_metric = 'delay_per_mile';
+let init_selected_metric = 'v_1';
 let metric_options_all, metric_options_daily; 
-let bwidth_options_all, bwidth_options_daily;
 let daily_metric_list = ['cap', 'lane_am', 'lane_op', 'lane_pm', 'buslane_am', 'buslane_op', 'buslane_pm',
                          'tollam_da', 'tollam_sr2', 'tollam_sr3', 'tollpm_da', 'tollpm_sr2', 'tollpm_sr3',
                          'tollea_da', 'tollea_sr2', 'tollea_sr3', 'tollmd_da', 'tollmd_sr2', 'tollmd_sr3',
@@ -132,7 +131,7 @@ let daily_metric_list = ['cap', 'lane_am', 'lane_op', 'lane_pm', 'buslane_am', '
                          'v6_1', 'v7_1', 'v8_1', 'v9_1', 'v10_1', 'v11_1', 'v12_1', 'vt_1', 'v1t_1', 'v2t_1',
                          'v3t_1', 'v4t_1', 'v5t_1', 'v6t_1', 'v7t_1', 'v8t_1', 'v9t_1', 'v10t_1', 'v11t_1', 'v12t_1'];
 let bwidth_metric_list = ['v_1'];
-
+let time_period = ['DAILY', 'AM', 'EA', 'EV', 'MD', 'PM']
 // let init_selectedViz = VIZ_LIST[0];
 // let data_view = VIZ_INFO[init_selectedViz]['VIEW'];
 // let selviz_metric = VIZ_INFO[init_selectedViz]['METRIC'];
@@ -165,11 +164,11 @@ async function initialPrep() {
   //await buildChartHtmlFromCmpData();
 
   console.log('5...');
-  app.time_options = await updateOptionsData('time_period');
+  //app.time_options = await updateOptionsData('time_period');
   
   console.log('6...');
   await getMetricOptions();
- 
+
   console.log('7 !!!');
 }
 
@@ -192,7 +191,7 @@ async function fetchMapFeatures() {
   }
 }
 
-let ft_filter = 'ft=neq.6&ft=lt.9';
+let ft_filter = 'ft=neq.6&ft=lt.9&mtype=eq.SF';
 async function fetchAllCmpSegmentData() {
   //FIXME this should be a map()
   let data_url = API_SERVER + DATA_VIEW + '?limit=100' + '&' + ft_filter;
@@ -331,7 +330,7 @@ async function drawMapFeatures(queryMapData=true) {
   try {
     if (queryMapData) {
       app.custom_check = false;
-      if (app.selected_timep=='daily') {
+      if (app.selected_timep=='DAILY') {
         base_lookup = await getMapData(AGGDATA_VIEW);
       } else {
         base_lookup = await getMapData(DATA_VIEW);
@@ -776,25 +775,24 @@ function selectionChanged(thing) {
 
 function seltimepChanged(thing) {
   if (app.selected_timep && app.selected_metric) {
-    if (thing=='daily') {
+    
+    if (thing=='DAILY') {
       app.metric_options = metric_options_daily;
       if (!daily_metric_list.includes(app.selected_metric)) {
-        app.selected_metric = 'cap';
+        app.selected_metric = init_selected_metric;
       }
-      app.bwidth_options = bwidth_options_daily;
     } else {
       app.metric_options = metric_options_all;
-      app.bwidth_options = bwidth_options_all;
-    }
+   }
     drawMapFeatures();
   }
 }
 
 function optionsChanged(thing) {
   if (app.time_options.length > 0) {
-    app.selected_timep = 'daily';
+    app.selected_timep = 'DAILY';
     app.metric_options = metric_options_daily;
-    app.selected_metric = 'cap';
+    app.selected_metric = 'v_1';
   }
 }
 
@@ -835,40 +833,28 @@ function updateOptionsData(colname) {
   return selopts;
 }
 
-function getMetricOptions() {
-  let sellist = [];
-  metric_options_all = [];
-  bwidth_options_all = [];
-  fetch(API_SERVER + DATA_VIEW + '?limit=1')
-    .then(resp => resp.json())
-    .then(function(jsonData) {
-      for (var entry in jsonData[0]) {
-        if (!EXCLUDE_COLS.includes(entry)) sellist.push(entry);
-      }
-      for (let entry of sellist) {
-        metric_options_all.push({text: entry, value: entry});
-      }
-      for (let entry of bwidth_metric_list) {
-        bwidth_options_all.push({text: entry, value: entry});
-      }
-    });
+function fillOptions(options){
+  let optionList = [];
 
-  sellist = [];
-  metric_options_daily = [];
-  bwidth_options_daily = [];
-  fetch(API_SERVER + AGGDATA_VIEW + '?limit=1')
-    .then(resp => resp.json())
-    .then(function(jsonData) {
-      for (let entry in jsonData[0]) {
-        if (!EXCLUDE_COLS.includes(entry)) sellist.push(entry);
-      }
-      for (let entry of sellist) {
-        metric_options_daily.push({text: entry, value: entry});
-      }
-      for (let entry of bwidth_metric_list) {
-        bwidth_options_daily.push({text: entry, value: entry});
-      }
-    });
+  for(let entry of options){
+    optionList.push({text: entry, value: entry})
+  }
+
+  return optionList;
+
+}
+
+
+async function getMetricOptions() {
+
+  metric_options_all = fillOptions(daily_metric_list);
+  app.bwidth_options = fillOptions(bwidth_metric_list);
+  metric_options_daily = metric_options_all;
+  app.metric_options = metric_options_daily;
+  app.time_options = fillOptions(time_period);
+  app.selected_timep = 'DAILY';
+  app.selected_metric = 'v_1';
+    
 }
 
 
