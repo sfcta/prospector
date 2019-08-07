@@ -44,7 +44,7 @@ const YR_VAR = 'scenario';
 const TOD_VAR = 'period';
 
 const FRAC_COLS = ['avg_speed'];
-const SCNYR_LIST = ['2017-off','2017-tmc','2017-xd','2019-xd'];
+const SCNYR_LIST = ['2017-off','2017-tmc','2017-xd','2019-tmc','2019-xd'];
 
 const INT_COLS = [''];
 const DISCRETE_VAR_LIMIT = 10;
