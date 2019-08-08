@@ -65,7 +65,7 @@ const BWIDTH_MAP = {
 };
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'avg_speed': {'base':[10, 30, 50, 70], 'diff':[-3, -0.5, 0.5, 3], 'pctdiff':[-20, -5, 5, 20]},
+  'avg_speed': {'base':[15, 30, 45, 60], 'diff':[-3, -0.1, 0.1, 3], 'pctdiff':[-20, -5, 5, 20]},
 }
 
 const METRIC_UNITS = {'avg_speed':'mph'};
