@@ -37,7 +37,6 @@ mymap.setView([37.76889, -122.440997], 13);
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'hwynet_links';
 const DATA_VIEW = 'hwynet_weekday';
-let AGGDATA_VIEW = 'hwynet_weekday_agg';
 const EXCLUDE_COLS = ['a','b','streetname','type','mtype','time_period', 'distance', 'at', 'ft'];
 // const FRAC_COLS = ['speed','time','vmt','vhd','vht','pti80','pti80_vmt',
 //                     'obs_speed','obs_time','obs_vmt','obs_vhd','obs_vht','obs_pti80','obs_pti80_vmt'];
@@ -121,18 +120,16 @@ const METRIC_UNITS = {'speed':'mph','inrix_speed':'mph'};
 
 let sel_colorvals, sel_colors, sel_binsflag;
 let sel_bwvals;
-let init_selected_metric = 'delay_per_mile';
+let init_selected_metric = 'v_1';
 let metric_options_all, metric_options_daily; 
-let bwidth_options_all, bwidth_options_daily;
-let daily_metric_list = ['cap', 'lane_am', 'lane_op', 'lane_pm', 'buslane_am', 'buslane_op', 'buslane_pm',
+let daily_metric_list = ['cap', 'speed', 'time', 'lane_am', 'lane_op', 'lane_pm', 'buslane_am', 'buslane_op', 'buslane_pm',
                          'tollam_da', 'tollam_sr2', 'tollam_sr3', 'tollpm_da', 'tollpm_sr2', 'tollpm_sr3',
                          'tollea_da', 'tollea_sr2', 'tollea_sr3', 'tollmd_da', 'tollmd_sr2', 'tollmd_sr3',
                          'tollev_da', 'tollev_sr2', 'tollev_sr3', 'busvol_am', 'busvol_md', 'busvol_pm',
                          'busvol_ev', 'busvol_ea', 'v_1', 'time_1', 'v1_1', 'v2_1', 'v3_1', 'v4_1', 'v5_1', 
-                         'v6_1', 'v7_1', 'v8_1', 'v9_1', 'v10_1', 'v11_1', 'v12_1', 'vt_1', 'v1t_1', 'v2t_1',
-                         'v3t_1', 'v4t_1', 'v5t_1', 'v6t_1', 'v7t_1', 'v8t_1', 'v9t_1', 'v10t_1', 'v11t_1', 'v12t_1'];
+                         'v6_1', 'v7_1', 'v8_1', 'v9_1', 'v10_1', 'v11_1', 'v12_1'];
 let bwidth_metric_list = ['v_1'];
-
+let time_period = ['DAILY', 'AM', 'EA', 'EV', 'MD', 'PM']
 // let init_selectedViz = VIZ_LIST[0];
 // let data_view = VIZ_INFO[init_selectedViz]['VIEW'];
 // let selviz_metric = VIZ_INFO[init_selectedViz]['METRIC'];
@@ -159,17 +156,17 @@ async function initialPrep() {
   _allCmpData = await fetchAllCmpSegmentData();
 
   console.log('3...');
-  _aggregateData = await fetchAggregateData();
+  //_aggregateData = await fetchAggregateData();
 
   console.log('4... ');
   //await buildChartHtmlFromCmpData();
 
   console.log('5...');
-  app.time_options = await updateOptionsData('time_period');
+  //app.time_options = await updateOptionsData('time_period');
   
   console.log('6...');
   await getMetricOptions();
- 
+
   console.log('7 !!!');
 }
 
@@ -185,7 +182,6 @@ async function fetchMapFeatures() {
       feat['type'] = 'Feature';
       feat['geometry'] = JSON.parse(feat.geometry);
     }
-
     return features;
 
   } catch (error) {
@@ -193,7 +189,7 @@ async function fetchMapFeatures() {
   }
 }
 
-let ft_filter = 'ft=neq.6&ft=lt.9';
+let ft_filter = 'ft=neq.6&ft=neq.11&ft=lt.13&mtype=eq.SF';
 async function fetchAllCmpSegmentData() {
   //FIXME this should be a map()
   let data_url = API_SERVER + DATA_VIEW + '?limit=100' + '&' + ft_filter;
@@ -204,22 +200,6 @@ async function fetchAllCmpSegmentData() {
   } catch (error) {console.log('cmp data fetch error: ' + error);}
 }
 
-async function fetchAggregateData() {
-  // let buildAggData = {};
-  const url = API_SERVER + AGGDATA_VIEW + '?' + ft_filter;
-
-  try {
-    let resp = await fetch(url);
-    return await resp.json();
-    // for (let viz of VIZ_LIST) {
-    //   parseAllAggregateData(buildAggData, jsonData, viz);
-    // }
-    // return buildAggData;
-
-  } catch(error) {
-    console.log('aggregate data error: ' + error);
-  }
-}
 
 // async function parseAllAggregateData(buildAggData, jsonData, viz) {
 //   buildAggData[viz] = {};
@@ -300,14 +280,9 @@ infoPanel.addTo(mymap);
 async function getMapData(view) {
   let data_url;
 
-  if (view=='hwynet_weekday_agg') {
-    data_url = API_SERVER + view + '?select=a,b,' + app.selected_metric + 
-                ',' + app.selected_bwidth + '&' + ft_filter;
-  } else {
-    data_url = API_SERVER + view + '?select=a,b,' + app.selected_metric + 
+  data_url = API_SERVER + view + '?select=a,b,' + app.selected_metric + 
                 ',' + app.selected_bwidth + 
                 '&time_period=eq.' + app.selected_timep + '&' + ft_filter;
-  }
   
   let resp = await fetch(data_url);
   let jsonData = await resp.json();
@@ -332,11 +307,7 @@ async function drawMapFeatures(queryMapData=true) {
   try {
     if (queryMapData) {
       app.custom_check = false;
-      if (app.selected_timep=='daily') {
-        base_lookup = await getMapData(AGGDATA_VIEW);
-      } else {
-        base_lookup = await getMapData(DATA_VIEW);
-      }
+      base_lookup = await getMapData(DATA_VIEW);
 
       let map_metric;
       let bwidth_metric;
@@ -487,7 +458,7 @@ async function drawMapFeatures(queryMapData=true) {
         onEachFeature: function(feature, layer) {
           layer.on({
             mouseover: hoverFeature,
-        //    click: clickedOnFeature,
+            click: clickedOnFeature,
             });
         },
       });
@@ -624,33 +595,38 @@ function binFmt(x) {
   return distLabels[x.x] + ('');
 }
 
-// function clickedOnFeature(e) {
-//   e.target.setStyle(styles.popup);
+function clickedOnFeature(e) {
+  e.target.setStyle(styles.popup);
 
-//   let geo = e.target.feature;
-//   selGeoId = geo.a+'_'+geo.b;
+  let geo = e.target.feature;
+  selGeoId = geo.a+'_'+geo.b;
 
-//   // unselect the previously-selected selection, if there is one
-//   if (selectedSegment && selectedSegment.feature.cmp_segid != geo.cmp_segid) {
-//     prevselectedSegment = selectedSegment;
-//     geoLayer.resetStyle(prevselectedSegment);
-//   }
-//   selectedSegment = e.target;
+  // unselect the previously-selected selection, if there is one
+  if (selectedSegment && selectedSegment.feature.cmp_segid != geo.cmp_segid) {
+    prevselectedSegment = selectedSegment;
+    geoLayer.resetStyle(prevselectedSegment);
+  }
+  selectedSegment = e.target;
 
-//   let tmptxt = `${geo.cmp_name} ${geo.direction}-bound`;
-//   app.chartSubtitle = `${tmptxt} [${geo.cmp_from} to ${geo.cmp_to}]`;
+  let tmptxt = `${geo.cmp_name} ${geo.direction}-bound`;
+  app.chartSubtitle = `${tmptxt} [${geo.cmp_from} to ${geo.cmp_to}]`;
 
-//   showSegmentDetails(geo, e.latlng);
-// }
+  showSegmentDetails(geo, e.latlng);
+}
 
 function showSegmentDetails(geo, latlng) {
   _selectedGeo = geo;
   _selectedLatLng = latlng;
-
-  // show popup
-  let popupText =
-    `<b>${geo.cmp_name} ${geo.direction}-bound</b><br/>` +
-    `${geo.cmp_from} to ${geo.cmp_to}`;
+  let popupText = '';
+  let metric_val = null;
+  //SIMPLIFY 
+  if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
+  if (geo) {
+    // show popup
+    popupText =
+      `<b>${app.selected_metric.toUpperCase()}</b><b>: </b>${metric_val}` + 
+      (app.bwidth_check? `<br/><b>${app.selected_bwidth.toUpperCase()}</b>` + '<b>: </b>' + bwmetric_val:'');
+  }
 
   popSelSegment = L.popup()
     .setLatLng(latlng)
@@ -665,22 +641,22 @@ function showSegmentDetails(geo, latlng) {
     // buildChartHtmlFromCmpData();
   });
 
-  showVizChartForSelectedSegment();
+  // showVizChartForSelectedSegment();
 }
 
-// Show chart (filter json results for just the selected segment)
-function showVizChartForSelectedSegment() {
+// // Show chart (filter json results for just the selected segment)
+// function showVizChartForSelectedSegment() {
 
-  let metric_col = selviz_metric;
-  // show actual speeds in chart, not A-F LOS categories
-  if (selviz_metric == 'los_hcm85') metric_col = 'auto_speed';
+//   let metric_col = selviz_metric;
+//   // show actual speeds in chart, not A-F LOS categories
+//   if (selviz_metric == 'los_hcm85') metric_col = 'auto_speed';
 
-  let segmentData = _allCmpData
-    .filter(row => row.cmp_segid == _selectedGeo.cmp_segid)
-    .filter(row => row[metric_col] != null);
+//   let segmentData = _allCmpData
+//     .filter(row => row.cmp_segid == _selectedGeo.cmp_segid)
+//     .filter(row => row[metric_col] != null);
 
-  // buildChartHtmlFromCmpData(segmentData);
-}
+//   // buildChartHtmlFromCmpData(segmentData);
+// }
 
 // function buildChartHtmlFromCmpData(json = null) {
 //   document.getElementById('longchart').innerHTML = '';
@@ -772,25 +748,16 @@ function selectionChanged(thing) {
 
 function seltimepChanged(thing) {
   if (app.selected_timep && app.selected_metric) {
-    if (thing=='daily') {
-      app.metric_options = metric_options_daily;
-      if (!daily_metric_list.includes(app.selected_metric)) {
-        app.selected_metric = 'cap';
-      }
-      app.bwidth_options = bwidth_options_daily;
-    } else {
       app.metric_options = metric_options_all;
-      app.bwidth_options = bwidth_options_all;
-    }
     drawMapFeatures();
   }
 }
 
 function optionsChanged(thing) {
   if (app.time_options.length > 0) {
-    app.selected_timep = 'daily';
+    app.selected_timep = 'DAILY';
     app.metric_options = metric_options_daily;
-    app.selected_metric = 'cap';
+    app.selected_metric = 'v_1';
   }
 }
 
@@ -813,6 +780,7 @@ function clickViz(chosenviz) {
 }
 
 // fetch data to fill in select dropdowns
+/*
 function updateOptionsData(colname) {
   let sellist = [];
   let selopts = [];
@@ -830,86 +798,32 @@ function updateOptionsData(colname) {
   selopts.push({text: 'daily', value: 'daily'});
   return selopts;
 }
+*/
 
-function getMetricOptions() {
-  let sellist = [];
-  metric_options_all = [];
-  bwidth_options_all = [];
-  fetch(API_SERVER + DATA_VIEW + '?limit=1')
-    .then(resp => resp.json())
-    .then(function(jsonData) {
-      for (var entry in jsonData[0]) {
-        if (!EXCLUDE_COLS.includes(entry)) sellist.push(entry);
-      }
-      for (let entry of sellist) {
-        metric_options_all.push({text: entry, value: entry});
-      }
-      for (let entry of bwidth_metric_list) {
-        bwidth_options_all.push({text: entry, value: entry});
-      }
-    });
+function fillOptions(options){
+  let optionList = [];
 
-  sellist = [];
-  metric_options_daily = [];
-  bwidth_options_daily = [];
-  fetch(API_SERVER + AGGDATA_VIEW + '?limit=1')
-    .then(resp => resp.json())
-    .then(function(jsonData) {
-      for (let entry in jsonData[0]) {
-        if (!EXCLUDE_COLS.includes(entry)) sellist.push(entry);
-      }
-      for (let entry of sellist) {
-        metric_options_daily.push({text: entry, value: entry});
-      }
-      for (let entry of bwidth_metric_list) {
-        bwidth_options_daily.push({text: entry, value: entry});
-      }
-    });
+  for(let entry of options){
+    optionList.push({text: entry, value: entry})
+  }
+
+  return optionList;
+
 }
 
 
-// SLIDER ----
-let breakSlider = {
-  clickable: true,
-  min: 1,
-  max: 100,
-  interval: 0.01,
-  direction: 'horizontal',
-  disabled: false,
-  dotSize: 16,
-  eventType: 'auto',
-  height: 3,
-  labelStyle: { color: '#ccc' },
-  labelActiveStyle: { color: '#ccc' },
-  lazy: false,
-  piecewise: false,
-  piecewiseLabel: false,
-  realTime: false,
-  reverse: false,
-  show: true,
-  sliderValue: 0,
-  speed: 0.25,
-  style: { marginTop: '0px', marginBottom: '40px' },
-  tooltip: 'always',
-  tooltipDir: 'bottom',
-  tooltipStyle: { backgroundColor: '#eaae00', borderColor: '#eaae00' },
-  width: 'auto',
-  piecewiseStyle: {
-    backgroundColor: '#ccc',
-    visibility: 'visible',
-    width: '6px',
-    height: '6px',
-  },
-  piecewiseActiveStyle: {
-    backgroundColor: '#ccc',
-    visibility: 'visible',
-    width: '6px',
-    height: '6px',
-  },
-  processStyle: {
-    backgroundColor: '#ffc',
-  },
-};
+async function getMetricOptions() {
+
+  metric_options_all = fillOptions(daily_metric_list);
+  app.bwidth_options = fillOptions(bwidth_metric_list);
+  metric_options_daily = metric_options_all;
+  app.metric_options = metric_options_daily;
+  app.time_options = fillOptions(time_period);
+  app.selected_timep = 'DAILY';
+  app.selected_metric = 'v_1';
+    
+}
+
 
 function bp1Changed(thing) {
   if (thing < app.bp0) app.bp1 = app.bp0;
@@ -1046,7 +960,7 @@ let app = new Vue({
     time_options: [
     {text: '', value: ''},
     ],
-    
+
     selected_metric: null,
     metric_options: [
     {text: '', value: ''},
@@ -1054,6 +968,8 @@ let app = new Vue({
 
     selected_bwidth: bwidth_metric_list[0],
     bwidth_options: [],    
+
+    
     
     selected_colorscheme: 'Spectral',
     color_options: [
@@ -1108,9 +1024,6 @@ let app = new Vue({
     clickToggleHelp: clickToggleHelp,
     clickedShowHide: clickedShowHide,
     clickViz: clickViz,
-  },
-  components: {
-    vueSlider,
   },
 });
 
