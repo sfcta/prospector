@@ -54,69 +54,13 @@ const BWIDTH_MAP = {
   5: [1.25, 2.5, 3.75, 5],
   6: [1, 2, 3, 4, 5]
 };
-
+const SCNYR_LIST = ['hwynet2', 'hwynet_weekday'];
 const CUSTOM_BP_DICT = {
   'speed': {'base':[12, 20, 30, 45], 'diff':[-3, -2, -1, -0.5], 'pctdiff':[-20, -10, -5, 0]},
   'cap': {'base':[1500, 3000, 4500, 6000], 'diff':[-500, -1, 1, 500], 'pctdiff':[-5, -1, 1, 5]}
 }
 
 const METRIC_UNITS = {'speed':'mph','inrix_speed':'mph'};
-
-// const VIZ_LIST = ['ALOS', 'TSPD', 'TRLB', 'ATRAT'];
-// const VIZ_INFO = {
-//   ALOS: {
-//     TXT: 'Auto Level-of-Service (LOS)',
-//     VIEW: 'cmp_autotransit',
-//     METRIC: 'los_hcm85',
-//     METRIC_DESC: 'Level of Service',
-//     COLOR_BY_BINS: false,
-//     COLORVALS: ['A', 'B', 'C', 'D', 'E', 'F'],
-//     COLORS: ['#060', '#9f0', '#ff3', '#f90', '#f60', '#c00'],
-//     CHARTINFO: 'AUTO SPEED TREND (MPH):',
-//     CHART_PREC: 1,
-//     POST_UNITS: '',
-//   },
-
-//   TSPD: {
-//     TXT: 'Transit Speed',
-//     VIEW: 'cmp_autotransit',
-//     METRIC: 'transit_speed',
-//     METRIC_DESC: 'Transit Speed (MPH)',
-//     COLOR_BY_BINS: true,
-//     COLORVALS: [0, 5, 7.5, 10, 12.5, 15],
-//     COLORS: ['#ccc', '#c00', '#f60', '#f90', '#ff3', '#9f0', '#060'],
-//     CHARTINFO: 'TRANSIT SPEED TREND (MPH):',
-//     CHART_PREC: 1,
-//     POST_UNITS: '',
-//   },
-
-//   TRLB: {
-//     TXT: 'Transit Reliability',
-//     VIEW: 'cmp_autotransit',
-//     METRIC: 'transit_cv',
-//     METRIC_DESC: 'Transit Reliability',
-//     COLOR_BY_BINS: true,
-//     COLORVALS: [0, 5, 10, 20, 30, 40],
-//     COLORS: ['#ccc', '#060', '#9f0', '#ff3', '#f90', '#f60', '#c00'],
-//     CHARTINFO: 'TRANSIT RELIABILITY TREND:',
-//     CHART_PREC: 1,
-//     POST_UNITS: '%',
-//   },
-
-//   ATRAT: {
-//     TXT: 'Auto-Transit Speed Ratio',
-//     VIEW: 'cmp_autotransit',
-//     METRIC: 'atspd_ratio',
-//     METRIC_DESC: 'Auto/Transit Speed',
-//     COLOR_BY_BINS: true,
-//     COLORVALS: [0, 1, 1.5, 2, 2.5, 3],
-//     COLORS: ['#ccc', '#060', '#9f0', '#ff3', '#f90', '#f60', '#c00'],
-//     CHARTINFO: 'AUTO/TRANSIT SPEED TREND:',
-//     CHART_PREC: 1,
-//     POST_UNITS: '',
-//   },
-// };
-
 
 let sel_colorvals, sel_colors, sel_binsflag;
 let sel_bwvals;
@@ -153,7 +97,7 @@ async function initialPrep() {
   _featJson = await fetchMapFeatures();
 
   console.log('2...');
-  _allCmpData = await fetchAllCmpSegmentData();
+  //_allCmpData = await fetchAllCmpSegmentData();
 
   console.log('3...');
   //_aggregateData = await fetchAggregateData();
@@ -200,51 +144,6 @@ async function fetchAllCmpSegmentData() {
   } catch (error) {console.log('cmp data fetch error: ' + error);}
 }
 
-
-// async function parseAllAggregateData(buildAggData, jsonData, viz) {
-//   buildAggData[viz] = {};
-
-//   let vizData = jsonData.filter(row => row['viz'] === viz);
-
-//   let byYearAM = {};
-//   let byYearPM = {};
-
-//   for (let entry of vizData) {
-//     let val = Number(entry.metric).toFixed(
-//       VIZ_INFO[viz]['CHART_PREC']
-//     );
-//     if (val === 'NaN') continue;
-//     if (entry.period == 'AM') {
-//       if (!byYearAM[entry.year]) byYearAM[entry.year] = {};
-//       byYearAM[entry.year][entry.fac_typ] = val;
-//     } else {
-//       if (!byYearPM[entry.year]) byYearPM[entry.year] = {};
-//       byYearPM[entry.year][entry.fac_typ] = val;
-//     }
-//   }
-
-//   // Push AM data
-//   let data = [];
-//   for (let year in byYearAM) {
-//     data.push({
-//       year: year,
-//       art: byYearAM[year]['Arterial'],
-//       fwy: byYearAM[year]['Freeway'],
-//     });
-//   }
-//   buildAggData[viz]['AM'] = data;
-
-//   // Push PM data
-//   data = [];
-//   for (let year in byYearPM) {
-//     data.push({
-//       year: year,
-//       art: byYearPM[year]['Arterial'],
-//       fwy: byYearPM[year]['Freeway'],
-//     });
-//   }
-//   buildAggData[viz]['PM'] = data;
-// }
 
 // hover panel -------------------
 let infoPanel = L.control();
@@ -295,6 +194,7 @@ async function getMapData(view) {
 }
 
 let base_lookup;
+let comp_lookup;
 let map_vals;
 let bwidth_vals;
 async function drawMapFeatures(queryMapData=true) {
@@ -304,13 +204,21 @@ async function drawMapFeatures(queryMapData=true) {
   let sel_metric = app.selected_metric;
   // prec = (FRAC_COLS.includes(sel_metric) ? 100 : 1);
   
+  if (app.sliderValue[0] == app.sliderValue[1]){
+    app.comp_check = false;
+  } else {
+    app.comp_check = true;
+  }
   try {
     if (queryMapData) {
       app.custom_check = false;
-      base_lookup = await getMapData(DATA_VIEW);
+      base_lookup = await getMapData(app.sliderValue[0]);
+      comp_lookup = await getMapData(app.sliderValue[1]);
 
       let map_metric;
       let bwidth_metric;
+      let baseVal;
+      let compVal;
       map_vals = [];
       bwidth_vals = [];
       for (let feat of cleanFeatures) {
@@ -320,7 +228,19 @@ async function drawMapFeatures(queryMapData=true) {
           bwidth_metric = Math.round(base_lookup[feat.a+'_'+feat.b][app.selected_bwidth]);
           if (bwidth_metric !== null) bwidth_vals.push(bwidth_metric);
           feat['bwmetric'] = bwidth_metric;
-          map_metric = base_lookup[feat.a+'_'+feat.b][sel_metric];
+
+          if(app.comp_check){
+            if(base_lookup.hasOwnProperty(feat.a+'_'+feat.b)){
+              if(comp_lookup.hasOwnProperty(feat.a+'_'+feat.b)){
+                baseVal = base_lookup[feat.a+'_'+feat.b][sel_metric];
+                compVal = comp_lookup[feat.a+'_'+feat.b][sel_metric];
+                map_metric = baseVal - compVal;
+              }
+            }
+          } else {
+            map_metric = base_lookup[feat.a+'_'+feat.b][sel_metric];
+          }
+          
           if (map_metric !== null) map_vals.push(map_metric);
           feat['metric'] = map_metric;
         }
@@ -638,109 +558,12 @@ function showSegmentDetails(geo, latlng) {
     geoLayer.resetStyle(selectedSegment);
     app.chartSubtitle = aggdata_label;
     prevselectedSegment = selectedSegment = selGeoId = _selectedGeo = null;
-    // buildChartHtmlFromCmpData();
   });
 
-  // showVizChartForSelectedSegment();
 }
-
-// // Show chart (filter json results for just the selected segment)
-// function showVizChartForSelectedSegment() {
-
-//   let metric_col = selviz_metric;
-//   // show actual speeds in chart, not A-F LOS categories
-//   if (selviz_metric == 'los_hcm85') metric_col = 'auto_speed';
-
-//   let segmentData = _allCmpData
-//     .filter(row => row.cmp_segid == _selectedGeo.cmp_segid)
-//     .filter(row => row[metric_col] != null);
-
-//   // buildChartHtmlFromCmpData(segmentData);
-// }
-
-// function buildChartHtmlFromCmpData(json = null) {
-//   document.getElementById('longchart').innerHTML = '';
-
-//   if (json) {
-//     let byYear = {};
-//     let data = [];
-//     let maxHeight = 0;
-
-//     for (let entry of json) {
-//       let metric_col = selviz_metric;
-//       if (selviz_metric == VIZ_INFO['ALOS']['METRIC'])
-//         metric_col = 'auto_speed';
-//       let val = Number(entry[metric_col]).toFixed(
-//         VIZ_INFO[app.selectedViz]['CHART_PREC']
-//       );
-//       if (val === 'NaN') continue;
-//       if (!byYear[entry.year]) byYear[entry.year] = {};
-//       byYear[entry.year][entry.period] = val;
-//     }
-//     for (let year in byYear) {
-//       if (app.isAMActive) {
-//         data.push({year: year, period: byYear[year]['AM']});
-//       } else {
-//         data.push({year: year, period: byYear[year]['PM']});
-//       }
-
-//       // use the same scale for am/pm even though we only show one
-//       if (byYear[year]['AM'])
-//         maxHeight = Math.max(maxHeight, byYear[year]['AM']);
-//       if (byYear[year]['PM'])
-//         maxHeight = Math.max(maxHeight, byYear[year]['PM']);
-//     }
-
-//     // scale ymax to either 20 or 60:
-//     maxHeight = maxHeight <= 20 ? 20 : 60;
-
-//     // use maxHeight for ALOS and TSPD; use auto for other metrics
-//     let scale = 'auto';
-//     if (app.selectedViz == 'ALOS' || app.selectedViz == 'TSPD') {
-//       scale = maxHeight;
-//     }
-
-//     new Morris.Line({
-//       data: data,
-//       element: 'longchart',
-//       hideHover: true,
-//       labels: [selPeriod],
-//       lineColors: [app.isAMActive ? '#f66' : '#99f'],
-//       postUnits: VIZ_INFO[app.selectedViz]['POST_UNITS'],
-//       xkey: 'year',
-//       xLabels: 'year',
-//       xLabelAngle: 45,
-//       ykeys: ['period'],
-//       ymax: scale,
-//     });
-//   } else {
-//     let ykey_tmp, lab_tmp;
-//     if (app.selectedViz == 'ALOS') {
-//       ykey_tmp = ['art', 'fwy'];
-//       lab_tmp = ['Arterial', 'Freeway'];
-//     } else {
-//       ykey_tmp = ['art'];
-//       lab_tmp = ['Arterial'];
-//     }
-//     new Morris.Line({
-//       data: _aggregateData[app.selectedViz][selPeriod],
-//       element: 'longchart',
-//       gridTextColor: '#aaa',
-//       hideHover: true,
-//       labels: lab_tmp,
-//       lineColors: ['#f66', '#99f'],
-//       postUnits: VIZ_INFO[app.selectedViz]['POST_UNITS'],
-//       xkey: 'year',
-//       xLabels: 'year',
-//       xLabelAngle: 45,
-//       ykeys: ykey_tmp,
-//       ymax: app.selectedViz == 'TSPD' ? 20 : 'auto',
-//     });
-//   }
-// }
-
+0
 function selectionChanged(thing) {
-  if (app.selected_timep && app.selected_metric) {
+  if (app.selected_timep && app.selected_metric && app.sliderValue) {
     drawMapFeatures();
   }
   //highlightSelectedSegment();
@@ -779,26 +602,6 @@ function clickViz(chosenviz) {
   }
 }
 
-// fetch data to fill in select dropdowns
-/*
-function updateOptionsData(colname) {
-  let sellist = [];
-  let selopts = [];
-  fetch(API_SERVER + DATA_VIEW + '?select=' + colname + '&' + colname + '=neq.null')
-    .then(resp => resp.json())
-    .then(function(jsonData) {
-      for (let entry of jsonData) {
-        if (!sellist.includes(entry[colname])) sellist.push(entry[colname]);
-      }
-      sellist = sellist.sort();
-      for (let entry of sellist) {
-        selopts.push({text: entry, value: entry});
-      }
-    });
-  selopts.push({text: 'daily', value: 'daily'});
-  return selopts;
-}
-*/
 
 function fillOptions(options){
   let optionList = [];
@@ -908,34 +711,34 @@ function getColorMode(cscheme) {
   }
 }
 
+let scnSlider = {
+  data: SCNYR_LIST,
+  //direction: 'vertical',
+  //reverse: true,
+  lazy: true,
+  height: 3,
+  //width: 'auto',
+  style: {marginTop: '10px'},
+  processDragable: true,
+  eventType: 'auto',
+  piecewise: true,
+  piecewiseLabel: true,
+  tooltip: 'always',
+  tooltipDir: 'bottom',
+  tooltipStyle: { backgroundColor: '#eaae00', borderColor: '#eaae00', marginLeft:'5px'},
+  processStyle: { backgroundColor: "#eaae00"},
+  labelStyle: {color: "#ccc", marginLeft:'5px', marginTop:'5px'},
+  piecewiseStyle: {backgroundColor: '#ccc',width: '8px',height: '8px',visibility: 'visible'},
+};
+
 
 let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
   data: {
-    // chartTitle: VIZ_INFO[VIZ_LIST[0]].CHARTINFO,
-    // chartSubtitle: aggdata_label,
-    // isAMActive: true,
-    // isPMActive: false,
-    // selectedViz: VIZ_LIST[0],
-    // vizlist: VIZ_LIST,
-    // vizinfo: VIZ_INFO,
-    // ft: [
-    //   {text: 'Fwy-Fwy Connector', value: 1},
-    //   {text: 'Freeway', value: 2},
-    //   {text: 'Expressway', value: 3},
-    //   {text: 'Collector', value: 4},
-    //   {text: 'Ramp', value: 5},
-    //   {text: 'Centroid Connector', value: 6},
-    //   {text: 'Major Arterial', value: 7},
-    //   {text: 'Alley', value: 9},
-    //   {text: 'Local', value: 11},
-    //   {text: 'Minor Arterial', value: 12},
-    //   {text: 'Bike Only', value: 13},
-    //   {text: 'Super Arterial', value: 15},
-    //   ],
     isPanelHidden: false,
     isUpdActive: false,
+    comp_check: true,
     bwidth_check: false,
     custom_check: false,
     custom_disable: false,
@@ -969,7 +772,8 @@ let app = new Vue({
     selected_bwidth: bwidth_metric_list[0],
     bwidth_options: [],    
 
-    
+    scnSlider: scnSlider,
+    sliderValue: [SCNYR_LIST[0],SCNYR_LIST[SCNYR_LIST.length-1]],
     
     selected_colorscheme: 'Spectral',
     color_options: [
@@ -999,6 +803,7 @@ let app = new Vue({
     ]      
   },
   watch: {
+    sliderValue: selectionChanged,
     time_options: optionsChanged,
     selected_timep: seltimepChanged,
     selected_metric: selectionChanged,
@@ -1025,6 +830,9 @@ let app = new Vue({
     clickedShowHide: clickedShowHide,
     clickViz: clickViz,
   },
+  components: {
+    vueSlider,
+  }
 });
 
 let slideapp = new Vue({
