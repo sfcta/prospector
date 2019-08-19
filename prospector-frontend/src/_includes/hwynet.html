@@ -44,8 +44,18 @@
                 ${option.text}
               </option>
             </select> -->
-            <h5 style="margin-top:15px">CHOOSE YEAR(S)</h5>
-            <vue-slider v-bind="scnSlider" v-model="sliderValue"></vue-slider>
+            <h5 style="margin-top:15px">CHOOSE SCENARIOS:</h5>
+            <select v-model="selected_base_scenario">
+              <option v-for="option in scenario_options" v-bind:value="option.value">
+                ${option.text}
+              </option>
+            </select>
+
+            <select v-model="selected_comp_scenario">
+              <option v-for="option in scenario_options" v-bind:value="option.value">
+                ${option.text}
+              </option>
+            </select>
             
             <h5 style="margin-top:15px">CHOOSE TIME PERIOD:</h5>
             <select v-model="selected_timep">
