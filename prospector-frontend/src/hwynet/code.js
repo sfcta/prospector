@@ -74,6 +74,7 @@ let daily_metric_list = ['cap', 'speed', 'time', 'lane_am', 'lane_op', 'lane_pm'
                          'v6_1', 'v7_1', 'v8_1', 'v9_1', 'v10_1', 'v11_1', 'v12_1'];
 let bwidth_metric_list = ['v_1'];
 let time_period = ['DAILY', 'AM', 'EA', 'EV', 'MD', 'PM']
+let scenario_list = ['Scenario1', 'Scenario2']
 // let init_selectedViz = VIZ_LIST[0];
 // let data_view = VIZ_INFO[init_selectedViz]['VIEW'];
 // let selviz_metric = VIZ_INFO[init_selectedViz]['METRIC'];
@@ -204,7 +205,7 @@ async function drawMapFeatures(queryMapData=true) {
   let sel_metric = app.selected_metric;
   // prec = (FRAC_COLS.includes(sel_metric) ? 100 : 1);
   
-  if (app.sliderValue[0] == app.sliderValue[1]){
+  if (app.selected_base_scenario == app.selected_comp_scenario){
     app.comp_check = false;
   } else {
     app.comp_check = true;
@@ -212,8 +213,8 @@ async function drawMapFeatures(queryMapData=true) {
   try {
     if (queryMapData) {
       app.custom_check = false;
-      base_lookup = await getMapData(app.sliderValue[0]);
-      comp_lookup = await getMapData(app.sliderValue[1]);
+      base_lookup = await getMapData(app.selected_base_scenario);
+      comp_lookup = await getMapData(app.selected_comp_scenario);
 
       let map_metric;
       let bwidth_metric;
@@ -563,7 +564,7 @@ function showSegmentDetails(geo, latlng) {
 }
 0
 function selectionChanged(thing) {
-  if (app.selected_timep && app.selected_metric && app.sliderValue) {
+  if (app.selected_timep && app.selected_metric && app.selected_base_scenario && app.selected_comp_scenario) {
     drawMapFeatures();
   }
   //highlightSelectedSegment();
@@ -622,6 +623,9 @@ async function getMetricOptions() {
   metric_options_daily = metric_options_all;
   app.metric_options = metric_options_daily;
   app.time_options = fillOptions(time_period);
+  app.scenario_options = fillOptions(scenario_list)
+  app.selected_base_scenario = 'Scenario1'
+  app.selected_comp_scenario = 'Scenario2'
   app.selected_timep = 'DAILY';
   app.selected_metric = 'v_1';
     
@@ -763,6 +767,16 @@ let app = new Vue({
     time_options: [
     {text: '', value: ''},
     ],
+    
+    selected_base_scenario: null,
+    scenario_options:[
+      {text: '', value: ''},
+    ],
+
+    selected_comp_scenario: null,
+    scenario_options:[
+      {text: '', value: ''},
+    ],
 
     selected_metric: null,
     metric_options: [
@@ -809,6 +823,8 @@ let app = new Vue({
     selected_metric: selectionChanged,
     selected_bwidth: selectionChanged,
     selected_breaks: selectionChanged,
+    selected_base_scenario: selectionChanged,
+    selected_comp_scenario: selectionChanged,
     
     selected_colorscheme: colorschemeChanged,
     bp1: bp1Changed,
