@@ -92,7 +92,6 @@ let _featJson;
 let _allCmpData;
 let _aggregateData;
 // let prec;
-
 async function initialPrep() {
 
   console.log('1...');
@@ -136,15 +135,6 @@ async function fetchMapFeatures() {
 }
 
 let ft_filter = 'ft=neq.6&ft=neq.11&ft=lt.13&mtype=eq.SF';
-async function fetchAllCmpSegmentData() {
-  //FIXME this should be a map()
-  let data_url = API_SERVER + DATA_VIEW + '?limit=100' + '&' + ft_filter;
-
-  try {
-    let resp = await fetch(data_url);
-    return await resp.json();
-  } catch (error) {console.log('cmp data fetch error: ' + error);}
-}
 
 async function fetchScenarios(){
   let data_url = API_SERVER + SCENARIO_VIEW
@@ -152,7 +142,9 @@ async function fetchScenarios(){
   try{
     let resp = await fetch(data_url).then(function(response) {
       response.json().then(function(parsedJson) {
-        return parsedJson;
+        for (let obj of parsedJson){
+          scenario_list.push(obj.table_name)
+        }
       })
     })
   } catch (error) {console.log('scenario data fetch error: ' + error)}
@@ -195,7 +187,7 @@ async function getMapData(view) {
   data_url = API_SERVER + view + '?select=a,b,' + app.selected_metric + 
                 ',' + app.selected_bwidth + 
                 '&time_period=eq.' + app.selected_timep + '&' + ft_filter;
-  
+
   let resp = await fetch(data_url);
   let jsonData = await resp.json();
 
@@ -629,15 +621,14 @@ function fillOptions(options){
 
 
 async function getMetricOptions() {
-  fetchScenarios()
   metric_options_all = fillOptions(daily_metric_list);
   app.bwidth_options = fillOptions(bwidth_metric_list);
   metric_options_daily = metric_options_all;
   app.metric_options = metric_options_daily;
   app.time_options = fillOptions(time_period);
   app.scenario_options = fillOptions(scenario_list)
-  app.selected_base_scenario = 'hwynet2'
-  app.selected_comp_scenario = 'hn_csf_2015_tnc_v7_est'
+  app.selected_base_scenario = scenario_list[0]
+  app.selected_comp_scenario = scenario_list[1]
   app.selected_timep = 'DAILY';
   app.selected_metric = 'v_1';
     
@@ -915,5 +906,6 @@ let helpPanel = new Vue({
   },
 });
 
+fetchScenarios();
 initialPrep();
 
