@@ -28,15 +28,11 @@
            </div>
 
           <div id="picker">
-            <h5 style="margin-top:15px">CHOOSE YEAR(S)</h5>
-            <vue-slider v-bind="scnSlider" v-model="sliderValue"></vue-slider>
+            <!--h5 style="margin-top:15px">CHOOSE YEAR(S)</h5>
+            <vue-slider v-bind="scnSlider" v-model="sliderValue"></vue-slider-->
             
-            <h5 style="margin-top:50px">CHOOSE TIME PERIOD:</h5>
-            <select v-model="selected_timep">
-              <option v-for="option in time_options" v-bind:value="option.value">
-                ${option.text}
-              </option>
-            </select>
+            <h5 style="margin-top:50px">CHOOSE HOUSEHOLD ID:</h5>
+            <v-select v-model="hhidSelVal" :options="hhidSelOptions"></v-select>
             
             <h5 style="margin-top:15px">CHOOSE MAP METRIC:</h5>
             <select v-model="selected_metric">

@@ -21,8 +21,8 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 
 // Must use npm and babel to support IE11/Safari
 import 'isomorphic-fetch';
-import vueSlider from 'vue-slider-component';
 import Cookies from 'js-cookie';
+Vue.component('v-select', VueSelect.VueSelect);
 
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
@@ -37,6 +37,8 @@ mymap.setView([37.76889, -122.440997], 13);
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'tmc_transit';
 const DATA_VIEW = 'tnctr_bus';
+const API_SERVER2 = 'http://shinyta.sfcta.org/apiprivate/';
+const HH_VIEW = 'household';
 
 const GEOTYPE = 'Segment';
 const GEOID_VAR = 'tmc';
@@ -78,7 +80,9 @@ let bwidth_metric_list = [''];
 let chart_deftitle = 'All Segments Combined';
 
 let geoLayer, mapLegend;
-let _featJson;
+let _featJson, _featJson2;
+let _hhmap = {};
+let _hhlist = [];
 let _aggregateData;
 let prec;
 
@@ -102,12 +106,18 @@ async function fetchMapFeatures() {
   try {
     // get a list of valid TMCs
     let trtmc_ids = [];
-    let resp = await fetch(API_SERVER + DATA_VIEW + '?select=tmc');
+    let resp = await fetch(API_SERVER2 + HH_VIEW);
     let features = await resp.json();
     for (let feat of features) {
-      trtmc_ids.push(feat.tmc);
+      feat['type'] = 'Feature';
+      feat['geometry'] = {};
+      feat['geometry']['type'] = 'Point';
+      feat['geometry']['coordinates'] = [feat['sample_home_lon'], feat['sample_home_lat']];
+      _hhlist.push(feat['hh_id']);
+      _hhmap[feat['hh_id']] = feat;
     }
-    trtmc_ids = Array.from(new Set(trtmc_ids));
+    _featJson2 = features;
+    app.hhidSelOptions = app.hhidSelOptions.concat(_hhlist);
     
     resp = await fetch(geo_url);
     features = await resp.json();
@@ -115,11 +125,9 @@ async function fetchMapFeatures() {
     // do some parsing and stuff
     let feat_filtered = [];
     for (let feat of features) {
-      if (trtmc_ids.includes(feat.tmc)) {
-        feat['type'] = 'Feature';
-        feat['geometry'] = JSON.parse(feat.geometry);
-        feat_filtered.push(feat);
-      }
+      feat['type'] = 'Feature';
+      feat['geometry'] = JSON.parse(feat.geometry);
+      feat_filtered.push(feat);
     }
     return feat_filtered;
 
@@ -220,7 +228,6 @@ let base_lookup;
 let map_vals;
 let bwidth_vals;
 async function drawMapFeatures(queryMapData=true) {
-
   // create a clean copy of the feature Json
   if (!_featJson) return;
   let cleanFeatures = _featJson.slice();
@@ -420,16 +427,31 @@ async function drawMapFeatures(queryMapData=true) {
  
       if (geoLayer) mymap.removeLayer(geoLayer);
       if (mapLegend) mymap.removeControl(mapLegend);
-      geoLayer = L.geoJSON(cleanFeatures, {
-        style: styleByMetricColor,
+      
+      let geojsonMarkerOptions = {
+        radius: 4,
+        fillColor: "#ff7800",
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      };
+      
+      geoLayer = L.geoJSON(_featJson2, {
+        pointToLayer: function (feature, latlng) {
+          return L.circleMarker(latlng, geojsonMarkerOptions);
+        }
+        /*style: {"color": "#ff7800"},
         onEachFeature: function(feature, layer) {
           layer.on({
             mouseover: hoverFeature,
             click: clickedOnFeature,
             });
-        },
+        },*/
       });
+
       geoLayer.addTo(mymap);
+      
 
       mapLegend = L.control({ position: 'bottomright' });
       mapLegend.onAdd = function(map) {
@@ -660,27 +682,6 @@ function buildChartHtmlFromData(geoid = null) {
 }
 
 
-// SLIDER ----
-let scnSlider = {
-  data: SCNYR_LIST,
-  //direction: 'vertical',
-  //reverse: true,
-  lazy: true,
-  height: 3,
-  //width: 'auto',
-  style: {marginTop: '10px'},
-  processDragable: true,
-  eventType: 'auto',
-  piecewise: true,
-  piecewiseLabel: true,
-  tooltip: 'always',
-  tooltipDir: 'bottom',
-  tooltipStyle: { backgroundColor: '#eaae00', borderColor: '#eaae00', marginLeft:'5px'},
-  processStyle: { backgroundColor: "#eaae00"},
-  labelStyle: {color: "#ccc", marginLeft:'5px', marginTop:'5px'},
-  piecewiseStyle: {backgroundColor: '#ccc',width: '8px',height: '8px',visibility: 'visible'},
-};
-
 function bp1Changed(thing) {
   if (thing < app.bp0) app.bp1 = app.bp0;
   if (thing > app.bp2) app.bp2 = thing;
@@ -732,6 +733,11 @@ async function selectionChanged(thing) {
     }
   }
 }
+
+async function hhselectionChanged(thing) {
+  console.log(thing);
+}
+
 
 async function updateMap(thing) {
   app.isUpdActive = false;
@@ -806,6 +812,9 @@ let app = new Vue({
     bwbp4: 0.0,
     bwbp5: 0.0,
     
+    hhidSelOptions: ['All'],
+    hhidSelVal: {label:'All'},
+    
     selected_metric: 'avg_ride',
     metric_options: [
     {text: 'avg_ride', value: 'avg_ride'},
@@ -845,7 +854,6 @@ let app = new Vue({
     chartTitle: 'AVG_RIDE TREND',
     chartSubtitle: chart_deftitle,
     
-    scnSlider: scnSlider,
     sliderValue: [SCNYR_LIST[0],SCNYR_LIST[SCNYR_LIST.length-1]],
     
     selected_timep: 'Daily',
@@ -871,6 +879,7 @@ let app = new Vue({
     selected_breaks: 5,
   },
   watch: {
+    hhidSelVal: hhselectionChanged,
     sliderValue: selectionChanged,
     selected_timep: selectionChanged,
     selected_metric: selectionChanged,
@@ -893,9 +902,6 @@ let app = new Vue({
     bwUpdateMap: bwUpdateMap,
     clickToggleHelp: clickToggleHelp,
     clickedShowHide: clickedShowHide,
-  },
-  components: {
-    vueSlider,
   },
 });
 
