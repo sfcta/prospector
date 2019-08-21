@@ -37,6 +37,7 @@ mymap.setView([37.76889, -122.440997], 13);
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'hwynet_links';
 const DATA_VIEW = 'hwynet_weekday';
+const SCENARIO_VIEW = 'tables_hwynet'
 const EXCLUDE_COLS = ['a','b','streetname','type','mtype','time_period', 'distance', 'at', 'ft'];
 // const FRAC_COLS = ['speed','time','vmt','vhd','vht','pti80','pti80_vmt',
 //                     'obs_speed','obs_time','obs_vmt','obs_vhd','obs_vht','obs_pti80','obs_pti80_vmt'];
@@ -74,7 +75,7 @@ let daily_metric_list = ['cap', 'speed', 'time', 'lane_am', 'lane_op', 'lane_pm'
                          'v6_1', 'v7_1', 'v8_1', 'v9_1', 'v10_1', 'v11_1', 'v12_1'];
 let bwidth_metric_list = ['v_1'];
 let time_period = ['DAILY', 'AM', 'EA', 'EV', 'MD', 'PM']
-let scenario_list = ['Scenario1', 'Scenario2']
+let scenario_list = []
 // let init_selectedViz = VIZ_LIST[0];
 // let data_view = VIZ_INFO[init_selectedViz]['VIEW'];
 // let selviz_metric = VIZ_INFO[init_selectedViz]['METRIC'];
@@ -145,6 +146,17 @@ async function fetchAllCmpSegmentData() {
   } catch (error) {console.log('cmp data fetch error: ' + error);}
 }
 
+async function fetchScenarios(){
+  let data_url = API_SERVER + SCENARIO_VIEW
+
+  try{
+    let resp = await fetch(data_url).then(function(response) {
+      response.json().then(function(parsedJson) {
+        return parsedJson;
+      })
+    })
+  } catch (error) {console.log('scenario data fetch error: ' + error)}
+}
 
 // hover panel -------------------
 let infoPanel = L.control();
@@ -562,7 +574,7 @@ function showSegmentDetails(geo, latlng) {
   });
 
 }
-0
+
 function selectionChanged(thing) {
   if (app.selected_timep && app.selected_metric && app.selected_base_scenario && app.selected_comp_scenario) {
     drawMapFeatures();
@@ -617,15 +629,15 @@ function fillOptions(options){
 
 
 async function getMetricOptions() {
-
+  fetchScenarios()
   metric_options_all = fillOptions(daily_metric_list);
   app.bwidth_options = fillOptions(bwidth_metric_list);
   metric_options_daily = metric_options_all;
   app.metric_options = metric_options_daily;
   app.time_options = fillOptions(time_period);
   app.scenario_options = fillOptions(scenario_list)
-  app.selected_base_scenario = 'Scenario1'
-  app.selected_comp_scenario = 'Scenario2'
+  app.selected_base_scenario = 'hwynet2'
+  app.selected_comp_scenario = 'hn_csf_2015_tnc_v7_est'
   app.selected_timep = 'DAILY';
   app.selected_metric = 'v_1';
     
