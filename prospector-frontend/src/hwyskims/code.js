@@ -23,8 +23,7 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 import 'babel-polyfill';
 import 'isomorphic-fetch';
 import vueSlider from 'vue-slider-component';
-import vSelect from 'vue-select';
-Vue.component('v-select', vSelect);
+Vue.component('v-select', VueSelect.VueSelect);
 
 let api_server = 'http://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
