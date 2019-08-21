@@ -44,13 +44,14 @@
                 ${option.text}
               </option>
             </select> -->
-            <h5 style="margin-top:15px">CHOOSE SCENARIOS:</h5>
+            <h5 style="margin-top:15px">CHOOSE BASE SCENARIO:</h5>
+
             <select v-model="selected_base_scenario">
               <option v-for="option in scenario_options" v-bind:value="option.value">
                 ${option.text}
               </option>
             </select>
-
+            <h5 style="margin-top:15px">CHOOSE COMPARATIVE SCENARIO:</h5>
             <select v-model="selected_comp_scenario">
               <option v-for="option in scenario_options" v-bind:value="option.value">
                 ${option.text}
