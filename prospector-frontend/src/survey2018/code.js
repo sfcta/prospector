@@ -35,16 +35,17 @@ mymap.setView([37.76889, -122.440997], 13);
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
-const GEO_VIEW = 'cmp_segments_master';
-const DATA_VIEW = 'cmpqa_2019';
+const GEO_VIEW = 'tmc_transit';
+const DATA_VIEW = 'tnctr_bus';
 
 const GEOTYPE = 'Segment';
-const GEOID_VAR = 'cmp_segid';
-const YR_VAR = 'scenario';
-const TOD_VAR = 'period';
+const GEOID_VAR = 'tmc';
+const YR_VAR = 'year';
+const TOD_VAR = 'tod';
 
-const FRAC_COLS = ['avg_speed'];
-const SCNYR_LIST = ['2017-off','2017-tmc','2017-xd','2019-tmc','2019-xd'];
+const FRAC_COLS = ['freq_s','avg_ride','ontime5','ons','offs','shr_hh_0veh','crowded','hh_den_acs','pop_den_acs',
+                  'veh_per_hh','avg_hh_size'];
+const SCNYR_LIST = [2010,2015];
 
 const INT_COLS = [''];
 const DISCRETE_VAR_LIMIT = 10;
@@ -65,10 +66,10 @@ const BWIDTH_MAP = {
 };
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'avg_speed': {'base':[15, 30, 45, 60], 'diff':[-3, -0.1, 0.1, 3], 'pctdiff':[-20, -5, 5, 20]},
+  'hh': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
 }
 
-const METRIC_UNITS = {'avg_speed':'mph'};
+const METRIC_UNITS = {'speed':'mph','tot':'jobs'};
 
 let sel_colorvals, sel_colors, sel_binsflag;
 let sel_bwvals;
@@ -96,17 +97,17 @@ async function initialPrep() {
 }
 
 async function fetchMapFeatures() {
-  const geo_url = API_SERVER + GEO_VIEW + '?select=geometry,cmp_segid,cmp_name,cmp_from,cmp_to,direction,length,cls_hcm85';
+  const geo_url = API_SERVER + GEO_VIEW + '?select=tmc,geometry,street,intersec,direction,dir2';
 
   try {
-    // get a list of valid CMPs
-    let seg_ids = [];
-    let resp = await fetch(API_SERVER + DATA_VIEW + '?select=cmp_segid');
+    // get a list of valid TMCs
+    let trtmc_ids = [];
+    let resp = await fetch(API_SERVER + DATA_VIEW + '?select=tmc');
     let features = await resp.json();
     for (let feat of features) {
-      seg_ids.push(feat.cmp_segid);
+      trtmc_ids.push(feat.tmc);
     }
-    seg_ids = Array.from(new Set(seg_ids));
+    trtmc_ids = Array.from(new Set(trtmc_ids));
     
     resp = await fetch(geo_url);
     features = await resp.json();
@@ -114,7 +115,7 @@ async function fetchMapFeatures() {
     // do some parsing and stuff
     let feat_filtered = [];
     for (let feat of features) {
-      if (seg_ids.includes(feat.cmp_segid)) {
+      if (trtmc_ids.includes(feat.tmc)) {
         feat['type'] = 'Feature';
         feat['geometry'] = JSON.parse(feat.geometry);
         feat_filtered.push(feat);
@@ -146,13 +147,10 @@ function getInfoHtml(geo) {
   if (geo.comp !== null) comp_val = (Math.round(geo.comp*100)/100).toLocaleString();
   let bwmetric_val = null;
   if (geo.bwmetric !== null) bwmetric_val = (Math.round(geo.bwmetric*100)/100).toLocaleString();
-  let ftype = (geo.cls_hcm85=='Fwy')? 'Freeway':'Arterial';
-  let retval = '<b>SEGID: </b>' + `${geo[GEOID_VAR]}<br/>` +
-                '<b>FACILITY TYPE: </b>' + `${ftype}<br/>` +
-                '<b>STREET: </b>' + `${geo.cmp_name}<br/>` +
+  let retval = '<b>TMC: </b>' + `${geo[GEOID_VAR]}<br/>` +
+                '<b>STREET: </b>' + `${geo.street}<br/>` +
                 '<b>DIRECTION: </b>' + `${geo.direction}<br/>` +
-                '<b>FROM: </b>' + `${geo.cmp_from}<br/>` +
-                '<b>TO: </b>' + `${geo.cmp_to}<br/><hr>`;
+                '<b>INTERSECTION: </b>' + `${geo.intersec}<br/><hr>`;
   if (app.comp_check) {
     retval += `<b>${app.sliderValue[0]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${base_val}<br/>` +
               `<b>${app.sliderValue[1]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${comp_val}<br/>`;
@@ -185,21 +183,15 @@ async function getMapData() {
   let jsonData = await resp.json();
   base_lookup = {};
   let tmp = {};
-  for (let scn of SCNYR_LIST) {
-    tmp[scn] = {};
-    base_lookup[scn] = {};
+  for (let yr of SCNYR_LIST) {
+    tmp[yr] = {};
+    base_lookup[yr] = {};
     for (let tod of app.time_options) {
-      tmp[scn][tod.value] = {};
-      base_lookup[scn][tod.value] = {};
+      tmp[yr][tod.value] = {};
+      base_lookup[yr][tod.value] = {};
       for (let met of app.metric_options) {
-        tmp[scn][tod.value][met.value] = 0;
+        tmp[yr][tod.value][met.value] = 0;
       }
-      tmp[scn][tod.value]['length'] = {};
-      tmp[scn][tod.value]['tt'] = {};
-      tmp[scn][tod.value]['length']['Arterial'] = 0.0;
-      tmp[scn][tod.value]['length']['Freeway'] = 0.0;
-      tmp[scn][tod.value]['tt']['Arterial'] = 0.0;
-      tmp[scn][tod.value]['tt']['Freeway'] = 0.0;
     }
   }
   for (let entry of jsonData) {
@@ -207,26 +199,18 @@ async function getMapData() {
     for (let met of app.metric_options) {
       tmp[entry[YR_VAR]][entry[TOD_VAR]][met.value] += entry[met.value];
     }
-    let facility = 'Arterial';
-    let feat = _featJson.filter(rec => rec[GEOID_VAR] == entry[GEOID_VAR])[0];
-    if (feat.cls_hcm85 == 'Fwy') facility = 'Freeway';
-    tmp[entry[YR_VAR]][entry[TOD_VAR]]['length'][facility] += feat['length'];
-    tmp[entry[YR_VAR]][entry[TOD_VAR]]['tt'][facility] += (feat['length']/entry['avg_speed']);
   }
   _aggregateData = {};
   for (let tod of app.time_options) {
     _aggregateData[tod.value] = [];
   }
-  for (let scn of SCNYR_LIST) {
+  for (let yr of SCNYR_LIST) {
     for (let tod of app.time_options) {
       let row = {};
-      row[YR_VAR] = scn.toString();
-      /*for (let met of app.metric_options) {
-        row[met.value] = Math.round(tmp[scn][tod.value][met.value]*prec)/prec;
-      }*/
-      
-      row['Arterial'] = Math.round((tmp[scn][tod.value]['length']['Arterial']/tmp[scn][tod.value]['tt']['Arterial'])*10)/10;
-      row['Freeway'] = Math.round((tmp[scn][tod.value]['length']['Freeway']/tmp[scn][tod.value]['tt']['Freeway'])*10)/10;
+      row['year'] = yr.toString();
+      for (let met of app.metric_options) {
+        row[met.value] = Math.round(tmp[yr][tod.value][met.value]*prec)/prec;
+      }
       _aggregateData[tod.value].push(row);
     }
   }
@@ -639,14 +623,10 @@ function buildChartHtmlFromData(geoid = null) {
   document.getElementById('longchart').innerHTML = '';
   if (geoid) {
     let selgeodata = [];
-    for (let scn of SCNYR_LIST) {
+    for (let yr of SCNYR_LIST) {
       let row = {};
-      row[YR_VAR] = scn.toString();
-      if (base_lookup[scn][app.selected_timep].hasOwnProperty(geoid)) {
-        row[app.selected_metric] = Math.round(base_lookup[scn][app.selected_timep][geoid][app.selected_metric]*prec)/prec;
-      } else {
-        row[app.selected_metric] = null;
-      }
+      row['year'] = yr.toString();
+      row[app.selected_metric] = base_lookup[yr][app.selected_timep][geoid][app.selected_metric];
       selgeodata.push(row);
     } 
     trendChart = new Morris.Line({
@@ -656,7 +636,7 @@ function buildChartHtmlFromData(geoid = null) {
       hideHover: true,
       labels: [app.selected_metric.toUpperCase()],
       lineColors: ['#f66'],
-      xkey: YR_VAR,
+      xkey: 'year',
       smooth: false,
       parseTime: false,
       xLabelAngle: 45,
@@ -668,13 +648,13 @@ function buildChartHtmlFromData(geoid = null) {
       element: 'longchart',
       gridTextColor: '#aaa',
       hideHover: true,
-      labels: ['Freeway','Arterial'],
-      lineColors: ['#99f','#f66'],
-      xkey: YR_VAR,
+      labels: [app.selected_metric.toUpperCase()],
+      lineColors: ['#f66'],
+      xkey: 'year',
       smooth: false,
       parseTime: false,
       xLabelAngle: 45,
-      ykeys: ['Freeway','Arterial'],
+      ykeys: [app.selected_metric],
     });
   }
 }
@@ -805,7 +785,7 @@ let app = new Vue({
     isPanelHidden: false,
     isUpdActive: false,
     comp_check: true,
-    pct_check: false,
+    pct_check: true,
     bwidth_check: false,
     custom_check: true,
     custom_disable: false,
@@ -826,20 +806,58 @@ let app = new Vue({
     bwbp4: 0.0,
     bwbp5: 0.0,
     
-    selected_metric: 'avg_speed',
+    selected_metric: 'avg_ride',
     metric_options: [
-    {text: 'avg_speed', value: 'avg_speed'},
+    {text: 'avg_ride', value: 'avg_ride'},
+    {text: 'pickups', value: 'pickups'},
+    {text: 'dropoffs', value: 'dropoffs'},
+    {text: 'avg_ride_muni_rail', value: 'avg_ride_muni_rail'},
+    
+    {text: 'ontime5', value: 'ontime5'},
+    {text: 'ons', value: 'ons'},
+    {text: 'offs', value: 'offs'},
+    {text: 'freq_s', value: 'freq_s'},
+    {text: 'num_stops', value: 'num_stops'},
+    
+    {text: 'hhlds', value: 'hhlds'},
+    {text: 'pop', value: 'pop'},
+    {text: 'empres', value: 'empres'},
+    {text: 'cie', value: 'cie'},
+    {text: 'med', value: 'med'},
+    {text: 'mips', value: 'mips'},
+    {text: 'pdr', value: 'pdr'},
+    {text: 'retail', value: 'retail'},
+    {text: 'visitor', value: 'visitor'},
+    {text: 'totalemp', value: 'totalemp'},
+    
+    {text: 'areatype', value: 'areatype'},
+    {text: 'non_white_pop_total', value: 'non_white_pop_total'},
+    {text: 'white_pop_total', value: 'white_pop_total'},
+    {text: 'senior_65p_pop_total', value: 'senior_65p_pop_total'},
+    
+    {text: 'totalemp_30', value: 'totalemp_30'},
+    {text: 'totalemp_60', value: 'totalemp_60'},
+    {text: 'hhlds_30', value: 'hhlds_30'},
+    {text: 'hhlds_60', value: 'hhlds_60'},
+    {text: 'pop_30', value: 'pop_30'},
+    {text: 'pop_60', value: 'pop_60'},
     ],
-    chartTitle: 'AVG_SPEED TREND',
+    chartTitle: 'AVG_RIDE TREND',
     chartSubtitle: chart_deftitle,
     
     scnSlider: scnSlider,
-    sliderValue: [SCNYR_LIST[0],SCNYR_LIST[1]],
+    sliderValue: [SCNYR_LIST[0],SCNYR_LIST[SCNYR_LIST.length-1]],
     
-    selected_timep: 'AM',
+    selected_timep: 'Daily',
     time_options: [
-    {text: 'AM', value: 'AM'},
-    {text: 'PM', value: 'PM'},
+    {text: 'Daily', value: 'Daily'},
+    {text: '0300-0559', value: '0300-0559'},
+    {text: '0600-0859', value: '0600-0859'},
+    {text: '0900-1359', value: '0900-1359'},
+    {text: '1400-1559', value: '1400-1559'},
+    {text: '1600-1859', value: '1600-1859'},
+    {text: '1900-2159', value: '1900-2159'},
+    {text: '2200-0259', value: '2200-0259'},
     ],
 
     selected_bwidth: bwidth_metric_list[0],

@@ -36,7 +36,7 @@ mymap.setView([37.76889, -122.440997], 13);
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
-const DATA_VIEW = 'lua2017_v4';
+const DATA_VIEW = 'lua2017_v5';
 
 const FRAC_COLS = ['speed','time','vol','vmt','vhd','vht','pti80','pti80_vmt'];
 const YR_LIST = [2010,2015,2020,2025,2030,2035,2040];
