@@ -179,14 +179,26 @@
         <hr style="margin-bottom:5px;margin-top:5px"/>
         Placeholder text.
 
+        <h2 style="margin-top:10px; margin-bottom:0px;">How to load Scenarios</h2>
+        <hr style="margin-bottom:5px;margin-top:5px"/>
+        <ul>
+        <li>Create a batch file in the directory with all your data with the following command</li>
+        <li><i>"python Y:\warehouse\scripts\hwynet\import_loaded_hwynet.py . your_scenario_name"</i></li>
+        <li>After running, your scenario should show up on the dropdown menu!</li>
+        </ul>
+
+
         <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
         <ul>
-        <li>Select two scenarios you would like to compare.</li>
+        <li>Select two scenarios you would like to compare in the dropdown menu</li>
         <li>Select a metric to display it on the map for all segments.</li>
         <li>Choose time period to display metric.</li>
         <li>Click on a colored roadway segment on the map to see segment-specific details.</li>
+        <li>Choosing the same scenarios will show only data from that scenario.</li>
         </ul>
+
+        
 
         <div style="margin-top:20px;">
           <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
