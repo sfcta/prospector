@@ -35,7 +35,6 @@ mymap.setView([37.76889, -122.440997], 13);
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
-const DATA_VIEW = 'hwynet_weekday';
 const SCENARIO_VIEW = 'tables_hwynet'
 const EXCLUDE_COLS = ['a','b','streetname','type','mtype','time_period', 'distance', 'at', 'ft'];
 const FRAC_COLS = ['v_1','vdt_1','cspd_1','vc_1'];
@@ -53,7 +52,6 @@ const BWIDTH_MAP = {
   5: [1.25, 2.5, 3.75, 5],
   6: [1, 2, 3, 4, 5]
 };
-const SCNYR_LIST = ['hwynet2', 'hwynet_weekday'];
 const CUSTOM_BP_DICT = {
   'cspd_1': {'base':[12, 20, 30, 45], 'diff':[-3, -0.5, 0.5, 3], 'pctdiff':[-20, -10, -5, 0]},
   'cap': {'base':[1500, 3000, 4500, 6000], 'diff':[-500, -1, 1, 500], 'pctdiff':[-5, -1, 1, 5]}
@@ -90,23 +88,13 @@ async function initialPrep() {
   console.log('1...');
   scenario_list = await fetchScenarios();
   
-
   console.log('2...');
   _featJson = await fetchMapFeatures();
-
-  console.log('3...');
-  //_aggregateData = await fetchAggregateData();
-
-  console.log('4... ');
-  //await buildChartHtmlFromCmpData();
-
-  console.log('5...');
-  //app.time_options = await updateOptionsData('time_period');
   
-  console.log('6...');
+  console.log('3...');
   await getMetricOptions();
 
-  console.log('7 !!!');
+  console.log('4 !!!');
 }
 
 async function fetchMapFeatures() {
@@ -721,25 +709,7 @@ function getColorMode(cscheme) {
   }
 }
 
-let scnSlider = {
-  data: SCNYR_LIST,
-  //direction: 'vertical',
-  //reverse: true,
-  lazy: true,
-  height: 3,
-  //width: 'auto',
-  style: {marginTop: '10px'},
-  processDragable: true,
-  eventType: 'auto',
-  piecewise: true,
-  piecewiseLabel: true,
-  tooltip: 'always',
-  tooltipDir: 'bottom',
-  tooltipStyle: { backgroundColor: '#eaae00', borderColor: '#eaae00', marginLeft:'5px'},
-  processStyle: { backgroundColor: "#eaae00"},
-  labelStyle: {color: "#ccc", marginLeft:'5px', marginTop:'5px'},
-  piecewiseStyle: {backgroundColor: '#ccc',width: '8px',height: '8px',visibility: 'visible'},
-};
+
 
 
 let app = new Vue({
@@ -792,9 +762,6 @@ let app = new Vue({
 
     selected_bwidth: bwidth_metric_list[0],
     bwidth_options: [],    
-
-    scnSlider: scnSlider,
-    sliderValue: [SCNYR_LIST[0],SCNYR_LIST[SCNYR_LIST.length-1]],
     
     selected_colorscheme: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641'],
     color_options: [
@@ -910,6 +877,5 @@ let helpPanel = new Vue({
   },
 });
 
-// fetchScenarios();
 initialPrep();
 
