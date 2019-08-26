@@ -31,7 +31,9 @@ let getColorFromVal = maplib.getColorFromVal2;
 let getBWLegHTML = maplib.getBWLegHTML;
 let getQuantiles = maplib.getQuantiles;
 let mymap = maplib.sfmap;
-mymap.setView([37.76889, -122.440997], 13);
+const DEFAULT_ZOOM = 13;
+const DEFAULT_CENTER = [37.76889, -122.440997];
+mymap.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
@@ -39,11 +41,20 @@ const GEO_VIEW = 'tmc_transit';
 const DATA_VIEW = 'tnctr_bus';
 const API_SERVER2 = 'http://shinyta.sfcta.org/apiprivate/';
 const HH_VIEW = 'household';
+const PERSON_VIEW = 'person';
+const TRIP_VIEW = 'trip';
+const LOCATION_VIEW = 'location';
 
 const GEOTYPE = 'Segment';
 const GEOID_VAR = 'tmc';
 const YR_VAR = 'year';
 const TOD_VAR = 'tod';
+const HLON_VAR = 'sample_home_lon';
+const HLAT_VAR = 'sample_home_lat';
+const WLON_VAR = 'work_lon';
+const WLAT_VAR = 'work_lat';
+const SLON_VAR = 'school_lon';
+const SLAT_VAR = 'school_lat';
 
 const FRAC_COLS = ['freq_s','avg_ride','ontime5','ons','offs','shr_hh_0veh','crowded','hh_den_acs','pop_den_acs',
                   'veh_per_hh','avg_hh_size'];
@@ -79,10 +90,34 @@ let bwidth_metric_list = [''];
 
 let chart_deftitle = 'All Segments Combined';
 
-let geoLayer, mapLegend;
-let _featJson, _featJson2;
+let iconHome = L.AwesomeMarkers.icon({
+    prefix: 'ion',
+    icon: 'home',
+    markerColor:'green',
+  });
+let iconWork = L.AwesomeMarkers.icon({
+    prefix: 'ion',
+    icon: 'briefcase',
+    markerColor:'blue',
+  });
+let iconSchool = L.AwesomeMarkers.icon({
+  prefix: 'ion',
+  icon: 'school',
+  markerColor:'orange',
+});
+
+let geoLayer, mapLegend, allHHLayer, hhLayer, tripLayer;
+let _featJson, _featJson2, _tripsJson;
 let _hhmap = {};
 let _hhlist = [];
+let _personmap = {};
+let _personlist = [];
+let _datelist = [];
+let _datemap = {};
+let _triplist = [];
+let _tripmap = {};
+let _locations;
+let selHHObj, selpersonObj;
 let _aggregateData;
 let prec;
 
@@ -92,10 +127,10 @@ async function initialPrep() {
   _featJson = await fetchMapFeatures();
 
   console.log('2... ');
-  await drawMapFeatures();
+  await drawMapFeatures2(true);
   
   console.log('3... ');
-  await buildChartHtmlFromData();
+  //await buildChartHtmlFromData();
 
   console.log('4 !!!');
 }
@@ -112,12 +147,12 @@ async function fetchMapFeatures() {
       feat['type'] = 'Feature';
       feat['geometry'] = {};
       feat['geometry']['type'] = 'Point';
-      feat['geometry']['coordinates'] = [feat['sample_home_lon'], feat['sample_home_lat']];
+      feat['geometry']['coordinates'] = [feat[HLON_VAR], feat[HLAT_VAR]];
       _hhlist.push(feat['hh_id']);
       _hhmap[feat['hh_id']] = feat;
     }
     _featJson2 = features;
-    app.hhidSelOptions = app.hhidSelOptions.concat(_hhlist);
+    app.hhidOptions = app.hhidOptions.concat(_hhlist);
     
     resp = await fetch(geo_url);
     features = await resp.json();
@@ -223,6 +258,132 @@ async function getMapData() {
     }
   }
 }
+
+
+let geojsonMarkerOptions = {
+        radius: 4,
+        fillColor: "#ff7800",
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      };
+let homeMarker, workMarker, schoolMarker;
+async function drawMapFeatures2(init=false) {
+  
+  if (app.hhidSelVal == 'All') {
+    if (!init) mymap.flyTo(DEFAULT_CENTER, DEFAULT_ZOOM);
+    if (homeMarker) homeMarker.remove();
+    if (workMarker) workMarker.remove();
+    if (schoolMarker) schoolMarker.remove();
+    if (tripLayer) mymap.removeLayer(tripLayer);
+    app.pernumOptions = [''];
+    app.pernumSelVal = '';
+    app.dateOptions = [''];
+    app.dateSelVal = [''];
+    
+    if (!allHHLayer) {
+      allHHLayer = L.geoJSON(_featJson2, {
+        pointToLayer: function (feature, latlng) {
+          return L.circleMarker(latlng, geojsonMarkerOptions);
+        }
+        /*style: {"color": "#ff7800"},
+        onEachFeature: function(feature, layer) {
+          layer.on({
+            mouseover: hoverFeature,
+            click: clickedOnFeature,
+            });
+        },*/
+      });
+    }
+    allHHLayer.addTo(mymap);
+  } else {
+    if (allHHLayer) mymap.removeLayer(allHHLayer);
+    selHHObj = _hhmap[app.hhidSelVal];
+    let home_coords = [selHHObj[HLAT_VAR], selHHObj[HLON_VAR]];
+    if (homeMarker) homeMarker.remove();
+    homeMarker = new L.marker(home_coords, {icon: iconHome}).addTo(mymap);
+    
+    let query = API_SERVER2 + PERSON_VIEW + '?hh_id=eq.' + app.hhidSelVal;
+    let resp = await fetch(query);
+    resp = await resp.json();
+    let tmp_arr = [];
+    for (let rec of resp) {
+      tmp_arr.push(rec['person_num']);
+      _personmap[rec['person_num']] = rec;
+    }
+    app.pernumOptions = tmp_arr;
+    if (!app.pernumOptions.includes(app.pernumSelVal)) app.pernumSelVal = app.pernumOptions[0];
+    selpersonObj = _personmap[app.pernumSelVal];
+    if (workMarker) workMarker.remove();
+    if ((selpersonObj[WLAT_VAR]!==null) & (selpersonObj[WLON_VAR]!==null)) {
+      let work_coords = [selpersonObj[WLAT_VAR], selpersonObj[WLON_VAR]];
+      workMarker = new L.marker(work_coords, {icon: iconWork}).addTo(mymap);
+    }
+    if (schoolMarker) schoolMarker.remove();
+    if ((selpersonObj[SLAT_VAR]!==null) & (selpersonObj[SLON_VAR]!==null)) {
+      let school_coords = [selpersonObj[SLAT_VAR], selpersonObj[SLON_VAR]];
+      schoolMarker = new L.marker(school_coords, {icon: iconSchool}).addTo(mymap);
+    }
+
+    
+    query = API_SERVER2 + TRIP_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0');
+    resp = await fetch(query);
+    resp = await resp.json();
+    tmp_arr = [];
+    _datemap = {};
+    for (let rec of resp) {
+      if (!tmp_arr.includes(rec['travel_date'])) {
+        tmp_arr.push(rec['travel_date']);
+        _datemap[rec['travel_date']] = [];
+      } else {
+        _datemap[rec['travel_date']].push(rec);
+      }
+    }
+    app.dateOptions = tmp_arr.sort();
+    app.dateSelVal = [app.dateOptions[0]];
+    
+    for (let dt of app.dateSelVal) {
+      for (let triprec of _datemap[dt]) {
+        _triplist.push(triprec['trip_id']);
+        triprec['geometry'] = {};
+        triprec['geometry']['type'] = 'LineString';
+        triprec['geometry']['coordinates'] = [];
+        _tripmap[triprec['trip_id']] =  triprec;
+      }
+    }
+    
+    query = API_SERVER2 + LOCATION_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0');
+    resp = await fetch(query);
+    _locations = await resp.json();
+    for (let loc of _locations) {
+      if (_tripmap.hasOwnProperty(loc['trip_id'])) {
+        _tripmap[loc['trip_id']]['geometry']['coordinates'].push([loc['lon'],loc['lat']]);
+      }
+    }
+    let _tripJson = [];
+    for (let tid of _triplist) {
+      _tripmap[tid]['type'] = 'Feature';
+      _tripJson.push(_tripmap[tid]);
+    }
+    if (tripLayer) mymap.removeLayer(tripLayer);
+    tripLayer = L.geoJSON(_tripJson, /*{
+        style: {"color": "#ff7800"},
+        onEachFeature: function(feature, layer) {
+          layer.on({
+            mouseover: hoverFeature,
+            click: clickedOnFeature,
+            });
+        },
+      }*/);
+    tripLayer.addTo(mymap);  
+    
+    
+    mymap.flyTo(home_coords, DEFAULT_ZOOM);
+  }
+  
+}
+
 
 let base_lookup;
 let map_vals;
@@ -427,15 +588,6 @@ async function drawMapFeatures(queryMapData=true) {
  
       if (geoLayer) mymap.removeLayer(geoLayer);
       if (mapLegend) mymap.removeControl(mapLegend);
-      
-      let geojsonMarkerOptions = {
-        radius: 4,
-        fillColor: "#ff7800",
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-      };
       
       geoLayer = L.geoJSON(_featJson2, {
         pointToLayer: function (feature, latlng) {
@@ -735,7 +887,7 @@ async function selectionChanged(thing) {
 }
 
 async function hhselectionChanged(thing) {
-  console.log(thing);
+  drawMapFeatures2();
 }
 
 
@@ -812,8 +964,12 @@ let app = new Vue({
     bwbp4: 0.0,
     bwbp5: 0.0,
     
-    hhidSelOptions: ['All'],
-    hhidSelVal: {label:'All'},
+    hhidOptions: ['All'],
+    hhidSelVal: 'All',
+    pernumOptions: [''],
+    pernumSelVal: '',
+    dateOptions: [''],
+    dateSelVal: [''],
     
     selected_metric: 'avg_ride',
     metric_options: [
@@ -880,7 +1036,7 @@ let app = new Vue({
   },
   watch: {
     hhidSelVal: hhselectionChanged,
-    sliderValue: selectionChanged,
+    pernumSelVal: hhselectionChanged,
     selected_timep: selectionChanged,
     selected_metric: selectionChanged,
     pct_check: selectionChanged,
