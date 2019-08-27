@@ -50,6 +50,7 @@ const GEOID_VAR = 'tmc';
 const YR_VAR = 'year';
 const TOD_VAR = 'tod';
 const HHID_VAR = 'hh_id';
+const TRIPID_VAR = 'trip_id';
 const HLON_VAR = 'sample_home_lon';
 const HLAT_VAR = 'sample_home_lat';
 const WLON_VAR = 'work_lon';
@@ -101,6 +102,18 @@ const hhStyles = {
         opacity: 1,
         fillOpacity: 1},
 };
+const tripStyles = {
+  highlighted: {
+        color: "#ffff00",
+  },
+};
+
+const MODE_MAP = {1:'Walk',2:'Bike',3:'Bike',4:'Bike',
+6:'Car',7:'Car',8:'Car',9:'Car',10:'Car',11:'Car',12:'Car',16:'Car',17:'Car',18:'Carshare',21:'Carpool',22:'Car',24:'SchoolBus',
+25:'Bus',26:'Bus',27:'Bus',28:'Bus',30:'BART',31:'Air',32:'Ferry',33:'Car',34:'Car',36:'Taxi',38:'Bus',39:'LRT',41:'Rail',42:'Rail',
+43:'Other',44:'Other',46:'Bus',47:'Other',55:'ExpBus',59:'Car',60:'Car',62:'Bus',63:'Car',64:'TNC',65:'TNC',66:'TNC',67:'Bus',
+68:'CableCar',69:'Bikeshare',70:'Bikeshare',71:'Scooter',73:'Scooter',74:'Other',75:'Scooter',76:'Carpool',77:'Scooter',995:'',997:'Other'};
+const PURP_MAP = {1:'Home',2:'Work',3:'Work-related',4:'School',5:'Escort',6:'Shop',7:'Meal',8:'SocRec',9:'Other',10:'ChangeMode'};
 
 let sel_colorvals, sel_colors, sel_binsflag;
 let sel_bwvals;
@@ -207,6 +220,16 @@ function getInfoHtml(geo) {
     retval = '<b>HHID: </b>' + `${geo[HHID_VAR]}<br/>` +
                 '<b>COUNTY_FIPS: </b>' + `${geo.home_county_fips}<br/>` +
                 '<b>ADDRESS: </b>' + `${geo.sample_address}<br/><hr>`;
+  } else if (geo.geometry.type == 'LineString') {
+    retval = '<b>HHID: </b>' + `${geo[HHID_VAR]}<br/>` +
+                '<b>PERSONID: </b>' + `${geo['person_num']}<br/>` +
+                '<b>TRIPID: </b>' + `${geo['trip_num']}<br/><hr>` +
+                
+                '<b>O_PURP: </b>' + `${PURP_MAP[geo['o_purpose_category']]}<br/>` +
+                '<b>D_PURP: </b>' + `${PURP_MAP[geo['d_purpose_category']]}<br/>` +
+                '<b>MODES: </b>' + `${MODE_MAP[geo['mode_1']]} - ${MODE_MAP[geo['mode_2']]} - ${MODE_MAP[geo['mode_3']]}<br/>` +
+                '<b>DEP_TIME: </b>' + `${geo['depart_time'].substring(11,19)}<br/>` +
+                '<b>ARR_TIME: </b>' + `${geo['arrive_time'].substring(11,19)}<br/><hr>`;
   }
   return retval; 
 }
@@ -220,7 +243,8 @@ infoPanel.update = function(geo) {
     // use CSS to hide the info-panel
     infoPanel._div.className = 'info-panel-hide';
     // and clear the hover too
-    if (oldHHHoverTarget.feature[HHID_VAR] != selHHId) allHHLayer.resetStyle(oldHHHoverTarget);
+    if (oldHHHoverTarget && oldHHHoverTarget.feature[HHID_VAR] != selHHId) allHHLayer.resetStyle(oldHHHoverTarget);
+    if (oldTrHoverTarget && oldTrHoverTarget.feature[TRIPID_VAR] != selTripId) tripLayer.resetStyle(oldTrHoverTarget);
   }, 2000);
 };
 infoPanel.addTo(mymap);
@@ -336,13 +360,14 @@ async function drawMapFeatures2(init=false) {
       if (!tmp_arr.includes(rec['travel_date'])) {
         tmp_arr.push(rec['travel_date']);
         _datemap[rec['travel_date']] = [];
-      } else {
-        _datemap[rec['travel_date']].push(rec);
       }
+      _datemap[rec['travel_date']].push(rec);
     }
+
     app.dateOptions = tmp_arr.sort();
     app.dateSelVal = [app.dateOptions[0]];
     _triplist = [];
+    _tripmap = {};
     for (let dt of app.dateSelVal) {
       for (let triprec of _datemap[dt]) {
         _triplist.push(triprec['trip_id']);
@@ -366,16 +391,16 @@ async function drawMapFeatures2(init=false) {
       _tripmap[tid]['type'] = 'Feature';
       _tripJson.push(_tripmap[tid]);
     }
+
     if (tripLayer) mymap.removeLayer(tripLayer);
-    tripLayer = L.geoJSON(_tripJson, /*{
-        style: {"color": "#ff7800"},
+    tripLayer = L.geoJSON(_tripJson, {
         onEachFeature: function(feature, layer) {
           layer.on({
-            mouseover: hoverFeature,
-            click: clickedOnFeature,
+            mouseover: hoverTripFeature,
+            /*click: clickedOnFeature,*/
             });
         },
-      }*/);
+      });
     tripLayer.addTo(mymap);  
     
     
@@ -668,7 +693,7 @@ function styleByMetricColor(feat) {
 }
 
 let infoPanelTimeout;
-let oldHHHoverTarget;
+let oldHHHoverTarget, oldTrHoverTarget;
 
 function hoverHHFeature(e) {
   clearTimeout(infoPanelTimeout);
@@ -687,6 +712,25 @@ function hoverHHFeature(e) {
   highlightedGeo.bringToFront();
   highlightedGeo.setStyle(hhStyles.highlighted);
   oldHHHoverTarget = e.target; 
+}
+
+function hoverTripFeature(e) {
+  clearTimeout(infoPanelTimeout);
+  infoPanel.update(e.target.feature);
+  
+  // don't do anything else if the feature is already clicked
+  if (selTripId === e.target.feature[TRIPID_VAR]) return;
+
+  // return previously-hovered segment to its original color
+  if (oldTrHoverTarget && e.target.feature[TRIPID_VAR] != selTripId) {
+    if (oldTrHoverTarget.feature[TRIPID_VAR] != selTripId)
+      tripLayer.resetStyle(oldTrHoverTarget);
+  }
+
+  let highlightedGeo = e.target;
+  highlightedGeo.bringToFront();
+  highlightedGeo.setStyle(tripStyles.highlighted);
+  oldTrHoverTarget = e.target; 
 }
 
 function highlightSelectedSegment() {
@@ -746,7 +790,7 @@ function binFmt(x) {
   return distLabels[x.x] + ((app.pct_check && app.comp_check)? '%':'');
 }
 
-let selGeoId, selHHId;
+let selGeoId, selHHId, selTripId;
 let selectedGeo, prevSelectedGeo;
 let selectedLatLng;
 
