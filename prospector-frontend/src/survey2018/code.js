@@ -49,6 +49,7 @@ const GEOTYPE = 'Segment';
 const GEOID_VAR = 'tmc';
 const YR_VAR = 'year';
 const TOD_VAR = 'tod';
+const HHID_VAR = 'hh_id';
 const HLON_VAR = 'sample_home_lon';
 const HLAT_VAR = 'sample_home_lat';
 const WLON_VAR = 'work_lon';
@@ -83,6 +84,23 @@ const CUSTOM_BP_DICT = {
 }
 
 const METRIC_UNITS = {'speed':'mph','tot':'jobs'};
+
+const hhStyles = {
+  init: {
+        radius: 4,
+        fillColor: "#ff7800",
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      },
+  highlighted: {
+        fillColor: "#ffff00",
+        color: "#000",
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 1},
+};
 
 let sel_colorvals, sel_colors, sel_binsflag;
 let sel_bwvals;
@@ -182,27 +200,14 @@ infoPanel.onAdd = function(map) {
 };
 
 function getInfoHtml(geo) {
-  let metric_val = null;
-  if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
-  let base_val = null;
-  if (geo.base !== null) base_val = (Math.round(geo.base*100)/100).toLocaleString();
-  let comp_val = null;
-  if (geo.comp !== null) comp_val = (Math.round(geo.comp*100)/100).toLocaleString();
-  let bwmetric_val = null;
-  if (geo.bwmetric !== null) bwmetric_val = (Math.round(geo.bwmetric*100)/100).toLocaleString();
-  let retval = '<b>TMC: </b>' + `${geo[GEOID_VAR]}<br/>` +
-                '<b>STREET: </b>' + `${geo.street}<br/>` +
-                '<b>DIRECTION: </b>' + `${geo.direction}<br/>` +
-                '<b>INTERSECTION: </b>' + `${geo.intersec}<br/><hr>`;
-  if (app.comp_check) {
-    retval += `<b>${app.sliderValue[0]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${base_val}<br/>` +
-              `<b>${app.sliderValue[1]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${comp_val}<br/>`;
+  //let metric_val = null;
+  //if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
+  let retval = '';
+  if (geo.geometry.type == 'Point') {
+    retval = '<b>HHID: </b>' + `${geo[HHID_VAR]}<br/>` +
+                '<b>COUNTY_FIPS: </b>' + `${geo.home_county_fips}<br/>` +
+                '<b>ADDRESS: </b>' + `${geo.sample_address}<br/><hr>`;
   }
-  retval += `<b>${app.selected_metric.toUpperCase()}</b>` + 
-            (app.pct_check? '<b> %</b>': '') +
-            (app.comp_check? '<b> Diff: </b>':'<b>: </b>') + 
-            `${metric_val}` + 
-            ((app.pct_check && app.comp_check && metric_val !== null)? '%':''); 
   return retval; 
 }
 
@@ -215,7 +220,7 @@ infoPanel.update = function(geo) {
     // use CSS to hide the info-panel
     infoPanel._div.className = 'info-panel-hide';
     // and clear the hover too
-    if (oldHoverTarget.feature[GEOID_VAR] != selGeoId) geoLayer.resetStyle(oldHoverTarget);
+    if (oldHHHoverTarget.feature[HHID_VAR] != selHHId) allHHLayer.resetStyle(oldHHHoverTarget);
   }, 2000);
 };
 infoPanel.addTo(mymap);
@@ -260,14 +265,6 @@ async function getMapData() {
 }
 
 
-let geojsonMarkerOptions = {
-        radius: 4,
-        fillColor: "#ff7800",
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-      };
 let homeMarker, workMarker, schoolMarker;
 async function drawMapFeatures2(init=false) {
   
@@ -285,15 +282,14 @@ async function drawMapFeatures2(init=false) {
     if (!allHHLayer) {
       allHHLayer = L.geoJSON(_featJson2, {
         pointToLayer: function (feature, latlng) {
-          return L.circleMarker(latlng, geojsonMarkerOptions);
-        }
-        /*style: {"color": "#ff7800"},
+          return L.circleMarker(latlng, hhStyles.init);
+        },
         onEachFeature: function(feature, layer) {
           layer.on({
-            mouseover: hoverFeature,
-            click: clickedOnFeature,
+            mouseover: hoverHHFeature,
+            /*click: clickedOnFeature,*/
             });
-        },*/
+        },
       });
     }
     allHHLayer.addTo(mymap);
@@ -667,25 +663,25 @@ function styleByMetricColor(feat) {
 }
 
 let infoPanelTimeout;
-let oldHoverTarget;
+let oldHHHoverTarget;
 
-function hoverFeature(e) {
+function hoverHHFeature(e) {
   clearTimeout(infoPanelTimeout);
   infoPanel.update(e.target.feature);
   
   // don't do anything else if the feature is already clicked
-  if (selGeoId === e.target.feature[GEOID_VAR]) return;
+  if (selHHId === e.target.feature[HHID_VAR]) return;
 
   // return previously-hovered segment to its original color
-  if (oldHoverTarget && e.target.feature[GEOID_VAR] != selGeoId) {
-    if (oldHoverTarget.feature[GEOID_VAR] != selGeoId)
-      geoLayer.resetStyle(oldHoverTarget);
+  if (oldHHHoverTarget && e.target.feature[HHID_VAR] != selHHId) {
+    if (oldHHHoverTarget.feature[HHID_VAR] != selHHId)
+      allHHLayer.resetStyle(oldHHHoverTarget);
   }
 
   let highlightedGeo = e.target;
   highlightedGeo.bringToFront();
-  highlightedGeo.setStyle(styles.selected);
-  oldHoverTarget = e.target; 
+  highlightedGeo.setStyle(hhStyles.highlighted);
+  oldHHHoverTarget = e.target; 
 }
 
 function highlightSelectedSegment() {
@@ -745,7 +741,7 @@ function binFmt(x) {
   return distLabels[x.x] + ((app.pct_check && app.comp_check)? '%':'');
 }
 
-let selGeoId;
+let selGeoId, selHHId;
 let selectedGeo, prevSelectedGeo;
 let selectedLatLng;
 
