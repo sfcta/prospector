@@ -287,7 +287,7 @@ async function drawMapFeatures2(init=false) {
         onEachFeature: function(feature, layer) {
           layer.on({
             mouseover: hoverHHFeature,
-            /*click: clickedOnFeature,*/
+            click: clickedOnHHFeature,
             });
         },
       });
@@ -300,16 +300,20 @@ async function drawMapFeatures2(init=false) {
     if (homeMarker) homeMarker.remove();
     homeMarker = new L.marker(home_coords, {icon: iconHome}).addTo(mymap);
     
-    let query = API_SERVER2 + PERSON_VIEW + '?hh_id=eq.' + app.hhidSelVal;
-    let resp = await fetch(query);
-    resp = await resp.json();
+    let query, resp;
     let tmp_arr = [];
-    for (let rec of resp) {
-      tmp_arr.push(rec['person_num']);
-      _personmap[rec['person_num']] = rec;
+    if (app.hhidSelVal != app.prevHHId) {
+      query = API_SERVER2 + PERSON_VIEW + '?hh_id=eq.' + app.hhidSelVal;
+      resp = await fetch(query);
+      resp = await resp.json();
+      for (let rec of resp) {
+        tmp_arr.push(rec['person_num']);
+        _personmap[rec['person_num']] = rec;
+      }
+      app.pernumOptions = tmp_arr;
+      if (!app.pernumOptions.includes(app.pernumSelVal)) app.pernumSelVal = app.pernumOptions[0];
     }
-    app.pernumOptions = tmp_arr;
-    if (!app.pernumOptions.includes(app.pernumSelVal)) app.pernumSelVal = app.pernumOptions[0];
+    
     selpersonObj = _personmap[app.pernumSelVal];
     if (workMarker) workMarker.remove();
     if ((selpersonObj[WLAT_VAR]!==null) & (selpersonObj[WLON_VAR]!==null)) {
@@ -338,7 +342,7 @@ async function drawMapFeatures2(init=false) {
     }
     app.dateOptions = tmp_arr.sort();
     app.dateSelVal = [app.dateOptions[0]];
-    
+    _triplist = [];
     for (let dt of app.dateSelVal) {
       for (let triprec of _datemap[dt]) {
         _triplist.push(triprec['trip_id']);
@@ -377,6 +381,7 @@ async function drawMapFeatures2(init=false) {
     
     mymap.flyTo(home_coords, DEFAULT_ZOOM);
   }
+  app.prevHHId = app.hhidSelVal;
   
 }
 
@@ -745,11 +750,11 @@ let selGeoId, selHHId;
 let selectedGeo, prevSelectedGeo;
 let selectedLatLng;
 
-function clickedOnFeature(e) {
-  e.target.setStyle(styles.popup);
+function clickedOnHHFeature(e) {
   let geo = e.target.feature;
-  selGeoId = geo[GEOID_VAR];
+  app.hhidSelVal = geo[HHID_VAR];
 
+  /*
   // unselect the previously-selected selection, if there is one
   if (selectedGeo && selectedGeo.feature[GEOID_VAR] != geo[GEOID_VAR]) {
     prevSelectedGeo = selectedGeo;
@@ -764,7 +769,7 @@ function clickedOnFeature(e) {
     buildChartHtmlFromData(selGeoId);
   } else {
     resetPopGeo();
-  }
+  }*/
 }
 
 let popSelGeo;
@@ -962,6 +967,7 @@ let app = new Vue({
     
     hhidOptions: ['All'],
     hhidSelVal: 'All',
+    prevHHId: 'All',
     pernumOptions: [''],
     pernumSelVal: '',
     dateOptions: [''],
