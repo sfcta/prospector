@@ -288,8 +288,60 @@ async function getMapData() {
   }
 }
 
+async function updateTripData() {
+  let query = API_SERVER2 + TRIP_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0');
+  if (query != prevtrip_query) {
+    let resp = await fetch(query);
+    resp = await resp.json();
+    let tmp_arr = [];
+    _datemap = {};
+    
+    for (let rec of resp) {
+      if (!tmp_arr.includes(rec['travel_date'])) {
+        tmp_arr.push(rec['travel_date']);
+        _datemap[rec['travel_date']] = [];
+      }
+      _datemap[rec['travel_date']].push(rec);
+    }
+    app.dateOptions = tmp_arr.sort();
+    app.dateSelVal = [app.dateOptions[0]];
+    
+    prevtrip_query = query;
+  }
+  
+  _triplist = [];
+  let tripmap = {};
+  for (let dt of app.dateSelVal) {
+    for (let triprec of _datemap[dt]) {
+      _triplist.push(triprec['trip_id']);
+      triprec['geometry'] = {};
+      triprec['geometry']['type'] = 'LineString';
+      triprec['geometry']['coordinates'] = [];
+      tripmap[triprec['trip_id']] =  triprec;
+    }
+  }
+  return tripmap;
+}
+
+async function updateLocData(tripmap) {
+  let query = API_SERVER2 + LOCATION_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0');
+  if (query != prevloc_query) {
+    let resp = await fetch(query);
+    _locations = await resp.json();
+  }
+  
+  for (let loc of _locations) {
+    if (tripmap.hasOwnProperty(loc['trip_id'])) {
+      tripmap[loc['trip_id']]['geometry']['coordinates'].push([loc['lon'],loc['lat']]);
+    }
+  }
+  return tripmap;
+}
+
 
 let homeMarker, workMarker, schoolMarker;
+let prevtrip_query = '';
+let prevloc_query = '';
 async function drawMapFeatures2(init=false) {
   
   if (app.hhidSelVal == 'All') {
@@ -350,48 +402,16 @@ async function drawMapFeatures2(init=false) {
       schoolMarker = new L.marker(school_coords, {icon: iconSchool}).addTo(mymap);
     }
 
+    _tripmap = await updateTripData();
     
-    query = API_SERVER2 + TRIP_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0');
-    resp = await fetch(query);
-    resp = await resp.json();
-    tmp_arr = [];
-    _datemap = {};
-    for (let rec of resp) {
-      if (!tmp_arr.includes(rec['travel_date'])) {
-        tmp_arr.push(rec['travel_date']);
-        _datemap[rec['travel_date']] = [];
-      }
-      _datemap[rec['travel_date']].push(rec);
-    }
+    _tripmap = await updateLocData(_tripmap);
 
-    app.dateOptions = tmp_arr.sort();
-    app.dateSelVal = [app.dateOptions[0]];
-    _triplist = [];
-    _tripmap = {};
-    for (let dt of app.dateSelVal) {
-      for (let triprec of _datemap[dt]) {
-        _triplist.push(triprec['trip_id']);
-        triprec['geometry'] = {};
-        triprec['geometry']['type'] = 'LineString';
-        triprec['geometry']['coordinates'] = [];
-        _tripmap[triprec['trip_id']] =  triprec;
-      }
-    }
-    
-    query = API_SERVER2 + LOCATION_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0');
-    resp = await fetch(query);
-    _locations = await resp.json();
-    for (let loc of _locations) {
-      if (_tripmap.hasOwnProperty(loc['trip_id'])) {
-        _tripmap[loc['trip_id']]['geometry']['coordinates'].push([loc['lon'],loc['lat']]);
-      }
-    }
     let _tripJson = [];
     for (let tid of _triplist) {
       _tripmap[tid]['type'] = 'Feature';
       _tripJson.push(_tripmap[tid]);
     }
-
+    console.log(_tripJson);
     if (tripLayer) mymap.removeLayer(tripLayer);
     tripLayer = L.geoJSON(_tripJson, {
         onEachFeature: function(feature, layer) {
