@@ -343,7 +343,7 @@ let homeMarker, workMarker, schoolMarker;
 let prevtrip_query = '';
 let prevloc_query = '';
 async function drawMapFeatures2(init=false) {
-  
+
   if (app.hhidSelVal == 'All') {
     if (!init) mymap.flyTo(DEFAULT_CENTER, DEFAULT_ZOOM);
     if (homeMarker) homeMarker.remove();
@@ -955,6 +955,10 @@ async function hhselectionChanged(thing) {
   drawMapFeatures2();
 }
 
+async function dateChanged(thing) {
+  if (thing.toString()!='') drawMapFeatures2();;
+}
+
 
 async function updateMap(thing) {
   app.isUpdActive = false;
@@ -1103,6 +1107,7 @@ let app = new Vue({
   watch: {
     hhidSelVal: hhselectionChanged,
     pernumSelVal: hhselectionChanged,
+    dateSelVal: dateChanged,
     selected_timep: selectionChanged,
     selected_metric: selectionChanged,
     pct_check: selectionChanged,
