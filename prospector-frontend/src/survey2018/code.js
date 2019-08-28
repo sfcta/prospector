@@ -296,28 +296,35 @@ async function updateTripData() {
     let tmp_arr = [];
     _datemap = {};
     
-    for (let rec of resp) {
-      if (!tmp_arr.includes(rec['travel_date'])) {
-        tmp_arr.push(rec['travel_date']);
-        _datemap[rec['travel_date']] = [];
+    if (resp.length > 0) {
+      for (let rec of resp) {
+        if (!tmp_arr.includes(rec['travel_date'])) {
+          tmp_arr.push(rec['travel_date']);
+          _datemap[rec['travel_date']] = [];
+        }
+        _datemap[rec['travel_date']].push(rec);
       }
-      _datemap[rec['travel_date']].push(rec);
+      app.dateOptions = tmp_arr.sort();
+      app.dateSelVal = [app.dateOptions[0]];
+    } else {
+      app.dateOptions = [''];
+      app.dateSelVal = [''];
     }
-    app.dateOptions = tmp_arr.sort();
-    app.dateSelVal = [app.dateOptions[0]];
-    
+
     prevtrip_query = query;
   }
-  
+
   _triplist = [];
   let tripmap = {};
-  for (let dt of app.dateSelVal) {
-    for (let triprec of _datemap[dt]) {
-      _triplist.push(triprec['trip_id']);
-      triprec['geometry'] = {};
-      triprec['geometry']['type'] = 'LineString';
-      triprec['geometry']['coordinates'] = [];
-      tripmap[triprec['trip_id']] =  triprec;
+  if (Object.keys(_datemap).length > 0) {
+    for (let dt of app.dateSelVal) {
+      for (let triprec of _datemap[dt]) {
+        _triplist.push(triprec['trip_id']);
+        triprec['geometry'] = {};
+        triprec['geometry']['type'] = 'LineString';
+        triprec['geometry']['coordinates'] = [];
+        tripmap[triprec['trip_id']] =  triprec;
+      }
     }
   }
   return tripmap;
@@ -403,25 +410,27 @@ async function drawMapFeatures2(init=false) {
     }
 
     _tripmap = await updateTripData();
-    
-    _tripmap = await updateLocData(_tripmap);
 
     let _tripJson = [];
-    for (let tid of _triplist) {
-      _tripmap[tid]['type'] = 'Feature';
-      _tripJson.push(_tripmap[tid]);
-    }
-    console.log(_tripJson);
     if (tripLayer) mymap.removeLayer(tripLayer);
-    tripLayer = L.geoJSON(_tripJson, {
-        onEachFeature: function(feature, layer) {
-          layer.on({
-            mouseover: hoverTripFeature,
-            /*click: clickedOnFeature,*/
-            });
-        },
-      });
-    tripLayer.addTo(mymap);  
+    if (Object.keys(_tripmap).length > 0) {
+      _tripmap = await updateLocData(_tripmap);
+      for (let tid of _triplist) {
+        _tripmap[tid]['type'] = 'Feature';
+        _tripJson.push(_tripmap[tid]);
+      }
+      console.log(_tripJson);
+      if (tripLayer) mymap.removeLayer(tripLayer);
+      tripLayer = L.geoJSON(_tripJson, {
+          onEachFeature: function(feature, layer) {
+            layer.on({
+              mouseover: hoverTripFeature,
+              /*click: clickedOnFeature,*/
+              });
+          },
+        });
+      tripLayer.addTo(mymap); 
+    }    
     
     
     mymap.flyTo(home_coords, DEFAULT_ZOOM);
@@ -956,7 +965,7 @@ async function hhselectionChanged(thing) {
 }
 
 async function dateChanged(thing) {
-  if (thing.toString()!='') drawMapFeatures2();;
+  if (app.hhidSelVal!='All') drawMapFeatures2();;
 }
 
 
