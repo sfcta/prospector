@@ -142,14 +142,13 @@ let geoLayer, mapLegend, allHHLayer, hhLayer, tripLayer;
 let _featJson, _featJson2, _tripsJson;
 let _hhmap = {};
 let _hhlist = [];
-let _personmap = {};
-let _personlist = [];
-let _datelist = [];
-let _datemap = {};
-let _triplist = [];
-let _tripmap = {};
+let _personmap;
+let _datemap;
+let _triplist;
+let _tripmap;
 let _locations;
 let selHHObj, selpersonObj;
+let home_coords;
 let _aggregateData;
 let prec;
 
@@ -159,7 +158,8 @@ async function initialPrep() {
   _featJson = await fetchMapFeatures();
 
   console.log('2... ');
-  await drawMapFeatures2(true);
+  //await drawMapFeatures2(true);
+  await hhselectionChanged(app.hhidSelVal);
   
   console.log('3... ');
   //await buildChartHtmlFromData();
@@ -314,8 +314,6 @@ async function updateTripData() {
       app.tripOptions = [{text:'',value:''}];
       app.tripSelVal = [''];
     }
-
-    
   }
 
   _triplist = [];
@@ -327,10 +325,12 @@ async function updateTripData() {
         triprec['geometry'] = {};
         triprec['geometry']['type'] = 'LineString';
         triprec['geometry']['coordinates'] = [];
+        triprec['type'] = 'Feature';
         tripmap[triprec['trip_id']] =  triprec;
       }
     }
   }
+  
   return tripmap;
 }
 
@@ -338,10 +338,13 @@ async function updateLocData(tripmap) {
   let query = API_SERVER2 + LOCATION_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0');
   if (query != prevloc_query) {
     prevloc_query = query;
-    let resp = await fetch(query).then(resp => resp.json());
-    _locations = resp;
+    if (Object.keys(tripmap).length > 0) {
+      let resp = await fetch(query).then(resp => resp.json());
+      _locations = resp;
+      console.log(Object.keys(tripmap).length);
+    }
   }
-  
+
   if (_locations) {
     for (let loc of _locations) {
       if (tripmap.hasOwnProperty(loc['trip_id'])) {
@@ -349,6 +352,7 @@ async function updateLocData(tripmap) {
       }
     }
   }
+  
   return tripmap;
 }
 
@@ -359,7 +363,7 @@ let prevloc_query = '';
 async function drawMapFeatures2(init=false) {
   
   if (app.hhidSelVal == 'All') {
-    if (!init) mymap.flyTo(DEFAULT_CENTER, DEFAULT_ZOOM);
+    mymap.flyTo(DEFAULT_CENTER, DEFAULT_ZOOM);
     if (homeMarker) homeMarker.remove();
     if (workMarker) workMarker.remove();
     if (schoolMarker) schoolMarker.remove();
@@ -389,7 +393,7 @@ async function drawMapFeatures2(init=false) {
   } else {
     if (allHHLayer) mymap.removeLayer(allHHLayer);
     selHHObj = _hhmap[app.hhidSelVal];
-    let home_coords = [selHHObj[HLAT_VAR], selHHObj[HLON_VAR]];
+    home_coords = [selHHObj[HLAT_VAR], selHHObj[HLON_VAR]];
     if (homeMarker) homeMarker.remove();
     homeMarker = new L.marker(home_coords, {icon: iconHome}).addTo(mymap);
     
@@ -421,12 +425,15 @@ async function drawMapFeatures2(init=false) {
     }
 
     _tripmap = await updateTripData();
+    //console.log(_tripmap);
 
     let _tripJson = [];
     if (tripLayer) mymap.removeLayer(tripLayer);
+    _tripmap = await updateLocData(_tripmap);
+    console.log(_tripmap);
     if (Object.keys(_tripmap).length > 0) {
-      _tripmap = await updateLocData(_tripmap);
       let tmpOptions = [];
+       
       for (let tid of _triplist) {
         _tripmap[tid]['type'] = 'Feature';
         _tripJson.push(_tripmap[tid]);
@@ -434,7 +441,7 @@ async function drawMapFeatures2(init=false) {
       }
       app.tripOptions = tmpOptions;
       if (!app.tripOptions.includes(app.tripSelVal)) app.tripSelVal = [''];
-      console.log(_tripJson);
+      //console.log(_tripJson);
       if (tripLayer) mymap.removeLayer(tripLayer);
       tripLayer = L.geoJSON(_tripJson, {
           onEachFeature: function(feature, layer) {
@@ -983,15 +990,155 @@ async function selectionChanged(thing) {
 }
 
 async function hhselectionChanged(thing) {
-  drawMapFeatures2();
+  if (thing == 'All') {
+    mymap.flyTo(DEFAULT_CENTER, DEFAULT_ZOOM);
+    if (homeMarker) homeMarker.remove();
+    if (workMarker) workMarker.remove();
+    if (schoolMarker) schoolMarker.remove();
+    if (tripLayer) mymap.removeLayer(tripLayer);
+    if (popSelGeo) popSelGeo.remove();
+    app.pernumOptions = [''];
+    app.pernumSelVal = '';
+    app.dateOptions = [''];
+    app.dateSelVal = [''];
+    
+    if (!allHHLayer) {
+      allHHLayer = L.geoJSON(_featJson2, {
+        pointToLayer: function (feature, latlng) {
+          return L.circleMarker(latlng, hhStyles.init);
+        },
+        onEachFeature: function(feature, layer) {
+          layer.on({
+            mouseover: hoverHHFeature,
+            click: clickedOnHHFeature,
+            });
+        },
+      });
+    }
+    allHHLayer.addTo(mymap);
+  } else {
+    if (allHHLayer) mymap.removeLayer(allHHLayer);
+    selHHObj = _hhmap[app.hhidSelVal];
+    home_coords = [selHHObj[HLAT_VAR], selHHObj[HLON_VAR]];
+    if (homeMarker) homeMarker.remove();
+    homeMarker = new L.marker(home_coords, {icon: iconHome}).addTo(mymap);
+
+    let query, resp;
+    let tmp_arr = [];
+    if (app.hhidSelVal != app.prevHHId) {
+      _personmap = {};
+      query = API_SERVER2 + PERSON_VIEW + '?hh_id=eq.' + app.hhidSelVal;
+      app.prevHHId = app.hhidSelVal;
+      resp = await fetch(query);
+      resp = await resp.json();
+      for (let rec of resp) {
+        tmp_arr.push(rec['person_num']);
+        _personmap[rec['person_num']] = rec;
+      }
+      app.pernumOptions = tmp_arr;
+      app.pernumSelVal = app.pernumOptions[0];
+    }
+  }
+}
+
+async function perselectionChanged(thing) {
+  selpersonObj = _personmap[app.pernumSelVal];
+  if (workMarker) workMarker.remove();
+  if ((selpersonObj[WLAT_VAR]!==null) & (selpersonObj[WLON_VAR]!==null)) {
+    let work_coords = [selpersonObj[WLAT_VAR], selpersonObj[WLON_VAR]];
+    workMarker = new L.marker(work_coords, {icon: iconWork}).addTo(mymap);
+  }
+  if (schoolMarker) schoolMarker.remove();
+  if ((selpersonObj[SLAT_VAR]!==null) & (selpersonObj[SLON_VAR]!==null)) {
+    let school_coords = [selpersonObj[SLAT_VAR], selpersonObj[SLON_VAR]];
+    schoolMarker = new L.marker(school_coords, {icon: iconSchool}).addTo(mymap);
+  }
+  
+  
+  
+  let tmp_arr = [];
+  _datemap = {};
+  let resp = await fetch(API_SERVER2 + TRIP_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0'));  
+  resp = await resp.json();
+  if (resp.length > 0) {
+    for (let rec of resp) {
+      if (!tmp_arr.includes(rec['travel_date'])) {
+        tmp_arr.push(rec['travel_date']);
+        _datemap[rec['travel_date']] = [];
+      }
+      _datemap[rec['travel_date']].push(rec);
+    }
+    
+    _locations = await getLocData();
+    
+    app.dateOptions = tmp_arr.sort();
+    app.dateSelVal = [app.dateOptions[0]];
+  } else {
+    app.dateOptions = [''];
+    app.dateSelVal = [''];  
+  }
+}
+
+async function getLocData() {
+  let locdata = await fetch(API_SERVER2 + LOCATION_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0'));  
+  return await locdata.json();
 }
 
 async function dateChanged(thing) {
-  if (app.hhidSelVal!='All') drawMapFeatures2();
+  if (app.hhidSelVal == 'All') {
+    app.tripOptions = [{text:'',value:''}];
+    app.tripSelVal = '';
+  } else {
+    _tripmap = {};
+    _triplist = [];
+    let tmpOptions = [];
+    if (Object.keys(_datemap).length > 0) {
+      for (let dt of app.dateSelVal) {
+        for (let triprec of _datemap[dt]) {
+          triprec['geometry'] = {};
+          triprec['geometry']['type'] = 'LineString';
+          triprec['geometry']['coordinates'] = [];
+          _triplist.push(triprec['trip_id']);
+          _tripmap[triprec['trip_id']] =  triprec;
+          tmpOptions.push(await getTripOption(triprec));
+        }
+      }
+      
+      for (let loc of _locations) {
+        if (_tripmap.hasOwnProperty(loc['trip_id'])) {
+          _tripmap[loc['trip_id']]['geometry']['coordinates'].push([loc['lon'],loc['lat']]);
+        }
+      }
+      app.tripOptions = tmpOptions;
+      app.tripSelVal = 'All';
+    } else {
+      app.tripOptions = [{text:'',value:''}];
+      app.tripSelVal = '';
+    }
+  }
 }
 
 async function tripChanged(thing) {
-  //console.log(thing);
+  if (thing=='All') {
+    let _tripJson = [];
+    if (tripLayer) mymap.removeLayer(tripLayer);
+    for (let tid of _triplist) {
+      _tripmap[tid]['type'] = 'Feature';
+      _tripJson.push(_tripmap[tid]);
+    }
+    tripLayer = L.geoJSON(_tripJson, {
+        onEachFeature: function(feature, layer) {
+          layer.on({
+            mouseover: hoverTripFeature,
+            click: clickedOnTripFeature,
+            });
+        },
+      });
+    tripLayer.addTo(mymap); 
+    mymap.flyTo(home_coords, DEFAULT_ZOOM);
+  } else if (thing=='') {
+    if (tripLayer) mymap.removeLayer(tripLayer);
+  }
 }
 
 
@@ -1076,7 +1223,7 @@ let app = new Vue({
     dateOptions: [''],
     dateSelVal: [''],
     tripOptions: [{text:'',value:''}],
-    tripSelVal: [''],
+    tripSelVal: '',
     
     selected_metric: 'avg_ride',
     metric_options: [
@@ -1143,7 +1290,7 @@ let app = new Vue({
   },
   watch: {
     hhidSelVal: hhselectionChanged,
-    pernumSelVal: hhselectionChanged,
+    pernumSelVal: perselectionChanged,
     dateSelVal: dateChanged,
     tripSelVal: tripChanged,
     selected_timep: selectionChanged,
