@@ -106,6 +106,7 @@ const tripStyles = {
   highlighted: {
         color: "#ffff00",
   },
+  popup: {"color": "purple", "weight": 9, "opacity": 1.0 }
 };
 
 const MODE_MAP = {1:'Walk',2:'Bike',3:'Bike',4:'Bike',
@@ -244,7 +245,7 @@ infoPanel.update = function(geo) {
     infoPanel._div.className = 'info-panel-hide';
     // and clear the hover too
     if (oldHHHoverTarget && oldHHHoverTarget.feature[HHID_VAR] != selHHId) allHHLayer.resetStyle(oldHHHoverTarget);
-    if (oldTrHoverTarget && oldTrHoverTarget.feature[TRIPID_VAR] != selTripId) tripLayer.resetStyle(oldTrHoverTarget);
+    if (oldTrHoverTarget && oldTrHoverTarget.feature[TRIPID_VAR] != selGeoId) tripLayer.resetStyle(oldTrHoverTarget);
   }, 2000);
 };
 infoPanel.addTo(mymap);
@@ -425,7 +426,7 @@ async function drawMapFeatures2(init=false) {
           onEachFeature: function(feature, layer) {
             layer.on({
               mouseover: hoverTripFeature,
-              /*click: clickedOnFeature,*/
+              click: clickedOnTripFeature,
               });
           },
         });
@@ -748,11 +749,11 @@ function hoverTripFeature(e) {
   infoPanel.update(e.target.feature);
   
   // don't do anything else if the feature is already clicked
-  if (selTripId === e.target.feature[TRIPID_VAR]) return;
+  if (selGeoId === e.target.feature[TRIPID_VAR]) return;
 
   // return previously-hovered segment to its original color
-  if (oldTrHoverTarget && e.target.feature[TRIPID_VAR] != selTripId) {
-    if (oldTrHoverTarget.feature[TRIPID_VAR] != selTripId)
+  if (oldTrHoverTarget && e.target.feature[TRIPID_VAR] != selGeoId) {
+    if (oldTrHoverTarget.feature[TRIPID_VAR] != selGeoId)
       tripLayer.resetStyle(oldTrHoverTarget);
   }
 
@@ -819,30 +820,30 @@ function binFmt(x) {
   return distLabels[x.x] + ((app.pct_check && app.comp_check)? '%':'');
 }
 
-let selGeoId, selHHId, selTripId;
+let selGeoId, selHHId;
 let selectedGeo, prevSelectedGeo;
 let selectedLatLng;
 
 function clickedOnHHFeature(e) {
   let geo = e.target.feature;
   app.hhidSelVal = geo[HHID_VAR];
+}
 
-  /*
+function clickedOnTripFeature(e) {
+  e.target.setStyle(tripStyles.popup);
+  let geo = e.target.feature;
+  selGeoId = geo[TRIPID_VAR];
+
   // unselect the previously-selected selection, if there is one
-  if (selectedGeo && selectedGeo.feature[GEOID_VAR] != geo[GEOID_VAR]) {
+  if (selectedGeo && selectedGeo.feature[TRIPID_VAR] != geo[TRIPID_VAR]) {
     prevSelectedGeo = selectedGeo;
     geoLayer.resetStyle(prevSelectedGeo);
   }
   selectedGeo = e.target;
   let selfeat = selectedGeo.feature;
-  app.chartSubtitle = GEOTYPE + ' ' + selfeat[GEOID_VAR];
+  //app.chartSubtitle = GEOTYPE + ' ' + selfeat[GEOID_VAR];
   selectedLatLng = e.latlng;
-  if (base_lookup[app.sliderValue[0]][app.selected_timep].hasOwnProperty(selGeoId)) {
-    showGeoDetails(selectedLatLng);
-    buildChartHtmlFromData(selGeoId);
-  } else {
-    resetPopGeo();
-  }*/
+  showGeoDetails(selectedLatLng);
 }
 
 let popSelGeo;
@@ -860,10 +861,10 @@ function showGeoDetails(latlng) {
 }
 
 function resetPopGeo() {
-  geoLayer.resetStyle(selectedGeo);
+  tripLayer.resetStyle(selectedGeo);
   prevSelectedGeo = selectedGeo = selGeoId = null;
-  app.chartSubtitle = chart_deftitle;
-  buildChartHtmlFromData();
+  //app.chartSubtitle = chart_deftitle;
+  //buildChartHtmlFromData();
 }
 
 let trendChart = null
