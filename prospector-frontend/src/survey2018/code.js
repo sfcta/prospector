@@ -311,6 +311,8 @@ async function updateTripData() {
     } else {
       app.dateOptions = [''];
       app.dateSelVal = [''];
+      app.tripOptions = [{text:'',value:''}];
+      app.tripSelVal = [''];
     }
 
     
@@ -362,10 +364,13 @@ async function drawMapFeatures2(init=false) {
     if (workMarker) workMarker.remove();
     if (schoolMarker) schoolMarker.remove();
     if (tripLayer) mymap.removeLayer(tripLayer);
+    if (popSelGeo) popSelGeo.remove();
     app.pernumOptions = [''];
     app.pernumSelVal = '';
     app.dateOptions = [''];
     app.dateSelVal = [''];
+    app.tripOptions = [{text:'',value:''}];
+    app.tripSelVal = [''];
     
     if (!allHHLayer) {
       allHHLayer = L.geoJSON(_featJson2, {
@@ -421,10 +426,14 @@ async function drawMapFeatures2(init=false) {
     if (tripLayer) mymap.removeLayer(tripLayer);
     if (Object.keys(_tripmap).length > 0) {
       _tripmap = await updateLocData(_tripmap);
+      let tmpOptions = [];
       for (let tid of _triplist) {
         _tripmap[tid]['type'] = 'Feature';
         _tripJson.push(_tripmap[tid]);
+        tmpOptions.push(await getTripOption(_tripmap[tid]));
       }
+      app.tripOptions = tmpOptions;
+      if (!app.tripOptions.includes(app.tripSelVal)) app.tripSelVal = [''];
       console.log(_tripJson);
       if (tripLayer) mymap.removeLayer(tripLayer);
       tripLayer = L.geoJSON(_tripJson, {
@@ -442,6 +451,14 @@ async function drawMapFeatures2(init=false) {
     mymap.flyTo(home_coords, DEFAULT_ZOOM);
   }
   
+}
+
+async function getTripOption(trec) {
+  let retval = {};
+  retval['text'] = trec['trip_num']+', '+PURP_MAP[trec['o_purpose_category']]+', '+PURP_MAP[trec['d_purpose_category']]+', '+MODE_MAP[trec['mode_1']]+
+                    ','+trec['depart_time'].substring(11,19)+', '+trec['arrive_time'].substring(11,19);
+  retval['value'] = trec['trip_num']; 
+  return retval;
 }
 
 
@@ -970,7 +987,11 @@ async function hhselectionChanged(thing) {
 }
 
 async function dateChanged(thing) {
-  if (app.hhidSelVal!='All') drawMapFeatures2();;
+  if (app.hhidSelVal!='All') drawMapFeatures2();
+}
+
+async function tripChanged(thing) {
+  //console.log(thing);
 }
 
 
@@ -1054,6 +1075,8 @@ let app = new Vue({
     pernumSelVal: '',
     dateOptions: [''],
     dateSelVal: [''],
+    tripOptions: [{text:'',value:''}],
+    tripSelVal: [''],
     
     selected_metric: 'avg_ride',
     metric_options: [
@@ -1122,6 +1145,7 @@ let app = new Vue({
     hhidSelVal: hhselectionChanged,
     pernumSelVal: hhselectionChanged,
     dateSelVal: dateChanged,
+    tripSelVal: tripChanged,
     selected_timep: selectionChanged,
     selected_metric: selectionChanged,
     pct_check: selectionChanged,
