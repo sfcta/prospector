@@ -35,7 +35,7 @@
             <v-select v-model="hhidSelVal" :options="hhidOptions"></v-select>
             
             <h5 style="margin-top:15px">CHOOSE PERSON:</h5>
-            <select v-model="pernumSelVal">
+            <select v-model="pernumSelVal" size="5">
               <option v-for="option of pernumOptions" v-bind:value="option">
                 ${option}
               </option>
