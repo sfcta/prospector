@@ -292,6 +292,7 @@ async function getMapData() {
 async function updateTripData() {
   let query = API_SERVER2 + TRIP_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0');
   if (query != prevtrip_query) {
+    prevtrip_query = query;
     let resp = await fetch(query);
     resp = await resp.json();
     let tmp_arr = [];
@@ -312,7 +313,7 @@ async function updateTripData() {
       app.dateSelVal = [''];
     }
 
-    prevtrip_query = query;
+    
   }
 
   _triplist = [];
@@ -334,13 +335,16 @@ async function updateTripData() {
 async function updateLocData(tripmap) {
   let query = API_SERVER2 + LOCATION_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0');
   if (query != prevloc_query) {
-    let resp = await fetch(query);
-    _locations = await resp.json();
+    prevloc_query = query;
+    let resp = await fetch(query).then(resp => resp.json());
+    _locations = resp;
   }
   
-  for (let loc of _locations) {
-    if (tripmap.hasOwnProperty(loc['trip_id'])) {
-      tripmap[loc['trip_id']]['geometry']['coordinates'].push([loc['lon'],loc['lat']]);
+  if (_locations) {
+    for (let loc of _locations) {
+      if (tripmap.hasOwnProperty(loc['trip_id'])) {
+        tripmap[loc['trip_id']]['geometry']['coordinates'].push([loc['lon'],loc['lat']]);
+      }
     }
   }
   return tripmap;
@@ -351,7 +355,7 @@ let homeMarker, workMarker, schoolMarker;
 let prevtrip_query = '';
 let prevloc_query = '';
 async function drawMapFeatures2(init=false) {
-
+  
   if (app.hhidSelVal == 'All') {
     if (!init) mymap.flyTo(DEFAULT_CENTER, DEFAULT_ZOOM);
     if (homeMarker) homeMarker.remove();
@@ -388,6 +392,7 @@ async function drawMapFeatures2(init=false) {
     let tmp_arr = [];
     if (app.hhidSelVal != app.prevHHId) {
       query = API_SERVER2 + PERSON_VIEW + '?hh_id=eq.' + app.hhidSelVal;
+      app.prevHHId = app.hhidSelVal;
       resp = await fetch(query);
       resp = await resp.json();
       for (let rec of resp) {
@@ -436,7 +441,6 @@ async function drawMapFeatures2(init=false) {
     
     mymap.flyTo(home_coords, DEFAULT_ZOOM);
   }
-  app.prevHHId = app.hhidSelVal;
   
 }
 
