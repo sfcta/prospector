@@ -990,13 +990,14 @@ async function selectionChanged(thing) {
 }
 
 async function hhselectionChanged(thing) {
-  if (thing == 'All') {
+  if (popSelGeo) popSelGeo.remove();
+  if (app.hhidSelVal == 'All') {
+    app.prevHHId = app.hhidSelVal;
     mymap.flyTo(DEFAULT_CENTER, DEFAULT_ZOOM);
     if (homeMarker) homeMarker.remove();
     if (workMarker) workMarker.remove();
     if (schoolMarker) schoolMarker.remove();
     if (tripLayer) mymap.removeLayer(tripLayer);
-    if (popSelGeo) popSelGeo.remove();
     app.pernumOptions = [''];
     app.pernumSelVal = '';
     app.dateOptions = [''];
@@ -1037,11 +1038,14 @@ async function hhselectionChanged(thing) {
       }
       app.pernumOptions = tmp_arr;
       app.pernumSelVal = app.pernumOptions[0];
+      perselectionChanged(app.pernumSelVal);
     }
   }
 }
 
 async function perselectionChanged(thing) {
+  if (popSelGeo) popSelGeo.remove();
+  if (app.pernumSelVal == '') return;
   selpersonObj = _personmap[app.pernumSelVal];
   if (workMarker) workMarker.remove();
   if ((selpersonObj[WLAT_VAR]!==null) & (selpersonObj[WLON_VAR]!==null)) {
@@ -1054,7 +1058,7 @@ async function perselectionChanged(thing) {
     schoolMarker = new L.marker(school_coords, {icon: iconSchool}).addTo(mymap);
   }
   
-  
+  if (tripLayer) mymap.removeLayer(tripLayer);
   
   let tmp_arr = [];
   _datemap = {};
@@ -1085,6 +1089,7 @@ async function getLocData() {
 }
 
 async function dateChanged(thing) {
+  if (popSelGeo) popSelGeo.remove();
   if (app.hhidSelVal == 'All') {
     app.tripOptions = [{text:'',value:''}];
     app.tripSelVal = '';
