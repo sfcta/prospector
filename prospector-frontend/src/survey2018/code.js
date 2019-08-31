@@ -341,7 +341,6 @@ async function updateLocData(tripmap) {
     if (Object.keys(tripmap).length > 0) {
       let resp = await fetch(query).then(resp => resp.json());
       _locations = resp;
-      console.log(Object.keys(tripmap).length);
     }
   }
 
@@ -430,7 +429,7 @@ async function drawMapFeatures2(init=false) {
     let _tripJson = [];
     if (tripLayer) mymap.removeLayer(tripLayer);
     _tripmap = await updateLocData(_tripmap);
-    console.log(_tripmap);
+    //console.log(_tripmap);
     if (Object.keys(_tripmap).length > 0) {
       let tmpOptions = [];
        
@@ -792,13 +791,17 @@ function hoverTripFeature(e) {
 }
 
 function highlightSelectedSegment() {
-  if (!selGeoId) return;
+  selGeoId = app.hhidSelVal + app.pernumSelVal.padStart(2, '0') + app.tripSelVal.padStart(3, '0');
+  if (selectedGeo && selectedGeo.feature[TRIPID_VAR] != selGeoId) {
+    tripLayer.resetStyle(selectedGeo);
+    if (popSelGeo) popSelGeo.remove();
+  }
 
   mymap.eachLayer(function (e) {
     try {
-      if (e.feature[GEOID_VAR] === selGeoId) {
+      if (e.feature[TRIPID_VAR] === selGeoId) {
         e.bringToFront();
-        e.setStyle(styles.popup);
+        e.setStyle(tripStyles.popup);
         selectedGeo = e;
         return;
       }
@@ -860,12 +863,13 @@ function clickedOnHHFeature(e) {
 function clickedOnTripFeature(e) {
   e.target.setStyle(tripStyles.popup);
   let geo = e.target.feature;
+  app.tripSelVal = geo['trip_num'];
   selGeoId = geo[TRIPID_VAR];
 
   // unselect the previously-selected selection, if there is one
   if (selectedGeo && selectedGeo.feature[TRIPID_VAR] != geo[TRIPID_VAR]) {
     prevSelectedGeo = selectedGeo;
-    geoLayer.resetStyle(prevSelectedGeo);
+    tripLayer.resetStyle(prevSelectedGeo);
   }
   selectedGeo = e.target;
   let selfeat = selectedGeo.feature;
@@ -884,13 +888,14 @@ function showGeoDetails(latlng) {
 
   // Revert to overall chart when no segment selected
   popSelGeo.on('remove', function(e) {
-    resetPopGeo();
+    //resetPopGeo();
   });
 }
 
 function resetPopGeo() {
   tripLayer.resetStyle(selectedGeo);
   prevSelectedGeo = selectedGeo = selGeoId = null;
+  app.tripSelVal = 'All';
   //app.chartSubtitle = chart_deftitle;
   //buildChartHtmlFromData();
 }
@@ -1040,6 +1045,7 @@ async function hhselectionChanged(thing) {
       app.pernumSelVal = app.pernumOptions[0];
       perselectionChanged(app.pernumSelVal);
     }
+    mymap.flyTo(home_coords, DEFAULT_ZOOM);
   }
 }
 
@@ -1116,6 +1122,7 @@ async function dateChanged(thing) {
       }
       app.tripOptions = tmpOptions;
       app.tripSelVal = 'All';
+      tripChanged(app.tripSelVal);
     } else {
       app.tripOptions = [{text:'',value:''}];
       app.tripSelVal = '';
@@ -1143,6 +1150,9 @@ async function tripChanged(thing) {
     mymap.flyTo(home_coords, DEFAULT_ZOOM);
   } else if (thing=='') {
     if (tripLayer) mymap.removeLayer(tripLayer);
+  } else if (thing) {
+    highlightSelectedSegment();
+    //showGeoDetails(selectedLatLng);
   }
 }
 
