@@ -462,7 +462,7 @@ async function drawMapFeatures2(init=false) {
 async function getTripOption(trec) {
   let retval = {};
   retval['text'] = trec['trip_num']+', '+PURP_MAP[trec['o_purpose_category']]+', '+PURP_MAP[trec['d_purpose_category']]+', '+MODE_MAP[trec['mode_1']]+
-                    ','+trec['depart_time'].substring(11,19)+', '+trec['arrive_time'].substring(11,19);
+                    ', '+trec['depart_time'].substring(11,19)+', '+trec['arrive_time'].substring(11,19);
   retval['value'] = trec['trip_num']; 
   return retval;
 }
@@ -1147,7 +1147,7 @@ async function tripChanged(thing) {
         },
       });
     tripLayer.addTo(mymap); 
-    mymap.flyTo(home_coords, DEFAULT_ZOOM);
+    mymap.flyToBounds(tripLayer.getBounds());
   } else if (thing=='') {
     if (tripLayer) mymap.removeLayer(tripLayer);
   } else if (thing) {
