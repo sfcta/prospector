@@ -36,10 +36,7 @@ const DEFAULT_CENTER = [37.76889, -122.440997];
 mymap.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
 
 // some important global variables.
-const API_SERVER = 'https://api.sfcta.org/api/';
-const GEO_VIEW = 'tmc_transit';
-const DATA_VIEW = 'tnctr_bus';
-const API_SERVER2 = 'http://shinyta.sfcta.org/apiprivate/';
+const API_SERVER = 'http://shinyta.sfcta.org/apiprivate/';
 const HH_VIEW = 'household';
 const PERSON_VIEW = 'person';
 const TRIP_VIEW = 'trip';
@@ -139,7 +136,7 @@ let iconSchool = L.AwesomeMarkers.icon({
 });
 
 let geoLayer, mapLegend, allHHLayer, hhLayer, tripLayer;
-let _featJson, _featJson2, _tripsJson;
+let _featJson, _tripsJson;
 let _hhmap = {};
 let _hhlist = [];
 let _personmap;
@@ -158,7 +155,6 @@ async function initialPrep() {
   _featJson = await fetchMapFeatures();
 
   console.log('2... ');
-  //await drawMapFeatures2(true);
   await hhselectionChanged(app.hhidSelVal);
   
   console.log('3... ');
@@ -168,12 +164,10 @@ async function initialPrep() {
 }
 
 async function fetchMapFeatures() {
-  const geo_url = API_SERVER + GEO_VIEW + '?select=tmc,geometry,street,intersec,direction,dir2';
-
   try {
     // get a list of valid TMCs
     let trtmc_ids = [];
-    let resp = await fetch(API_SERVER2 + HH_VIEW);
+    let resp = await fetch(API_SERVER + HH_VIEW);
     let features = await resp.json();
     for (let feat of features) {
       feat['type'] = 'Feature';
@@ -183,20 +177,8 @@ async function fetchMapFeatures() {
       _hhlist.push(feat['hh_id']);
       _hhmap[feat['hh_id']] = feat;
     }
-    _featJson2 = features;
-    app.hhidOptions = app.hhidOptions.concat(_hhlist);
-    
-    resp = await fetch(geo_url);
-    features = await resp.json();
 
-    // do some parsing and stuff
-    let feat_filtered = [];
-    for (let feat of features) {
-      feat['type'] = 'Feature';
-      feat['geometry'] = JSON.parse(feat.geometry);
-      feat_filtered.push(feat);
-    }
-    return feat_filtered;
+    return features;
 
   } catch (error) {
     console.log('map feature error: ' + error);
@@ -250,47 +232,8 @@ infoPanel.update = function(geo) {
 };
 infoPanel.addTo(mymap);
 
-async function getMapData() {
-  let data_url = API_SERVER + DATA_VIEW;
-  let resp = await fetch(data_url);
-  let jsonData = await resp.json();
-  base_lookup = {};
-  let tmp = {};
-  for (let yr of SCNYR_LIST) {
-    tmp[yr] = {};
-    base_lookup[yr] = {};
-    for (let tod of app.time_options) {
-      tmp[yr][tod.value] = {};
-      base_lookup[yr][tod.value] = {};
-      for (let met of app.metric_options) {
-        tmp[yr][tod.value][met.value] = 0;
-      }
-    }
-  }
-  for (let entry of jsonData) {
-    base_lookup[entry[YR_VAR]][entry[TOD_VAR]][entry[GEOID_VAR]] = entry;
-    for (let met of app.metric_options) {
-      tmp[entry[YR_VAR]][entry[TOD_VAR]][met.value] += entry[met.value];
-    }
-  }
-  _aggregateData = {};
-  for (let tod of app.time_options) {
-    _aggregateData[tod.value] = [];
-  }
-  for (let yr of SCNYR_LIST) {
-    for (let tod of app.time_options) {
-      let row = {};
-      row['year'] = yr.toString();
-      for (let met of app.metric_options) {
-        row[met.value] = Math.round(tmp[yr][tod.value][met.value]*prec)/prec;
-      }
-      _aggregateData[tod.value].push(row);
-    }
-  }
-}
-
 async function updateTripData() {
-  let query = API_SERVER2 + TRIP_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0');
+  let query = API_SERVER + TRIP_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0');
   if (query != prevtrip_query) {
     prevtrip_query = query;
     let resp = await fetch(query);
@@ -335,7 +278,7 @@ async function updateTripData() {
 }
 
 async function updateLocData(tripmap) {
-  let query = API_SERVER2 + LOCATION_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0');
+  let query = API_SERVER + LOCATION_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0');
   if (query != prevloc_query) {
     prevloc_query = query;
     if (Object.keys(tripmap).length > 0) {
@@ -359,105 +302,7 @@ async function updateLocData(tripmap) {
 let homeMarker, workMarker, schoolMarker;
 let prevtrip_query = '';
 let prevloc_query = '';
-async function drawMapFeatures2(init=false) {
-  
-  if (app.hhidSelVal == 'All') {
-    mymap.flyTo(DEFAULT_CENTER, DEFAULT_ZOOM);
-    if (homeMarker) homeMarker.remove();
-    if (workMarker) workMarker.remove();
-    if (schoolMarker) schoolMarker.remove();
-    if (tripLayer) mymap.removeLayer(tripLayer);
-    if (popSelGeo) popSelGeo.remove();
-    app.pernumOptions = [''];
-    app.pernumSelVal = '';
-    app.dateOptions = [''];
-    app.dateSelVal = [''];
-    app.tripOptions = [{text:'',value:''}];
-    app.tripSelVal = [''];
-    
-    if (!allHHLayer) {
-      allHHLayer = L.geoJSON(_featJson2, {
-        pointToLayer: function (feature, latlng) {
-          return L.circleMarker(latlng, hhStyles.init);
-        },
-        onEachFeature: function(feature, layer) {
-          layer.on({
-            mouseover: hoverHHFeature,
-            click: clickedOnHHFeature,
-            });
-        },
-      });
-    }
-    allHHLayer.addTo(mymap);
-  } else {
-    if (allHHLayer) mymap.removeLayer(allHHLayer);
-    selHHObj = _hhmap[app.hhidSelVal];
-    home_coords = [selHHObj[HLAT_VAR], selHHObj[HLON_VAR]];
-    if (homeMarker) homeMarker.remove();
-    homeMarker = new L.marker(home_coords, {icon: iconHome}).addTo(mymap);
-    
-    let query, resp;
-    let tmp_arr = [];
-    if (app.hhidSelVal != app.prevHHId) {
-      query = API_SERVER2 + PERSON_VIEW + '?hh_id=eq.' + app.hhidSelVal;
-      app.prevHHId = app.hhidSelVal;
-      resp = await fetch(query);
-      resp = await resp.json();
-      for (let rec of resp) {
-        tmp_arr.push(rec['person_num']);
-        _personmap[rec['person_num']] = rec;
-      }
-      app.pernumOptions = tmp_arr;
-      if (!app.pernumOptions.includes(app.pernumSelVal)) app.pernumSelVal = app.pernumOptions[0];
-    }
-    
-    selpersonObj = _personmap[app.pernumSelVal];
-    if (workMarker) workMarker.remove();
-    if ((selpersonObj[WLAT_VAR]!==null) & (selpersonObj[WLON_VAR]!==null)) {
-      let work_coords = [selpersonObj[WLAT_VAR], selpersonObj[WLON_VAR]];
-      workMarker = new L.marker(work_coords, {icon: iconWork}).addTo(mymap);
-    }
-    if (schoolMarker) schoolMarker.remove();
-    if ((selpersonObj[SLAT_VAR]!==null) & (selpersonObj[SLON_VAR]!==null)) {
-      let school_coords = [selpersonObj[SLAT_VAR], selpersonObj[SLON_VAR]];
-      schoolMarker = new L.marker(school_coords, {icon: iconSchool}).addTo(mymap);
-    }
 
-    _tripmap = await updateTripData();
-    //console.log(_tripmap);
-
-    let _tripJson = [];
-    if (tripLayer) mymap.removeLayer(tripLayer);
-    _tripmap = await updateLocData(_tripmap);
-    //console.log(_tripmap);
-    if (Object.keys(_tripmap).length > 0) {
-      let tmpOptions = [];
-       
-      for (let tid of _triplist) {
-        _tripmap[tid]['type'] = 'Feature';
-        _tripJson.push(_tripmap[tid]);
-        tmpOptions.push(await getTripOption(_tripmap[tid]));
-      }
-      app.tripOptions = tmpOptions;
-      if (!app.tripOptions.includes(app.tripSelVal)) app.tripSelVal = [''];
-      //console.log(_tripJson);
-      if (tripLayer) mymap.removeLayer(tripLayer);
-      tripLayer = L.geoJSON(_tripJson, {
-          onEachFeature: function(feature, layer) {
-            layer.on({
-              mouseover: hoverTripFeature,
-              click: clickedOnTripFeature,
-              });
-          },
-        });
-      tripLayer.addTo(mymap); 
-    }    
-    
-    
-    mymap.flyTo(home_coords, DEFAULT_ZOOM);
-  }
-  
-}
 
 async function getTripOption(trec) {
   let retval = {};
@@ -471,268 +316,6 @@ async function getTripOption(trec) {
 let base_lookup;
 let map_vals;
 let bwidth_vals;
-async function drawMapFeatures(queryMapData=true) {
-  // create a clean copy of the feature Json
-  if (!_featJson) return;
-  let cleanFeatures = _featJson.slice();
-  let sel_metric = app.selected_metric;
-  let base_scnyr = app.sliderValue[0];
-  let comp_scnyr = app.sliderValue[1];
-  if (base_scnyr==comp_scnyr) {
-    app.comp_check = false;
-    app.pct_check = false;
-  } else {
-    app.comp_check = true;
-  }
-  prec = (FRAC_COLS.includes(sel_metric) ? 100 : 1);
-  
-  try {
-    if (queryMapData) {
-      if (base_lookup == undefined) await getMapData();
-      
-      let map_metric;
-      let bwidth_metric;
-      map_vals = [];
-      bwidth_vals = [];
-      for (let feat of cleanFeatures) {
-        bwidth_metric = null;
-        if (base_lookup[base_scnyr][app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
-          bwidth_metric = Math.round(base_lookup[base_scnyr][app.selected_timep][feat[GEOID_VAR]][app.selected_bwidth]);
-          if (bwidth_metric !== null) bwidth_vals.push(bwidth_metric);
-        }
-        feat['bwmetric'] = bwidth_metric;
-        
-        map_metric = null;
-        feat['base'] = null;
-        feat['comp'] = null;
-        if (app.comp_check) {
-          if (base_lookup[base_scnyr][app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
-            if (base_lookup[comp_scnyr][app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
-              feat['base'] = base_lookup[base_scnyr][app.selected_timep][feat[GEOID_VAR]][sel_metric];
-              feat['comp'] = base_lookup[comp_scnyr][app.selected_timep][feat[GEOID_VAR]][sel_metric];
-              map_metric = feat['comp'] - feat['base'];
-              if (app.pct_check && app.comp_check) {
-                if (feat['base']>0) {
-                  map_metric = map_metric*100/feat['base'];
-                } else {
-                  map_metric = 0;
-                }
-              }
-            } else {
-              feat['base'] = base_lookup[base_scnyr][app.selected_timep][feat[GEOID_VAR]][sel_metric];
-            }
-          } else {
-            if (base_lookup[comp_scnyr][app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) feat['comp'] = base_lookup[comp_scnyr][app.selected_timep][feat[GEOID_VAR]][sel_metric];
-          }
-        } else {
-          if (base_lookup[base_scnyr][app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
-            map_metric = base_lookup[base_scnyr][app.selected_timep][feat[GEOID_VAR]][sel_metric];
-          }
-        }
-        if (map_metric !== null) {
-          map_metric = Math.round(map_metric*prec)/prec;
-          map_vals.push(map_metric);
-        }
-        feat['metric'] = map_metric;
-      }
-      map_vals = map_vals.sort((a, b) => a - b);  
-      bwidth_vals = bwidth_vals.sort((a, b) => a - b); 
-    }
-    
-    if (map_vals.length > 0) {
-      let color_func;
-      let sel_colorvals2;
-      let bp;
-      
-      if (queryMapData) {
-        sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
-        
-        //calculate distribution
-        let dist_vals = (app.comp_check && app.pct_check)? map_vals.filter(entry => entry <= MAX_PCTDIFF) : map_vals;
-        let x = d3.scaleLinear()
-                .domain([dist_vals[0], dist_vals[dist_vals.length-1]])
-        let numticks = 20;
-        if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) numticks = sel_colorvals.length;
-        let histogram = d3.histogram()
-            .domain(x.domain())
-            .thresholds(x.ticks(numticks));
-        updateDistChart(histogram(dist_vals));
-
-        if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) {
-          sel_binsflag = false;
-          color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
-          sel_colorvals2 = sel_colorvals.slice(0);
-          
-          app.custom_disable = true;
-          app.bp0 = 0;
-          app.bp1 = 0;
-          app.bp2 = 0;
-          app.bp3 = 0;
-          app.bp4 = 0;
-          app.bp5 = 1;
-          
-        } else {
-          app.custom_disable = false;
-          
-          let mode = 'base';
-          if (app.comp_check){
-            if(app.pct_check){
-              mode = 'pctdiff';
-            } else {
-              mode = 'diff';
-            }
-          }
-          let custom_bps;
-          if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)){
-            custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
-            sel_colorvals = [map_vals[0]];
-            for (var i = 0; i < custom_bps.length; i++) {
-              if (custom_bps[i]>map_vals[0] && custom_bps[i]<map_vals[map_vals.length-1]) sel_colorvals.push(custom_bps[i]);
-            }
-            sel_colorvals.push(map_vals[map_vals.length-1]);
-          } else {
-            sel_colorvals = getQuantiles(map_vals, app.selected_breaks);
-          }
-          bp = Array.from(sel_colorvals).sort((a, b) => a - b);
-          app.bp0 = bp[0];
-          app.bp5 = bp[bp.length-1];
-          if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)){
-            app.bp1 = custom_bps[0];
-            app.bp2 = custom_bps[1];
-            app.bp3 = custom_bps[2];
-            app.bp4 = custom_bps[3];
-            if (custom_bps[0] < app.bp0) app.bp1 = app.bp0;
-          } else {
-            app.bp1 = bp[1];
-            app.bp4 = bp[bp.length-2];
-            if (app.selected_breaks==3) {
-              app.bp2 = app.bp3 = bp[2];
-            } else {
-              app.bp2 = bp[2];
-              app.bp3 = bp[3];
-            }
-          }
-          
-          sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
-          updateColorScheme(sel_colorvals);
-          sel_binsflag = true; 
-          color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
-          sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
-        }
-
-        app.bwcustom_disable = false;
-        sel_bwvals = getQuantiles(bwidth_vals, 5);
-        bp = Array.from(sel_bwvals).sort((a, b) => a - b);
-        app.bwbp0 = bp[0];
-        app.bwbp1 = bp[1];
-        app.bwbp2 = bp[2];
-        app.bwbp3 = bp[3];
-        app.bwbp4 = bp[4];
-        app.bwbp5 = bp[5];
-        sel_bwvals = Array.from(new Set(sel_bwvals)).sort((a, b) => a - b); 
-      } else {
-        sel_colorvals = new Set([app.bp0, app.bp1, app.bp2, app.bp3, app.bp4, app.bp5]);
-        sel_colorvals = Array.from(sel_colorvals).sort((a, b) => a - b);
-        updateColorScheme(sel_colorvals);
-        sel_binsflag = true; 
-        color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
-        sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
-        
-        sel_bwvals = new Set([app.bwbp0, app.bwbp1, app.bwbp2, app.bwbp3, app.bwbp4, app.bwbp5]);
-        sel_bwvals = Array.from(sel_bwvals).sort((a, b) => a - b);
-      }
-
-      let bw_widths;
-      if (app.bwidth_check) {
-        bw_widths = BWIDTH_MAP[sel_bwvals.length]; 
-        for (let feat of cleanFeatures) {
-          if (feat['bwmetric'] !== null) {
-            if (sel_bwvals.length <= 2){
-              feat['bwmetric_scaled'] = bw_widths;
-            } else {
-              for (var i = 0; i < sel_bwvals.length-1; i++) {
-                if (feat['bwmetric'] <= sel_bwvals[i + 1]) {
-                  feat['bwmetric_scaled'] = bw_widths[i];
-                  break;
-                }
-              }
-            }
-            //feat['bwmetric_scaled'] = (feat['bwmetric']-bwidth_vals[0])*(MAX_BWIDTH-MIN_BWIDTH)/(bwidth_vals[bwidth_vals.length-1]-bwidth_vals[0])+MIN_BWIDTH;
-          } else {
-            feat['bwmetric_scaled'] = null;
-          }
-        }
-      }
-      
-      sel_colors = [];
-      for(let i of sel_colorvals2) {
-        sel_colors.push(color_func(i).hex());
-      }
- 
-      if (geoLayer) mymap.removeLayer(geoLayer);
-      if (mapLegend) mymap.removeControl(mapLegend);
-      
-      geoLayer = L.geoJSON(_featJson2, {
-        pointToLayer: function (feature, latlng) {
-          return L.circleMarker(latlng, geojsonMarkerOptions);
-        }
-        /*style: {"color": "#ff7800"},
-        onEachFeature: function(feature, layer) {
-          layer.on({
-            mouseover: hoverFeature,
-            click: clickedOnFeature,
-            });
-        },*/
-      });
-
-      geoLayer.addTo(mymap);
-      
-
-      mapLegend = L.control({ position: 'bottomright' });
-      mapLegend.onAdd = function(map) {
-        let div = L.DomUtil.create('div', 'info legend');
-        let legHTML = getLegHTML(
-          sel_colorvals,
-          sel_colors,
-          sel_binsflag,
-          (app.pct_check && app.comp_check)? '%': ''
-        );
-        legHTML = '<h4>' + sel_metric.toUpperCase() + (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(sel_metric)? (' (' + METRIC_UNITS[sel_metric] + ')') : '')) +
-                  '</h4>' + legHTML;
-        if (app.bwidth_check) {
-          legHTML += '<hr/>' + '<h4>' + app.selected_bwidth.toUpperCase() +  '</h4>';
-          legHTML += getBWLegHTML(sel_bwvals, bw_widths);
-        }
-        div.innerHTML = legHTML;
-        return div;
-      };
-      mapLegend.addTo(mymap);
-      
-      if (selectedGeo) {
-        if (base_lookup[base_scnyr][app.selected_timep].hasOwnProperty(selectedGeo.feature[GEOID_VAR])) {
-          buildChartHtmlFromData(selectedGeo.feature[GEOID_VAR]);
-          return cleanFeatures.filter(entry => entry[GEOID_VAR] == selectedGeo.feature[GEOID_VAR])[0];
-        } else {
-          resetPopGeo();
-        }
-      } else {
-        buildChartHtmlFromData();
-        return null;
-      }
-    }
-
-  } catch(error) {
-    console.log(error);
-  }
-}
-
-function updateColorScheme(colorvals) {
-  if (colorvals[0] * colorvals[colorvals.length-1] >= 0) {
-    app.selected_colorscheme = COLORRAMP.SEQ;
-  } else {
-    app.selected_colorscheme = COLORRAMP.DIV;
-  } 
-}
 
 function styleByMetricColor(feat) {
   let color = getColorFromVal(
@@ -809,48 +392,6 @@ function highlightSelectedSegment() {
   });
 }
 
-let distChart = null;
-let distLabels;
-function updateDistChart(bins) {
-  let data = [];
-  distLabels = [];
-  for (let b of bins) {
-    let x0 = Math.round(b.x0*prec)/prec;
-    let x1 = Math.round(b.x1*prec)/prec;
-    data.push({x:x0, y:b.length});
-    distLabels.push(x0 + '-' + x1);
-  }
-
-  if (distChart) {
-    distChart.setData(data);
-  } else {
-      distChart = new Morris.Area({
-        element: 'dist-chart',
-        data: data,
-        xkey: 'x',
-        ykeys: 'y',
-        ymin: 0,
-        labels: ['Freq'],
-        lineColors: ['#1fc231'],
-        xLabels: 'x',
-        xLabelAngle: 25,
-        xLabelFormat: binFmt,
-        hideHover: true,
-        parseTime: false,
-        fillOpacity: 0.4,
-        pointSize: 1,
-        behaveLikeLine: false,
-        eventStrokeWidth: 2,
-        eventLineColors: ['#ccc'],
-      });
-  }
-
-}
-
-function binFmt(x) {
-  return distLabels[x.x] + ((app.pct_check && app.comp_check)? '%':'');
-}
-
 let selGeoId, selHHId;
 let selectedGeo, prevSelectedGeo;
 let selectedLatLng;
@@ -901,98 +442,6 @@ function resetPopGeo() {
 }
 
 let trendChart = null
-function buildChartHtmlFromData(geoid = null) {
-  document.getElementById('longchart').innerHTML = '';
-  if (geoid) {
-    let selgeodata = [];
-    for (let yr of SCNYR_LIST) {
-      let row = {};
-      row['year'] = yr.toString();
-      row[app.selected_metric] = base_lookup[yr][app.selected_timep][geoid][app.selected_metric];
-      selgeodata.push(row);
-    } 
-    trendChart = new Morris.Line({
-      data: selgeodata,
-      element: 'longchart',
-      gridTextColor: '#aaa',
-      hideHover: true,
-      labels: [app.selected_metric.toUpperCase()],
-      lineColors: ['#f66'],
-      xkey: 'year',
-      smooth: false,
-      parseTime: false,
-      xLabelAngle: 45,
-      ykeys: [app.selected_metric],
-    });
-  } else {
-    trendChart = new Morris.Line({
-      data: _aggregateData[app.selected_timep],
-      element: 'longchart',
-      gridTextColor: '#aaa',
-      hideHover: true,
-      labels: [app.selected_metric.toUpperCase()],
-      lineColors: ['#f66'],
-      xkey: 'year',
-      smooth: false,
-      parseTime: false,
-      xLabelAngle: 45,
-      ykeys: [app.selected_metric],
-    });
-  }
-}
-
-
-function bp1Changed(thing) {
-  if (thing < app.bp0) app.bp1 = app.bp0;
-  if (thing > app.bp2) app.bp2 = thing;
-  app.isUpdActive = true;
-}
-function bp2Changed(thing) {
-  if (thing < app.bp1) app.bp1 = thing;
-  if (thing > app.bp3) app.bp3 = thing;
-  app.isUpdActive = true;
-}
-function bp3Changed(thing) {
-  if (thing < app.bp2) app.bp2 = thing;
-  if (thing > app.bp4) app.bp4 = thing;
-  app.isUpdActive = true;
-}
-function bp4Changed(thing) {
-  if (thing < app.bp3) app.bp3 = thing;
-  if (thing > app.bp5) app.bp4 = app.bp5;
-  app.isUpdActive = true;
-}
-function bwbp1Changed(thing) {
-  if (thing < app.bwbp0) app.bwbp1 = app.bwbp0;
-  if (thing > app.bwbp2) app.bwbp2 = thing;
-  app.isBWUpdActive = true;
-}
-function bwbp2Changed(thing) {
-  if (thing < app.bwbp1) app.bwbp1 = thing;
-  if (thing > app.bwbp3) app.bwbp3 = thing;
-  app.isBWUpdActive = true;
-}
-function bwbp3Changed(thing) {
-  if (thing < app.bwbp2) app.bwbp2 = thing;
-  if (thing > app.bwbp4) app.bwbp4 = thing;
-  app.isBWUpdActive = true;
-}
-function bwbp4Changed(thing) {
-  if (thing < app.bwbp3) app.bwbp3 = thing;
-  if (thing > app.bwbp5) app.bwbp4 = app.bwbp5;
-  app.isBWUpdActive = true;
-}
-
-async function selectionChanged(thing) {
-  app.chartTitle = app.selected_metric.toUpperCase() + ' TREND';
-  if (app.sliderValue && app.selected_metric && app.selected_timep) {
-    let selfeat = await drawMapFeatures();
-    if (selfeat) {
-      highlightSelectedSegment();
-      popSelGeo.setContent(getInfoHtml(selfeat));
-    }
-  }
-}
 
 async function hhselectionChanged(thing) {
   if (popSelGeo) popSelGeo.remove();
@@ -1009,7 +458,7 @@ async function hhselectionChanged(thing) {
     app.dateSelVal = [''];
     
     if (!allHHLayer) {
-      allHHLayer = L.geoJSON(_featJson2, {
+      allHHLayer = L.geoJSON(_featJson, {
         pointToLayer: function (feature, latlng) {
           return L.circleMarker(latlng, hhStyles.init);
         },
@@ -1033,7 +482,7 @@ async function hhselectionChanged(thing) {
     let tmp_arr = [];
     if (app.hhidSelVal != app.prevHHId) {
       _personmap = {};
-      query = API_SERVER2 + PERSON_VIEW + '?hh_id=eq.' + app.hhidSelVal;
+      query = API_SERVER + PERSON_VIEW + '?hh_id=eq.' + app.hhidSelVal;
       app.prevHHId = app.hhidSelVal;
       resp = await fetch(query);
       resp = await resp.json();
@@ -1068,7 +517,7 @@ async function perselectionChanged(thing) {
   
   let tmp_arr = [];
   _datemap = {};
-  let resp = await fetch(API_SERVER2 + TRIP_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0'));  
+  let resp = await fetch(API_SERVER + TRIP_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0'));  
   resp = await resp.json();
   if (resp.length > 0) {
     for (let rec of resp) {
@@ -1090,7 +539,7 @@ async function perselectionChanged(thing) {
 }
 
 async function getLocData() {
-  let locdata = await fetch(API_SERVER2 + LOCATION_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0'));  
+  let locdata = await fetch(API_SERVER + LOCATION_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0'));  
   return await locdata.json();
 }
 
@@ -1157,78 +606,11 @@ async function tripChanged(thing) {
 }
 
 
-async function updateMap(thing) {
-  app.isUpdActive = false;
-  let selfeat = await drawMapFeatures(false);
-  if (selfeat) {
-    highlightSelectedSegment();
-    popSelGeo.setContent(getInfoHtml(selfeat));
-  }
-}
-function customBreakPoints(thing) {
-  if(thing) {
-    app.isUpdActive = false;
-  } else {
-    drawMapFeatures();
-  }
-}
-function customBWBreakPoints(thing) {
-  if(thing) {
-    app.isBWUpdActive = false;
-  } else {
-    drawMapFeatures();
-  }
-}
-
-function colorschemeChanged(thing) {
-  app.selected_colorscheme = thing;
-  drawMapFeatures(false);
-}
-
-function bwidthChanged(thing) {
-  app.bwcustom_disable = !thing;
-  drawMapFeatures(false);
-}
-function bwUpdateMap(thing) {
-  app.isBWUpdActive = false;
-  drawMapFeatures(false);
-}
-
-function getColorMode(cscheme) {
-  if (app.modeMap.hasOwnProperty(cscheme.toString())) {
-    return app.modeMap[cscheme];
-  } else {
-    return 'lrgb';
-  }
-}
-
 let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
   data: {
     isPanelHidden: false,
-    isUpdActive: false,
-    comp_check: true,
-    pct_check: true,
-    bwidth_check: false,
-    custom_check: true,
-    custom_disable: false,
-    bp0: 0.0,
-    bp1: 0.0,
-    bp2: 0.0,
-    bp3: 0.0,
-    bp4: 0.0,
-    bp5: 0.0,
-    
-    isBWUpdActive: false,
-    bwcustom_check: false,
-    bwcustom_disable: true,
-    bwbp0: 0.0,
-    bwbp1: 0.0,
-    bwbp2: 0.0,
-    bwbp3: 0.0,
-    bwbp4: 0.0,
-    bwbp5: 0.0,
     
     hhidOptions: ['All'],
     hhidSelVal: 'All',
@@ -1240,93 +622,16 @@ let app = new Vue({
     tripOptions: [{text:'',value:''}],
     tripSelVal: '',
     
-    selected_metric: 'avg_ride',
-    metric_options: [
-    {text: 'avg_ride', value: 'avg_ride'},
-    {text: 'pickups', value: 'pickups'},
-    {text: 'dropoffs', value: 'dropoffs'},
-    {text: 'avg_ride_muni_rail', value: 'avg_ride_muni_rail'},
-    
-    {text: 'ontime5', value: 'ontime5'},
-    {text: 'ons', value: 'ons'},
-    {text: 'offs', value: 'offs'},
-    {text: 'freq_s', value: 'freq_s'},
-    {text: 'num_stops', value: 'num_stops'},
-    
-    {text: 'hhlds', value: 'hhlds'},
-    {text: 'pop', value: 'pop'},
-    {text: 'empres', value: 'empres'},
-    {text: 'cie', value: 'cie'},
-    {text: 'med', value: 'med'},
-    {text: 'mips', value: 'mips'},
-    {text: 'pdr', value: 'pdr'},
-    {text: 'retail', value: 'retail'},
-    {text: 'visitor', value: 'visitor'},
-    {text: 'totalemp', value: 'totalemp'},
-    
-    {text: 'areatype', value: 'areatype'},
-    {text: 'non_white_pop_total', value: 'non_white_pop_total'},
-    {text: 'white_pop_total', value: 'white_pop_total'},
-    {text: 'senior_65p_pop_total', value: 'senior_65p_pop_total'},
-    
-    {text: 'totalemp_30', value: 'totalemp_30'},
-    {text: 'totalemp_60', value: 'totalemp_60'},
-    {text: 'hhlds_30', value: 'hhlds_30'},
-    {text: 'hhlds_60', value: 'hhlds_60'},
-    {text: 'pop_30', value: 'pop_30'},
-    {text: 'pop_60', value: 'pop_60'},
-    ],
     chartTitle: 'AVG_RIDE TREND',
     chartSubtitle: chart_deftitle,
-    
-    sliderValue: [SCNYR_LIST[0],SCNYR_LIST[SCNYR_LIST.length-1]],
-    
-    selected_timep: 'Daily',
-    time_options: [
-    {text: 'Daily', value: 'Daily'},
-    {text: '0300-0559', value: '0300-0559'},
-    {text: '0600-0859', value: '0600-0859'},
-    {text: '0900-1359', value: '0900-1359'},
-    {text: '1400-1559', value: '1400-1559'},
-    {text: '1600-1859', value: '1600-1859'},
-    {text: '1900-2159', value: '1900-2159'},
-    {text: '2200-0259', value: '2200-0259'},
-    ],
-
-    selected_bwidth: bwidth_metric_list[0],
-    bwidth_options: [],    
-    
-    selected_colorscheme: COLORRAMP.DIV,
-    modeMap: {
-      '#ffffcc,#3f324f': 'hsl',
-    },
-
-    selected_breaks: 5,
   },
   watch: {
     hhidSelVal: hhselectionChanged,
     pernumSelVal: perselectionChanged,
     dateSelVal: dateChanged,
     tripSelVal: tripChanged,
-    selected_timep: selectionChanged,
-    selected_metric: selectionChanged,
-    pct_check: selectionChanged,
-    
-    bp1: bp1Changed,
-    bp2: bp2Changed,
-    bp3: bp3Changed,
-    bp4: bp4Changed,
-    bwbp1: bwbp1Changed,
-    bwbp2: bwbp2Changed,
-    bwbp3: bwbp3Changed,
-    bwbp4: bwbp4Changed,
-    //custom_check: customBreakPoints,
-    bwcustom_check: customBWBreakPoints,
-    bwidth_check: bwidthChanged,
   },
   methods: {
-    updateMap: updateMap,
-    bwUpdateMap: bwUpdateMap,
     clickToggleHelp: clickToggleHelp,
     clickedShowHide: clickedShowHide,
   },
