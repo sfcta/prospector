@@ -165,7 +165,6 @@ async function initialPrep() {
 
 async function fetchMapFeatures() {
   try {
-    // get a list of valid TMCs
     let trtmc_ids = [];
     let resp = await fetch(API_SERVER + HH_VIEW);
     let features = await resp.json();
@@ -177,7 +176,7 @@ async function fetchMapFeatures() {
       _hhlist.push(feat['hh_id']);
       _hhmap[feat['hh_id']] = feat;
     }
-
+    app.hhidOptions = app.hhidOptions.concat(_hhlist);
     return features;
 
   } catch (error) {
@@ -376,7 +375,9 @@ function hoverTripFeature(e) {
 function highlightSelectedSegment() {
   selGeoId = app.hhidSelVal + app.pernumSelVal.padStart(2, '0') + app.tripSelVal.padStart(3, '0');
   if (selectedGeo && selectedGeo.feature[TRIPID_VAR] != selGeoId) {
+    selectedGeo.setText(null);
     tripLayer.resetStyle(selectedGeo);
+    
     if (popSelGeo) popSelGeo.remove();
   }
 
@@ -386,6 +387,8 @@ function highlightSelectedSegment() {
         e.bringToFront();
         e.setStyle(tripStyles.popup);
         selectedGeo = e;
+        selectedGeo.setText(null);
+        selectedGeo.setText('  ►  ', {repeat: true, attributes: {fill: 'red'}});
         return;
       }
     } catch(error) {}
@@ -402,6 +405,8 @@ function clickedOnHHFeature(e) {
 }
 
 function clickedOnTripFeature(e) {
+  this.setText(null);
+  this.setText('  ►  ', {repeat: true, attributes: {fill: 'red'}});
   e.target.setStyle(tripStyles.popup);
   let geo = e.target.feature;
   app.tripSelVal = geo['trip_num'];
@@ -411,6 +416,7 @@ function clickedOnTripFeature(e) {
   if (selectedGeo && selectedGeo.feature[TRIPID_VAR] != geo[TRIPID_VAR]) {
     prevSelectedGeo = selectedGeo;
     tripLayer.resetStyle(prevSelectedGeo);
+    prevSelectedGeo.setText(null);
   }
   selectedGeo = e.target;
   let selfeat = selectedGeo.feature;
