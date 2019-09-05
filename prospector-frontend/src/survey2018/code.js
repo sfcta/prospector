@@ -1120,7 +1120,7 @@ async function dateChanged(thing) {
           _tripmap[loc['trip_id']]['geometry']['coordinates'].push([loc['lon'],loc['lat']]);
         }
       }
-      app.tripOptions = tmpOptions;
+      app.tripOptions = tmpOptions.sort((a,b) => a.value-b.value);
       app.tripSelVal = 'All';
       tripChanged(app.tripSelVal);
     } else {
