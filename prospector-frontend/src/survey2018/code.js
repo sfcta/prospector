@@ -106,6 +106,13 @@ const tripStyles = {
   popup: {"color": "cyan", "weight": 9, "opacity": 1.0 }
 };
 
+const INC_MAP = {1:'Under $25,000',2:'$25,000-$49,999',3:'$50,000-$74,999',4:'$75,000-$99,999',5:'$100,000-$249,999',6:'$250,000 or more',999:'No answer'};
+const AGE_MAP = {1:'Under 5',2:'5-15',3:'16-17',4:'18-24',5:'25-34',6:'35-44',7:'45-54',8:'55-64',9:'65-74',10:'75 or older'};
+const GENDER_MAP = {1:'Female',2:'Male',3:'Transgender',4:'Non-binary/Third gender',997:'Other',999:'No answer'};
+const EMP_MAP = {1:'Employed full-time (paid)',2:'Employed part-time (paid)',3:'Primarily self-employed',6:'Not currently employed',7:'Unpaid volunteer or intern'};
+const DOW_MAP = {1:'Monday',2:'Tuesday',3:'Wednesday',4:'Thursday',5:'Friday',6:'Saturday',7:'Sunday'};
+const DRIVER_MAP = {1:'Driver',2:'Passenger'};
+
 /*const MODE_MAP = {1:'Walk',2:'Bike',3:'Bike',4:'Bike',
 6:'Car',7:'Car',8:'Car',9:'Car',10:'Car',11:'Car',12:'Car',16:'Car',17:'Car',18:'Carshare',21:'Carpool',22:'Car',24:'SchoolBus',
 25:'Bus',26:'Bus',27:'Bus',28:'Bus',30:'BART',31:'Air',32:'Ferry',33:'Car',34:'Car',36:'Taxi',38:'Bus',39:'LRT',41:'Rail',42:'Rail',
@@ -203,17 +210,31 @@ function getInfoHtml(geo) {
   if (geo.geometry.type == 'Point') {
     retval = '<b>HHID: </b>' + `${geo[HHID_VAR]}<br/>` +
                 '<b>COUNTY_FIPS: </b>' + `${geo.home_county_fips}<br/>` +
+                '<b>SIZE: </b>' + `${geo.num_people}<br/>` +
+                '<b>WORKERS: </b>' + `${geo.num_workers}<br/>` +
+                '<b>VEHICLES: </b>' + `${geo.num_vehicles}<br/>` +
+                '<b>INCOME: </b>' + `${INC_MAP[geo.income_aggregate]}<br/>` +
                 '<b>ADDRESS: </b>' + `${geo.sample_address}<br/><hr>`;
   } else if (geo.geometry.type == 'LineString') {
     retval = '<b>HHID: </b>' + `${geo[HHID_VAR]}<br/>` +
-                '<b>PERSONID: </b>' + `${geo['person_num']}<br/>` +
-                '<b>TRIPID: </b>' + `${geo['trip_num']}<br/><hr>` +
+                '<b>SIZE: </b>' + `${selHHObj.num_people}<br/>` +
+                '<b>WORKERS: </b>' + `${selHHObj.num_workers}<br/>` +
+                '<b>VEHICLES: </b>' + `${selHHObj.num_vehicles}<br/>` +
+                '<b>INCOME: </b>' + `${INC_MAP[selHHObj.income_aggregate]}<br/><hr>` +
                 
-                '<b>O_PURP: </b>' + `${PURP_MAP[geo['o_purpose_category']]}<br/>` +
-                '<b>D_PURP: </b>' + `${PURP_MAP[geo['d_purpose_category']]}<br/>` +
+                '<b>PERSONID: </b>' + `${geo['person_num']}<br/>` +
+                '<b>AGE: </b>' + `${AGE_MAP[selpersonObj.age]}<br/>` +
+                '<b>GENDER: </b>' + `${GENDER_MAP[selpersonObj.gender]}<br/>` +
+                '<b>EMP_STATUS: </b>' + `${EMP_MAP[selpersonObj.employment]}<br/><hr>` +
+                
+                '<b>TRIPID: </b>' + `${geo['trip_num']}<br/>` +
+                '<b>DAY: </b>' + `${DOW_MAP[geo['travel_date_dow']]}<br/>` +
+                '<b>PURPOSE: </b>' + `${PURP_MAP[geo['o_purpose_category']]}` + '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${PURP_MAP[geo['d_purpose_category']]}<br/>` +
+                '<b>TIME: </b>' + `${geo['depart_time'].substring(11,19)}` +  '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${geo['arrive_time'].substring(11,19)}<br/>` +
                 '<b>MODE: </b>' + `${MODE_MAP[geo['mode_type']]}<br/>` +
-                '<b>DEP_TIME: </b>' + `${geo['depart_time'].substring(11,19)}<br/>` +
-                '<b>ARR_TIME: </b>' + `${geo['arrive_time'].substring(11,19)}<br/><hr>`;
+                '<b>PARTY_SIZE: </b>' + `${geo['num_travelers']}` + '<b>  DORP: </b>' + `${DRIVER_MAP[geo['driver']]}<br/>` +
+                '<b>DISTANCE: </b>' + `${(Math.round(geo['distance']*100)/100)}` + ' mi.  <b>DURATION: </b>' + `${geo['duration']}&nbsp;min.<br/>` +
+                '<b>COST(TNC/TAXI): </b>' + `${geo['taxi_cost']}<hr>`;
   }
   return retval; 
 }
