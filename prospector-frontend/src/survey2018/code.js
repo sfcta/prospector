@@ -103,7 +103,7 @@ const tripStyles = {
   highlighted: {
         color: "#ffff00",
   },
-  popup: {"color": "purple", "weight": 9, "opacity": 1.0 }
+  popup: {"color": "cyan", "weight": 9, "opacity": 1.0 }
 };
 
 const MODE_MAP = {1:'Walk',2:'Bike',3:'Bike',4:'Bike',
