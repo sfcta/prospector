@@ -106,11 +106,13 @@ const tripStyles = {
   popup: {"color": "cyan", "weight": 9, "opacity": 1.0 }
 };
 
-const MODE_MAP = {1:'Walk',2:'Bike',3:'Bike',4:'Bike',
+/*const MODE_MAP = {1:'Walk',2:'Bike',3:'Bike',4:'Bike',
 6:'Car',7:'Car',8:'Car',9:'Car',10:'Car',11:'Car',12:'Car',16:'Car',17:'Car',18:'Carshare',21:'Carpool',22:'Car',24:'SchoolBus',
 25:'Bus',26:'Bus',27:'Bus',28:'Bus',30:'BART',31:'Air',32:'Ferry',33:'Car',34:'Car',36:'Taxi',38:'Bus',39:'LRT',41:'Rail',42:'Rail',
 43:'Other',44:'Other',46:'Bus',47:'Other',55:'ExpBus',59:'Car',60:'Car',62:'Bus',63:'Car',64:'TNC',65:'TNC',66:'TNC',67:'Bus',
-68:'CableCar',69:'Bikeshare',70:'Bikeshare',71:'Scooter',73:'Scooter',74:'Other',75:'Scooter',76:'Carpool',77:'Scooter',995:'',997:'Other'};
+68:'CableCar',69:'Bikeshare',70:'Bikeshare',71:'Scooter',73:'Scooter',74:'Other',75:'Scooter',76:'Carpool',77:'Scooter',995:'',997:'Other'};*/
+const MODE_MAP = {1:'Walk',2:'Bike',3:'Car',4:'Taxi',5:'Transit',6:'Schoolbus',7:'Other',8:'Shuttle/vanpool',
+9:'TNC',10:'Carshare',11:'Bikeshare',12:'Scooter share',13:'long-distance'};
 const PURP_MAP = {1:'Home',2:'Work',3:'Work-related',4:'School',5:'Escort',6:'Shop',7:'Meal',8:'SocRec',9:'Other',10:'ChangeMode'};
 
 let sel_colorvals, sel_colors, sel_binsflag;
@@ -209,7 +211,7 @@ function getInfoHtml(geo) {
                 
                 '<b>O_PURP: </b>' + `${PURP_MAP[geo['o_purpose_category']]}<br/>` +
                 '<b>D_PURP: </b>' + `${PURP_MAP[geo['d_purpose_category']]}<br/>` +
-                '<b>MODES: </b>' + `${MODE_MAP[geo['mode_1']]} - ${MODE_MAP[geo['mode_2']]} - ${MODE_MAP[geo['mode_3']]}<br/>` +
+                '<b>MODE: </b>' + `${MODE_MAP[geo['mode_type']]}<br/>` +
                 '<b>DEP_TIME: </b>' + `${geo['depart_time'].substring(11,19)}<br/>` +
                 '<b>ARR_TIME: </b>' + `${geo['arrive_time'].substring(11,19)}<br/><hr>`;
   }
@@ -305,7 +307,7 @@ let prevloc_query = '';
 
 async function getTripOption(trec) {
   let retval = {};
-  retval['text'] = trec['trip_num']+', '+PURP_MAP[trec['o_purpose_category']]+', '+PURP_MAP[trec['d_purpose_category']]+', '+MODE_MAP[trec['mode_1']]+
+  retval['text'] = trec['trip_num']+', '+PURP_MAP[trec['o_purpose_category']]+', '+PURP_MAP[trec['d_purpose_category']]+', '+MODE_MAP[trec['mode_type']]+
                     ', '+trec['depart_time'].substring(11,19)+', '+trec['arrive_time'].substring(11,19);
   retval['value'] = trec['trip_num']; 
   return retval;
