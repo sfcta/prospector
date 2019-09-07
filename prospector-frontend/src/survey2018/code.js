@@ -140,7 +140,7 @@ let iconWork = L.AwesomeMarkers.icon({
   });
 let iconSchool = L.AwesomeMarkers.icon({
   prefix: 'ion',
-  icon: 'school',
+  icon: 'university',
   markerColor:'orange',
 });
 
