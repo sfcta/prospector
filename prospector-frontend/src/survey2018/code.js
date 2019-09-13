@@ -227,7 +227,7 @@ function getInfoHtml(geo) {
                 '<b>GENDER: </b>' + `${GENDER_MAP[selpersonObj.gender]}<br/>` +
                 '<b>EMP_STATUS: </b>' + `${EMP_MAP[selpersonObj.employment]}<br/><hr>` +
                 
-                '<b>TRIPID: </b>' + `${geo['trip_num']}<br/>` +
+                '<b>TRIPID: </b>' + `${geo['trip_num']}` + '<b>  COMPLETE: </b>' + `${geo['survey_complete_trip']}<br/>` +
                 '<b>DAY: </b>' + `${DOW_MAP[geo['travel_date_dow']]}<br/>` +
                 '<b>PURPOSE: </b>' + `${PURP_MAP[geo['o_purpose_category']]}` + '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${PURP_MAP[geo['d_purpose_category']]}<br/>` +
                 '<b>TIME: </b>' + `${geo['depart_time'].substring(11,19)}` +  '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${geo['arrive_time'].substring(11,19)}<br/>` +
@@ -572,6 +572,7 @@ async function getLocData() {
   return await locdata.json();
 }
 
+let _allTrips, _compTrips;
 async function dateChanged(thing) {
   if (popSelGeo) popSelGeo.remove();
   if (app.hhidSelVal == 'All') {
@@ -580,7 +581,8 @@ async function dateChanged(thing) {
   } else {
     _tripmap = {};
     _triplist = [];
-    let tmpOptions = [];
+    _allTrips = [];
+    _compTrips = [];
     if (Object.keys(_datemap).length > 0) {
       for (let dt of app.dateSelVal) {
         for (let triprec of _datemap[dt]) {
@@ -589,16 +591,20 @@ async function dateChanged(thing) {
           triprec['geometry']['coordinates'] = [];
           _triplist.push(triprec['trip_id']);
           _tripmap[triprec['trip_id']] =  triprec;
-          tmpOptions.push(await getTripOption(triprec));
+          let trip_str = await getTripOption(triprec)
+          _allTrips.push(trip_str);
+          if (triprec['survey_complete_trip']==1) _compTrips.push(trip_str);
         }
       }
+      _allTrips = _allTrips.sort((a,b) => a.value-b.value);
+      _compTrips = _compTrips.sort((a,b) => a.value-b.value);
       
       for (let loc of _locations) {
         if (_tripmap.hasOwnProperty(loc['trip_id'])) {
           _tripmap[loc['trip_id']]['geometry']['coordinates'].push([loc['lon'],loc['lat']]);
         }
       }
-      app.tripOptions = tmpOptions.sort((a,b) => a.value-b.value);
+      app.tripOptions = app.comp_check? _compTrips: _allTrips;
       app.tripSelVal = 'All';
       tripChanged(app.tripSelVal);
     } else {
@@ -614,7 +620,11 @@ async function tripChanged(thing) {
     if (tripLayer) mymap.removeLayer(tripLayer);
     for (let tid of _triplist) {
       _tripmap[tid]['type'] = 'Feature';
-      _tripJson.push(_tripmap[tid]);
+      if (app.comp_check) {
+        if (_tripmap[tid]['survey_complete_trip']==1) _tripJson.push(_tripmap[tid]);
+      } else {
+        _tripJson.push(_tripmap[tid]);
+      }
     }
     tripLayer = L.geoJSON(_tripJson, {
         onEachFeature: function(feature, layer) {
@@ -634,6 +644,15 @@ async function tripChanged(thing) {
   }
 }
 
+async function compTrips(thing) {
+  if (popSelGeo) popSelGeo.remove();
+  app.tripOptions = thing? _compTrips: _allTrips;
+  if (app.tripSelVal != 'All') {
+    app.tripSelVal = 'All';
+  } else {
+    tripChanged('All');
+  }
+}
 
 let app = new Vue({
   el: '#panel',
@@ -650,6 +669,7 @@ let app = new Vue({
     dateSelVal: [''],
     tripOptions: [{text:'',value:''}],
     tripSelVal: '',
+    comp_check: false,
     
     chartTitle: 'AVG_RIDE TREND',
     chartSubtitle: chart_deftitle,
@@ -659,6 +679,7 @@ let app = new Vue({
     pernumSelVal: perselectionChanged,
     dateSelVal: dateChanged,
     tripSelVal: tripChanged,
+    comp_check: compTrips,
   },
   methods: {
     clickToggleHelp: clickToggleHelp,

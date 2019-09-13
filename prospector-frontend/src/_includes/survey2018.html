@@ -49,15 +49,14 @@
             </select>
             
             <h5 style="margin-top:15px">CHOOSE TRIP(S):</h5>
+            <input type="checkbox" id="comp_checkbox" v-model="comp_check" style="margin-top:0px">
+            <label for="comp_checkbox"><b>SHOW ONLY COMPLETE TRIPS</b></label>
             <h5>TRIPNUM, OPURP, DPURP, MODE, DEPTM, ARRTM</h5>
             <select v-model="tripSelVal" size="15">
               <option v-for="option of tripOptions" v-bind:value="option.value">
                 ${option.text}
               </option>
             </select>
-            
-            <!--input type="checkbox" id="pct_checkbox" v-model="pct_check" v-bind:disabled="!comp_check" style="margin-top:0px">
-            <label for="pct_checkbox"><b>&nbsp;&nbsp;PERCENT DIFF</b></label-->
             
             <!--br>
             <input type="checkbox" id="bwidth_checkbox" v-model="bwidth_check" style="margin-top:15px">
