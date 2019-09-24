@@ -255,7 +255,7 @@ infoPanel.update = function(geo) {
     // use CSS to hide the info-panel
     infoPanel._div.className = 'info-panel-hide';
     // and clear the hover too
-    geoLayer.resetStyle(oldHoverTarget);
+    if (oldHoverTarget.feature.cmp_segid != selGeoId) geoLayer.resetStyle(oldHoverTarget);
   }, 2000);
 };
 infoPanel.addTo(mymap);
@@ -344,11 +344,8 @@ function hoverFeature(e) {
 
   let highlightedGeo = e.target;
   highlightedGeo.bringToFront();
-
-  if (highlightedGeo.feature.cmp_segid != selGeoId) {
-    highlightedGeo.setStyle(styles.selected);
-    oldHoverTarget = e.target;
-  }
+  highlightedGeo.setStyle(styles.selected);
+  oldHoverTarget = e.target;
 }
 
 let _selectedGeo;
