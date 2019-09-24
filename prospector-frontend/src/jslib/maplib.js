@@ -107,7 +107,7 @@ function getLegHTML(vals, colors, bins=true, postunits=''){
     // loop through our bin intervals and generate a label with a colored square for each interval
     for (var i = 0; i < vals.length; i++) {
       ret +=
-          '<p class="legend-row"><div style="background:' + colors[i+1] + '">&nbsp;&nbsp;</div> '
+          '<p class="legend-row"><i style="background:' + colors[i+1] + '">&nbsp;&nbsp;</i> '
           + vals[i] + postunits
           + (vals[i + 1] ? ' &ndash; ' + vals[i + 1] + postunits + '<br>' : '+')
           + '</p>';
