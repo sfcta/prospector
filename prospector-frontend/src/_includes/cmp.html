@@ -1,6 +1,16 @@
 <div id="container">
 
-  <div id="panel">
+  <div id="slide-panel" v-bind:class="{ shrunken: isPanelHidden}">
+    <div id="layer-widgets">
+      <button class="ui tiny green icon button"
+              v-on:click="clickedShowHide">
+              <i class="angle double icon"
+              v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
+      </button>
+    </div>
+  </div> 
+
+  <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
       <div id="preheader">
         <hr/>
         <h3 class="apptitle">CONGESTION EXPLORER</h3>

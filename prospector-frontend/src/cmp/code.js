@@ -613,6 +613,7 @@ let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
   data: {
+    isPanelHidden: false,
     chartTitle: VIZ_INFO[VIZ_LIST[0]].CHARTINFO,
     chartSubtitle: aggdata_label,
     isAMActive: true,
@@ -630,12 +631,34 @@ let app = new Vue({
     pickAM: pickAM,
     pickPM: pickPM,
     clickToggleHelp: clickToggleHelp,
+    clickedShowHide: clickedShowHide,
     clickViz: clickViz,
   },
   components: {
     vueSlider,
   },
 });
+
+let slideapp = new Vue({
+  el: '#slide-panel',
+  delimiters: ['${', '}'],
+  data: {
+    isPanelHidden: false,
+  },
+  methods: {
+    clickedShowHide: clickedShowHide,
+  },
+});
+function clickedShowHide(e) {
+  slideapp.isPanelHidden = !slideapp.isPanelHidden;
+  app.isPanelHidden = slideapp.isPanelHidden;
+  // leaflet map needs to be force-recentered, and it is slow.
+  for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
+    setTimeout(function() {
+      mymap.invalidateSize()
+    }, delay)
+  }
+}
 
 // eat some cookies -- so we can hide the help permanently
 let cookieShowHelp = Cookies.get('showHelp');
