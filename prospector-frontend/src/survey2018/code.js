@@ -36,7 +36,7 @@ const DEFAULT_CENTER = [37.76889, -122.440997];
 mymap.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
 
 // some important global variables.
-const API_SERVER = 'http://shinyta.sfcta.org/apiprivate/';
+const API_SERVER = 'https://api.sfcta.org/apiprivate/';
 const HH_VIEW = 'household';
 const PERSON_VIEW = 'person';
 const TRIP_VIEW = 'trip';
