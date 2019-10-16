@@ -37,6 +37,7 @@ mymap.setView([37.76889, -122.440997], 13);
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'cmp_segments_master';
 const DATA_VIEW = 'cmpqa_2019';
+const AGGDATA_VIEW = 'cmpqa_aggregate';
 
 const GEOTYPE = 'Segment';
 const GEOID_VAR = 'cmp_segid';
@@ -90,9 +91,12 @@ async function initialPrep() {
   await drawMapFeatures();
   
   console.log('3... ');
+  _aggregateData = await fetchAggregateData();
+  
+  console.log('4... ');
   await buildChartHtmlFromData();
-
-  console.log('4 !!!');
+  
+  console.log('5 !!!');
 }
 
 async function fetchMapFeatures() {
@@ -179,6 +183,38 @@ infoPanel.update = function(geo) {
 };
 infoPanel.addTo(mymap);
 
+async function fetchAggregateData() {
+  let buildAggData = {};
+
+  const url = API_SERVER + AGGDATA_VIEW
+    + '?select=fac_typ,period,scenario,viz,metric';
+
+  try {
+    let resp = await fetch(url);
+    let jsonData = await resp.json();
+    let vizData = jsonData.filter(row => row['viz'] === 'avg_speed');
+    
+    for (let tod of app.time_options) {
+      buildAggData[tod.value] = [];
+    }
+    
+    for (let scn of SCNYR_LIST) {
+      for (let tod of app.time_options) {
+        let row = {};
+        row[YR_VAR] = scn.toString();
+        row['Arterial'] = Math.round((vizData.filter(row => row[YR_VAR]==scn && row[TOD_VAR]==tod.value && row['fac_typ']=='Arterial')[0]['metric'])*10)/10;
+        row['Freeway'] = Math.round((vizData.filter(row => row[YR_VAR]==scn && row[TOD_VAR]==tod.value && row['fac_typ']=='Freeway')[0]['metric'])*10)/10;
+        buildAggData[tod.value].push(row);
+    }
+  }
+
+  return buildAggData;
+
+  } catch(error) {
+    console.log('aggregate data error: ' + error);
+  }
+}
+
 async function getMapData() {
   let data_url = API_SERVER + DATA_VIEW;
   let resp = await fetch(data_url);
@@ -213,6 +249,7 @@ async function getMapData() {
     tmp[entry[YR_VAR]][entry[TOD_VAR]]['length'][facility] += feat['length'];
     tmp[entry[YR_VAR]][entry[TOD_VAR]]['tt'][facility] += (feat['length']/entry['avg_speed']);
   }
+  /*
   _aggregateData = {};
   for (let tod of app.time_options) {
     _aggregateData[tod.value] = [];
@@ -221,15 +258,16 @@ async function getMapData() {
     for (let tod of app.time_options) {
       let row = {};
       row[YR_VAR] = scn.toString();
-      /*for (let met of app.metric_options) {
-        row[met.value] = Math.round(tmp[scn][tod.value][met.value]*prec)/prec;
-      }*/
+      //for (let met of app.metric_options) {
+      //  row[met.value] = Math.round(tmp[scn][tod.value][met.value]*prec)/prec;
+      //}
       
       row['Arterial'] = Math.round((tmp[scn][tod.value]['length']['Arterial']/tmp[scn][tod.value]['tt']['Arterial'])*10)/10;
       row['Freeway'] = Math.round((tmp[scn][tod.value]['length']['Freeway']/tmp[scn][tod.value]['tt']['Freeway'])*10)/10;
       _aggregateData[tod.value].push(row);
     }
   }
+  */
 }
 
 let base_lookup;
