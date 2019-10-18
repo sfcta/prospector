@@ -11,6 +11,7 @@ const sfcta_components = [
      'sftraveldemand',
      'champlu',
      'tnctrn',
+     'tnctrntaz',
      'hwynet',
      'csf_tt',
      'csf_jobpop',
