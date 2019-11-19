@@ -44,7 +44,7 @@ const YR_VAR = 'year';
 const TOD_VAR = 'tod';
 
 const FRAC_COLS = ['freq_s','avg_ride','ontime5','ons','offs','shr_hh_0veh','crowded','hh_den_acs','pop_den_acs',
-                  'veh_per_hh','avg_hh_size'];
+                  'veh_per_hh','avg_hh_size','sol','eol'];
 const SCNYR_LIST = [2010,2015];
 
 const INT_COLS = [''];
@@ -818,6 +818,8 @@ let app = new Vue({
     {text: 'offs', value: 'offs'},
     {text: 'freq_s', value: 'freq_s'},
     {text: 'num_stops', value: 'num_stops'},
+    {text: 'sol', value: 'sol'},
+    {text: 'eol', value: 'eol'},
     
     {text: 'hhlds', value: 'hhlds'},
     {text: 'pop', value: 'pop'},
@@ -848,9 +850,9 @@ let app = new Vue({
     scnSlider: scnSlider,
     sliderValue: [SCNYR_LIST[0],SCNYR_LIST[SCNYR_LIST.length-1]],
     
-    selected_timep: 'Daily',
+    selected_timep: '0600-0859',
     time_options: [
-    {text: 'Daily', value: 'Daily'},
+    //{text: 'Daily', value: 'Daily'},
     {text: '0300-0559', value: '0300-0559'},
     {text: '0600-0859', value: '0600-0859'},
     {text: '0900-1359', value: '0900-1359'},
