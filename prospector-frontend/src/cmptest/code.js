@@ -108,8 +108,8 @@ let popHoverSegment, popSelSegment;
 let selectedSegment, prevselectedSegment;
 
 let _segmentJson;
-let _allCmpData;
-let _aggregateData;
+let _allCmpData, _allCmpData_xd;
+let _aggregateData, _aggregateData_xd;
 
 async function initialPrep() {
 
@@ -117,10 +117,12 @@ async function initialPrep() {
   _segmentJson = await fetchCmpSegments();
 
   console.log('2...');
-  _allCmpData = await fetchAllCmpSegmentData();
+  _allCmpData = await fetchAllCmpSegmentData(data_view);
+  _allCmpData_xd = await fetchAllCmpSegmentData('cmp_autotransit_xd');
 
   console.log('3...');
-  _aggregateData = await fetchAggregateData();
+  _aggregateData = await fetchAggregateData(aggdata_view);
+  _aggregateData_xd = await fetchAggregateData('cmp_aggregate_xd');
 
   console.log('4... ');
   await buildChartHtmlFromCmpData();
@@ -151,12 +153,12 @@ async function fetchCmpSegments() {
   }
 }
 
-async function fetchAllCmpSegmentData() {
+async function fetchAllCmpSegmentData(dat_view) {
   //FIXME this should be a map()
   let params =
     'select=cmp_segid,year,period,los_hcm85,transit_speed,transit_cv,atspd_ratio,auto_speed';
 
-  let data_url = API_SERVER + data_view + '?' + params;
+  let data_url = API_SERVER + dat_view + '?' + params;
 
   selMetricData = {};
 
@@ -167,10 +169,10 @@ async function fetchAllCmpSegmentData() {
   } catch (error) {console.log('cmp data fetch error: ' + error);}
 }
 
-async function fetchAggregateData() {
+async function fetchAggregateData(aggdat_view) {
   let buildAggData = {};
 
-  const url = API_SERVER + aggdata_view
+  const url = API_SERVER + aggdat_view
     + '?select=fac_typ,period,year,viz,metric';
 
   try {
@@ -264,10 +266,18 @@ function drawMapSegments() {
 
   // create a clean copy of the segment Json
   let cleanSegments = _segmentJson.slice();
-
-  let relevantRows = _allCmpData.filter(
-    row => row.year==app.sliderValue && row.period===selPeriod
-  );
+  
+  let relevantRows;
+  if (app.sliderValue > 2017) {
+    relevantRows = _allCmpData_xd.filter(
+      row => row.year==app.sliderValue && row.period===selPeriod
+    );    
+  } else {
+    relevantRows = _allCmpData.filter(
+      row => row.year==app.sliderValue && row.period===selPeriod
+    );
+  }
+  
 
   let lookup = {};
   for (let row of relevantRows) {
@@ -551,7 +561,7 @@ function clickViz(chosenviz) {
 }
 
 // fetch the year details in data
-function updateSliderData() {
+async function updateSliderData() {
   let yearlist = [];
   fetch(API_SERVER + data_view + '?select=year')
     .then(resp => resp.json())
@@ -559,10 +569,27 @@ function updateSliderData() {
       for (let entry of jsonData) {
         if (!yearlist.includes(entry.year)) yearlist.push(entry.year);
       }
+    /*})
+    .then(fetch(API_SERVER + 'cmp_autotransit_xd' + '?select=year'))
+    .then(resp => resp.json()) 
+    .then (function(jsonData) {
+      for (let entry of jsonData) {
+        if (!yearlist.includes(entry.year)) yearlist.push(entry.year);
+      }*/
+    });
+  fetch(API_SERVER + 'cmp_autotransit_xd' + '?select=year')
+    .then(resp => resp.json()) 
+    .then(function(jsonData) {
+      for (let entry of jsonData) {
+        if (!yearlist.includes(entry.year)) yearlist.push(entry.year);
+      }
+      
       yearlist = yearlist.sort();
       app.timeSlider.data = yearlist;
       app.sliderValue = yearlist[yearlist.length - 1];
     });
+
+  return;
 }
 
 // SLIDER ----
