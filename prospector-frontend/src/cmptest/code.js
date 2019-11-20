@@ -468,6 +468,36 @@ function buildChartHtmlFromCmpData(json = null) {
       if (byYear[year]['PM'])
         maxHeight = Math.max(maxHeight, byYear[year]['PM']);
     }
+    
+    // adding xd auto speed data
+    byYear = {};
+    if (app.selectedViz == 'ALOS') {
+      let segmentData = _allCmpData_xd
+      .filter(row => row.cmp_segid == _selectedGeo.cmp_segid)
+      .filter(row => row['auto_speed'] != null);
+      for (let entry of segmentData) {
+        let val = Number(entry['auto_speed']).toFixed(
+          VIZ_INFO[app.selectedViz]['CHART_PREC']
+        );
+        if (val === 'NaN') continue;
+        if (!byYear[entry.year]) byYear[entry.year] = {};
+        byYear[entry.year][entry.period] = val;
+      }
+      
+      for (let year in byYear) {
+        if (app.isAMActive) {
+          data.push({year: year, period: byYear[year]['AM']});
+        } else {
+          data.push({year: year, period: byYear[year]['PM']});
+        }
+
+        // use the same scale for am/pm even though we only show one
+        if (byYear[year]['AM'])
+          maxHeight = Math.max(maxHeight, byYear[year]['AM']);
+        if (byYear[year]['PM'])
+          maxHeight = Math.max(maxHeight, byYear[year]['PM']);
+      }      
+    }
 
     // scale ymax to either 20 or 60:
     maxHeight = maxHeight <= 20 ? 20 : 60;
@@ -496,24 +526,39 @@ function buildChartHtmlFromCmpData(json = null) {
     if (app.selectedViz == 'ALOS') {
       ykey_tmp = ['art', 'fwy'];
       lab_tmp = ['Arterial', 'Freeway'];
+      new Morris.Line({
+        data: _aggregateData[app.selectedViz][selPeriod].concat(_aggregateData_xd[app.selectedViz][selPeriod]),
+        element: 'longchart',
+        gridTextColor: '#aaa',
+        hideHover: true,
+        labels: lab_tmp,
+        lineColors: ['#f66', '#99f'],
+        postUnits: VIZ_INFO[app.selectedViz]['POST_UNITS'],
+        xkey: 'year',
+        xLabels: 'year',
+        xLabelAngle: 45,
+        ykeys: ykey_tmp,
+        ymax: 'auto',
+      });      
     } else {
       ykey_tmp = ['art'];
       lab_tmp = ['Arterial'];
+      
+      new Morris.Line({
+        data: _aggregateData[app.selectedViz][selPeriod],
+        element: 'longchart',
+        gridTextColor: '#aaa',
+        hideHover: true,
+        labels: lab_tmp,
+        lineColors: ['#f66', '#99f'],
+        postUnits: VIZ_INFO[app.selectedViz]['POST_UNITS'],
+        xkey: 'year',
+        xLabels: 'year',
+        xLabelAngle: 45,
+        ykeys: ykey_tmp,
+        ymax: app.selectedViz == 'TSPD' ? 20 : 'auto',
+      });
     }
-    new Morris.Line({
-      data: _aggregateData[app.selectedViz][selPeriod],
-      element: 'longchart',
-      gridTextColor: '#aaa',
-      hideHover: true,
-      labels: lab_tmp,
-      lineColors: ['#f66', '#99f'],
-      postUnits: VIZ_INFO[app.selectedViz]['POST_UNITS'],
-      xkey: 'year',
-      xLabels: 'year',
-      xLabelAngle: 45,
-      ykeys: ykey_tmp,
-      ymax: app.selectedViz == 'TSPD' ? 20 : 'auto',
-    });
   }
 }
 
