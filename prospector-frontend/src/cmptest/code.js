@@ -614,13 +614,6 @@ async function updateSliderData() {
       for (let entry of jsonData) {
         if (!yearlist.includes(entry.year)) yearlist.push(entry.year);
       }
-    /*})
-    .then(fetch(API_SERVER + 'cmp_autotransit_xd' + '?select=year'))
-    .then(resp => resp.json()) 
-    .then (function(jsonData) {
-      for (let entry of jsonData) {
-        if (!yearlist.includes(entry.year)) yearlist.push(entry.year);
-      }*/
     });
   fetch(API_SERVER + 'cmp_autotransit_xd' + '?select=year')
     .then(resp => resp.json()) 
