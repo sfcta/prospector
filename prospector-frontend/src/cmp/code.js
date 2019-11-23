@@ -444,10 +444,11 @@ function buildChartHtmlFromCmpData(json = null) {
     let data = [];
     let maxHeight = 0;
 
+    let metric_col = selviz_metric;
+    if (selviz_metric == VIZ_INFO['ALOS']['METRIC'])
+      metric_col = 'auto_speed';
+    
     for (let entry of json) {
-      let metric_col = selviz_metric;
-      if (selviz_metric == VIZ_INFO['ALOS']['METRIC'])
-        metric_col = 'auto_speed';
       let val = Number(entry[metric_col]).toFixed(
         VIZ_INFO[app.selectedViz]['CHART_PREC']
       );
@@ -471,33 +472,32 @@ function buildChartHtmlFromCmpData(json = null) {
     
     // adding xd auto speed data
     byYear = {};
-    if (app.selectedViz == 'ALOS') {
-      let segmentData = _allCmpData_xd
-      .filter(row => row.cmp_segid == _selectedGeo.cmp_segid)
-      .filter(row => row['auto_speed'] != null);
-      for (let entry of segmentData) {
-        let val = Number(entry['auto_speed']).toFixed(
-          VIZ_INFO[app.selectedViz]['CHART_PREC']
-        );
-        if (val === 'NaN') continue;
-        if (!byYear[entry.year]) byYear[entry.year] = {};
-        byYear[entry.year][entry.period] = val;
-      }
-      
-      for (let year in byYear) {
-        if (app.isAMActive) {
-          data.push({year: year, period: byYear[year]['AM']});
-        } else {
-          data.push({year: year, period: byYear[year]['PM']});
-        }
-
-        // use the same scale for am/pm even though we only show one
-        if (byYear[year]['AM'])
-          maxHeight = Math.max(maxHeight, byYear[year]['AM']);
-        if (byYear[year]['PM'])
-          maxHeight = Math.max(maxHeight, byYear[year]['PM']);
-      }      
+    
+    let segmentData = _allCmpData_xd
+    .filter(row => row.cmp_segid == _selectedGeo.cmp_segid)
+    .filter(row => row[metric_col] != null);
+    for (let entry of segmentData) {
+      let val = Number(entry[metric_col]).toFixed(
+        VIZ_INFO[app.selectedViz]['CHART_PREC']
+      );
+      if (val === 'NaN') continue;
+      if (!byYear[entry.year]) byYear[entry.year] = {};
+      byYear[entry.year][entry.period] = val;
     }
+    
+    for (let year in byYear) {
+      if (app.isAMActive) {
+        data.push({year: year, period: byYear[year]['AM']});
+      } else {
+        data.push({year: year, period: byYear[year]['PM']});
+      }
+
+      // use the same scale for am/pm even though we only show one
+      if (byYear[year]['AM'])
+        maxHeight = Math.max(maxHeight, byYear[year]['AM']);
+      if (byYear[year]['PM'])
+        maxHeight = Math.max(maxHeight, byYear[year]['PM']);
+    }      
 
     // scale ymax to either 20 or 60:
     maxHeight = maxHeight <= 20 ? 20 : 60;
