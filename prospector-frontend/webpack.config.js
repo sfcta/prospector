@@ -22,6 +22,7 @@ const sfcta_components = [
      'coc',
      'cmptest',
      'cmpqa',
+     'cmp_safety',
      'survey2018',
 	 //'cmp-v0',
 ];
