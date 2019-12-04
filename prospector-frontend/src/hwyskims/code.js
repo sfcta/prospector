@@ -192,7 +192,7 @@ function updateOptionsData() {
 	  tableSelOptions.push({label:entry.table_name});
     }
 	  app.tableSelOptions = tableSelOptions;
-    app.tableSelVal = tableSelOptions[0];
+    app.tableSelVal = tableSelOptions[1];
   });
 
 }
