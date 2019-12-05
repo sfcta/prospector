@@ -8,6 +8,9 @@
 .leaflet-bottom .legend.leaflet-control {
     margin-bottom: 100px;
 }
+.leaflet-bottom .legend2.leaflet-control {
+    margin-bottom: 100px;
+}
 
 .ui.color1.button {
   background-color: #8cb8ca;
