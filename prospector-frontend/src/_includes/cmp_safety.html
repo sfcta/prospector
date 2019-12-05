@@ -29,17 +29,14 @@
 
         <div id="picker">
           <div style="height:70px;font-size:1px;">
-            <h4>CHOOSE TYPE:</h4>
-            <button class="mini ui grey button"
-                    v-on:click="pickBike"
-                    v-bind:class="{ active: isBikeactive, green: isBikeactive}">
-                    Bike
-            </button>
-            <button class="mini ui grey button"
-                    v-on:click="pickPed"
-                    v-bind:class="{ active: isPedactive, green: isPedactive}">
-                    Pedestrian
-            </button>
+          <div id="vizbuttons" class="ui vertical buttons">
+              <button v-for="item in vizlist"
+                    v-on:click="clickViz(item)"
+                    class="ui grey button"
+                    v-bind:class="{ active: item==chosenIncidents, green: item==chosenIncidents }">
+                    ${vizinfo[item]['TXT']}
+              </button>
+            </div>
           </div>
         </div>  
       </div>

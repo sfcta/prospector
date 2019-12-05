@@ -50,6 +50,15 @@ let mapLegend;
 let _cocSegments;
 let allJSONData;
 let popUpChart = null;
+const VIZ_LIST = ['Ped', 'Bike'];
+const VIZ_INFO = {
+  'Ped': {
+    TXT: 'Pedestrian Collisions',
+    },
+  'Bike': {
+    TXT: 'Bicycle Collisions',
+    },
+};
 
 //Initialization of selective aspects
 let popSelIntersection;
@@ -853,23 +862,9 @@ function pickAllDay(thing) {
 
 
 //When you click bike, change the active app to bike then chosen incidents to bike and regrab the switrsinfo
-function pickBike(thing) {
-  app.isBikeactive = true;
-  app.isPedactive = false;
-  chosenIncidents = 'Bike'
-  getSWITRSinfo();
-  if (selectedIntersection){
-	createChart();
-  } else {
-	showYearlyChart();
-  }
-}
-
-//same as above, but with ped
-function pickPed(thing) {
-  app.isBikeactive = false;
-  app.isPedactive = true;
-  chosenIncidents = 'Ped'
+function clickViz(chosenviz) {
+  app.chosenIncidents = chosenviz;
+  chosenIncidents = chosenviz;
   getSWITRSinfo();
   if (selectedIntersection){
 	createChart();
@@ -1054,8 +1049,6 @@ let app = new Vue({
   data: {
 	chartTitle: label,
     chartSubTitle: 'All Intersections',
-    isBikeactive: false,
-    isPedactive: true,
     isFatalactive: false,
     isNonfactive: false,
     isAllactive: true,
@@ -1065,20 +1058,23 @@ let app = new Vue({
     isPanelHidden: false,
     sliderValue: 0,
     timeSlider: timeSlider,
-    checkedNames: []
+    checkedNames: [],
+    vizlist: VIZ_LIST,
+    vizinfo: VIZ_INFO,
+    selectedViz: VIZ_LIST[0],
+    chosenIncidents: 'Ped'
   },
   //What methods clicking will change one of the above data, or run certain scipts.
   methods: {
   clickToggleHelp: clickToggleHelp,
-  pickBike: pickBike,
-  pickPed: pickPed,
   pickFatal: pickFatal,
   pickNonf: pickNonf,
   pickAll: pickAll,
   pickAM: pickAM,
   pickPM: pickPM,
   pickAllDay: pickAllDay,
-  onChange: changeCheckbox
+  onChange: changeCheckbox,
+  clickViz: clickViz
   },
   //what to continually watch out for
   watch: {
