@@ -198,13 +198,13 @@ td {text-align:center; vertical-align:top; }
     opacity: 1;
 }
 .legend2 {
-    line-height: 5px;
+    line-height: 12px;
     color: #555;
     min-width: 88px;
 }
 .legend2 i {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
     float: left;
     margin-right: 8px;
     opacity: 1;
