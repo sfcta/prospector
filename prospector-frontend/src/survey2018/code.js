@@ -120,7 +120,7 @@ const DRIVER_MAP = {1:'Driver',2:'Passenger'};
 68:'CableCar',69:'Bikeshare',70:'Bikeshare',71:'Scooter',73:'Scooter',74:'Other',75:'Scooter',76:'Carpool',77:'Scooter',995:'',997:'Other'};*/
 const MODE_MAP = {1:'Walk',2:'Bike',3:'Car',4:'Taxi',5:'Transit',6:'Schoolbus',7:'Other',8:'Shuttle/vanpool',
 9:'TNC',10:'Carshare',11:'Bikeshare',12:'Scooter share',13:'long-distance'};
-const PURP_MAP = {1:'Home',2:'Work',3:'Work-related',4:'School',5:'Escort',6:'Shop',7:'Meal',8:'SocRec',9:'Other',10:'ChangeMode'};
+const PURP_MAP = {1:'Home',2:'Work',3:'Work-related',4:'School',5:'Escort',6:'Shop',7:'Meal',8:'SocRec',9:'Errand/other',10:'ChangeMode',11:'Non-Home Night',12:'Other/Missing',14:'MergeTrip'};
 
 let sel_colorvals, sel_colors, sel_binsflag;
 let sel_bwvals;
@@ -229,7 +229,7 @@ function getInfoHtml(geo) {
                 
                 '<b>TRIPID: </b>' + `${geo['trip_num']}` + '<b>  COMPLETE: </b>' + `${geo['survey_complete_trip']}<br/>` +
                 '<b>DAY: </b>' + `${DOW_MAP[geo['travel_date_dow']]}<br/>` +
-                '<b>PURPOSE: </b>' + `${PURP_MAP[geo['o_purpose_category']]}` + '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${PURP_MAP[geo['d_purpose_category']]}<br/>` +
+                '<b>PURPOSE: </b>' + `${PURP_MAP[geo['o_purpose_category_imputed']]}` + '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${PURP_MAP[geo['d_purpose_category_imputed']]}<br/>` +
                 '<b>TIME: </b>' + `${geo['depart_time'].substring(11,19)}` +  '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${geo['arrive_time'].substring(11,19)}<br/>` +
                 '<b>MODE: </b>' + `${MODE_MAP[geo['mode_type']]}<br/>` +
                 '<b>PARTY_SIZE: </b>' + `${geo['num_travelers']}` + '<b>  DORP: </b>' + `${DRIVER_MAP[geo['driver']]}<br/>` +
@@ -328,7 +328,7 @@ let prevloc_query = '';
 
 async function getTripOption(trec) {
   let retval = {};
-  retval['text'] = trec['trip_num']+', '+PURP_MAP[trec['o_purpose_category']]+', '+PURP_MAP[trec['d_purpose_category']]+', '+MODE_MAP[trec['mode_type']]+
+  retval['text'] = trec['trip_num']+', '+PURP_MAP[trec['o_purpose_category_imputed']]+', '+PURP_MAP[trec['d_purpose_category_imputed']]+', '+MODE_MAP[trec['mode_type']]+
                     ', '+trec['depart_time'].substring(11,19)+', '+trec['arrive_time'].substring(11,19);
   retval['value'] = trec['trip_num']; 
   return retval;
