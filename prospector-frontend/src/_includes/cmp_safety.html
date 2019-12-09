@@ -30,16 +30,27 @@
         </div>
 
         <div id="picker">
-          <div style="height:70px;font-size:1px;">
-          <div id="vizbuttons" class="ui vertical buttons">
-              <button v-for="item in vizlist"
-                    v-on:click="clickViz(item)"
-                    class="ui grey button"
-                    v-bind:class="{ active: item==chosenIncidents, green: item==chosenIncidents }">
-                    ${vizinfo[item]['TXT']}
-              </button>
-            </div>
-          </div>
+          <h5>CHOOSE TYPE:</h5>
+          <button v-for="item in vizlist"
+                v-on:click="clickViz(item)"
+                class="mini ui grey button"
+                v-bind:class="{ active: item==chosenIncidents, green: item==chosenIncidents }">
+                ${vizinfo[item]['TXT']}
+          </button>
+          
+          <h5>CHOOSE SEVERITY:</h5>
+          <button class="mini ui grey button"
+                  v-on:click="pickFatal"
+                  v-bind:class="{ active: isFatalactive, orange: isFatalactive}">
+                  Fatal</button>
+          <button class="mini ui grey button"
+                  v-on:click="pickNonf"
+                  v-bind:class="{ active: isNonfactive, blue: isNonfactive}">
+                  Non-Fatal</button>
+          <button class="mini ui grey button"
+                  v-on:click="pickAll"
+                  v-bind:class="{ active: isAllactive, green: isAllactive}">
+                  All</button>          
         </div>  
       </div>
       <div id="header">
@@ -65,22 +76,7 @@
           <div class="pickers">
             <h5>CHOOSE YEAR:</h5>
             <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
-            
-            <h5>CHOOSE SEVERITY:</h5>
-            <button class="mini ui grey button"
-                    v-on:click="pickFatal"
-                    v-bind:class="{ active: isFatalactive, orange: isFatalactive}">
-                    Fatal</button>
-            <button class="mini ui grey button"
-                    v-on:click="pickNonf"
-                    v-bind:class="{ active: isNonfactive, blue: isNonfactive}">
-                    Non-Fatal</button>
-            <button class="mini ui grey button"
-                    v-on:click="pickAll"
-                    v-bind:class="{ active: isAllactive, green: isAllactive}">
-                    All</button>
           </div>
-          <br>
           
           <hr/>
           

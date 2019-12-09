@@ -53,10 +53,10 @@ let popUpChart = null;
 const VIZ_LIST = ['Ped', 'Bike'];
 const VIZ_INFO = {
   'Ped': {
-    TXT: 'Pedestrian Collisions',
+    TXT: 'Pedestrian',
     },
   'Bike': {
-    TXT: 'Bicycle Collisions',
+    TXT: 'Bicycle',
     },
 };
 
