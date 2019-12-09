@@ -85,7 +85,7 @@ infopanel.update = function(geo, popupText) {
 	infopanelTimeout = setTimeout(function() {
 		infopanel._div.className = 'info-panel-hide-2';
 		collisionLayer.resetStyle(oldHoverTarget);
-	}, 3000);
+	}, 2000);
 };
 infopanel.addTo(mymap);
 
@@ -578,7 +578,7 @@ function createChart() {
 
     currentChart = new Morris.Bar({
     // ID of the element in which to draw the chart.
-      element: 'chart',
+      element: 'longchart',
       data: selectedData,
       stacked: true,
     // The name of the data record attribute that contains x-values.
@@ -746,7 +746,7 @@ function buildYearlyDetails(jsonData) {
 	yearlyTotals.push({year:'Every Year', pedcols:every_pedcol, biccols:every_biccol, pedkills:every_pedkill, bickills:every_bickill, pedinjs:every_pedinj, bicinjs:every_bicinj});
 
     app.timeSlider.disabled = false;
-    document.getElementById('chart').innerHTML = '';
+    document.getElementById('longchart').innerHTML = '';
     showYearlyChart();
 }
 
@@ -806,7 +806,7 @@ function showYearlyChart() {
   } else {
     currentChart = new Morris.Bar({
     // ID of the element in which to draw the chart.
-    element: 'chart',
+    element: 'longchart',
     data: data,
     stacked: true,
     // The name of the data record attribute that contains x-values.
@@ -1146,7 +1146,7 @@ function clickedShowHide(e) {
   app.isPanelHidden = slideapp.isPanelHidden;
   if (popSelIntersection) mymap.removeLayer(popSelIntersection);
   // leaflet map needs to be force-recentered, and it is slow.
-  for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
+  for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450]) {
     setTimeout(function() {
       mymap.invalidateSize()
     }, delay)
