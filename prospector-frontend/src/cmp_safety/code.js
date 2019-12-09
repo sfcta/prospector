@@ -163,7 +163,7 @@ function addSWITRSLayer(collisions) {
    mapLegend.onAdd = function (map) {
      var div = L.DomUtil.create('div', 'info legend2'),
      grades = [5, 15, 25, 35],
-     labels = ['<strong>Size</strong>'],
+     labels = [`<b>${app.legTitle}</b>`],
      from, to;
      if (app.sliderValue != "All Years" || chosenSeverity == 'Fatal') {
        for (var i = 0; i < grades.length; i++) {
@@ -404,21 +404,34 @@ function remakeLabel() {
 	  label = 'Non-fatal Pedestrian Collisions for ' + String(app.sliderValue) + ' : ' + yearlyTotals[app.sliderValue-2006]['pedinjs'];
     } else {
 	  label = 'Fatal Pedestrian Collisions for ' + String(app.sliderValue) + ' : ' + yearlyTotals[app.sliderValue-2006]['pedkills'];
-	}
+    }
   } else {
-	if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
-	  label = 'All Bike Collisions: ' + yearlyTotals[yearlyTotals.length-1]['biccols'];
-    } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
-	  label = 'Non-fatal Bike Collisions: ' + yearlyTotals[yearlyTotals.length-1]['bicinjs'];
-    } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
-	  label = 'Fatal Bike Collisions: ' + yearlyTotals[yearlyTotals.length-1]['bickills'];
-    } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
-	  label = 'All Pedestrian Collisions: ' + yearlyTotals[yearlyTotals.length-1]['pedcols'];
-    } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
-	  label = 'Non-fatal Pedestrian Collisions: ' + yearlyTotals[yearlyTotals.length-1]['pedinjs'];
-    } else {
-	  label = 'Fatal Pedestrian Collisions: ' + yearlyTotals[yearlyTotals.length-1]['pedkills'];
-	}
+    if (chosenIncidents == 'Bike' && chosenSeverity == 'All'){
+      label = 'All Bike Collisions: ' + yearlyTotals[yearlyTotals.length-1]['biccols'];
+      } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf'){
+      label = 'Non-fatal Bike Collisions: ' + yearlyTotals[yearlyTotals.length-1]['bicinjs'];
+      } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal'){
+      label = 'Fatal Bike Collisions: ' + yearlyTotals[yearlyTotals.length-1]['bickills'];
+      } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All'){
+      label = 'All Pedestrian Collisions: ' + yearlyTotals[yearlyTotals.length-1]['pedcols'];
+      } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf'){
+      label = 'Non-fatal Pedestrian Collisions: ' + yearlyTotals[yearlyTotals.length-1]['pedinjs'];
+      } else {
+      label = 'Fatal Pedestrian Collisions: ' + yearlyTotals[yearlyTotals.length-1]['pedkills'];
+    }
+  }
+  if (chosenIncidents == 'Bike' && chosenSeverity == 'All') {
+    app.legTitle = 'All Bike';
+  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'All') {
+    app.legTitle = 'All Ped';
+  } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Nonf') {
+    app.legTitle = 'Non-fatal Bike';
+  } else if (chosenIncidents == 'Bike' && chosenSeverity == 'Fatal') {
+    app.legTitle = 'Fatal Bike';
+  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Nonf') {
+    app.legTitle = 'Non-fatal Ped';
+  } else if (chosenIncidents == 'Ped' && chosenSeverity == 'Fatal') {
+    app.legTitle = 'Fatal Ped';
   }
   app.chartSubTitle = 'All Intersections';
 }
@@ -1049,6 +1062,7 @@ let app = new Vue({
   data: {
 	chartTitle: label,
     chartSubTitle: 'All Intersections',
+    legTitle: 'All Ped',
     isFatalactive: false,
     isNonfactive: false,
     isAllactive: true,
