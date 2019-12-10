@@ -26,7 +26,7 @@ import Cookies from 'js-cookie';
 
 let api_server = 'http://api.sfcta.org/api/switrs_viz3';
 let api_totals = 'http://api.sfcta.org/api/switrs_totals2';
-let api_geo = 'https://api.sfcta.org/api/coc2017';
+const master_api = 'https://api.sfcta.org/api/';
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
 let size = 1;
@@ -34,6 +34,21 @@ let size = 1;
 // Basic leaflet information: .addTo adds a layer to your map.
 let mymap = maplib.sfmap;
 mymap.setView([37.76889, -122.440997], 13);
+
+let stripes = new L.StripePattern({weight:2,spaceWeight:3,opacity:0.6,angle:135}); stripes.addTo(mymap);
+
+const ADDLAYERS = [
+  {
+    view: 'hin2017', name: 'High Injury Network',
+    style: { opacity: 1, weight: 2, color: '#FF8C00', interactive: false},
+    info: 'https://www.visionzerosf.org/maps-data/',
+  },
+  {
+    view: 'coc2017_diss', name: 'Communities of Concern',
+    style: { opacity: 1, weight: 2, color: 'grey', fillPattern: stripes, interactive: false},
+    info: 'https://www.arcgis.com/home/item.html?id=1501fe1552414d569ca747e0e23628ff',
+  },
+]
 
 //Initialization of visual aspects
 let totals = true;
@@ -47,7 +62,6 @@ let popup = null;
 let collisionLayer;
 let cocLayer;
 let mapLegend;
-let _cocSegments;
 let allJSONData;
 let popUpChart = null;
 const VIZ_LIST = ['Ped', 'Bike'];
@@ -59,6 +73,18 @@ const VIZ_INFO = {
     TXT: 'Bicycle',
     },
 };
+let addLayerStore = {};
+
+async function initialPrep() {
+
+  console.log('1...');
+  await updateSliderData();
+  
+  console.log('2...');
+  await fetchAddLayers();
+
+  console.log('3 !!!');
+}
 
 //Initialization of selective aspects
 let popSelIntersection;
@@ -66,6 +92,7 @@ let selectedIntersection, prevSelectedIntersection;
 let selectedData;
 let currentChart = null;
 let infopanel = L.control();
+
 
 //Add a hidden infopanel layer
 infopanel.onAdd = function(map) {
@@ -949,46 +976,10 @@ var cocStyle = {
 
 }
 
-function changeCheckbox(thing) {
-    if (cocLayer) mymap.removeLayer(cocLayer);
-    if (app.checkedNames.includes("Communities of Concern")){
-        console.log('Communities of Concern: Yes');
-        console.log(_cocSegments);
-        cocLayer = L.geoJSON(_cocSegments);
-        cocLayer.addTo(mymap);
-
-    } else {
-        console.log('Communities of Concern: No')
-    } if (app.checkedNames.includes("High Injury Network")){
-        console.log('High Injury Network: Yes')
-    } else {
-        console.log('High Injury Network: No')
-    }
-}
-
-async function fetchCocGeometry() {
-  const geo_url_item = api_geo + '?select=geometry';
-
-  try {
-    let resp = await fetch(geo_url_item);
-    let segments = await resp.json();
-
-    // do some parsing and stuff
-    for (let segment of segments) {
-      segment['type'] = 'Feature';
-      segment['geometry'] = JSON.parse(segment.geometry);
-    }
-    return segments;
-
-  } catch (error) {
-    console.log('map segment error: ' + error);
-  }
-}
-
 let yearlist = [];
 
 //update the year slider
-function updateSliderData() {
+async function updateSliderData() {
   //create the yearlabels based upon what years are in the data.
   yearlist = [];
   fetch(api_server + '?select=year')
@@ -1010,6 +1001,27 @@ function updateSliderData() {
 	app.sliderValue = sliderlist[sliderlist.length-1];
   });
   fetchYearlyDetails();
+}
+
+async function fetchAddLayers() {
+  try {
+    for (let item of ADDLAYERS) {
+      let resp = await fetch(master_api + item.view);
+      let features = await resp.json();
+      for (let feat of features) {
+        feat['type'] = 'Feature';
+        feat['geometry'] = JSON.parse(feat.geometry);
+      }
+      let lyr = L.geoJSON(features, {
+        style: item.style,
+        pane: 'shadowPane',
+      }).addTo(mymap);
+      addLayerStore[item.view] = lyr;
+      mymap.removeLayer(lyr);
+    }
+  } catch (error) {
+    console.log('additional layers error: ' + error);
+  }
 }
 
 //creating the timeslider for the visualization.
@@ -1076,7 +1088,9 @@ let app = new Vue({
     vizlist: VIZ_LIST,
     vizinfo: VIZ_INFO,
     selectedViz: VIZ_LIST[0],
-    chosenIncidents: 'Ped'
+    chosenIncidents: 'Ped',
+    extraLayers: ADDLAYERS,
+    addLayers:[],
   },
   //What methods clicking will change one of the above data, or run certain scipts.
   methods: {
@@ -1087,18 +1101,28 @@ let app = new Vue({
   pickAM: pickAM,
   pickPM: pickPM,
   pickAllDay: pickAllDay,
-  onChange: changeCheckbox,
-  clickViz: clickViz
+  clickViz: clickViz,
+  addLayers: showExtraLayers,
   },
   //what to continually watch out for
   watch: {
     sliderValue: sliderChanged,
+    addLayers: showExtraLayers,
   },
   //extra vue options we are using.
   components: {
     vueSlider,
   }
 });
+
+function showExtraLayers(e) {
+  for (let lyr in addLayerStore) {
+    mymap.removeLayer(addLayerStore[lyr]);
+  }
+  for (let lyr of app.addLayers) {
+    addLayerStore[lyr].addTo(mymap);
+  }
+}
 
 //Help functions
 let cookieShowHelp = Cookies.get('showHelp');
@@ -1153,5 +1177,4 @@ function clickedShowHide(e) {
   }
 }
 // Ready to go! Read some data.
-_cocSegments = fetchCocGeometry();
-updateSliderData();
+initialPrep();

@@ -50,7 +50,17 @@
           <button class="mini ui grey button"
                   v-on:click="pickAll"
                   v-bind:class="{ active: isAllactive, green: isAllactive}">
-                  All</button>          
+                  All</button>
+          
+          <h5>MAP LAYERS</h5>
+          <p>Add additional geographic data to the map.</p>
+          <div v-for="item in extraLayers" class="ui toggle checkbox">
+            <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
+            <label><h5>${item.name}
+            <a class="icon" target="_blank" v-bind:href="item.info"><i v-if="item.info" class="question circle icon"></i></a>
+            </h5></label>
+          </div>
+          
         </div>  
       </div>
       <div id="header">
