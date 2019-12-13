@@ -25,7 +25,6 @@ import vueSlider from 'vue-slider-component';
 import Cookies from 'js-cookie';
 
 var maplib = require('../jslib/maplib');
-let styles = maplib.styles;
 let getLegHTML = maplib.getLegHTML2;
 let getColorFromVal = maplib.getColorFromVal2;
 let getBWLegHTML = maplib.getBWLegHTML;
@@ -36,7 +35,7 @@ mymap.setView([37.76889, -122.440997], 13);
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
-const DATA_VIEW = 'lua2017_v5';
+const DATA_VIEW = 'lua2017_v6';
 
 const FRAC_COLS = ['speed','time','vol','vmt','vhd','vht','pti80','pti80_vmt'];
 const YR_LIST = [2010,2015,2020,2025,2030,2035,2040];
@@ -61,7 +60,7 @@ const BWIDTH_MAP = {
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
   'hh': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
-  'tot': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
+  'job': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
   'cie': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
   'med': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
   'mips': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
@@ -70,7 +69,12 @@ const CUSTOM_BP_DICT = {
   'vis': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
 }
 
-const METRIC_UNITS = {'speed':'mph','tot':'jobs'};
+const METRIC_UNITS = {'speed':'mph','job':'jobs'};
+
+const styles = {normal  : {"color": "#3c6", "weight": 4, "opacity": 1.0 },
+                    selected: {"color": "#39f", "weight": 5, "opacity": 1.0 },
+                    popup   : {"color": "#33f", "weight": 10, "opacity": 1.0 }
+};
 
 let sel_colorvals, sel_colors, sel_binsflag;
 let sel_bwvals;
@@ -460,7 +464,7 @@ function styleByMetricColor(feat) {
     fo = 0;
   }
   if (!app.bwidth_check) {
-    return { fillColor: color, opacity: 0.5, weight: 0.5, fillOpacity: fo };
+    return { fillColor: color, opacity: 0.5, weight: 0.5, fillOpacity: fo, color: '#fff'};
   } else {
     return { color: color, weight: feat['bwmetric_scaled'], opacity: 1.0 };
   }
@@ -797,7 +801,7 @@ let app = new Vue({
     {text: 'PDR_EMP', value: 'pdr'},
     {text: 'RET_EMP', value: 'ret'},
     {text: 'VIS_EMP', value: 'vis'},
-    {text: 'TOT_EMP', value: 'tot'},
+    {text: 'TOT_EMP', value: 'job'},
     ],
     chartTitle: 'HH TREND',
     chartSubtitle: chart_deftitle,
