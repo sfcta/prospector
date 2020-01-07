@@ -35,12 +35,12 @@ mymap.setView([37.76889, -122.440997], 13);
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
-const DATA_VIEW = 'lua2017_v6';
+const DATA_VIEW = 'lua2017_final';
 
-const FRAC_COLS = ['speed','time','vol','vmt','vhd','vht','pti80','pti80_vmt'];
+const FRAC_COLS = [];
 const YR_LIST = [2010,2015,2020,2025,2030,2035,2040];
 
-const INT_COLS = ['dt','at','ft2'];
+const INT_COLS = [];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ccd';
 const COLORRAMP = {SEQ: ['#ffffcc','#3f324f'],
@@ -69,7 +69,7 @@ const CUSTOM_BP_DICT = {
   'vis': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
 }
 
-const METRIC_UNITS = {'speed':'mph','job':'jobs'};
+const METRIC_UNITS = {'job':'jobs'};
 
 const styles = {normal  : {"color": "#3c6", "weight": 4, "opacity": 1.0 },
                     selected: {"color": "#39f", "weight": 5, "opacity": 1.0 },
