@@ -114,14 +114,15 @@ const DOW_MAP = {1:'Monday',2:'Tuesday',3:'Wednesday',4:'Thursday',5:'Friday',6:
 const DRIVER_MAP = {1:'Driver',2:'Passenger'};
 const LOCATION_MAP = {1:'Home',2:'Work',3:'School',4:'Other'};
 
-/*const MODE_MAP = {1:'Walk',2:'Bike',3:'Bike',4:'Bike',
-6:'Car',7:'Car',8:'Car',9:'Car',10:'Car',11:'Car',12:'Car',16:'Car',17:'Car',18:'Carshare',21:'Carpool',22:'Car',24:'SchoolBus',
-25:'Bus',26:'Bus',27:'Bus',28:'Bus',30:'BART',31:'Air',32:'Ferry',33:'Car',34:'Car',36:'Taxi',38:'Bus',39:'LRT',41:'Rail',42:'Rail',
-43:'Other',44:'Other',46:'Bus',47:'Other',55:'ExpBus',59:'Car',60:'Car',62:'Bus',63:'Car',64:'TNC',65:'TNC',66:'TNC',67:'Bus',
-68:'CableCar',69:'Bikeshare',70:'Bikeshare',71:'Scooter',73:'Scooter',74:'Other',75:'Scooter',76:'Carpool',77:'Scooter',995:'',997:'Other'};*/
+const MODE_MAP_DET = {1:'Walk',2:'Bike-hh',3:'Bike-borrowed',4:'Bike-rent',
+6:'HHVeh',7:'HHVeh',8:'HHVeh',9:'HHVeh',10:'HHVeh',11:'HHVeh',12:'HHVeh',16:'HHVeh-other',17:'Rental-car',18:'Carshare',21:'Vanpool',22:'OtherVeh',24:'SchoolBus',
+25:'Intercity-bus',26:'PvtShuttle',27:'Paratransit',28:'Other-bus',30:'BART',31:'Air',32:'Ferry',33:'Car-from-work',34:'Car-borrowed',36:'Taxi',38:'Univ-bus',39:'LRT',41:'Intercity-rail',42:'Other-rail',
+43:'Skateboard',44:'Golf-cart',46:'Local-bus',47:'Motorcycle',55:'Exp-bus',59:'Rental-p2p',60:'OthHired-car',62:'EmpShuttle',63:'MedTrans',64:'Uber',65:'Lyft',66:'OthTNC',67:'Pvt-bus',
+68:'CableCar',69:'Bikeshare-reg',70:'Bikeshare-ele',71:'Scootershare',73:'Mopedshare',74:'Segway',75:'OthScooter',76:'Carpool-match',77:'PersScooter',995:'',997:'Other'};
 const MODE_MAP = {1:'Walk',2:'Bike',3:'Car',4:'Taxi',5:'Transit',6:'Schoolbus',7:'Other',8:'Shuttle/vanpool',
 9:'TNC',10:'Carshare',11:'Bikeshare',12:'Scooter share',13:'long-distance'};
-const PURP_MAP = {1:'Home',2:'Work',3:'Work-related',4:'School',5:'Escort',6:'Shop',7:'Meal',8:'SocRec',9:'Errand/other',10:'ChangeMode',11:'Non-Home Night',12:'Other/Missing',14:'MergeTrip'};
+const PURP_MAP = {1:'Home',2:'Work',3:'Work-related',4:'School',5:'Escort',6:'Shop',7:'Meal',8:'SocRec',9:'Errand/appointment',10:'ChangeMode'};
+const IMPUTED_PURP_MAP = {'-1':'Missing', 1:'Home',2:'Work',3:'Work-related',4:'School',5:'Escort',6:'Shop',7:'Meal',8:'SocRec',9:'Errand/appointment',10:'ChangeMode',11:'Non-Home Night',12:'Other/Missing',14:'MergeTrip'};
 
 let sel_colorvals, sel_colors, sel_binsflag;
 let sel_bwvals;
@@ -214,8 +215,8 @@ function getInfoHtml(geo) {
                 '<b>SIZE: </b>' + `${geo.num_people}<br/>` +
                 '<b>WORKERS: </b>' + `${geo.num_workers}<br/>` +
                 '<b>VEHICLES: </b>' + `${geo.num_vehicles}<br/>` +
-                '<b>INCOME: </b>' + `${INC_MAP[geo.income_aggregate]}<br/>` +
-                '<b>ADDRESS: </b>' + `${geo.sample_address}<br/><hr>`;
+                '<b>INCOME: </b>' + `${INC_MAP[geo.income_aggregate]}<br/><hr>`;
+                //'<b>ADDRESS: </b>' + `${geo.sample_address}<br/><hr>`;
   } else if (geo.geometry.type == 'LineString') {
     retval = '<b>HHID: </b>' + `${geo[HHID_VAR]}<br/>` +
                 '<b>SIZE: </b>' + `${selHHObj.num_people}<br/>` +
@@ -230,12 +231,14 @@ function getInfoHtml(geo) {
                 
                 '<b>TRIPID: </b>' + `${geo['trip_num']}` + '<b>  COMPLETE: </b>' + `${geo['survey_complete_trip']}<br/>` +
                 '<b>DAY: </b>' + `${DOW_MAP[geo['travel_date_dow']]}<br/>` +
-                '<b>PURPOSE: </b>' + `${PURP_MAP[geo['o_purpose_category_imputed']]}` + '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${PURP_MAP[geo['d_purpose_category_imputed']]}<br/>` +
+                '<b>PURPOSE: </b>' + `${PURP_MAP[geo['o_purpose_category']]}` + '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${PURP_MAP[geo['d_purpose_category']]}<br/>` +
+                '<b>PURPOSE_IMPUTED: </b>' + `${IMPUTED_PURP_MAP[geo['o_purpose_category_imputed']]}` + '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${IMPUTED_PURP_MAP[geo['d_purpose_category_imputed']]}<br/>` +
                 '<b>TIME: </b>' + `${geo['depart_time'].substring(11,19)}` +  '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${geo['arrive_time'].substring(11,19)}<br/>` +
-                '<b>MODE: </b>' + `${MODE_MAP[geo['mode_type']]}<br/>` +
-                '<b>MODE_IMPUTED: </b>' + `${MODE_MAP[geo['mode_type_imputed']]}<br/>` +
-                '<b>O_LOC_IMPUTED: </b>' + `${LOCATION_MAP[geo['o_location_type_imputed']]}<br/>` +
-                '<b>D_LOC_IMPUTED: </b>' + `${LOCATION_MAP[geo['d_location_type_imputed']]}<br/>` +
+                '<b>MODE_TYPE: </b>' + `${MODE_MAP[geo['mode_type']]}<br/>` +
+                '<b>MODE_TYPE_IMPUTED: </b>' + `${MODE_MAP[geo['mode_type_imputed']]}<br/>` +
+                '<b>MODE_DETAIL: </b>' + `${MODE_MAP_DET[geo['mode_1']]}` +','+ `${MODE_MAP_DET[geo['mode_2']]}` +','+ `${MODE_MAP_DET[geo['mode_3']]}` +','+ `${MODE_MAP_DET[geo['mode_4']]}<br/>` +
+                '<b>LOCATION: </b>' + `${LOCATION_MAP[geo['o_location_type']]}` + '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${LOCATION_MAP[geo['d_location_type']]}<br/>` +
+                '<b>LOCATION_IMPUTED: </b>' + `${LOCATION_MAP[geo['o_location_type_imputed']]}` + '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${LOCATION_MAP[geo['d_location_type_imputed']]}<br/>` +
                 '<b>PARTY_SIZE: </b>' + `${geo['num_travelers']}` + '<b>  DORP: </b>' + `${DRIVER_MAP[geo['driver']]}<br/>` +
                 '<b>DISTANCE: </b>' + `${(Math.round(geo['distance']*100)/100)}` + ' mi.  <b>DURATION: </b>' + `${geo['duration']}&nbsp;min.<br/>` +
                 '<b>COST(TNC/TAXI): </b>' + `${geo['taxi_cost']}<hr>`;
@@ -415,7 +418,7 @@ function highlightSelectedSegment() {
         e.setStyle(tripStyles.popup);
         selectedGeo = e;
         selectedGeo.setText(null);
-        selectedGeo.setText('  ►  ', {repeat: true, attributes: {fill: 'red'}});
+        selectedGeo.setText('  =►  ', {repeat: true, attributes: {fill: 'red'}});
         return;
       }
     } catch(error) {}
