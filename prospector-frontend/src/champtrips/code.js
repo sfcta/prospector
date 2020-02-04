@@ -35,7 +35,7 @@ mymap.setView([37.694204, -122.385188], 12);
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
-const GEO_VIEW = 'taz_boundaries_v2';
+const GEO_VIEW = 'taz_boundaries_v2_csf';
 const DATA_VIEW = 'champtrips_d4';
 
 const GEOTYPE = 'TAZ';
