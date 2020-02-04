@@ -522,7 +522,7 @@ function styleByMetricColor(feat) {
               sel_binsflag
               );
   if (!color) color = MISSING_COLOR;
-  let fo = 0.75;
+  let fo = 0.6;
   if (feat['metric']==0) {
     fo = 0;
   }
