@@ -69,10 +69,10 @@ const CUSTOM_BP_DICT = {
   'hh': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
 }
 
-const METRIC_UNITS = {'sq_mile': 'SQ. MI.',
+const METRIC_UNITS = {'sq_mile': 'SQMI',
                       'job2015': '100 JOBS',
                       'pop2015': '100 RESIDENTS'};
-const METRIC_DESC = {'sq_mile': 'sq. mi.','job2015': '100 jobs',
+const METRIC_DESC = {'sq_mile': 'sqmi','job2015': '100 jobs',
                       'pop2015': '100 residents',
 };
 
@@ -148,7 +148,7 @@ function getInfoHtml(geo) {
     retval += `<b>${app.sliderValue[0]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${base_val}<br/>` +
               `<b>${app.sliderValue[1]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${comp_val}<br/>`;
   }
-  retval += `<b>TRIPS: </b>` + `${trips.toLocaleString()}</br>`;
+  retval += `<b>D4 TRIPS: </b>` + `${trips.toLocaleString()}</br>`;
   if (app.selected_norm.toUpperCase() != 'NONE') {
     retval += `<b>${app.selected_norm.toUpperCase()}: </b>` + `${norm_val}</br>` +
               `<b>${app.selected_metric.toUpperCase()}</b>` + `<b> PER </b>` + `<b>${METRIC_DESC[app.selected_norm].toUpperCase()}</b>` +
@@ -467,7 +467,7 @@ async function drawMapFeatures(queryMapData=true) {
           sel_binsflag,
           (app.pct_check && app.comp_check)? '%': ''
         );
-        legHTML = '<h4>' + sel_metric.toUpperCase() + (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(app.selected_norm)? (' per ' + METRIC_UNITS[app.selected_norm]) : '')) +
+        legHTML = '<h4>D4 ' + sel_metric.toUpperCase() + (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(app.selected_norm)? (' per ' + METRIC_UNITS[app.selected_norm]) : '')) +
                   '</h4>' + legHTML;
         if (app.bwidth_check) {
           legHTML += '<hr/>' + '<h4>' + app.selected_bwidth.toUpperCase() +  '</h4>';
@@ -527,7 +527,7 @@ function styleByMetricColor(feat) {
     fo = 0;
   }
   if (!app.bwidth_check) {
-    return { fillColor: color, opacity: 0.5, weight: 0.5, fillOpacity: fo, color: '#fff' };
+    return { fillColor: color, opacity: 0.5, weight: 0.05, fillOpacity: fo, color: '#fff' };
   } else {
     return { color: color, weight: feat['bwmetric_scaled'], opacity: 1.0 };
   }
@@ -871,7 +871,6 @@ let app = new Vue({
     {text: 'DTRAN', value: 'DTRAN'},
     {text: 'WALK', value: 'WALK'},
     {text: 'BIKE', value: 'BIKE'},
-    {text: 'SCHBUS', value: 'SCHBUS'},
     ],
     chartTitle: 'AVG_RIDE TREND',
     chartSubtitle: chart_deftitle,
