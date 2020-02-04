@@ -136,7 +136,7 @@ function getInfoHtml(geo) {
   let trips = 0;
   if (geo.trips !== null) trips = (Math.round(geo.trips*100)/100).toLocaleString();
   let norm_val = 0;
-  if (geo.norm !== null) norm_val = (Math.round(geo.norm*100)/100).toLocaleString();
+  if (geo.norm !== null) norm_val = (Math.round(geo.norm*10000)/10000).toLocaleString();
   
   let comp_val = null;
   if (geo.comp !== null) comp_val = (Math.round(geo.comp*100)/100).toLocaleString();
@@ -150,7 +150,7 @@ function getInfoHtml(geo) {
   }
   retval += `<b>TRIPS: </b>` + `${trips.toLocaleString()}</br>`;
   if (app.selected_norm.toUpperCase() != 'NONE') {
-    retval += `<b>${app.selected_norm.toUpperCase()}: </b>` + `${norm_val.toLocaleString()}</br>` +
+    retval += `<b>${app.selected_norm.toUpperCase()}: </b>` + `${norm_val}</br>` +
               `<b>${app.selected_metric.toUpperCase()}</b>` + `<b> PER </b>` + `<b>${METRIC_DESC[app.selected_norm].toUpperCase()}</b>` +
               (app.pct_check? '<b> %</b>': '') +
               (app.comp_check? '<b> Diff: </b>':'<b>: </b>') + 
@@ -860,7 +860,7 @@ let app = new Vue({
     {text: 'Population', value: 'pop2015'},
     ],
     
-    selected_mode: 'ALL',
+    selected_mode: 'DA',
     mode_options: [
     {text: 'ALL', value: 'ALL'},
     {text: 'DA', value: 'DA'},
