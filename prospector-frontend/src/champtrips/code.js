@@ -30,8 +30,30 @@ let getLegHTML = maplib.getLegHTML2;
 let getColorFromVal = maplib.getColorFromVal2;
 let getBWLegHTML = maplib.getBWLegHTML;
 let getQuantiles = maplib.getQuantiles;
+
+let baseLayer = maplib.baseLayer;
 let mymap = maplib.sfmap;
 mymap.setView([37.694204, -122.385188], 12);
+mymap.removeLayer(baseLayer);
+let url = 'https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+let token = 'pk.eyJ1Ijoic2ZjdGEiLCJhIjoiY2ozdXBhNm1mMDFkaTJ3dGRmZHFqanRuOCJ9.KDmACTJBGNA6l0CyPi1Luw';
+let attribution ='<a href="https://openstreetmap.org">OpenStreetMap</a> | ' +
+                 '<a href="https://mapbox.com">Mapbox</a>';
+baseLayer = L.tileLayer(url, {
+  attribution:attribution,
+  minZoom: 10,
+  maxZoom: 18,
+  accessToken:token,
+}).addTo(mymap);
+
+let url2 = 'https://api.mapbox.com/styles/v1/sfcta/cjscclu2q07qn1fpimxuf2wbd/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+let streetLayer = L.tileLayer(url2, {
+  attribution:attribution,
+  maxZoom: 18,
+  accessToken:token,
+  pane: 'shadowPane',
+});
+streetLayer.addTo(mymap);
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
@@ -522,7 +544,7 @@ function styleByMetricColor(feat) {
               sel_binsflag
               );
   if (!color) color = MISSING_COLOR;
-  let fo = 0.6;
+  let fo = 1.0;
   if (feat['metric']==0) {
     fo = 0;
   }
