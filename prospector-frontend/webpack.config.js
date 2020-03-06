@@ -24,6 +24,7 @@ const sfcta_components = [
      'cmpqa',
      'cmp_safety',
      'champtrips',
+     'tnctrnfac',
      'survey2018',
 	 //'cmp-v0',
 ];
