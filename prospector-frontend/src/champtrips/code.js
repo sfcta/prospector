@@ -72,7 +72,7 @@ const SCNYR_LIST = [2010,2015];
 const INT_COLS = [''];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ccd';
-const COLORRAMP = {SEQ: ['#ffffcc','#3f324f'],
+const COLORRAMP = {SEQ: ['#eefacd','#c5e5bf','#49a895','#116570','#173252'],
                     DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
 const MIN_BWIDTH = 2;
@@ -543,9 +543,9 @@ function styleByMetricColor(feat) {
               sel_colors,
               sel_binsflag
               );
-  if (!color) color = MISSING_COLOR;
+  //if (!color) color = MISSING_COLOR;
   let fo = 1.0;
-  if (feat['metric']==0) {
+  if (feat['metric']==0 || !color) {
     fo = 0;
   }
   if (!app.bwidth_check) {
@@ -919,7 +919,7 @@ let app = new Vue({
     selected_bwidth: bwidth_metric_list[0],
     bwidth_options: [],    
     
-    selected_colorscheme: COLORRAMP.DIV,
+    selected_colorscheme: COLORRAMP.SEQ,
     modeMap: {
       '#ffffcc,#3f324f': 'hsl',
     },
