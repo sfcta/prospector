@@ -104,11 +104,10 @@ async function initialPrep() {
   await buildChartHtmlFromData();
 
   console.log('4 !!!');
-  console.log(SCN_LIST);
 }
 
 async function fetchMapFeatures() {
-  const geo_url = API_SERVER + GEO_VIEW + '?select=taz,geometry,nhood';
+  const geo_url = API_SERVER + GEO_VIEW + '?select=taz,geometry,nhood&taz=lt.1000';
 
   try {
     let resp = await fetch(geo_url);
@@ -446,12 +445,12 @@ function styleByMetricColor(feat) {
               sel_colors,
               sel_binsflag
               );
-  if (!color) color = MISSING_COLOR;
+  //if (!color) color = MISSING_COLOR;
   let fo = 0.6;
-  if (feat['metric']==0) {
+  if (feat['metric']==0 || !color) {
     fo = 0;
   }
-  return { fillColor: color, opacity: 0.5, weight: 0.5, fillOpacity: fo };
+  return { fillColor: color, opacity: 0.5, weight: 0, fillOpacity: fo };
 }
 
 let infoPanelTimeout;
