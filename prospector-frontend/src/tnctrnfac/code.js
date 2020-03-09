@@ -252,6 +252,7 @@ async function drawMapFeatures(queryMapData=true) {
         map_metric = null;
         feat['base'] = null;
         feat['comp'] = null;
+        feat['diff'] = null;
         if (app.comp_check) {
           if (base_lookup[app.selected_source][app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
             let entry = base_lookup[app.selected_source][app.selected_timep][feat[GEOID_VAR]];
@@ -411,10 +412,11 @@ async function drawMapFeatures(queryMapData=true) {
         return div;
       };
       mapLegend.addTo(mymap);
-      
+
       if (selectedGeo) {
-        if (base_lookup[app.selected_source][base_scnyr][app.selected_timep].hasOwnProperty(selectedGeo.feature[GEOID_VAR])) {
-          buildChartHtmlFromData(selectedGeo.feature[GEOID_VAR]);
+        return cleanFeatures.filter(entry => entry[GEOID_VAR] == selectedGeo.feature[GEOID_VAR])[0];
+        if (base_lookup[app.selected_source][app.selected_timep].hasOwnProperty(selectedGeo.feature[GEOID_VAR])) {
+          //buildChartHtmlFromData(selectedGeo.feature[GEOID_VAR]);
           return cleanFeatures.filter(entry => entry[GEOID_VAR] == selectedGeo.feature[GEOID_VAR])[0];
         } else {
           resetPopGeo();
@@ -550,12 +552,8 @@ function clickedOnFeature(e) {
   let selfeat = selectedGeo.feature;
   app.chartSubtitle = GEOTYPE + ' ' + selfeat[GEOID_VAR];
   selectedLatLng = e.latlng;
-  if (base_lookup[app.selected_source][app.sliderValue[0]][app.selected_timep].hasOwnProperty(selGeoId)) {
-    showGeoDetails(selectedLatLng);
-    buildChartHtmlFromData(selGeoId);
-  } else {
-    resetPopGeo();
-  }
+  showGeoDetails(selectedLatLng);
+    //buildChartHtmlFromData(selGeoId);
 }
 
 let popSelGeo;
@@ -576,7 +574,7 @@ function resetPopGeo() {
   geoLayer.resetStyle(selectedGeo);
   prevSelectedGeo = selectedGeo = selGeoId = null;
   app.chartSubtitle = chart_deftitle;
-  buildChartHtmlFromData();
+  //buildChartHtmlFromData();
 }
 
 let trendChart = null
@@ -685,7 +683,7 @@ function bwbp4Changed(thing) {
 
 async function selectionChanged(thing) {
   app.chartTitle = app.selected_metric.toUpperCase() + ' TREND';
-  if (app.sliderValue && app.selected_metric && app.selected_timep && app.selected_source) {
+  if (app.selected_timep && app.selected_source) {
     let selfeat = await drawMapFeatures();
     if (selfeat) {
       highlightSelectedSegment();
@@ -846,12 +844,6 @@ let app = new Vue({
     selected_breaks: 5,
   },
   watch: {
-    sliderValue: selectionChanged,
-    selected_source: selectionChanged,
-    selected_timep: selectionChanged,
-    selected_metric: selectionChanged,
-    pct_check: selectionChanged,
-    
     bp1: bp1Changed,
     bp2: bp2Changed,
     bp3: bp3Changed,
