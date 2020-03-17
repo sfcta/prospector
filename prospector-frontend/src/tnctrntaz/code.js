@@ -36,7 +36,7 @@ mymap.setView([37.76889, -122.440997], 13);
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
-const DATA_VIEW = 'tnctr_taz';
+const DATA_VIEW = 'tnctr_taz2';
 
 const GEOTYPE = 'Segment';
 const GEOID_VAR = 'taz';
@@ -138,7 +138,7 @@ function getInfoHtml(geo) {
   let retval = '<b>TAZ: </b>' + `${geo[GEOID_VAR]}<br/>` +
                 '<b>NEIGHBORHOOD: </b>' + `${geo.nhood}<br/><hr>`;
   if (app.comp_check) {
-    retval += `<b>${app.sliderValue[0]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${base_val}<br/>` +
+    retval += `<b>${app.sliderValue[0]}</b> `+`<b>AVG_RIDE: </b>` + `${base_val}<br/>` +
               `<b>${app.sliderValue[1]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${comp_val}<br/>`;
   }
   retval += `<b>${app.selected_metric.toUpperCase()}</b>` + 
@@ -816,7 +816,13 @@ let app = new Vue({
     selected_metric: 'avg_ride',
     metric_options: [
     {text: 'avg_ride', value: 'avg_ride'},
-    {text: 'ons', value: 'ons'},
+    {text: 'fac_access', value: 'fac_access'},
+    {text: 'fac_regional_transfers', value: 'fac_regional_transfers'},
+    {text: 'fac_service', value: 'fac_service'},
+    {text: 'fac_tnc', value: 'fac_tnc'},
+    {text: 'fac_unexplained', value: 'fac_unexplained'},
+    
+    /*{text: 'ons', value: 'ons'},
     {text: 'offs', value: 'offs'},
     
     {text: 'avg_tnc', value: 'avg_tnc'},
@@ -862,7 +868,7 @@ let app = new Vue({
     {text: 'access_all_30_hhlds', value: 'access_all_30_hhlds'},
     {text: 'access_all_30_totalemp', value: 'access_all_30_totalemp'},
     {text: 'access_all_45_hhlds', value: 'access_all_45_hhlds'},
-    {text: 'access_all_45_totalemp', value: 'access_all_45_totalemp'},
+    {text: 'access_all_45_totalemp', value: 'access_all_45_totalemp'},*/
     
     ],
     chartTitle: 'AVG_RIDE TREND',
@@ -876,8 +882,9 @@ let app = new Vue({
     {text: 'Bus', value: 'Bus'},
     {text: 'Rail', value: 'Rail'},
     ],
-    selected_timep: '0300-0859',
+    selected_timep: 'Daily',
     time_options: [
+    {text: 'Daily', value: 'Daily'},
     {text: '0300-0859', value: '0300-0859'},
     {text: '0900-1559', value: '0900-1559'},
     {text: '1600-1859', value: '1600-1859'},
