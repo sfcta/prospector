@@ -62,6 +62,7 @@ const DATA_VIEW = 'champtrips_d4';
 
 const GEOTYPE = 'TAZ';
 const GEOID_VAR = 'taz';
+const GEOID_VAR_DATA = 'dtaz';
 const PURP_VAR = 'purpose';
 const MODE_VAR = 'tmode';
 const TOD_VAR = 'timep';
@@ -219,7 +220,7 @@ async function getMapData() {
     }
   }
   for (let entry of jsonData) {
-    base_lookup[entry[PURP_VAR]][entry[MODE_VAR]][entry[TOD_VAR]][entry['dtaz']] = entry;
+    base_lookup[entry[PURP_VAR]][entry[MODE_VAR]][entry[TOD_VAR]][entry[GEOID_VAR_DATA]] = entry;
     for (let met of app.metric_options) {
       tmp[entry[PURP_VAR]][entry[MODE_VAR]][entry[TOD_VAR]][met.value] += entry[met.value];
     }
