@@ -1,0 +1,126 @@
+<div id="container">
+
+  <div id="slide-panel" v-bind:class="{ shrunken: isPanelHidden}">
+    <div id="layer-widgets">
+      <button class="ui tiny green icon button"
+              v-on:click="clickedShowHide">
+              <i class="angle double icon"
+              v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
+      </button>
+    </div>
+  </div> 
+
+  <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
+      <div id="preheader">
+        <hr/>
+        <h3 class="apptitle">CONGESTION EXPLORER (REAL-TIME)</h3>
+        <div id="helpbar">
+            <button class="ui mini right labeled icon violet button"
+                    v-on:click="clickToggleHelp">
+                    <i class="help circle icon"></i>
+                    What is this?
+            </button>
+            &nbsp;
+            <button class="ui mini right labeled icon violet button"
+                    v-on:click="this.window.open('https://www.sfcta.org/congestion','_blank')">
+                    <i class="arrow right icon"></i>
+                    Learn More
+            </button>
+            <hr/>
+           </div>
+
+          <div id="picker">
+            <div id="vizbuttons" class="ui vertical buttons">
+              <button v-for="item in vizlist"
+                    v-on:click="clickViz(item)"
+                    class="ui grey button"
+                    v-bind:class="{ active: item==selectedViz, yellow: item==selectedViz }">
+                    ${vizinfo[item]['TXT']}
+              </button>
+            </div>
+          </div>
+      </div>
+      <div id="header">
+          <div id="stats-panel">
+            <hr style="margin-bottom:-5px;" />
+            <div id="chartinfo"><h3 style="font-size: 22px;">${chartTitle}</h3></div>
+            <div id="geoinfo"><h5>${chartSubtitle}</h5></div>
+            <div id="longchart">
+                <div class="ui active dimmer">
+                  <div class="ui text loader">Loading</div>
+                </div>
+            </div>
+          </div>
+      </div>
+
+      <div class="logo">
+        <div class="pickers">
+            <h5 style="margin-top:10px">CHOOSE DATE:</h5>
+            <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
+
+            <h5>CHOOSE TIME PERIOD:</h5>
+            <button v-on:click="pickAM"
+                    v-bind:class="{ active: isAMActive, yellow: isAMActive}"
+                     class="mini ui grey button">
+                     AM</button>
+            <button v-on:click="pickPM"
+                    v-bind:class="{ active: isPMActive, yellow: isPMActive }"
+                     class="mini ui grey button">
+                     PM</button>
+        </div>
+        <br>
+
+        <hr/>
+
+        <div class="logo">
+            <a class="agency-link" target="_blank" href="https://www.sfcta.org">
+              <img class="img-logo" src="/assets/SFCTA Logo dark-background.svg" width="80%">
+            </a>
+        </div>
+      </div>
+    </div>
+
+  <div id="helpbox" v-if="showHelp" class="ui segment">
+  <div v-cloak> <!-- hides everything until Vue finished loading -->
+        <h2 style="margin-bottom:0px;">Congestion in San Francisco</h2>
+        <hr style="margin-bottom:5px;margin-top:5px"/>
+        Use this tool to explore automobile Level-of-Service (LOS) on major San Francisco streets and highways.
+        The LOS are calculated using speed data from INRIX Roadway Analytics.
+        <ul>
+        <li><b>Auto Level-of-Service (LOS)</b> grades road segments by vehicle delay with "A" describing free flow,
+        and "F" describing bumper-to-bumper conditions.</li>
+        </ul>
+
+        <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
+        <hr style="margin-bottom:5px;margin-top:5px"/>
+        <ul>
+        <li>Move the date slider to map historic data.</li>
+        <li>Choose time period to display metric for AM or PM peak.</li>
+        <li>Click on a colored roadway segment on the map to see segment-specific trends.</li>
+        </ul>
+
+        <div style="margin-top:20px;">
+          <button v-on:click="clickToggleHelp" class="small ui right floated violet button">
+            &nbsp;OK&nbsp;
+          </button>
+
+          <!--button v-on:click="this.window.open('/assets/sfcta_cmp_data_2019.zip')"
+                  class="small ui right labeled icon floated yellow button"
+                  style="margin-right:5px">
+                  <i class="icon download"></i>
+                  Download data (.zip)
+          </button-->
+
+          <button v-on:click="this.window.open('https://www.sfcta.org/congestion','_blank')"
+                  class="small ui right floated basic violet button"
+                  style="margin-right:5px">
+                  Learn more&hellip;
+          </button>
+
+        </div>
+  </div>
+  </div>
+
+  <div id="sfmap"></div>
+
+</div>
