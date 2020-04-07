@@ -80,7 +80,12 @@ const BWIDTH_MAP = {
 };
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'hh': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
+  'avg_ride': {'pctdiff':[-7, -5, -3, -1, 1, 3, 5, 7]},
+  'fac_access': {'pctdiff':[-7, -5, -3, -1, 1, 3, 5, 7]},
+  'fac_regional_transfers': {'pctdiff':[-7, -5, -3, -1, 1, 3, 5, 7]},
+  'fac_service': {'pctdiff':[-7, -5, -3, -1, 1, 3, 5, 7]},
+  'fac_tnc': {'pctdiff':[-7, -5, -3, -1, 1, 3, 5, 7]},
+  'fac_unexplained': {'pctdiff':[-7, -5, -3, -1, 1, 3, 5, 7]},
 }
 
 const METRIC_UNITS = {'speed':'mph','tot':'jobs'};
@@ -343,13 +348,12 @@ async function drawMapFeatures(queryMapData=true) {
           }
           let custom_bps, brk_metric;
           brk_metric = CUSTOM_BP_DICT.hasOwnProperty(sel_metric)? sel_metric:'All';
-          if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)){
+          sel_colorvals = [];
+          if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric) && CUSTOM_BP_DICT[sel_metric][mode]){
             custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
-            sel_colorvals = [map_vals[0]];
-            for (var i = 0; i < custom_bps.length; i++) {
-              if (custom_bps[i]>map_vals[0] && custom_bps[i]<map_vals[map_vals.length-1]) sel_colorvals.push(custom_bps[i]);
-            }
-            sel_colorvals.push(map_vals[map_vals.length-1]);
+            (map_vals[0] > custom_bps[0])? sel_colorvals.push(custom_bps[0]-1): sel_colorvals.push(map_vals[0]);
+            sel_colorvals = sel_colorvals.concat(custom_bps);
+            (map_vals[map_vals.length-1] > custom_bps[custom_bps.length-1])? sel_colorvals.push(map_vals[map_vals.length-1]): sel_colorvals.push(custom_bps[custom_bps.length-1]+1);
           } else {
             let clusters = ss.ckmeans(map_vals, app.selected_breaks);
             sel_colorvals = [map_vals[0]];
@@ -362,12 +366,19 @@ async function drawMapFeatures(queryMapData=true) {
           bp = Array.from(sel_colorvals).sort((a, b) => a - b);
           app.bp0 = bp[0];
           app.bp5 = bp[bp.length-1];
-          if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)){
-            app.bp1 = custom_bps[0];
+          if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric) && CUSTOM_BP_DICT[sel_metric][mode]){
+            /*app.bp1 = custom_bps[0];
             app.bp2 = custom_bps[1];
             app.bp3 = custom_bps[2];
             app.bp4 = custom_bps[3];
-            if (custom_bps[0] < app.bp0) app.bp1 = app.bp0;
+            if (custom_bps[0] < app.bp0) app.bp1 = app.bp0;*/
+            app.custom_disable = true;
+            app.bp0 = 0;
+            app.bp1 = 0;
+            app.bp2 = 0;
+            app.bp3 = 0;
+            app.bp4 = 0;
+            app.bp5 = 1;
           } else {
             app.bp1 = bp[1];
             app.bp4 = bp[bp.length-2];
@@ -501,9 +512,9 @@ function styleByMetricColor(feat) {
               );
   if (!color) color = MISSING_COLOR;
   let fo = 0.6;
-  if (feat['metric']==0) {
+  /*if (feat['metric']==0) {
     fo = 0;
-  }
+  }*/
   if (!app.bwidth_check) {
     return { fillColor: color, opacity: 0.5, weight: 0, fillOpacity: fo };
   } else {
