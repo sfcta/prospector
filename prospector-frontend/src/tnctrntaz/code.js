@@ -242,6 +242,7 @@ async function drawMapFeatures(queryMapData=true) {
   } else {
     app.comp_check = true;
   }
+  updateColorScheme();
   prec = (FRAC_COLS.includes(sel_metric) ? 100 : 1);
   
   try {
@@ -379,7 +380,6 @@ async function drawMapFeatures(queryMapData=true) {
           }
           
           sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
-          updateColorScheme(sel_colorvals);
           sel_binsflag = true; 
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
           sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
@@ -398,7 +398,6 @@ async function drawMapFeatures(queryMapData=true) {
       } else {
         sel_colorvals = new Set([app.bp0, app.bp1, app.bp2, app.bp3, app.bp4, app.bp5]);
         sel_colorvals = Array.from(sel_colorvals).sort((a, b) => a - b);
-        updateColorScheme(sel_colorvals);
         sel_binsflag = true; 
         color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
         sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
@@ -485,11 +484,11 @@ async function drawMapFeatures(queryMapData=true) {
   }
 }
 
-function updateColorScheme(colorvals) {
-  if (colorvals[0] * colorvals[colorvals.length-1] >= 0) {
-    app.selected_colorscheme = COLORRAMP.SEQ;
-  } else {
+function updateColorScheme() {
+  if (app.comp_check) {
     app.selected_colorscheme = COLORRAMP.DIV;
+  } else {
+    app.selected_colorscheme = COLORRAMP.SEQ;
   } 
 }
 
