@@ -35,11 +35,24 @@ mymap.setView([37.76889, -122.440997], 13);
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
-const GEO_VIEW = 'taz_boundaries';
+
+/*const GEO_VIEW = 'taz_boundaries';
 const DATA_VIEW = 'tnctr_taz2';
+const GEOID_VAR = 'taz';
+const GEOQUERY_COLS = 'taz,geometry,nhood';
+const GEODESC_VAR = 'nhood';
+const GEODESC = 'NEIGHBORHOOD';
+*/
+
+const GEO_VIEW = 'csf_dist15';
+const DATA_VIEW = 'tnctr_dist15';
+const GEOID_VAR = 'dist15';
+const GEOQUERY_COLS = 'dist15,geometry,dist15name';
+const GEODESC_VAR = 'dist15name';
+const GEODESC = 'NAME';
 
 const GEOTYPE = 'Segment';
-const GEOID_VAR = 'taz';
+
 const SRC_VAR = 'source';
 const YR_VAR = 'year';
 const TOD_VAR = 'tod2';
@@ -98,7 +111,7 @@ async function initialPrep() {
 }
 
 async function fetchMapFeatures() {
-  const geo_url = API_SERVER + GEO_VIEW + '?select=taz,geometry,nhood';
+  const geo_url = API_SERVER + GEO_VIEW + '?select=' + GEOQUERY_COLS;
 
   try {
     let resp = await fetch(geo_url);
@@ -135,8 +148,8 @@ function getInfoHtml(geo) {
   if (geo.comp !== null) comp_val = (Math.round(geo.comp*100)/100).toLocaleString();
   let bwmetric_val = null;
   if (geo.bwmetric !== null) bwmetric_val = (Math.round(geo.bwmetric*100)/100).toLocaleString();
-  let retval = '<b>TAZ: </b>' + `${geo[GEOID_VAR]}<br/>` +
-                '<b>NEIGHBORHOOD: </b>' + `${geo.nhood}<br/><hr>`;
+  let retval = `<b>${GEOID_VAR.toUpperCase()}: </b>` + `${geo[GEOID_VAR]}<br/>` +
+                `<b>${GEODESC.toUpperCase()}: </b>` + `${geo[GEODESC_VAR]}<br/><hr>`;
   if (app.comp_check) {
     retval += `<b>${app.sliderValue[0]}</b> `+`<b>AVG_RIDE: </b>` + `${base_val}<br/>` +
               `<b>${app.sliderValue[1]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${comp_val}<br/>`;
