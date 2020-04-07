@@ -31,7 +31,7 @@ let getColorFromVal = maplib.getColorFromVal2;
 let getBWLegHTML = maplib.getBWLegHTML;
 let getQuantiles = maplib.getQuantiles;
 let mymap = maplib.sfmap;
-mymap.setView([37.76889, -122.440997], 13);
+mymap.setView([37.76889, -122.440997], 12);
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
@@ -62,7 +62,7 @@ const FRAC_COLS = ['freq_s','avg_ride','ontime5','ons','offs','shr_hh_0veh','cro
 const SCNYR_LIST = [2010,2015];
 
 const INT_COLS = [''];
-const DISCRETE_VAR_LIMIT = 10;
+const DISCRETE_VAR_LIMIT = 1;
 const MISSING_COLOR = '#ccd';
 const COLORRAMP = {SEQ: ['#ffffcc','#3f324f'],
                     DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
@@ -505,7 +505,7 @@ function styleByMetricColor(feat) {
     fo = 0;
   }
   if (!app.bwidth_check) {
-    return { fillColor: color, opacity: 0.5, weight: 0.5, fillOpacity: fo };
+    return { fillColor: color, opacity: 0.5, weight: 0, fillOpacity: fo };
   } else {
     return { color: color, weight: feat['bwmetric_scaled'], opacity: 1.0 };
   }
@@ -804,7 +804,7 @@ let app = new Vue({
     isPanelHidden: false,
     isUpdActive: false,
     comp_check: true,
-    pct_check: false,
+    pct_check: true,
     bwidth_check: false,
     custom_check: true,
     custom_disable: false,
