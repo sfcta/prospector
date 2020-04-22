@@ -40,7 +40,7 @@ const VIZ_LIST = ['ASPD'];
 const VIZ_INFO = {
   ASPD: {
     TXT: 'Auto Level-of-Service (LOS)',
-    VIEW: 'inrix_mar20',
+    VIEW: 'inrix_rt_daily',
     METRIC: 'los_hcm85',
     METRIC_DESC: 'Level of Service',
     COLOR_BY_BINS: false,
@@ -58,7 +58,7 @@ let init_selectedViz = VIZ_LIST[0];
 let data_view = VIZ_INFO[init_selectedViz]['VIEW'];
 let selviz_metric = VIZ_INFO[init_selectedViz]['METRIC'];
 let selPeriod = 'AM';
-let aggdata_view = 'inrix_mar20_agg';
+let aggdata_view = 'inrix_rt_daily_agg';
 let aggdata_label = 'All Segments Combined';
 let selGeoId;
 
