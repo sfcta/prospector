@@ -33,7 +33,7 @@ let getQuantiles = maplib.getQuantiles;
 
 let baseLayer = maplib.baseLayer;
 let mymap = maplib.sfmap;
-mymap.setView([37.694204, -122.385188], 12);
+mymap.setView([37.76889, -122.440997], 12);
 mymap.removeLayer(baseLayer);
 let url = 'https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
 let token = 'pk.eyJ1Ijoic2ZjdGEiLCJhIjoiY2ozdXBhNm1mMDFkaTJ3dGRmZHFqanRuOCJ9.KDmACTJBGNA6l0CyPi1Luw';
@@ -883,7 +883,7 @@ let app = new Vue({
     {text: 'Population', value: 'pop2015'},
     ],
     
-    selected_mode: 'DA',
+    selected_mode: 'ALL',
     mode_options: [
     {text: 'ALL', value: 'ALL'},
     {text: 'DA', value: 'DA'},
