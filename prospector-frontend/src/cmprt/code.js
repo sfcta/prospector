@@ -442,6 +442,7 @@ function buildChartHtmlFromCmpData(json = null) {
       ykeys: ['period'],
       ymax: scale,
       parseTime: false,
+      pointSize: 2,
     });
   } else {
     let ykey_tmp, lab_tmp;
@@ -460,6 +461,7 @@ function buildChartHtmlFromCmpData(json = null) {
       ykeys: ykey_tmp,
       ymax: 70,
       parseTime: false,
+      pointSize: 2,
     });   
   }
 }
