@@ -28,19 +28,19 @@ import Cookies from 'js-cookie';
 
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
-let getLegHTML = maplib.getLegHTML;
-let getColorFromVal = maplib.getColorFromVal;
+let getLegHTML = maplib.getLegHTML2;
+let getColorFromVal = maplib.getColorFromVal2;
 let mymap = maplib.sfmap;
 mymap.setView([37.76889, -122.440997], 13);
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'cmp_segments_master';
-const VIZ_LIST = ['ASPD'];
+const VIZ_LIST = ['ASPD','SPDIFFPCT'];
 const VIZ_INFO = {
   ASPD: {
     TXT: 'Auto Level-of-Service (LOS)',
-    VIEW: 'inrix_rt_daily',
+    VIEW: 'inrix_rt_weekly',
     METRIC: 'los_hcm85',
     METRIC_DESC: 'Level of Service',
     COLOR_BY_BINS: false,
@@ -50,6 +50,30 @@ const VIZ_INFO = {
     CHART_PREC: 1,
     POST_UNITS: '',
   },
+  SPDIFFPCT: {
+    TXT: 'Speed Change Relative to Pre-COVID',
+    VIEW: 'inrix_rt_weekly',
+    METRIC: 'pct_diff',
+    METRIC_DESC: 'Pct Speed Change',
+    COLOR_BY_BINS: true,
+    COLORVALS: [-50, 0, 10, 20, 30, 500],
+    COLORS: ['#3f324f', '#963d8e', '#d55175', '#f2ad86', '#ffffcc'],
+    CHARTINFO: 'AUTO SPEED TREND (MPH):',
+    CHART_PREC: 1,
+    POST_UNITS: '%',
+  },
+  SPDIFF: {
+    TXT: 'Absolute Speed Change from Pre-COVID',
+    VIEW: 'inrix_rt_weekly',
+    METRIC: 'spd_diff',
+    METRIC_DESC: 'Speed Change',
+    COLOR_BY_BINS: true,
+    COLORVALS: [-50, 0, 2, 4, 6, 8, 500],
+    COLORS: ['#c00', '#f60', '#f90', '#ff3', '#9f0', '#060'],
+    CHARTINFO: 'AUTO SPEED TREND (MPH):',
+    CHART_PREC: 1,
+    POST_UNITS: ' mph',
+  },
 };
 const MISSING_COLOR = '#ccd';
 
@@ -58,7 +82,8 @@ let init_selectedViz = VIZ_LIST[0];
 let data_view = VIZ_INFO[init_selectedViz]['VIEW'];
 let selviz_metric = VIZ_INFO[init_selectedViz]['METRIC'];
 let selPeriod = 'AM';
-let aggdata_view = 'inrix_rt_daily_agg';
+let aggdata_view = 'inrix_rt_weekly_agg';
+let diffdata_view = 'inrix_rt_weeklydiff';
 let aggdata_label = 'All Segments Combined';
 let selGeoId;
 
@@ -70,6 +95,7 @@ let selectedSegment, prevselectedSegment;
 let _segmentJson;
 let _allCmpData;
 let _aggregateData;
+let _diffData;
 
 async function initialPrep() {
 
@@ -87,8 +113,11 @@ async function initialPrep() {
 
   console.log('5...');
   await updateSliderData();
+  
+  console.log('6...');
+  _diffData = await fetchDiffData(diffdata_view);
 
-  console.log('6 !!!');
+  console.log('7 !!!');
 }
 
 async function fetchCmpSegments() {
@@ -147,6 +176,19 @@ async function fetchAggregateData(aggdat_view) {
   }
 }
 
+async function fetchDiffData(diffdat_view) {
+
+  const url = API_SERVER + diffdat_view;
+
+  try {
+    let resp = await fetch(url);
+    return await resp.json();
+    
+  } catch(error) {
+    console.log('diff data error: ' + error);
+  }
+}
+
 async function parseAllAggregateData(buildAggData, jsonData, viz) {
   buildAggData[viz] = {};
 
@@ -201,15 +243,29 @@ infoPanel.onAdd = function(map) {
   return this._div;
 };
 
+function getInfoHtml(geo) {
+  let retval = `<b>${geo.cmp_name} ${geo.direction}-bound</b><br/>` +
+                `${geo.cmp_from} to ${geo.cmp_to}<br/><hr>`;
+  if (app.selectedViz != 'ASPD') {
+    let base_val = null;
+    if (geo.base_speed !== null) base_val = (Math.round(geo.base_speed*100)/100).toLocaleString();
+    let comp_val = null;
+    if (geo.avg_speed !== null) comp_val = (Math.round(geo.avg_speed*100)/100).toLocaleString();
+    let metric_val = 0;
+    if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
+    
+    retval += '<b> Base Speed (pre-covid): </b>' + `${base_val}` + ' mph<br/>' +
+              '<b> Current Speed: </b>' + `${comp_val}` + ' mph<br/>' +
+              `<b> ${VIZ_INFO[app.selectedViz]['METRIC_DESC']}: </b>` + `${metric_val}` + VIZ_INFO[app.selectedViz]['POST_UNITS'];
+  }
+
+  return retval;
+}
+
 infoPanel.update = function(geo) {
   infoPanel._div.innerHTML = '';
   infoPanel._div.className = 'info-panel';
-
-  if (geo) {
-    this._div.innerHTML =
-      `<b>${geo.cmp_name} ${geo.direction}-bound</b><br/>` +
-      `${geo.cmp_from} to ${geo.cmp_to}`;
-  }
+  if (geo) this._div.innerHTML = getInfoHtml(geo);
 
   infoPanelTimeout = setTimeout(function() {
     // use CSS to hide the info-panel
@@ -226,9 +282,15 @@ function drawMapSegments() {
   let cleanSegments = _segmentJson.slice();
   
   let relevantRows;
-  relevantRows = _allCmpData.filter(
-    row => row.date==app.sliderValue && row.period===selPeriod
-  );
+  if (app.selectedViz == 'ASPD') {
+    app.diffFlag = false;
+    relevantRows = _allCmpData.filter(
+      row => row.date==app.sliderValue && row.period===selPeriod
+    );
+  } else {
+    app.diffFlag = true;
+    relevantRows = _diffData.filter(row => row.period===selPeriod);
+  }
 
   let lookup = {};
   for (let row of relevantRows) {
@@ -239,8 +301,16 @@ function drawMapSegments() {
   for (let segment of cleanSegments) {
     if (lookup[segment.cmp_segid]) {
       segment['metric'] = lookup[segment.cmp_segid][selviz_metric];
+      if (app.selectedViz != 'ASPD') {
+        segment['base_speed'] = lookup[segment.cmp_segid]['base_speed'];
+        segment['avg_speed'] = lookup[segment.cmp_segid]['avg_speed'];
+      }
     } else {
       segment['metric'] = null;
+      if (app.selectedViz != 'ASPD') {
+        segment['base_speed'] = null;
+        segment['avg_speed'] = null;
+      }
     }
   }
 
@@ -320,6 +390,7 @@ function highlightSelectedSegment() {
       if (e.feature.cmp_segid === selGeoId) {
         e.setStyle(styles.popup);
         selectedSegment = e;
+        popSelSegment.setContent(getInfoHtml(e.feature));
         return;
       }
     } catch(error) {}
@@ -356,7 +427,7 @@ function showSegmentDetails(geo, latlng) {
 
   popSelSegment = L.popup()
     .setLatLng(latlng)
-    .setContent(popupText)
+    .setContent(infoPanel._div.innerHTML)
     .addTo(mymap);
 
   // Revert to overall chart when no segment selected
@@ -375,7 +446,8 @@ function showVizChartForSelectedSegment() {
 
   let metric_col = selviz_metric;
   // show actual speeds in chart, not A-F LOS categories
-  if (selviz_metric == 'los_hcm85') metric_col = 'avg_speed';
+  //if ((selviz_metric == 'los_hcm85') || (selviz_metric == 'pct_diff')) metric_col = 'avg_speed';
+  metric_col = 'avg_speed';
 
   if (_selectedGeo) {
     let segmentData = _allCmpData
@@ -396,8 +468,9 @@ function buildChartHtmlFromCmpData(json = null) {
     let maxHeight = 0;
 
     let metric_col = selviz_metric;
-    if (selviz_metric == VIZ_INFO['ASPD']['METRIC'])
-      metric_col = 'avg_speed';
+    metric_col = 'avg_speed';
+    /*if ((selviz_metric == VIZ_INFO['ASPD']['METRIC']) || (selviz_metric == VIZ_INFO['SPDIFF']['METRIC']))
+      metric_col = 'avg_speed';*/
     
     for (let entry of json) {
       let val = Number(entry[metric_col]).toFixed(
@@ -424,11 +497,12 @@ function buildChartHtmlFromCmpData(json = null) {
     // scale ymax to either 30 or 70:
     maxHeight = maxHeight <= 30 ? 30 : 70;
 
-    // use maxHeight for ASPD and TSPD; use auto for other metrics
+    // use maxHeight for ASPD and SPDIFF; use auto for other metrics
     let scale = 'auto';
-    if (app.selectedViz == 'ASPD' || app.selectedViz == 'TSPD') {
+    /*if (app.selectedViz == 'ASPD' || app.selectedViz == 'SPDIFF') {
       scale = maxHeight;
-    }
+    }*/
+    scale = maxHeight;
 
     new Morris.Line({
       data: data,
@@ -449,13 +523,13 @@ function buildChartHtmlFromCmpData(json = null) {
     ykey_tmp = ['art', 'fwy'];
     lab_tmp = ['Arterial', 'Freeway'];
     new Morris.Line({
-      data: _aggregateData[app.selectedViz][selPeriod],
+      data: _aggregateData['ASPD'][selPeriod],
       element: 'longchart',
       gridTextColor: '#aaa',
       hideHover: true,
       labels: lab_tmp,
       lineColors: ['#f66', '#99f'],
-      postUnits: VIZ_INFO[app.selectedViz]['POST_UNITS'],
+      postUnits: VIZ_INFO['ASPD']['POST_UNITS'],
       xkey: 'date',
       xLabelAngle: 45,
       ykeys: ykey_tmp,
@@ -493,8 +567,8 @@ function sliderChanged(thing) {
 
 function clickViz(chosenviz) {
   app.selectedViz = chosenviz;
-  app.chartTitle = VIZ_INFO[chosenviz]['CHARTINFO'];
 
+  app.chartTitle = VIZ_INFO[chosenviz]['CHARTINFO'];
   data_view = VIZ_INFO[chosenviz]['VIEW'];
   selviz_metric = VIZ_INFO[chosenviz]['METRIC'];
 
@@ -582,6 +656,7 @@ let app = new Vue({
     timeSlider: timeSlider,
     vizlist: VIZ_LIST,
     vizinfo: VIZ_INFO,
+    diffFlag: false,
   },
   watch: {
     sliderValue: sliderChanged,

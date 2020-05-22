@@ -56,7 +56,7 @@
       <div class="logo">
         <div class="pickers">
             <h5 style="margin-top:10px">CHOOSE DATE:</h5>
-            <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
+            <vue-slider v-bind="timeSlider" v-model="sliderValue" :disabled="diffFlag"></vue-slider>
 
             <h5>CHOOSE TIME PERIOD:</h5>
             <button v-on:click="pickAM"
@@ -85,10 +85,14 @@
         <h2 style="margin-bottom:0px;">Congestion in San Francisco</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
         Use this tool to explore automobile Level-of-Service (LOS) on major San Francisco streets and highways.
-        The LOS are calculated using speed data from INRIX Roadway Analytics.
+        The LOS are calculated using speed data from INRIX Roadway Analytics. Speeds are weekly averages calculated using
+        data from Tuesday through Thursday of each week.
         <ul>
         <li><b>Auto Level-of-Service (LOS)</b> grades road segments by vehicle delay with "A" describing free flow,
         and "F" describing bumper-to-bumper conditions.</li>
+        <li><b>Speed Change Relative to Pre-COVID</b> shows the percent difference between latest available average speed
+        of a segment and the speed under pre-COVID conditions (from the week of 3rd March 2020). Lower and negative values imply that 
+        speeds have droppped back to pre-COVID levels.</li>
         </ul>
 
         <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
