@@ -13,7 +13,7 @@
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
       <div id="preheader">
         <hr/>
-        <h3 class="apptitle">SF CONGESTION TRACKER</h3>
+        <h3 class="apptitle">COVID-ERA CONGESTION TRACKER</h3>
         <div id="helpbar">
             <button class="ui mini right labeled icon violet button"
                     v-on:click="clickToggleHelp">
@@ -55,7 +55,7 @@
 
       <div class="logo">
         <div class="pickers">
-            <h5 style="margin-top:10px">CHOOSE DATE:</h5>
+            <h5 style="margin-top:10px">CHOOSE WEEK:</h5>
             <vue-slider v-bind="timeSlider" v-model="sliderValue" :disabled="diffFlag"></vue-slider>
 
             <h5>CHOOSE TIME PERIOD:</h5>
@@ -82,9 +82,9 @@
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
   <div v-cloak> <!-- hides everything until Vue finished loading -->
-        <h2 style="margin-bottom:0px;">Tracking Congestion in San Francisco</h2>
+        <h2 style="margin-bottom:0px;">COVID-Era Congestion Tracker</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
-        Use this tool to track congestion on on major San Francisco streets and highways. 
+        Explore how congestion in San Francisco has changed since the March 2020 shelter-in-place order.
         Explore automobile (1) Level-of-Service (LOS) and (2) speed changes relative to pre-COVID conditions on key segments in our transportation network.</br>
         The LOS are calculated using speed data from INRIX Roadway Analytics. Speeds are weekly averages calculated using
         data from Tuesday through Thursday of each week. The data are updated every one to two weeks.
@@ -100,8 +100,8 @@
         <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
         <ul>
-        <li>Move the date slider to map historic LOS data (not applicable to Speed Change Relative to pre-COVID view).</li>
-        <li>Choose time period to display metric for AM or PM peak.</li>
+        <li>Move the week slider to map historic LOS data (not applicable for <b>Speed Change Relative to Pre-COVID</b> view).</li>
+        <li>Choose time period to update map for AM (7a-9a) or PM (4:30p-6:30p) peak.</li>
         <li>Click on a roadway segment on the map to see segment-specific trends.</li>
         </ul>
 
