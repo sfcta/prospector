@@ -45,24 +45,15 @@ module.exports = {
      },
 
      module: {
-       loaders: [{
+       rules: [{
          loader: 'babel-loader',
          exclude: /node_modules/,
          query: {
-           plugins: ['transform-runtime'],
+           plugins: ["@babel/plugin-transform-runtime"],
            presets: [
-             ['env', {
-               "targets": {
-                 "browsers": [
-                    "Explorer 11",
-                    "Safari >= 8",
-                    "last 3 Chrome versions",
-                    "last 3 Firefox versions",
-                    "last 3 Edge versions"
-                  ]
-               },
-               "useBuiltIns": true
-             }]
+			["@babel/preset-env", {
+				"useBuiltIns": false,
+			}]
            ]
          }
        }]
