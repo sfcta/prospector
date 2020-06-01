@@ -1028,40 +1028,19 @@ async function fetchAddLayers() {
 let timeSlider = {
           data: [0],
           sliderValue: 0,
-          disabled: false,
           width: '340px',
           height: 3,
-          direction: 'horizontal',
           dotSize: 16,
-          eventType: 'auto',
-          show: true,
-          realTime: false,
           tooltip: 'always',
           clickable: true,
-          tooltipDir: 'bottom',
-          piecewise: true,
-          piecewiseLabel: false,
+          tooltipPlacement: 'bottom',
+          marks: true,
+          hideLabel: true,
           tooltipStyle: { backgroundColor: '#13ae38', borderColor: '#13ae38' },
+		  dotStyle: {border: '2px solid #13ae38'},
           lazy: false,
-          reverse: false,
           speed: .25,
-          piecewiseStyle: {
-            "backgroundColor": "#ccc",
-            "visibility": "visible",
-            "width": "6px",
-            "height": "6px"
-          },
-          piecewiseActiveStyle: {
-            "backgroundColor": "#ccc",
-            "visibility": "visible",
-            "width": "6px",
-            "height": "6px"
-          },
-          labelStyle: {  "color": "#ccc"},
-          labelActiveStyle: {  "color": "#ccc"},
-          processStyle: {
-            "backgroundColor": "#ffc"
-          },
+          process: false,
           style: {"marginTop":"0px","marginBottom":"40px"},
 };
 
