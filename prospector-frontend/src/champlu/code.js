@@ -655,14 +655,16 @@ let scnSlider = {
   style: {marginTop: '10px'},
   processDragable: true,
   eventType: 'auto',
-  piecewise: true,
+  marks: true,
   piecewiseLabel: true,
   tooltip: 'always',
-  tooltipDir: 'bottom',
+  tooltipPlacement: 'bottom',
   tooltipStyle: { backgroundColor: '#eaae00', borderColor: '#eaae00', marginLeft:'5px'},
   processStyle: { backgroundColor: "#eaae00"},
-  labelStyle: {color: "#ccc", marginLeft:'5px', marginTop:'5px'},
-  piecewiseStyle: {backgroundColor: '#ccc',width: '8px',height: '8px',visibility: 'visible'},
+  labelStyle: {color: "#ccc", marginLeft:'5px'},
+  //stepStyle: {boxShadow: '0 0 0 2px #eaae00'},
+  stepActiveStyle: {boxShadow: '0 0 0 2px #eaae00'},
+  dotStyle: {border: '2px solid #eaae00'},
 };
 
 function bp1Changed(thing) {
