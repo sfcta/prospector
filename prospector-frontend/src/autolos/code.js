@@ -277,26 +277,15 @@ let timeSlider = {
           sliderValue: 0,
 					width: 'auto',
 					height: 6,
-					direction: 'horizontal',
 					dotSize: 16,
 					eventType: 'auto',
-					disabled: false,
-					show: true,
-					realTime: false,
 					tooltip: 'always',
 					clickable: true,
-					tooltipDir: 'bottom',
-					piecewise: true,
-          piecewiseLabel: false,
+					tooltipPlacement: 'bottom',
+					marks: true,
+					hideLabel: true,
 					lazy: false,
-					reverse: false,
-          labelActiveStyle: {  "color": "#fff"},
-          piecewiseStyle: {
-            "backgroundColor": "#888",
-            "visibility": "visible",
-            "width": "14px",
-            "height": "14px"
-          },
+					process: false,
 };
 // ------
 
