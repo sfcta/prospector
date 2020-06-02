@@ -646,42 +646,22 @@ function pickDropoff(thing) {
 let timeSlider = {
           min: 0,
           max: 24,
-          disabled: true,
 					width: 'auto',
 					height: 3,
-					direction: 'horizontal',
 					dotSize: 16,
-					eventType: 'auto',
-					show: true,
-					realTime: false,
 					tooltip: 'always',
 					clickable: true,
-					tooltipDir: 'bottom',
-					piecewise: true,
-          piecewiseLabel: false,
+					tooltipPlacement: 'bottom',
+					marks: true,
+					hideLabel: true,
 					lazy: false,
-					reverse: false,
           speed: 0.25,
-          piecewiseStyle: {
-            "backgroundColor": "#ccc",
-            "visibility": "visible",
-            "width": "6px",
-            "height": "6px"
-          },
-          piecewiseActiveStyle: {
-            "backgroundColor": "#ccc",
-            "visibility": "visible",
-            "width": "6px",
-            "height": "6px"
-          },
-          labelStyle: {  "color": "#ccc"},
-          labelActiveStyle: {  "color": "#ccc"},
-          processStyle: {
-            "backgroundColor": "#ffc"
-          },
-          formatter: function(index) {
-            return (index==0 ? 'All Day >>' : hourLabels[index-1]);
-          },
+          tooltipStyle: {  
+			"backgroundColor": "#3498db",
+			"borderColor": "#3498db"
+		  },
+          process: false,
+          tooltipFormatter: idx => idx==0? 'All Day >>' : hourLabels[idx-1],
           style: {"marginTop":"-25px","marginBottom":"30px","marginLeft":"46px","marginRight":"18px"},
 };
 
