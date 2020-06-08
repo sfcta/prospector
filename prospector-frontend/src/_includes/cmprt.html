@@ -56,7 +56,7 @@
       <div class="logo">
         <div class="pickers">
             <h5 style="margin-top:10px">CHOOSE WEEK:</h5>
-            <vue-slider v-bind="timeSlider" v-model="sliderValue" :disabled="diffFlag"></vue-slider>
+            <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
 
             <h5>CHOOSE TIME PERIOD:</h5>
             <button v-on:click="pickAM"
@@ -92,7 +92,7 @@
         <ul>
         <li><b>Auto Level-of-Service (LOS)</b> grades road segments by vehicle delay with "A" describing free flow,
         and "F" describing bumper-to-bumper conditions.</li>
-        <li><b>Speed Change Relative to Pre-COVID</b> shows the percent difference between latest available average speed
+        <li><b>Speed Change Relative to Pre-COVID</b> shows the percent difference between average speed
         of a segment and the speed under pre-COVID conditions (from the week of 3rd March 2020). Lower and negative values imply that 
         speeds have droppped back to pre-COVID levels.</li>
         </ul>
@@ -100,7 +100,7 @@
         <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
         <ul>
-        <li>Move the week slider to map historic LOS data (not applicable for <b>Speed Change Relative to Pre-COVID</b> view).</li>
+        <li>Move the week slider to update map with data from chosen week.</li>
         <li>Choose time period to update map for AM (7a-9a) or PM (4:30p-6:30p) peak.</li>
         <li>Click on a roadway segment on the map to see segment-specific trends.</li>
         </ul>

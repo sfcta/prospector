@@ -83,7 +83,7 @@ let data_view = VIZ_INFO[init_selectedViz]['VIEW'];
 let selviz_metric = VIZ_INFO[init_selectedViz]['METRIC'];
 let selPeriod = 'AM';
 let aggdata_view = 'inrix_rt_weekly_agg';
-let diffdata_view = 'inrix_rt_weeklydiff';
+let diffdata_view = 'inrix_rt_weeklydiff_test';
 let aggdata_label = 'All Segments Combined';
 let selGeoId;
 
@@ -255,7 +255,7 @@ function getInfoHtml(geo) {
     if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
     
     retval += '<b> Base Speed (pre-covid): </b>' + `${base_val}` + ' mph<br/>' +
-              '<b> Current Speed: </b>' + `${comp_val}` + ' mph<br/>' +
+              '<b> Average Speed (week of ' + `${app.sliderValue.slice(5)}` +  '): </b>' + `${comp_val}` + ' mph<br/>' +
               `<b> ${VIZ_INFO[app.selectedViz]['METRIC_DESC']}: </b>` + `${metric_val}` + VIZ_INFO[app.selectedViz]['POST_UNITS'];
   }
 
@@ -283,13 +283,11 @@ function drawMapSegments() {
   
   let relevantRows;
   if (app.selectedViz == 'ASPD') {
-    app.diffFlag = false;
     relevantRows = _allCmpData.filter(
       row => row.date==app.sliderValue && row.period===selPeriod
     );
   } else {
-    app.diffFlag = true;
-    relevantRows = _diffData.filter(row => row.period===selPeriod);
+    relevantRows = _diffData.filter(row => row.date==app.sliderValue && row.period===selPeriod);
   }
 
   let lookup = {};
@@ -637,7 +635,6 @@ let app = new Vue({
     timeSlider: timeSlider,
     vizlist: VIZ_LIST,
     vizinfo: VIZ_INFO,
-    diffFlag: false,
   },
   watch: {
     sliderValue: sliderChanged,
