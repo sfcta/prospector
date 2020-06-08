@@ -83,7 +83,7 @@ let data_view = VIZ_INFO[init_selectedViz]['VIEW'];
 let selviz_metric = VIZ_INFO[init_selectedViz]['METRIC'];
 let selPeriod = 'AM';
 let aggdata_view = 'inrix_rt_weekly_agg';
-let diffdata_view = 'inrix_rt_weeklydiff_test';
+let diffdata_view = 'inrix_rt_weeklydiff';
 let aggdata_label = 'All Segments Combined';
 let selGeoId;
 
