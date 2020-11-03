@@ -57,16 +57,17 @@
         <div class="pickers">
             <h5 style="margin-top:10px">CHOOSE WEEK:</h5>
             <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
-
-            <h5>CHOOSE TIME PERIOD:</h5>
-            <button v-on:click="pickAM"
-                    v-bind:class="{ active: isAMActive, yellow: isAMActive}"
-                     class="mini ui grey button">
-                     AM</button>
-            <button v-on:click="pickPM"
-                    v-bind:class="{ active: isPMActive, yellow: isPMActive }"
-                     class="mini ui grey button">
-                     PM</button>
+			<div v-if="!isTPHidden">
+				<h5>CHOOSE TIME PERIOD:</h5>
+				<button v-on:click="pickAM"
+						v-bind:class="{ active: isAMActive, yellow: isAMActive}"
+						 class="mini ui grey button">
+						 AM</button>
+				<button v-on:click="pickPM"
+						v-bind:class="{ active: isPMActive, yellow: isPMActive }"
+						 class="mini ui grey button">
+						 PM</button>
+			</div>
         </div>
         <br>
 

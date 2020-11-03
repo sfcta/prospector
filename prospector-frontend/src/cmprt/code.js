@@ -36,7 +36,7 @@ mymap.setView([37.76889, -122.440997], 13);
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'cmp_segments_master';
-const VIZ_LIST = ['ASPD','SPDIFFPCT'];
+const VIZ_LIST = ['ASPD','SPDIFFPCT','VMT'];
 const VIZ_INFO = {
   ASPD: {
     TXT: 'Auto Level-of-Service (LOS)',
@@ -73,6 +73,18 @@ const VIZ_INFO = {
     CHARTINFO: 'AUTO SPEED TREND (MPH):',
     CHART_PREC: 1,
     POST_UNITS: ' mph',
+  },
+  VMT: {
+    TXT: 'Vehicle Miles Travelled (VMT)',
+    VIEW: 'inrix_rt_weekly',
+    METRIC: 'imp_vol',
+    METRIC_DESC: 'VMT per mile',
+    COLOR_BY_BINS: true,
+    COLORVALS: [0, 10000, 20000, 30000, 40000, 100000],
+    COLORS: ['#ffffcc', '#f2ad86', '#d55175', '#963d8e', '#3f324f'],
+    CHARTINFO: 'DAILY VMT:',
+    CHART_PREC: 1,
+    POST_UNITS: '',
   },
 };
 const MISSING_COLOR = '#ccd';
@@ -143,7 +155,7 @@ async function fetchCmpSegments() {
 async function fetchAllCmpSegmentData(dat_view) {
   //FIXME this should be a map()
   let params =
-    'select=cmp_segid,year,date,period,los_hcm85,avg_speed';
+    'select=cmp_segid,year,date,period,los_hcm85,avg_speed,imp_vol';
 
   let data_url = API_SERVER + dat_view + '?' + params;
 
@@ -210,28 +222,52 @@ async function parseAllAggregateData(buildAggData, jsonData, viz) {
       byYearPM[entry.date][entry.fac_typ] = val;
     }
   }
+  
+  let data;
+  if (viz=='VMT') {
+	// Push AM data
+	data = [];
+	for (let date of Object.keys(byYearAM).sort()) {
+		data.push({
+			date: date,
+			Citywide: byYearAM[date]['Citywide'],
+		});
+	}
+	buildAggData[viz]['AM'] = data;
 
-  // Push AM data
-  let data = [];
-  for (let date of Object.keys(byYearAM).sort()) {
-    data.push({
-      date: date,
-      art: byYearAM[date]['Arterial'],
-      fwy: byYearAM[date]['Freeway'],
-    });
-  }
-  buildAggData[viz]['AM'] = data;
+	// Push PM data
+	data = [];
+	for (let date of Object.keys(byYearPM).sort()) {
+		data.push({
+			date: date,
+			Citywide: byYearPM[date]['Citywide'],
+		});
+	}
+	buildAggData[viz]['PM'] = data;	  
+  } else {
+	// Push AM data
+	data = [];
+	for (let date of Object.keys(byYearAM).sort()) {
+		data.push({
+			date: date,
+			art: byYearAM[date]['Arterial'],
+			fwy: byYearAM[date]['Freeway'],
+		});
+	}
+	buildAggData[viz]['AM'] = data;
 
-  // Push PM data
-  data = [];
-  for (let date of Object.keys(byYearPM).sort()) {
-    data.push({
-      date: date,
-      art: byYearPM[date]['Arterial'],
-      fwy: byYearPM[date]['Freeway'],
-    });
+	// Push PM data
+	data = [];
+	for (let date of Object.keys(byYearPM).sort()) {
+		data.push({
+			date: date,
+			art: byYearPM[date]['Arterial'],
+			fwy: byYearPM[date]['Freeway'],
+		});
+	}
+	buildAggData[viz]['PM'] = data;
   }
-  buildAggData[viz]['PM'] = data;
+
 }
 
 // hover panel -------------------
@@ -246,7 +282,14 @@ infoPanel.onAdd = function(map) {
 function getInfoHtml(geo) {
   let retval = `<b>${geo.cmp_name} ${geo.direction}-bound</b><br/>` +
                 `${geo.cmp_from} to ${geo.cmp_to}<br/><hr>`;
-  if (app.selectedViz != 'ASPD') {
+  
+  if (app.selectedViz == 'VMT') {
+    let metric_val = 0;
+    if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
+	retval += `<b> ${VIZ_INFO[app.selectedViz]['METRIC_DESC']}: </b>` + `${metric_val}` + VIZ_INFO[app.selectedViz]['POST_UNITS'];
+  }
+  
+  if (app.selectedViz != 'ASPD' && app.selectedViz != 'VMT') {
     let base_val = null;
     if (geo.base_speed !== null) base_val = (Math.round(geo.base_speed*100)/100).toLocaleString();
     let comp_val = null;
@@ -282,7 +325,7 @@ function drawMapSegments() {
   let cleanSegments = _segmentJson.slice();
   
   let relevantRows;
-  if (app.selectedViz == 'ASPD') {
+  if (app.selectedViz == 'ASPD' || app.selectedViz == 'VMT') {
     relevantRows = _allCmpData.filter(
       row => row.date==app.sliderValue && row.period===selPeriod
     );
@@ -408,9 +451,6 @@ function clickedOnFeature(e) {
   }
   selectedSegment = e.target;
 
-  let tmptxt = `${geo.cmp_name} ${geo.direction}-bound`;
-  app.chartSubtitle = `${tmptxt} [${geo.cmp_from} to ${geo.cmp_to}]`;
-
   showSegmentDetails(geo, e.latlng);
 }
 
@@ -431,7 +471,7 @@ function showSegmentDetails(geo, latlng) {
   // Revert to overall chart when no segment selected
   popSelSegment.on('remove', function(e) {
     geoLayer.resetStyle(selectedSegment);
-    app.chartSubtitle = aggdata_label;
+    app.chartSubtitle = app.selectedViz == 'VMT' ? 'Citywide (millions)' : aggdata_label;
     prevselectedSegment = selectedSegment = selGeoId = _selectedGeo = null;
     buildChartHtmlFromCmpData();
   });
@@ -441,19 +481,21 @@ function showSegmentDetails(geo, latlng) {
 
 // Show chart (filter json results for just the selected segment)
 function showVizChartForSelectedSegment() {
-
   let metric_col = selviz_metric;
   // show actual speeds in chart, not A-F LOS categories
-  //if ((selviz_metric == 'los_hcm85') || (selviz_metric == 'pct_diff')) metric_col = 'avg_speed';
-  metric_col = 'avg_speed';
+  if ((selviz_metric == 'los_hcm85') || (selviz_metric == 'pct_diff')) metric_col = 'avg_speed';
 
   if (_selectedGeo) {
     let segmentData = _allCmpData
       .filter(row => row.cmp_segid == _selectedGeo.cmp_segid)
       .filter(row => row[metric_col] != null);
     buildChartHtmlFromCmpData(segmentData);
+	
+	let tmptxt = `${_selectedGeo.cmp_name} ${_selectedGeo.direction}-bound`;
+	app.chartSubtitle = `${tmptxt} [${_selectedGeo.cmp_from} to ${_selectedGeo.cmp_to}]`;
   } else {
     buildChartHtmlFromCmpData();
+	app.chartSubtitle = app.selectedViz == 'VMT' ? 'Citywide (millions)' : aggdata_label;
   }
 }
 
@@ -466,9 +508,8 @@ function buildChartHtmlFromCmpData(json = null) {
     let maxHeight = 0;
 
     let metric_col = selviz_metric;
-    metric_col = 'avg_speed';
-    /*if ((selviz_metric == VIZ_INFO['ASPD']['METRIC']) || (selviz_metric == VIZ_INFO['SPDIFF']['METRIC']))
-      metric_col = 'avg_speed';*/
+    if ((selviz_metric == VIZ_INFO['ASPD']['METRIC']) || (selviz_metric == VIZ_INFO['SPDIFFPCT']['METRIC']) || (selviz_metric == VIZ_INFO['SPDIFF']['METRIC']))
+      metric_col = 'avg_speed';
     
     for (let entry of json) {
       let val = Number(entry[metric_col]).toFixed(
@@ -493,7 +534,7 @@ function buildChartHtmlFromCmpData(json = null) {
     }    
 
     // scale ymax to either 30 or 70:
-    maxHeight = maxHeight <= 30 ? 30 : 70;
+    maxHeight = maxHeight <= 30 ? 30 : maxHeight <= 70 ? 70 : Math.round(maxHeight/100)*100;
 
     // use maxHeight for ASPD and SPDIFF; use auto for other metrics
     let scale = 'auto';
@@ -501,13 +542,20 @@ function buildChartHtmlFromCmpData(json = null) {
       scale = maxHeight;
     }*/
     scale = maxHeight;
-
+	
+	let lab_tmp, col_tmp;
+	lab_tmp = selPeriod;
+	col_tmp = app.isAMActive ? '#f66' : '#99f';
+	if (app.selectedViz == 'VMT') {
+		lab_tmp = 'Daily';
+		col_tmp = '#99f';
+	}
     new Morris.Line({
       data: data,
       element: 'longchart',
       hideHover: true,
-      labels: [selPeriod],
-      lineColors: [app.isAMActive ? '#f66' : '#99f'],
+      labels: [lab_tmp],
+      lineColors: [col_tmp],
       //postUnits: VIZ_INFO[app.selectedViz]['POST_UNITS'],
       xkey: 'date',
       xLabelAngle: 45,
@@ -517,21 +565,31 @@ function buildChartHtmlFromCmpData(json = null) {
       pointSize: 2,
     });
   } else {
-    let ykey_tmp, lab_tmp;
+    let ykey_tmp, lab_tmp, col_tmp, viz_tmp,ymax_tmp;
     ykey_tmp = ['art', 'fwy'];
     lab_tmp = ['Arterial', 'Freeway'];
+	col_tmp = ['#f66', '#99f'];
+	viz_tmp = 'ASPD';
+	ymax_tmp = 70;
+	if (app.selectedViz == 'VMT') {
+		ykey_tmp = ['Citywide'];
+		lab_tmp = ['Citywide'];
+		col_tmp = ['#99f'];
+		viz_tmp = 'VMT';
+		ymax_tmp = 12;
+	}
     new Morris.Line({
-      data: _aggregateData['ASPD'][selPeriod],
+      data: _aggregateData[viz_tmp][selPeriod],
       element: 'longchart',
       gridTextColor: '#aaa',
       hideHover: true,
       labels: lab_tmp,
-      lineColors: ['#f66', '#99f'],
+      lineColors: col_tmp,
       //postUnits: VIZ_INFO['ASPD']['POST_UNITS'],
       xkey: 'date',
       xLabelAngle: 45,
       ykeys: ykey_tmp,
-      ymax: 70,
+      ymax: ymax_tmp,
       parseTime: false,
       pointSize: 2,
     });   
@@ -565,6 +623,13 @@ function sliderChanged(thing) {
 
 function clickViz(chosenviz) {
   app.selectedViz = chosenviz;
+  if (chosenviz=='VMT') {
+	  app.isTPHidden = true;
+	  app.chartSubtitle = 'Citywide (millions)';
+  } else {
+	  app.isTPHidden = false;
+	  app.chartSubtitle = aggdata_label;
+  }
 
   app.chartTitle = VIZ_INFO[chosenviz]['CHARTINFO'];
   data_view = VIZ_INFO[chosenviz]['VIEW'];
@@ -626,6 +691,7 @@ let app = new Vue({
   delimiters: ['${', '}'],
   data: {
     isPanelHidden: false,
+	isTPHidden: false,
     chartTitle: VIZ_INFO[VIZ_LIST[0]].CHARTINFO,
     chartSubtitle: aggdata_label,
     isAMActive: true,
