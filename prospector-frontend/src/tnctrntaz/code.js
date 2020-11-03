@@ -84,6 +84,7 @@ const CUSTOM_BP_DICT = {
   'fac_access': {'pctdiff':[-7, -5, -3, -1, 1, 3, 5, 7]},
   'fac_regional_transfers': {'pctdiff':[-7, -5, -3, -1, 1, 3, 5, 7]},
   'fac_service': {'pctdiff':[-7, -5, -3, -1, 1, 3, 5, 7]},
+  'fac_income': {'pctdiff':[-7, -5, -3, -1, 1, 3, 5, 7]},
   'fac_tnc': {'pctdiff':[-7, -5, -3, -1, 1, 3, 5, 7]},
   'fac_unexplained': {'pctdiff':[-7, -5, -3, -1, 1, 3, 5, 7]},
 }
@@ -837,6 +838,7 @@ let app = new Vue({
     {text: 'fac_access', value: 'fac_access'},
     {text: 'fac_regional_transfers', value: 'fac_regional_transfers'},
     {text: 'fac_service', value: 'fac_service'},
+	{text: 'fac_income', value: 'fac_income'},
     {text: 'fac_tnc', value: 'fac_tnc'},
     {text: 'fac_unexplained', value: 'fac_unexplained'},
     
@@ -903,10 +905,10 @@ let app = new Vue({
     selected_timep: 'Daily',
     time_options: [
     {text: 'Daily', value: 'Daily'},
-    {text: '0300-0859', value: '0300-0859'},
+    /*{text: '0300-0859', value: '0300-0859'},
     {text: '0900-1559', value: '0900-1559'},
     {text: '1600-1859', value: '1600-1859'},
-    {text: '1900-0259', value: '1900-0259'},
+    {text: '1900-0259', value: '1900-0259'},*/
     ],
 
     selected_bwidth: bwidth_metric_list[0],
