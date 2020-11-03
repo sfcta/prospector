@@ -27,11 +27,15 @@ const sfcta_components = [
 	 'losrt',
      'champtrips',
      'tnctrnfac',
-     'survey2018',    
+     'survey2018',
+     'trnobstrips',
 	 //'cmp-v0',
 ];
 
 module.exports = {
+	mode: 'development',
+	//mode: 'production',
+	
      entry: () => {
         let entries = {};
         for (let tool of sfcta_components) {
