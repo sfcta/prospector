@@ -35,8 +35,8 @@ mymap.setView([37.76889, -122.440997], 13);
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
-const GEO_VIEW = 'sf_xd_2001';
-const VIZ_LIST = ['ASPD','SPDIFFPCT'];
+const GEO_VIEW = 'sf_xd_2001_agg';
+const VIZ_LIST = ['ASPD','SPDIFFPCT','SPDIFF'];
 const GEOID_VAR = 'seg_id';
 const VIZ_INFO = {
   ASPD: {
@@ -52,13 +52,14 @@ const VIZ_INFO = {
     POST_UNITS: '',
   },
   SPDIFFPCT: {
-    TXT: 'Speed Change Relative to Pre-COVID',
+    //TXT: 'Speed Change Relative to Pre-COVID',
+	TXT: 'Relative Speed Change from Pre-COVID',
     VIEW: 'inrix_rt_weekly_allxd',
     METRIC: 'pct_diff',
     METRIC_DESC: 'Pct Speed Change',
     COLOR_BY_BINS: true,
-    COLORVALS: [-50, 0, 10, 20, 30, 500],
-    COLORS: ['#3f324f', '#963d8e', '#d55175', '#f2ad86', '#ffffcc'],
+    COLORVALS: [-50, 0, 5, 10, 15, 500],
+	COLORS: ["#990D35", "#D52941", "#FF9811", "#FCD581", "#FFFCCC"],
     CHARTINFO: 'AUTO SPEED TREND (MPH):',
     CHART_PREC: 1,
     POST_UNITS: '%',
@@ -69,8 +70,8 @@ const VIZ_INFO = {
     METRIC: 'spd_diff',
     METRIC_DESC: 'Speed Change',
     COLOR_BY_BINS: true,
-    COLORVALS: [-50, 0, 2, 4, 6, 8, 500],
-    COLORS: ['#c00', '#f60', '#f90', '#ff3', '#9f0', '#060'],
+    COLORVALS: [-500, 0, 1, 2, 3, 500],
+    COLORS: ["#990D35", "#D52941", "#FF9811", "#FCD581", "#FFFCCC"],
     CHARTINFO: 'AUTO SPEED TREND (MPH):',
     CHART_PREC: 1,
     POST_UNITS: ' mph',
