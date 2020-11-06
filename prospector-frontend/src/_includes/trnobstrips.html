@@ -11,7 +11,7 @@
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
       <div id="preheader">
         <hr/>
-        <h3 class="apptitle">Transit Trips (On-Board Survey)</h3>
+        <h3 class="apptitle">Transit Trips (On-Board Survey) Visualizer</h3>
         <div id="helpbar">
             <button class="ui mini right labeled icon violet button"
                     v-on:click="clickToggleHelp">
@@ -20,7 +20,7 @@
             </button>
             &nbsp;
             <button class="ui mini right labeled icon violet button"
-                    v-on:click="this.window.open('https://www.sfcta.org/congestion','_blank')">
+                    v-on:click="this.window.open('https://mtc.ca.gov/our-work/plans-projects/other-plans/regional-onboard-survey-program','_blank')">
                     <i class="arrow right icon"></i>
                     Learn More
             </button>
@@ -31,19 +31,39 @@
             <!--h5 style="margin-top:15px">CHOOSE YEAR(S)</h5>
             <vue-slider v-bind="scnSlider" v-model="sliderValue"></vue-slider-->
 
-            <h5 style="margin-top:15px">CHOOSE OPERATOR:</h5>
+            <h5 style="margin-top:15px">VIEW TRANSIT TRIPS BY:</h5>
+			<div id="vizbuttons" class="compact ui horizontal mini buttons">
+				<button v-for="option in metric_options"
+                    v-on:click="metricSelect(option.value)"
+                    class="ui grey button"
+                    v-bind:class="{ active: option.value==selected_metric, yellow: option.value==selected_metric }">
+                    ${option.text}
+				</button>
+			</div>
+
+            <h5 style="margin-top:15px">SELECT MARKET SEGMENT:</h5>
+			<div id="vizbuttons" class="compact ui horizontal mini buttons">
+				<button v-for="option in dim2_options"
+                    v-on:click="incomeSelect(option.value)"
+                    class="ui grey button"
+                    v-bind:class="{ active: option.value==selected_dim2, yellow: option.value==selected_dim2 }">
+                    ${option.text}
+				</button>
+			</div>
+			
+			<h5 style="margin-top:15px">CHOOSE OPERATOR:</h5>
             <select v-model="selected_dim1">
               <option v-for="option in dim1_options" v-bind:value="option.value">
                 ${option.text}
               </option>
             </select> 
             
-            <h5 style="margin-top:15px">CHOOSE INCOME:</h5>
+            <!--h5 style="margin-top:15px">CHOOSE INCOME:</h5>
             <select v-model="selected_dim2">
               <option v-for="option in dim2_options" v-bind:value="option.value">
                 ${option.text}
               </option>
-            </select>            
+            </select-->            
             
             <!--h5 style="margin-top:15px">CHOOSE TIME PERIOD:</h5>
             <select v-model="selected_dim3">
@@ -52,16 +72,16 @@
               </option>
             </select-->
             
-            <h5 style="margin-top:15px">CHOOSE NORMALIZER:</h5>
+            <!--h5 style="margin-top:15px">CHOOSE NORMALIZER:</h5>
             <select v-model="selected_norm">
               <option v-for="option in norm_options" v-bind:value="option.value">
                 ${option.text}
               </option>
-            </select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </select-->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <!--input type="checkbox" id="pct_checkbox" v-model="pct_check" v-bind:disabled="!comp_check" style="margin-top:0px">
             <label for="pct_checkbox"><b>&nbsp;&nbsp;PERCENT DIFF</b></label-->
             
-            <hr/>
+            <!--hr/>
 
             <label><b>CHOOSE CUSTOM BREAK POINTS</b></label>
             <br>
@@ -80,7 +100,7 @@
 
             <h5 style="margin-top:25px">FREQUENCY DISTRIBUTION</h5>
             <div id="dist-chart" style="height: 200px">
-            </div>
+            </div-->
             
           </div>
       </div>
@@ -107,22 +127,25 @@
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
   <div v-cloak> <!-- hides everything until Vue finished loading -->
-        <h2 style="margin-bottom:0px;">SF-CHAMP Trips</h2>
+        <h2 style="margin-bottom:0px;">Transit Trips (On-Board Survey)</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
-        Add description.
+        Weighted transit trips from the regional on-board survey dataset are summarized by Census Tracts and Market Segments. Transit trips are aggregated to Census Tracts based on
 
         <ul>
-        <li><b>metric 1</b> abcd</li>
-        <li><b>metric 2</b> abcd</li>
+        <li><b>Trip Origin</b> the true origin location of the trip</li>
+        <li><b>Boarding Location</b> the first boarding location of the trip</li>
+		<li><b>Residence Location</b> the residence location of the transit rider</li>
         </ul>
+		
+		Transit trips are normalized by the area of the Census Tract and displayed as Trips per Square Mile. In addition, the transit trips can be separately displayed by household income and transit operator. The low income threshold has been set to $35,000 per year.
 
         <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
         <ul>
-        <li>Select a metric to display it on the map for all geographies.</li>
-        <li>Move the year slider to map historic data.</li>
-        <li>Choose time period to display metric.</li>
-        <li>Click on a geography for more information.</li>
+        <li>Select the attribute to aggregate transit trips by and display on the map.</li>
+        <li>Select market segment based on household income.</li>
+        <li>Select transit operator.</li>
+        <li>Click on a geography for more information about it.</li>
         </ul>
 
         <div style="margin-top:20px;">
@@ -130,14 +153,14 @@
             &nbsp;OK&nbsp;
           </button>
 
-          <button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')"
+          <!--button v-on:click="this.window.open('/assets/sfcta_cmp_data_2017.zip')"
                   class="small ui right labeled icon floated yellow button"
                   style="margin-right:5px">
                   <i class="icon download"></i>
                   Download data (.zip)
-          </button>
+          </button-->
 
-          <button v-on:click="this.window.open('https://www.sfcta.org/sf-champ-modeling','_blank')"
+          <button v-on:click="this.window.open('https://mtc.ca.gov/our-work/plans-projects/other-plans/regional-onboard-survey-program','_blank')"
                   class="small ui right floated basic violet button"
                   style="margin-right:5px">
                   Learn more&hellip;

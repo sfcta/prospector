@@ -41,7 +41,7 @@ let attribution ='<a href="https://openstreetmap.org">OpenStreetMap</a> | ' +
                  '<a href="https://mapbox.com">Mapbox</a>';
 baseLayer = L.tileLayer(url, {
   attribution:attribution,
-  minZoom: 10,
+  minZoom: 9,
   maxZoom: 18,
   accessToken:token,
 }).addTo(mymap);
@@ -89,17 +89,19 @@ const BWIDTH_MAP = {
 };
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-	'origins': {'none': {'base':[500, 1000, 2000, 3000]},
+	'trip_origins': {'none': {'base':[500, 1000, 2000, 3000]},
 				'sq_mile': {'base':[2000, 4000, 6000, 8000]}},
-	'residents': {'none': {'base':[500, 1000, 2000, 3000]},
+	'trip_boards': {'none': {'base':[500, 1000, 2000, 3000]},
 				'sq_mile': {'base':[2000, 4000, 6000, 8000]}},
+	'trip_reslocs': {'none': {'base':[500, 1000, 2000, 3000]},
+				'sq_mile': {'base':[2000, 4000, 6000, 8000]}},			
 }
 
-const METRIC_UNITS = {'sq_mile': 'SQMI',
+const METRIC_UNITS = {'sq_mile': 'SqMi',
                       'job2015': '100 JOBS',
                       'pop2015': '100 RESIDENTS'};
-const METRIC_DESC = {'sq_mile': 'sqmi','job2015': '100 jobs','pop2015': '100 residents',
-					'origins': 'trip origins', 'residents': 'trips residents'
+const METRIC_DESC = {'sq_mile': 'Area (SqMi)','job2015': '100 jobs','pop2015': '100 residents',
+					'trip_origins': 'Origin', 'trip_boards': 'Boarding Location', 'trip_reslocs': 'Residence Location'
 };
 
 let sel_colorvals, sel_colors, sel_binsflag;
@@ -168,22 +170,24 @@ function getInfoHtml(geo) {
   if (geo.comp !== null) comp_val = (Math.round(geo.comp*100)/100).toLocaleString();
   let bwmetric_val = null;
   if (geo.bwmetric !== null) bwmetric_val = (Math.round(geo.bwmetric*100)/100).toLocaleString();
-  let retval = '<b>GEOID: </b>' + `${geo[GEOID_VAR]}<br/>` +
-                '<b>COUNTY: </b>' + `${geo.countyfp}<br/><hr>`;
+  let retval = '';
   if (app.comp_check) {
     retval += `<b>${app.sliderValue[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric].toUpperCase()}: </b>` + `${base_val}<br/>` +
               `<b>${app.sliderValue[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric].toUpperCase()}: </b>` + `${comp_val}<br/>`;
   }
-  retval += `<b>TRANSIT TRIPS: </b>` + `${trips.toLocaleString()}</br>`;
+  retval += `<b>Transit Trips: </b>` + `${trips.toLocaleString()}</br>`;
   if (app.selected_norm.toUpperCase() != 'NONE') {
-    retval += `<b>${app.selected_norm.toUpperCase()}: </b>` + `${norm_val}</br>` +
-              `<b>${METRIC_DESC[app.selected_metric].toUpperCase()}</b>` + `<b> PER </b>` + `<b>${METRIC_DESC[app.selected_norm].toUpperCase()}</b>` +
+    retval += `<b>${METRIC_DESC[app.selected_norm]}: </b>` + `${norm_val}</br>` +
+              `<b>Transit Trips </b>` + `<b> per </b>` + `<b>${METRIC_DESC[app.selected_norm]}</b>` +
+			   `<b> by </b>` + `<b>${METRIC_DESC[app.selected_metric]}</b>` +
               (app.pct_check? '<b> %</b>': '') +
               (app.comp_check? '<b> Diff: </b>':'<b>: </b>') + 
               `${metric_val}` + 
               ((app.pct_check && app.comp_check && metric_val !== null)? '%':'');     
   }
-
+  
+  retval += '<hr><b>GEOID: </b>' + `${geo[GEOID_VAR]}<br/>` +
+                '<b>COUNTY: </b>' + `${geo.countyfp}<br/>`;
   return retval; 
 }
 
@@ -353,7 +357,7 @@ async function drawMapFeatures(queryMapData=true) {
         let histogram = d3.histogram()
             .domain(x.domain())
             .thresholds(x.ticks(numticks));
-        updateDistChart(histogram(dist_vals));
+        //updateDistChart(histogram(dist_vals));
 
         if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) {
           sel_binsflag = false;
@@ -495,8 +499,7 @@ async function drawMapFeatures(queryMapData=true) {
           sel_binsflag,
           (app.pct_check && app.comp_check)? '%': ''
         );
-        legHTML = '<h4>' + METRIC_DESC[sel_metric].toUpperCase() + (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(app.selected_norm)? (' per ' + METRIC_UNITS[app.selected_norm]) : '')) +
-                  '</h4>' + legHTML;
+        legHTML = '<h4>' + 'Trips' + (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(app.selected_norm)? (' per ' + METRIC_UNITS[app.selected_norm] + ' by ' + METRIC_DESC[sel_metric]) : '')) + '</h4>' + legHTML;
         if (app.bwidth_check) {
           legHTML += '<hr/>' + '<h4>' + app.selected_bwidth.toUpperCase() +  '</h4>';
           legHTML += getBWLegHTML(sel_bwvals, bw_widths);
@@ -507,7 +510,7 @@ async function drawMapFeatures(queryMapData=true) {
       mapLegend.addTo(mymap);
       
       if (selectedGeo) {
-        if (base_lookup[app.selected_dim1][base_scnyr][app.selected_dim3].hasOwnProperty(selectedGeo.feature[GEOID_VAR])) {
+        if (base_lookup[app.selected_dim1][app.selected_dim2][app.selected_dim3].hasOwnProperty(selectedGeo.feature[GEOID_VAR])) {
           //buildChartHtmlFromData(selectedGeo.feature[GEOID_VAR]);
           return cleanFeatures.filter(entry => entry[GEOID_VAR] == selectedGeo.feature[GEOID_VAR])[0];
         } else {
@@ -526,7 +529,7 @@ async function drawMapFeatures(queryMapData=true) {
       app.bp5 = 0;
       if (geoLayer) mymap.removeLayer(geoLayer);
       if (mapLegend) mymap.removeControl(mapLegend);
-      updateDistChart([]);
+      //updateDistChart([]);
     }
 
   } catch(error) {
@@ -802,6 +805,16 @@ async function selectionChanged(thing) {
   }
 }
 
+async function metricSelect(metric) {
+	app.selected_metric = metric;
+	selectionChanged();
+}
+
+async function incomeSelect(inc_cat) {
+	app.selected_dim2 = inc_cat;
+	selectionChanged();
+}
+
 async function updateMap(thing) {
   app.isUpdActive = false;
   let selfeat = await drawMapFeatures(false);
@@ -875,10 +888,11 @@ let app = new Vue({
     bwbp4: 0.0,
     bwbp5: 0.0,
     
-    selected_metric: 'residents',
+    selected_metric: 'trip_origins',
     metric_options: [
-	{text: 'residents', value: 'residents'},
-    {text: 'origins', value: 'origins'},
+	{text: 'Trip Origin', value: 'trip_origins'},
+    {text: 'Boarding Location', value: 'trip_boards'},
+	{text: 'Residence Location', value: 'trip_reslocs'},
     ],
     
     selected_norm: 'sq_mile',
@@ -889,9 +903,9 @@ let app = new Vue({
     
     selected_dim2: 'LOW_INC',
     dim2_options: [
-    {text: 'ALL', value: 'ALL'},
-    {text: 'LOW_INCOME', value: 'LOW_INC'},
-    {text: 'NOT_LOW_INCOME', value: 'NOT_LOW_INC'},
+    {text: 'Low Income', value: 'LOW_INC'},
+    {text: 'Not Low Income', value: 'NOT_LOW_INC'},
+	{text: 'All', value: 'ALL'},
     ],
     chartTitle: 'AVG_RIDE TREND',
     chartSubtitle: chart_deftitle,
@@ -956,6 +970,8 @@ let app = new Vue({
     bwUpdateMap: bwUpdateMap,
     clickToggleHelp: clickToggleHelp,
     clickedShowHide: clickedShowHide,
+	metricSelect: metricSelect,
+	incomeSelect: incomeSelect,
   },
   components: {
     vueSlider,
