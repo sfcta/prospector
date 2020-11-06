@@ -10,6 +10,20 @@
     margin-bottom: 70px;
 }
 
+table#sumtable thead th, tbody, td {   
+  background-color: #444;
+  color: #fff;
+  border: 0px;
+}
+
+td:last-child {
+  text-align: right;
+}
+
+th:last-child {
+  text-align: right;
+}
+
 
 
   

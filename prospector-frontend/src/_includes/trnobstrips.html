@@ -80,6 +80,22 @@
             </select-->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <!--input type="checkbox" id="pct_checkbox" v-model="pct_check" v-bind:disabled="!comp_check" style="margin-top:0px">
             <label for="pct_checkbox"><b>&nbsp;&nbsp;PERCENT DIFF</b></label-->
+			
+			<h5 style="margin-top:15px">REGIONWIDE SUMMARY</h5>
+			<table id="sumtable">
+				<thead>
+				  <tr>
+					<th>Operator</th>
+					<th>Weighted Trips</th>
+				  </tr>
+				</thead>
+				<tbody>
+					<tr v-for="row in rows">
+						<td>${row.op}</td>
+						<td>${row.trips}</td>
+					</tr>
+				</tbody>
+			</table>
             
             <!--hr/>
 

@@ -112,7 +112,7 @@ let chart_deftitle = 'All TAZs Combined';
 
 let geoLayer, mapLegend;
 let _featJson;
-let _aggregateData;
+let _aggregateData, _tableData;
 let prec;
 
 async function initialPrep() {
@@ -124,7 +124,7 @@ async function initialPrep() {
   await drawMapFeatures();
   
   console.log('3... ');
-  //await buildChartHtmlFromData();
+  await updateTable();
 
   console.log('4 !!!');
 }
@@ -228,21 +228,33 @@ async function getMapData() {
     }
   }
 
+  _aggregateData = {};
+  for (let v2 of app.dim2_options) {
+    _aggregateData[v2.value] = {};
+    for (let v1 of app.dim1_options) {
+		_aggregateData[v2.value][v1.value] = 0;
+    }
+  }
+
   for (let entry of jsonData) {
     base_lookup[entry[DIM1_VAR]][entry[DIM2_VAR]][entry[DIM3_VAR]][entry[GEOID_VAR_DATA]] = entry;
     for (let met of app.metric_options) {
       tmp[entry[DIM1_VAR]][entry[DIM2_VAR]][entry[DIM3_VAR]][met.value] += entry[met.value];
+	  if (met.value=='trip_origins') {
+		  _aggregateData[entry[DIM2_VAR]][entry[DIM1_VAR]] += entry[met.value];
+	  }
     }
   }
-  _aggregateData = {};
   
-  for (let v1 of app.dim1_options) {
-    _aggregateData[v1.value] = {};
-    for (let v3 of app.dim3_options) {
-      _aggregateData[v1.value][v3.value] = [];
-    }
+  _tableData = {};
+  for (let v2 of app.dim2_options) {
+	  _tableData[v2.value] = [];
+	  for (let v1 of app.dim1_options) {
+		  _tableData[v2.value].push({op: v1.text, trips: (Math.round(_aggregateData[v2.value][v1.value]/100)*100).toLocaleString()});
+	  }
   }
-  for (let v1 of app.dim1_options) {
+
+  /*for (let v1 of app.dim1_options) {
     for (let v2 of app.dim2_options) {
       for (let v3 of app.dim3_options) {
         let row = {};
@@ -253,7 +265,7 @@ async function getMapData() {
         _aggregateData[v1.value][v3.value].push(row);
       }
     }
-  }
+  }*/
 }
 
 let base_lookup;
@@ -731,6 +743,14 @@ function buildChartHtmlFromData(geoid = null) {
   }
 }
 
+function updateTable() {
+	if (app.selected_dim1=='ALL') {
+		app.rows = _tableData[app.selected_dim2];
+	} else {
+		app.rows = _tableData[app.selected_dim2].filter(entry => entry['op'] == app.selected_dim1);
+	}
+}
+
 
 // SLIDER ----
 let scnSlider = {
@@ -802,6 +822,7 @@ async function selectionChanged(thing) {
       highlightSelectedSegment();
       popSelGeo.setContent(getInfoHtml(selfeat));
     }
+	updateTable();
   }
 }
 
@@ -933,6 +954,8 @@ let app = new Vue({
     {text: 'EV', value: 'EV'},
     {text: 'EA', value: 'EA'},
     ],
+	
+	rows: [{op:'All', trips:0},],
 
     selected_bwidth: bwidth_metric_list[0],
     bwidth_options: [],    
