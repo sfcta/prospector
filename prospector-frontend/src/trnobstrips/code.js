@@ -73,7 +73,7 @@ const SCNYR_LIST = [2010,2015];
 const INT_COLS = [''];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ccd';
-const COLORRAMP = {SEQ: ['#eefacd','#c5e5bf','#49a895','#116570','#173252'],
+const COLORRAMP = {SEQ: ['#eefacd','#c5e5bf','#89c5a8','#009485','#116570','#173252'],
                     DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
 
 const MIN_BWIDTH = 2;
@@ -90,18 +90,18 @@ const BWIDTH_MAP = {
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
 	'trip_origins': {'none': {'base':[500, 1000, 2000, 3000]},
-				'sq_mile': {'base':[2000, 4000, 6000, 8000]}},
+				'sq_mile': {'base':[100, 300, 900, 2700, 8100]}},
 	'trip_boards': {'none': {'base':[500, 1000, 2000, 3000]},
-				'sq_mile': {'base':[2000, 4000, 6000, 8000]}},
+				'sq_mile': {'base':[100, 300, 900, 2700, 8100]}},
 	'trip_reslocs': {'none': {'base':[500, 1000, 2000, 3000]},
-				'sq_mile': {'base':[2000, 4000, 6000, 8000]}},			
+				'sq_mile': {'base':[100, 300, 900, 2700, 8100]}},			
 }
 
 const METRIC_UNITS = {'sq_mile': 'SqMi',
                       'job2015': '100 JOBS',
                       'pop2015': '100 RESIDENTS'};
 const METRIC_DESC = {'sq_mile': 'Area (SqMi)','job2015': '100 jobs','pop2015': '100 residents',
-					'trip_origins': 'Origin', 'trip_boards': 'Boarding Location', 'trip_reslocs': 'Residence Location'
+					'trip_origins': 'Origin', 'trip_boards': 'Boarding Location', 'trip_reslocs': 'Home Location'
 };
 
 let sel_colorvals, sel_colors, sel_binsflag;
@@ -399,11 +399,8 @@ async function drawMapFeatures(queryMapData=true) {
           brk_metric = CUSTOM_BP_DICT.hasOwnProperty(sel_metric)? sel_metric:'All';
           if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)){
             custom_bps = CUSTOM_BP_DICT[sel_metric][app.selected_norm][mode];
-            sel_colorvals = [map_vals[0]];
-            for (var i = 0; i < custom_bps.length; i++) {
-              if (custom_bps[i]>map_vals[0] && custom_bps[i]<map_vals[map_vals.length-1]) sel_colorvals.push(custom_bps[i]);
-            }
-            sel_colorvals.push(map_vals[map_vals.length-1]);
+			sel_colorvals = [map_vals[0]].concat(custom_bps);
+			(map_vals[map_vals.length-1] > custom_bps[custom_bps.length-1])? sel_colorvals.push(map_vals[map_vals.length-1]): sel_colorvals.push(custom_bps[custom_bps.length-1]+1);
           } else {
             let clusters = ss.ckmeans(map_vals, app.selected_breaks);
             sel_colorvals = [map_vals[0]];
@@ -913,7 +910,7 @@ let app = new Vue({
     metric_options: [
 	{text: 'Trip Origin', value: 'trip_origins'},
     {text: 'Boarding Location', value: 'trip_boards'},
-	{text: 'Residence Location', value: 'trip_reslocs'},
+	{text: 'Home Location', value: 'trip_reslocs'},
     ],
     
     selected_norm: 'sq_mile',
