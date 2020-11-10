@@ -36,7 +36,7 @@ mymap.setView([37.76889, -122.440997], 13);
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'cmp_segments_master';
-const VIZ_LIST = ['ASPD','SPDIFFPCT','VMT'];
+const VIZ_LIST = ['ASPD','SPDIFFPCT','VMT','VMTDIFFPCT'];
 const VIZ_INFO = {
   ASPD: {
     TXT: 'Auto Level-of-Service (LOS)',
@@ -86,6 +86,18 @@ const VIZ_INFO = {
     CHART_PREC: 1,
     POST_UNITS: '',
   },
+  VMTDIFFPCT: {
+    TXT: 'VMT Change Relative to Pre-COVID',
+    VIEW: 'inrix_rt_weekly',
+    METRIC: 'pct_voldiff',
+    METRIC_DESC: 'Pct VMT Change',
+    COLOR_BY_BINS: true,
+    COLORVALS: [-5000, -15, -10, -5, 0, 5000],
+    COLORS: ['#ffffcc', '#f2ad86', '#d55175', '#963d8e', '#3f324f'],
+    CHARTINFO: 'DAILY VMT:',
+    CHART_PREC: 1,
+    POST_UNITS: '%',
+  },  
 };
 const MISSING_COLOR = '#ccd';
 
@@ -107,7 +119,6 @@ let selectedSegment, prevselectedSegment;
 let _segmentJson;
 let _allCmpData;
 let _aggregateData;
-let _diffData;
 
 async function initialPrep() {
 
@@ -125,11 +136,8 @@ async function initialPrep() {
 
   console.log('5...');
   await updateSliderData();
-  
-  console.log('6...');
-  _diffData = await fetchDiffData(diffdata_view);
 
-  console.log('7 !!!');
+  console.log('6 !!!');
 }
 
 async function fetchCmpSegments() {
@@ -155,7 +163,7 @@ async function fetchCmpSegments() {
 async function fetchAllCmpSegmentData(dat_view) {
   //FIXME this should be a map()
   let params =
-    'select=cmp_segid,year,date,period,los_hcm85,avg_speed,imp_vol';
+    'select=cmp_segid,year,date,period,los_hcm85,avg_speed,imp_vol,base_speed,spd_diff,pct_diff,base_vol,vol_diff,pct_voldiff';
 
   let data_url = API_SERVER + dat_view + '?' + params;
 
@@ -185,19 +193,6 @@ async function fetchAggregateData(aggdat_view) {
 
   } catch(error) {
     console.log('aggregate data error: ' + error);
-  }
-}
-
-async function fetchDiffData(diffdat_view) {
-
-  const url = API_SERVER + diffdat_view;
-
-  try {
-    let resp = await fetch(url);
-    return await resp.json();
-    
-  } catch(error) {
-    console.log('diff data error: ' + error);
   }
 }
 
@@ -290,15 +285,29 @@ function getInfoHtml(geo) {
   }
   
   if (app.selectedViz != 'ASPD' && app.selectedViz != 'VMT') {
+	let base_col, comp_col, base_desc, comp_desc, units;
+	if (app.selectedViz == 'SPDIFFPCT') {
+		base_col = 'base_speed';
+		comp_col = 'avg_speed';
+		base_desc = 'Base Speed';
+		comp_desc = 'Average Speed';
+		units = 'mph';
+	} else if (app.selectedViz == 'VMTDIFFPCT') {
+		base_col = 'base_vol';
+		comp_col = 'imp_vol';
+		base_desc = 'Base VMT';
+		comp_desc = 'Average VMT';
+		units = '';		
+	}
     let base_val = null;
-    if (geo.base_speed !== null) base_val = (Math.round(geo.base_speed*100)/100).toLocaleString();
+    if (geo[base_col] !== null) base_val = (Math.round(geo[base_col]*100)/100).toLocaleString();
     let comp_val = null;
-    if (geo.avg_speed !== null) comp_val = (Math.round(geo.avg_speed*100)/100).toLocaleString();
+    if (geo[comp_col] !== null) comp_val = (Math.round(geo[comp_col]*100)/100).toLocaleString();
     let metric_val = 0;
     if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
     
-    retval += '<b> Base Speed (pre-covid): </b>' + `${base_val}` + ' mph<br/>' +
-              '<b> Average Speed (week of ' + `${app.sliderValue.slice(5)}` +  '): </b>' + `${comp_val}` + ' mph<br/>' +
+    retval += '<b> ' + base_desc + ' (pre-covid): </b>' + `${base_val}` + units + '<br/>' +
+              '<b> ' + comp_desc + ' (week of ' + `${app.sliderValue.slice(5)}` +  '): </b>' + `${comp_val}` + units + '<br/>' +
               `<b> ${VIZ_INFO[app.selectedViz]['METRIC_DESC']}: </b>` + `${metric_val}` + VIZ_INFO[app.selectedViz]['POST_UNITS'];
   }
 
@@ -324,14 +333,7 @@ function drawMapSegments() {
   // create a clean copy of the segment Json
   let cleanSegments = _segmentJson.slice();
   
-  let relevantRows;
-  if (app.selectedViz == 'ASPD' || app.selectedViz == 'VMT') {
-    relevantRows = _allCmpData.filter(
-      row => row.date==app.sliderValue && row.period===selPeriod
-    );
-  } else {
-    relevantRows = _diffData.filter(row => row.date==app.sliderValue && row.period===selPeriod);
-  }
+  let relevantRows = _allCmpData.filter(row => row.date==app.sliderValue && row.period===selPeriod);
 
   let lookup = {};
   for (let row of relevantRows) {
@@ -342,16 +344,16 @@ function drawMapSegments() {
   for (let segment of cleanSegments) {
     if (lookup[segment.cmp_segid]) {
       segment['metric'] = lookup[segment.cmp_segid][selviz_metric];
-      if (app.selectedViz != 'ASPD') {
-        segment['base_speed'] = lookup[segment.cmp_segid]['base_speed'];
-        segment['avg_speed'] = lookup[segment.cmp_segid]['avg_speed'];
-      }
+	  segment['base_speed'] = lookup[segment.cmp_segid]['base_speed'];
+      segment['avg_speed'] = lookup[segment.cmp_segid]['avg_speed'];
+	  segment['base_vol'] = lookup[segment.cmp_segid]['base_vol'];
+      segment['imp_vol'] = lookup[segment.cmp_segid]['imp_vol'];
     } else {
       segment['metric'] = null;
-      if (app.selectedViz != 'ASPD') {
-        segment['base_speed'] = null;
-        segment['avg_speed'] = null;
-      }
+	  segment['base_speed'] = null;
+      segment['avg_speed'] = null;
+	  segment['base_vol'] = null;
+      segment['imp_vol'] = null;
     }
   }
 
@@ -471,7 +473,7 @@ function showSegmentDetails(geo, latlng) {
   // Revert to overall chart when no segment selected
   popSelSegment.on('remove', function(e) {
     geoLayer.resetStyle(selectedSegment);
-    app.chartSubtitle = app.selectedViz == 'VMT' ? 'Citywide (millions)' : aggdata_label;
+    app.chartSubtitle = (app.selectedViz == 'VMT' || app.selectedViz == 'VMTDIFFPCT') ? 'Citywide (millions)' : aggdata_label;
     prevselectedSegment = selectedSegment = selGeoId = _selectedGeo = null;
     buildChartHtmlFromCmpData();
   });
@@ -484,6 +486,7 @@ function showVizChartForSelectedSegment() {
   let metric_col = selviz_metric;
   // show actual speeds in chart, not A-F LOS categories
   if ((selviz_metric == 'los_hcm85') || (selviz_metric == 'pct_diff')) metric_col = 'avg_speed';
+  if ((selviz_metric == 'imp_vol') || (selviz_metric == 'pct_voldiff')) metric_col = 'imp_vol';
 
   if (_selectedGeo) {
     let segmentData = _allCmpData
@@ -495,7 +498,7 @@ function showVizChartForSelectedSegment() {
 	app.chartSubtitle = `${tmptxt} [${_selectedGeo.cmp_from} to ${_selectedGeo.cmp_to}]`;
   } else {
     buildChartHtmlFromCmpData();
-	app.chartSubtitle = app.selectedViz == 'VMT' ? 'Citywide (millions)' : aggdata_label;
+	app.chartSubtitle = (app.selectedViz == 'VMT' || app.selectedViz == 'VMTDIFFPCT') ? 'Citywide (millions)' : aggdata_label;
   }
 }
 
@@ -510,6 +513,8 @@ function buildChartHtmlFromCmpData(json = null) {
     let metric_col = selviz_metric;
     if ((selviz_metric == VIZ_INFO['ASPD']['METRIC']) || (selviz_metric == VIZ_INFO['SPDIFFPCT']['METRIC']) || (selviz_metric == VIZ_INFO['SPDIFF']['METRIC']))
       metric_col = 'avg_speed';
+    if ((selviz_metric == VIZ_INFO['VMT']['METRIC']) || (selviz_metric == VIZ_INFO['VMTDIFFPCT']['METRIC']))
+      metric_col = 'imp_vol';
     
     for (let entry of json) {
       let val = Number(entry[metric_col]).toFixed(
@@ -546,7 +551,7 @@ function buildChartHtmlFromCmpData(json = null) {
 	let lab_tmp, col_tmp;
 	lab_tmp = selPeriod;
 	col_tmp = app.isAMActive ? '#f66' : '#99f';
-	if (app.selectedViz == 'VMT') {
+	if (app.selectedViz == 'VMT' || app.selectedViz == 'VMTDIFFPCT') {
 		lab_tmp = 'Daily';
 		col_tmp = '#99f';
 	}
@@ -623,7 +628,7 @@ function sliderChanged(thing) {
 
 function clickViz(chosenviz) {
   app.selectedViz = chosenviz;
-  if (chosenviz=='VMT') {
+  if (chosenviz=='VMT' || chosenviz=='VMTDIFFPCT') {
 	  app.isTPHidden = true;
 	  app.chartSubtitle = 'Citywide (millions)';
   } else {
