@@ -576,7 +576,7 @@ function buildChartHtmlFromCmpData(json = null) {
 	col_tmp = ['#f66', '#99f'];
 	viz_tmp = 'ASPD';
 	ymax_tmp = 70;
-	if (app.selectedViz == 'VMT') {
+	if (app.selectedViz == 'VMT' || app.selectedViz == 'VMTDIFFPCT') {
 		ykey_tmp = ['Citywide'];
 		lab_tmp = ['Citywide'];
 		col_tmp = ['#99f'];
