@@ -567,7 +567,7 @@ function styleByMetricColor(feat) {
     fo = 0;
   }
   if (!app.bwidth_check) {
-    return { fillColor: color, opacity: 0.5, weight: 0.05, fillOpacity: fo, color: '#fff' };
+    return { fillColor: color, opacity: 0.5, weight: 0.55, fillOpacity: fo, color: color };
   } else {
     return { color: color, weight: feat['bwmetric_scaled'], opacity: 1.0 };
   }
