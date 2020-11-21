@@ -78,7 +78,7 @@ const VIZ_INFO = {
     TXT: 'Vehicle Miles Traveled (VMT)',
     VIEW: 'inrix_rt_weekly',
     METRIC: 'imp_vol',
-    METRIC_DESC: 'VMT per mile',
+    METRIC_DESC: 'Daily VMT per mile',
     COLOR_BY_BINS: true,
     COLORVALS: [0, 20000, 40000, 60000, 80000, 200000],
     COLORS: ['#ffffcc', '#f2ad86', '#d55175', '#963d8e', '#3f324f'],
