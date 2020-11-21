@@ -85,10 +85,14 @@
   <div v-cloak> <!-- hides everything until Vue finished loading -->
         <h2 style="margin-bottom:0px;">COVID-Era Congestion Tracker</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
-        Explore how congestion in San Francisco has changed since the March 2020 shelter-in-place order.
-        Explore automobile (1) Level-of-Service (LOS) and (2) speed changes relative to pre-COVID conditions on key segments in our transportation network.</br>
+        Explore how congestion in San Francisco has changed since the March 2020 shelter-in-place order. 
+		Automobile Level-of-Service (LOS) and Vehicle Miles Traveled (VMT) per mile are presented for key segments in the transportation network. 
+		In addition, changes in these metrics relative to pre-COVID conditions can be viewed.</br>
         The LOS are calculated using speed data from INRIX Roadway Analytics. Speeds are weekly averages calculated using
-        data from Tuesday through Thursday of each week. The data are updated every one to two weeks.
+        data from Tuesday through Thursday of each week. 
+		VMT metrics are derived using imputed vehicle volumes from observed speeds and Volume Delay Functions (VDF). 
+		Total peak period VMT for key segments is expanded to Daily Citywide estimate by applying expansions factors derived from historic Caltrans VMT estimated for San Francisco.
+		The data on this website are updated every one to two weeks.
         
         <ul>
         <li><b>Auto Level-of-Service (LOS)</b> grades road segments by vehicle delay with "A" describing free flow,
@@ -96,7 +100,11 @@
         <li><b>Speed Change Relative to Pre-COVID</b> shows the percent difference between average speed
         of a segment and the speed under pre-COVID conditions (from the week of 3rd March 2020). Lower and negative values imply that 
         speeds have droppped back to pre-COVID levels.</li>
-        </ul>
+		<li><b>Vehicle Miles Traveled (VMT)</b> is normalized by the length of the segment and could be interpreted as approximate average daily traffic volume.</li>
+		<li><b>VMT Change Relative to Pre-COVID</b> shows the percent difference between daily VMT estimate
+        of a segment and the VMT under pre-COVID conditions (from the week of 3rd March 2020). Higher and positive values imply that 
+        VMT have risen back to pre-COVID levels.</li>
+		</ul>
 
         <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
