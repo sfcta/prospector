@@ -11,7 +11,7 @@
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
       <div id="preheader">
         <hr/>
-        <h3 class="apptitle">Transit Trips (On-Board Survey) Visualizer</h3>
+        <h3 class="apptitle">Bay Area Low Income Transit Use Map</h3>
         <div id="helpbar">
             <button class="ui mini right labeled icon violet button"
                     v-on:click="clickToggleHelp">
@@ -143,25 +143,21 @@
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
   <div v-cloak> <!-- hides everything until Vue finished loading -->
-        <h2 style="margin-bottom:0px;">Transit Trips (On-Board Survey)</h2>
+        <h2 style="margin-bottom:0px;">Bay Area Low Income Transit Use Map</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
-        Weighted transit trips from the regional on-board survey dataset are summarized by Census Tracts and Market Segments. Transit trips are aggregated to Census Tracts based on
+        This map shows transit trip patterns by low income travelers. Low income is defined as household income of $50,000 or less per year.
 
         <ul>
-        <li><b>Trip Origin</b> the true origin location of the trip</li>
-        <li><b>Boarding Location</b> the first boarding location of the trip</li>
-		<li><b>Residence Location</b> the residence location of the transit rider</li>
+        <li>Transit trips can be displayed by 1) where the trips started; 2) where transit vehicles were first boarded; or 3) where the travelers live.</li>
+        <li>Transit trip patterns by low income travelers can be compared to the transit trip patterns by non-low income travelers and by all travelers.</li>
+		<li>Transit trips on each of the major transit systems can also be displayed individually.</li>
+		<li>Darker colors indicate higher intensities of transit trips.</li>
         </ul>
 		
-		Transit trips are normalized by the area of the Census Tract and displayed as Trips per Square Mile. In addition, the transit trips can be separately displayed by household income and transit operator. The low income threshold has been set to $50,000 per year.
+		The data sources are the transit on-board surveys conducted by the Metropolitan Transportation Commission and individual transit operators, generally conducted between 2015 and 2019.  The data are aggregated and displayed at the Census tract level.
 
-        <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
-        <hr style="margin-bottom:5px;margin-top:5px"/>
         <ul>
-        <li>Select the attribute to aggregate transit trips by and display on the map.</li>
-        <li>Select market segment based on household income.</li>
-        <li>Select transit operator.</li>
-        <li>Click on a geography for more information about it.</li>
+        <li>Clicking on an individual Census tract will reveal the total number of transit trips, as well as the density of transit trips (to account for the fact that Census tracts vary significantly in area).</li>
         </ul>
 
         <div style="margin-top:20px;">
