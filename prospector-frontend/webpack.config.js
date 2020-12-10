@@ -29,6 +29,7 @@ const sfcta_components = [
      'tnctrnfac',
      'survey2018',
      'trnobstrips',
+	 'covid_scn',
 	 //'cmp-v0',
 ];
 

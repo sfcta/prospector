@@ -1,0 +1,39 @@
+/* CSS Layout for CHAMPLU ONLY goes here */
+
+.ui.color1.button {
+  background-color: #f56e71;
+  color: #fff;
+}
+.ui.color1.button.active {
+  background-color: #f56e71;
+}
+
+.ui.color2.button {
+  background-color: #38bebb;
+  color: #fff;
+}
+.ui.color2.button.active {
+  background-color: #38bebb;
+}
+
+.ui.button {
+  margin: 1% 1%;
+}
+
+table#sumtable thead th, tbody, td {   
+  background-color: #444;
+  color: #fff;
+  border: 0px;
+}
+
+td:last-child {
+  text-align: right;
+}
+
+th:last-child {
+  text-align: right;
+}
+
+
+
+  
