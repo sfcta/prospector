@@ -34,6 +34,14 @@ th:last-child {
   text-align: right;
 }
 
+[class*="col-"] {
+  float: left;
+  padding: 12px;
+}
+
+.col-1 {width: 60%;}
+.col-2 {width: 40%;}
+.col-3 {width: 100%;}
 
 
   

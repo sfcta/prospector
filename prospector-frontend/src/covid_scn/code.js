@@ -21,6 +21,7 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 
 // Must use npm and babel to support IE11/Safari
 import 'isomorphic-fetch';
+import vueSlider from 'vue-slider-component';
 import Cookies from 'js-cookie';
 
 var maplib = require('../jslib/maplib');
@@ -819,26 +820,118 @@ function clickViz(chosenviz) {
 }
 
 function dim1Changed(chosen) {
-  app.selected_dim1 = chosen;
+  app.selected_dim1 = chosen.toLowerCase();
   selectionChanged();
 }
 function dim2Changed(chosen) {
-  app.selected_dim2 = chosen;
+  app.selected_dim2 = chosen.toLowerCase();
   selectionChanged();
 }
 function dim3Changed(chosen) {
-  app.selected_dim3 = chosen;
+  app.selected_dim3 = chosen.toLowerCase();
   selectionChanged();
 }
 function dim4Changed(chosen) {
-  app.selected_dim4 = chosen;
+  app.selected_dim4 = chosen.toLowerCase();
   selectionChanged();
 }
 function dim5Changed(chosen) {
-  app.selected_dim5 = chosen;
+  app.selected_dim5 = chosen.toLowerCase();
   selectionChanged();
 }
 
+// SLIDERS ----
+let dim1Slider = {
+  clickable: true,
+  data: ['Low','Med','High'],
+  disabled: false,
+  dotSize: 16,
+  height: 3,
+  lazy: true,
+  marks: true,
+  hideLabel: false,
+  process: false,
+  sliderValue: 'Low',
+  labelStyle: {color: '#fff', transform: 'translate(-50%, -225%)', fontSize: '1rem'},
+  speed: 0.25,
+  style: { marginTop: '0px'},
+  tooltipPlacement: 'top',
+  tooltipStyle: { backgroundColor: '#f56e71', borderColor: '#f56e71' },
+  width: 'auto',
+  dotStyle: {border: '2px solid #f56e71'},
+};
+let dim2Slider = {
+  clickable: true,
+  data: ['Low','Med','High'],
+  disabled: false,
+  dotSize: 16,
+  height: 3,
+  lazy: true,
+  marks: true,
+  hideLabel: true,
+  process: false,
+  sliderValue: 'Low',
+  speed: 0.25,
+  style: { marginTop: '0px'},
+  tooltipPlacement: 'top',
+  tooltipStyle: { backgroundColor: '#f56e71', borderColor: '#f56e71' },
+  width: 'auto',
+  dotStyle: {border: '2px solid #f56e71'},
+};
+let dim3Slider = {
+  clickable: true,
+  data: ['Low','Med','High'],
+  disabled: false,
+  dotSize: 16,
+  height: 3,
+  lazy: true,
+  marks: true,
+  hideLabel: true,
+  process: false,
+  sliderValue: 'Low',
+  speed: 0.25,
+  style: { marginTop: '0px'},
+  tooltipPlacement: 'top',
+  tooltipStyle: { backgroundColor: '#f56e71', borderColor: '#f56e71' },
+  width: 'auto',
+  dotStyle: {border: '2px solid #f56e71'},
+};
+let dim4Slider = {
+  clickable: true,
+  data: ['Low','Med','High'],
+  disabled: false,
+  dotSize: 16,
+  height: 3,
+  lazy: true,
+  marks: true,
+  hideLabel: true,
+  process: false,
+  sliderValue: 'Low',
+  speed: 0.25,
+  style: { marginTop: '0px'},
+  tooltipPlacement: 'top',
+  tooltipStyle: { backgroundColor: '#f56e71', borderColor: '#f56e71' },
+  width: 'auto',
+  dotStyle: {border: '2px solid #f56e71'},
+};
+let dim5Slider = {
+  clickable: true,
+  data: ['Low','Med','High'],
+  disabled: false,
+  dotSize: 16,
+  height: 3,
+  lazy: true,
+  marks: true,
+  hideLabel: true,
+  process: false,
+  sliderValue: 'Low',
+  speed: 0.25,
+  style: { marginTop: '0px'},
+  tooltipPlacement: 'top',
+  tooltipStyle: { backgroundColor: '#f56e71', borderColor: '#f56e71' },
+  width: 'auto',
+  dotStyle: {border: '2px solid #f56e71'},
+};
 
 let app = new Vue({
   el: '#panel',
@@ -859,6 +952,17 @@ let app = new Vue({
 	selectedScn: 1,
 	scnTitle: 'Baseline',
 	rows: SCEN_SUMMARY[1],
+	
+	dim1Slider: dim1Slider,
+	dim2Slider: dim2Slider,
+	dim3Slider: dim3Slider,
+	dim4Slider: dim4Slider,
+	dim5Slider: dim5Slider,
+	dim1Value: 'Low',
+	dim2Value: 'Low',
+	dim3Value: 'Low',
+	dim4Value: 'Low',
+	dim5Value: 'Low',
 	
     bp0: 0.0,
     bp1: 0.0,
@@ -932,7 +1036,11 @@ let app = new Vue({
     addLayers:[],
   },
   watch: {
-    sliderValue: selectionChanged,
+    dim1Value: dim1Changed,
+	dim2Value: dim2Changed,
+	dim3Value: dim3Changed,
+	dim4Value: dim4Changed,
+	dim5Value: dim5Changed,
   },
   methods: {
     clickToggleHelp: clickToggleHelp,
@@ -949,6 +1057,9 @@ let app = new Vue({
 	dim3Changed: dim3Changed,
 	dim4Changed: dim4Changed,
 	dim5Changed: dim5Changed
+  },
+  components: {
+    vueSlider,
   },
 });
 
