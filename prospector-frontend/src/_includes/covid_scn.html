@@ -56,7 +56,16 @@
                     ${vizinfo[item]['TXT']}
               </button>
          </div>
-         <div v-if="!isTrnHidden" style="margin-top:5px">
+         <div v-if="!isAspdHidden" style="margin-top:5px">
+				<h5>CHOOSE TIME PERIOD</h5>
+					<button v-for="item in tp_options2"
+					  v-on:click="tpChanged2(item.value)"
+					  class="ui mini grey button"
+					  v-bind:class="{ active: item.value==selected_timep2, color1: item.value==selected_timep2 }">
+					  ${item.text}
+					</button>
+		 </div>         
+		 <div v-if="!isTrnHidden" style="margin-top:5px">
 				<h5>CHOOSE TIME PERIOD</h5>
 					<button v-for="item in tp_options"
 					  v-on:click="tpChanged(item.value)"

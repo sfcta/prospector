@@ -381,7 +381,7 @@ function getInfoHtml(geo) {
             (app.comp_check? '<b> Diff: </b>':'<b>: </b>') +   
             `${metric_val}` + ' ' + `${VIZ_INFO[app.selectedViz]['POST_UNITS']}` +
             ((app.pct_check && app.comp_check && metric_val !== null)? '%':'') + 
-            ((app.bwidth_check && !app.comp_check)? `<br/><b>Daily Volume</b>` + '<b>: </b>' + bwmetric_val:'');
+            ((app.bwidth_check && !app.comp_check)? `<br/><b>Volume</b>` + '<b>: </b>' + bwmetric_val:'');
 
   if (app.comp_check) {
     retval += `<hr><b>${app.sliderValue[0]}</b> `+`<b>${METRIC_DESC['ab_vol']}: </b>` + `${basevol_val}<br/>` +
@@ -417,8 +417,12 @@ async function getMapData() {
   let resp = await fetch(data_url);
   let jsonData = await resp.json();
   base_lookup = {};
-  
-  if (app.selectedViz == 'TCROWD') {
+
+  if (app.selectedViz == 'ASPD') {
+	  for (let tod of app.tp_options2) {
+		  base_lookup[tod.value] = {};
+	  }
+  } else if (app.selectedViz == 'TCROWD') {
 	  for (let tod of app.tp_options) {
 		  base_lookup[tod.value] = {};
 	  }
@@ -433,7 +437,7 @@ async function getMapData() {
   
   for (let entry of jsonData) {
 	  if (app.selectedViz == 'ASPD') {
-		  base_lookup[entry[GEOID_VAR]] = entry;
+		  base_lookup[entry[TOD_VAR]][entry[GEOID_VAR]] = entry;
 	  } else if (app.selectedViz == 'TCROWD') {
 		  base_lookup[entry[TOD_VAR]][entry[GEOID_VAR]] = entry;
 	  } else if (app.selectedViz == 'TTIME') {
@@ -485,9 +489,9 @@ async function drawMapFeatures(queryMapData=true) {
 	  bwidth_metric = null;
 	  
 	  if (app.selectedViz == 'ASPD') {
-		  if (base_lookup.hasOwnProperty(feat[GEOID_VAR])) {
-			map_metric = base_lookup[feat[GEOID_VAR]][sel_metric];
-			bwidth_metric = base_lookup[feat[GEOID_VAR]][sel_bwidth];
+		  if (base_lookup[app.selected_timep2].hasOwnProperty(feat[GEOID_VAR])) {
+			map_metric = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_metric];
+			bwidth_metric = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_bwidth];
 		  }
 	  } else if (app.selectedViz == 'TCROWD') {
 		  if (base_lookup[app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
@@ -785,6 +789,10 @@ function opChanged(chosenop) {
   app.selected_op = chosenop;
   drawMapFeatures(false);
 }
+function tpChanged2(chosentp) {
+  app.selected_timep2 = chosentp;
+  drawMapFeatures(false);
+}
 function incomeChanged(choseninc) {
   app.selected_income = choseninc;
   drawMapFeatures(false);
@@ -799,18 +807,22 @@ function clickViz(chosenviz) {
   if (popSelGeo) popSelGeo.remove();
   
   if (chosenviz=='ASPD') {
+	  app.isAspdHidden = false;
 	  app.isTrnHidden = true;
 	  app.isTTHidden = true;
 	  app.bwidth_check = true;
   } else if (chosenviz=='TCROWD') {
+	  app.isAspdHidden = true;
 	  app.isTrnHidden = false;
 	  app.isTTHidden = true;
 	  app.bwidth_check = true;
   } else if (chosenviz=='TTIME') {
+	  app.isAspdHidden = true;
 	  app.isTrnHidden = true;
 	  app.isTTHidden = false;
 	  app.bwidth_check = false;
   } else {
+	  app.isAspdHidden = true;
 	  app.isTrnHidden = true;
 	  app.isTTHidden = true;
 	  app.bwidth_check = false;
@@ -947,6 +959,7 @@ let app = new Vue({
 	vizlist: VIZ_LIST,
     vizinfo: VIZ_INFO,
 	selectedViz: VIZ_LIST[0],
+	isAspdHidden: false,
 	isTrnHidden: true,
 	isTTHidden: true,
 	selectedScn: 1,
@@ -1005,6 +1018,12 @@ let app = new Vue({
     tp_options: [
 	{text: 'AM', value: 'AM'},
     {text: 'PM', value: 'PM'}],
+	
+	selected_timep2: 'AM',
+    tp_options2: [
+	{text: 'AM', value: 'AM'},
+    {text: 'PM', value: 'PM'},
+	{text: 'DAILY', value: 'DAILY'}],
     
     selected_metric: 'load',
     metric_options: [
@@ -1048,6 +1067,7 @@ let app = new Vue({
     yrChanged: yrChanged,
     metricChanged: metricChanged,
     tpChanged: tpChanged,
+	tpChanged2: tpChanged2,
     opChanged: opChanged,
 	incomeChanged: incomeChanged,
     purpChanged: purpChanged,
