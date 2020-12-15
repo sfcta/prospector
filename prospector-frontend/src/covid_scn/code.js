@@ -373,6 +373,8 @@ function getInfoHtml(geo) {
   } else if (app.selectedViz=='TCROWD') {
 	  retval += '<b>Link AB: </b>' + `${geo[GEOID_VAR]}<br/>`;
 	  retval += '<b>Mode: </b>' + `${MODE_DESC[geo['mode']]}<br/><hr>`;
+	  
+	  if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
   } else {
 	  retval += '<b>TAZ: </b>' + `${geo[GEOID_VAR]}<br/>`;
 	  retval += '<b>Neighborhood: </b>' + `${geo['nhood']}<br/><hr>`;
