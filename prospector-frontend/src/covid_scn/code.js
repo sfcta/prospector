@@ -209,7 +209,7 @@ const TOD_VAR = 'tp';
 const INC_VAR = 'income_group';
 const PURP_VAR = 'importance';
 
-const FRAC_COLS = ['cspd', 'spd_ratio', 'load', 'avg_time'];
+const FRAC_COLS = ['cspd', 'spd_ratio', 'load', 'vmt_per_pers', 'avg_time'];
 const YR_LIST = [2015,2050];
 
 const MISSING_COLOR = '#ccd';
@@ -346,7 +346,7 @@ infoPanel.onAdd = function(map) {
 
 function getInfoHtml(geo) {
   let metric_val = null;
-  if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
+  
   let base_val = null;
   if (geo.base !== null) base_val = (Math.round(geo.base*100)/100).toLocaleString();
   let comp_val = null;
@@ -368,12 +368,20 @@ function getInfoHtml(geo) {
 	  retval += '<b>Street: </b>' + `${geo['streetname']}<br/>`;
 	  retval += '<b>Congested Speed: </b>' + `${val1}` + ' mph' + `<br/>`;
 	  retval += '<b>Free Flow Speed: </b>' + `${val2}` + ' mph' + `<br/><hr>`;
+	  
+	  if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
   } else if (app.selectedViz=='TCROWD') {
 	  retval += '<b>Link AB: </b>' + `${geo[GEOID_VAR]}<br/>`;
 	  retval += '<b>Mode: </b>' + `${MODE_DESC[geo['mode']]}<br/><hr>`;
   } else {
 	  retval += '<b>TAZ: </b>' + `${geo[GEOID_VAR]}<br/>`;
 	  retval += '<b>Neighborhood: </b>' + `${geo['nhood']}<br/><hr>`;
+	  
+	  if (app.selectedViz=='TTIME') {
+		if (geo.metric !== null) metric_val = (Math.round(geo.metric*10)/10).toLocaleString();  
+	  } else if (app.selectedViz=='VMT') {
+		if (geo.metric !== null) metric_val = (Math.round(geo.metric*10)/10).toLocaleString();  
+	  }
   }
   
   if (app.comp_check) {
