@@ -61,16 +61,16 @@ const VIZ_INFO = {
 	GEO_VIEWKEY: 'hlinks',
 	DATA_VIEW: 'covid_hwy_scn',
 	GEOID_VAR: 'a_b',
-    METRIC: 'cspd',
-    METRIC_DESC: 'Congested Speed',
+    METRIC: 'spd_ratio',
+    METRIC_DESC: 'Speed Ratio',
 	BWIDTH_METRIC: 'totvol',
-	COLORVALS: [0, 8, 15, 30, 45, 500],
-    COLORS: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641'],
+	COLORVALS: [0, .5, .7, .8, .9, 500],
+    COLORS: ['#c73232','#f26e72','#f8afb1','#facacc','#fef0f1'],
 	BWVALS: [0, 1000, 5000, 25000, 125000, 500000],
-	BWIDTHS: [0.5, 1, 2, 4, 8],
+	BWIDTHS: [1, 2, 4, 8, 10],
 	STYLES_KEY: 'line',
     COLOR_BY_BINS: true,
-    POST_UNITS: 'mph',
+    POST_UNITS: '',
   },
   TCROWD: {
     TXT: 'Transit Volumes & Crowding',
@@ -209,7 +209,7 @@ const TOD_VAR = 'tp';
 const INC_VAR = 'income_group';
 const PURP_VAR = 'importance';
 
-const FRAC_COLS = ['cspd', 'load', 'avg_time'];
+const FRAC_COLS = ['cspd', 'spd_ratio', 'load', 'avg_time'];
 const YR_LIST = [2015,2050];
 
 const MISSING_COLOR = '#ccd';
@@ -361,8 +361,13 @@ function getInfoHtml(geo) {
 
   let retval = '';
   if (app.selectedViz=='ASPD') {
+	  let val1 = (Math.round(geo.cspd*10)/10).toLocaleString();
+	  let val2 = (Math.round(geo.fspd*10)/10).toLocaleString();
+	  
 	  retval += '<b>Link AB: </b>' + `${geo[GEOID_VAR]}<br/>`;
-	  retval += '<b>Street: </b>' + `${geo['streetname']}<br/><hr>`;
+	  retval += '<b>Street: </b>' + `${geo['streetname']}<br/>`;
+	  retval += '<b>Congested Speed: </b>' + `${val1}` + ' mph' + `<br/>`;
+	  retval += '<b>Free Flow Speed: </b>' + `${val2}` + ' mph' + `<br/><hr>`;
   } else if (app.selectedViz=='TCROWD') {
 	  retval += '<b>Link AB: </b>' + `${geo[GEOID_VAR]}<br/>`;
 	  retval += '<b>Mode: </b>' + `${MODE_DESC[geo['mode']]}<br/><hr>`;
@@ -492,6 +497,8 @@ async function drawMapFeatures(queryMapData=true) {
 		  if (base_lookup[app.selected_timep2].hasOwnProperty(feat[GEOID_VAR])) {
 			map_metric = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_metric];
 			bwidth_metric = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_bwidth];
+			feat['cspd'] = base_lookup[app.selected_timep2][feat[GEOID_VAR]]['cspd'];
+			feat['fspd'] = base_lookup[app.selected_timep2][feat[GEOID_VAR]]['fspd'];
 		  }
 	  } else if (app.selectedViz == 'TCROWD') {
 		  if (base_lookup[app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
@@ -573,9 +580,10 @@ async function drawMapFeatures(queryMapData=true) {
           true,
           (app.pct_check && app.comp_check)? '%': ''
         );
-
+		
+		let units = VIZ_INFO[app.selectedViz]['POST_UNITS'];
         legHTML = '<h4>' + VIZ_INFO[app.selectedViz]['METRIC_DESC'] +
-                  (app.pct_check? ' % Diff': ' (' + VIZ_INFO[app.selectedViz]['POST_UNITS'] + ')') +
+                  (app.pct_check? ' % Diff': (units!=''? ' (' + VIZ_INFO[app.selectedViz]['POST_UNITS'] + ')': '')) +
                   '</h4>' + legHTML;
                   
         if (app.bwidth_check) {
