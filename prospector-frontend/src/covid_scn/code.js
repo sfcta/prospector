@@ -107,7 +107,7 @@ const VIZ_INFO = {
     DATA_VIEW: 'covid_vmt_scn',
 	GEOID_VAR: 'taz',
     METRIC: 'vmt_per_pers',
-    METRIC_DESC: 'Vehicle Miles Traveled per Person',
+    METRIC_DESC: 'Daily Vehicle Miles Traveled per Person',
 	COLORVALS: [0, 1, 2, 3, 4, 5, 6, 7, 8, 500],
     COLORS: ['#fef0f1','#fde0e2','#facacc','#f8afb1','#f69497','#f47d80','#f26e72','#dd4f51','#c73232'],
 	STYLES_KEY: 'polygon',	
@@ -346,11 +346,9 @@ infoPanel.onAdd = function(map) {
 
 function getInfoHtml(geo) {
   let metric_val = null;
-  
   let base_val = null;
-  if (geo.base !== null) base_val = (Math.round(geo.base*100)/100).toLocaleString();
   let comp_val = null;
-  if (geo.comp !== null) comp_val = (Math.round(geo.comp*100)/100).toLocaleString();
+  
   let basevol_val = null;
   if (geo.basevol !== null) basevol_val = Math.round(geo.basevol).toLocaleString();
   let compvol_val = null;
@@ -370,11 +368,23 @@ function getInfoHtml(geo) {
 	  retval += '<b>Free Flow Speed: </b>' + `${val2}` + ' mph' + `<br/><hr>`;
 	  
 	  if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
+	  if (app.comp_check) {
+		if (geo.base !== null) base_val = (Math.round(geo.base*100)/100).toLocaleString();
+		if (geo.comp !== null) comp_val = (Math.round(geo.comp*100)/100).toLocaleString();
+		retval += '<b>Base </b> '+`<b>${VIZ_INFO[app.selectedViz]['METRIC_DESC']}: </b>` + `${base_val}<br/>` +
+              `<b>${VIZ_INFO[app.selectedViz]['METRIC_DESC']}: </b>` + `${comp_val}<br/>`;
+	  }
   } else if (app.selectedViz=='TCROWD') {
 	  retval += '<b>Link AB: </b>' + `${geo[GEOID_VAR]}<br/>`;
 	  retval += '<b>Mode: </b>' + `${MODE_DESC[geo['mode']]}<br/><hr>`;
 	  
 	  if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
+	  if (app.comp_check) {
+		if (geo.base !== null) base_val = (Math.round(geo.base*100)/100).toLocaleString();
+		if (geo.comp !== null) comp_val = (Math.round(geo.comp*100)/100).toLocaleString();
+		retval += '<b>Base </b> '+`<b>${VIZ_INFO[app.selectedViz]['METRIC_DESC']}: </b>` + `${base_val}<br/>` +
+              `<b>${VIZ_INFO[app.selectedViz]['METRIC_DESC']}: </b>` + `${comp_val}<br/>`;
+	  }
   } else {
 	  retval += '<b>TAZ: </b>' + `${geo[GEOID_VAR]}<br/>`;
 	  retval += '<b>Neighborhood: </b>' + `${geo['nhood']}<br/><hr>`;
@@ -384,11 +394,12 @@ function getInfoHtml(geo) {
 	  } else if (app.selectedViz=='VMT') {
 		if (geo.metric !== null) metric_val = (Math.round(geo.metric*10)/10).toLocaleString();  
 	  }
-  }
-  
-  if (app.comp_check) {
-    retval += `<b>${app.sliderValue[0]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${base_val}<br/>` +
-              `<b>${app.sliderValue[1]}</b> `+`<b>${METRIC_DESC[app.selected_metric]}: </b>` + `${comp_val}<br/>`;
+	  if (app.comp_check) {
+		if (geo.base !== null) base_val = (Math.round(geo.base*10)/10).toLocaleString();
+		if (geo.comp !== null) comp_val = (Math.round(geo.comp*10)/10).toLocaleString();
+		retval += '<b>Base </b> '+`<b>${VIZ_INFO[app.selectedViz]['METRIC_DESC']}: </b>` + `${base_val}<br/>` +
+              `<b>${VIZ_INFO[app.selectedViz]['METRIC_DESC']}: </b>` + `${comp_val}<br/>`;
+	  }
   }
 
   retval += `<b>${VIZ_INFO[app.selectedViz]['METRIC_DESC']}</b>` + 
@@ -396,12 +407,12 @@ function getInfoHtml(geo) {
             (app.comp_check? '<b> Diff: </b>':'<b>: </b>') +   
             `${metric_val}` + ' ' + `${VIZ_INFO[app.selectedViz]['POST_UNITS']}` +
             ((app.pct_check && app.comp_check && metric_val !== null)? '%':'') + 
-            ((app.bwidth_check && !app.comp_check)? `<br/><b>Volume</b>` + '<b>: </b>' + bwmetric_val:'');
+            ((app.bwidth_check)? `<br/><b>Volume</b>` + '<b>: </b>' + bwmetric_val:'');
 
-  if (app.comp_check) {
+  /*if (app.comp_check) {
     retval += `<hr><b>${app.sliderValue[0]}</b> `+`<b>${METRIC_DESC['ab_vol']}: </b>` + `${basevol_val}<br/>` +
               `<b>${app.sliderValue[1]}</b> `+`<b>${METRIC_DESC['ab_vol']}: </b>` + `${compvol_val}<br/>`;
-  }            
+  }*/            
             
   return retval; 
 }
@@ -502,26 +513,54 @@ async function drawMapFeatures(queryMapData=true) {
     for (let feat of cleanFeatures) {
 	  map_metric = null;
 	  bwidth_metric = null;
+	  feat['base'] = null;
+	  feat['comp'] = null;
 	  
 	  if (app.selectedViz == 'ASPD') {
 		  if (base_lookup[app.selected_timep2].hasOwnProperty(feat[GEOID_VAR])) {
-			map_metric = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_metric];
+			if (app.comp_check) {
+				feat['base'] = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_metric+'_base'];
+				feat['comp'] = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_metric];
+				map_metric = feat['comp']-feat['base'];
+			} else {
+				map_metric = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_metric];
+			}
+			
 			bwidth_metric = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_bwidth];
 			feat['cspd'] = base_lookup[app.selected_timep2][feat[GEOID_VAR]]['cspd'];
 			feat['fspd'] = base_lookup[app.selected_timep2][feat[GEOID_VAR]]['fspd'];
 		  }
 	  } else if (app.selectedViz == 'TCROWD') {
 		  if (base_lookup[app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
-			map_metric = base_lookup[app.selected_timep][feat[GEOID_VAR]][sel_metric];
+			if (app.comp_check) {
+				feat['base'] = base_lookup[app.selected_timep][feat[GEOID_VAR]][sel_metric+'_base'];
+				feat['comp'] = base_lookup[app.selected_timep][feat[GEOID_VAR]][sel_metric];
+				map_metric = feat['comp']-feat['base'];
+			} else {
+				map_metric = base_lookup[app.selected_timep][feat[GEOID_VAR]][sel_metric];
+			}
+			
 			bwidth_metric = base_lookup[app.selected_timep][feat[GEOID_VAR]][sel_bwidth];
 		  }
 	  } else if (app.selectedViz == 'TTIME') {
 		  if (base_lookup[app.selected_income][app.selected_purp].hasOwnProperty(feat[GEOID_VAR])) {
-			map_metric = base_lookup[app.selected_income][app.selected_purp][feat[GEOID_VAR]][sel_metric];
+			if (app.comp_check) {
+				feat['base'] = base_lookup[app.selected_income][app.selected_purp][feat[GEOID_VAR]][sel_metric+'_base'];
+				feat['comp'] = base_lookup[app.selected_income][app.selected_purp][feat[GEOID_VAR]][sel_metric];
+				map_metric = feat['comp']-feat['base'];
+			} else {
+				map_metric = base_lookup[app.selected_income][app.selected_purp][feat[GEOID_VAR]][sel_metric];
+			}
 		  }
 	  } else {
 		  if (base_lookup.hasOwnProperty(feat[GEOID_VAR])) {
-			map_metric = base_lookup[feat[GEOID_VAR]][sel_metric];
+			if (app.comp_check) {
+				feat['base'] = base_lookup[feat[GEOID_VAR]][sel_metric+'_base'];
+				feat['comp'] = base_lookup[feat[GEOID_VAR]][sel_metric];
+				map_metric = feat['comp']-feat['base'];
+			} else {
+				map_metric = base_lookup[feat[GEOID_VAR]][sel_metric];
+			}
 		  }
 	  }
 	
@@ -798,6 +837,9 @@ function metricChanged(metric) {
     app.bwidth_check = true;
   }
   app.selected_metric = metric;
+}
+function compMode(check) {
+  drawMapFeatures(false);
 }
 function tpChanged(chosentp) {
   app.selected_timep = chosentp;
@@ -1078,6 +1120,7 @@ let app = new Vue({
 	dim3Value: dim3Changed,
 	dim4Value: dim4Changed,
 	dim5Value: dim5Changed,
+	comp_check: compMode,
   },
   methods: {
     clickToggleHelp: clickToggleHelp,
@@ -1090,11 +1133,6 @@ let app = new Vue({
 	incomeChanged: incomeChanged,
     purpChanged: purpChanged,
 	clickViz: clickViz,
-	dim1Changed: dim1Changed,
-	dim2Changed: dim2Changed,
-	dim3Changed: dim3Changed,
-	dim4Changed: dim4Changed,
-	dim5Changed: dim5Changed
   },
   components: {
     vueSlider,
