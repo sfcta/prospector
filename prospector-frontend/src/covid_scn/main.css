@@ -41,12 +41,15 @@ th:last-child {
 
 [class*="col-"] {
   float: left;
-  padding: 12px;
+  padding: 12px 5px;
 }
 
 .col-1 {width: 60%;}
 .col-2 {width: 40%;}
 .col-3 {width: 100%;}
+
+.col1 {width: 55%; float: left; padding-bottom: 5px;}
+.col2 {width: 45%; float: left;}
 
 
   

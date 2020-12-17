@@ -117,7 +117,7 @@ const VIZ_INFO = {
 };
 
 const SCEN_DEF = {
-	1: {'name': 'Baseline', 'desc': ''},
+	1: {'name': 'Baseline (pre-COVID)', 'desc': ''},
 	2: {'name': 'Shelter in Place', 'desc': ''},
 	3: {'name': 'Carmageddon', 'desc': ''},
 	4: {'name': 'Remote Work Forever', 'desc': ''},
@@ -127,6 +127,11 @@ const SCEN_DEF = {
 	8: {'name': 'Transit Demand Worst Case', 'desc': ''},
 	9: {'name': 'Transit Trendline', 'desc': ''},
 }
+let scn_list = [];
+for (const prop in SCEN_DEF) {
+	scn_list.push({id: prop, name: SCEN_DEF[prop]['name']});
+}
+
 const SCEN_SUMMARY = {
 	1: [{key: 'SF Resident Trips', value: '2,850,049'}, 
 		{key: 'Vehicle Miles Traveled', value: '9.53 million'}, 
@@ -1025,6 +1030,7 @@ let app = new Vue({
 	selectedScn: 1,
 	scnTitle: 'Baseline',
 	rows: SCEN_SUMMARY[1],
+	scenario_options: scn_list,
 	
 	dim1Slider: dim1Slider,
 	dim2Slider: dim2Slider,

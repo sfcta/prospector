@@ -30,6 +30,13 @@
         </div>
 
         <div id="picker">
+		  <h5 class="col1">CHOOSE PRESET SCENARIO</h5>
+		  <select v-model="selectedScn" class="col2">
+            <option v-for="option in scenario_options" v-bind:value="option.id">
+              ${option.name}
+            </option>
+          </select>
+		  <h5 class="col-3">*OR* CHOOSE SCENARIO FEATURES</h5>
 
 		  <div class="col-1"><h5>UNEMPLOYMENT</h5></div>
 	      <div class="col-2"><vue-slider v-bind="dim1Slider" v-model="dim1Value"></vue-slider></div>
