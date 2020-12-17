@@ -64,8 +64,8 @@ const VIZ_INFO = {
     METRIC: 'spd_ratio',
     METRIC_DESC: 'Speed Ratio',
 	BWIDTH_METRIC: 'totvol',
-	COLORVALS: [0, .5, .7, .8, .9, 500],
-    COLORS: ['#c73232','#f26e72','#f8afb1','#facacc','#fef0f1'],
+	COLORVALS: {false: [0, .5, .7, .8, .9, 500], true: [-10, -0.2, -0.1, 0.1, 0.2, 500]},
+    COLORS: {false: ['#c73232','#f26e72','#f8afb1','#facacc','#fef0f1'], true: ['#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6']},
 	BWVALS: [0, 1000, 5000, 25000, 125000, 500000],
 	BWIDTHS: [1, 2, 4, 8, 10],
 	STYLES_KEY: 'line',
@@ -80,8 +80,8 @@ const VIZ_INFO = {
     METRIC: 'load',
     METRIC_DESC: 'Crowding',
 	BWIDTH_METRIC: 'ab_vol',
-	COLORVALS: [0, 0.5, 0.85, 1, 500],
-    COLORS: ['#fde0e2','#f7a6a9','#f37377','#c73232'],
+	COLORVALS: {false: [0, 0.5, 0.85, 1, 500], true: [-10, -0.2, -0.05, 0.05, 0.2, 500]},
+    COLORS: {false: ['#fde0e2','#f7a6a9','#f37377','#c73232'], true: ['#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c']},
 	BWVALS: [0, 500, 2500, 5000, 10000, 500000],
 	BWIDTHS: [1, 2, 4, 8, 16],
 	STYLES_KEY: 'line',	
@@ -95,8 +95,8 @@ const VIZ_INFO = {
 	GEOID_VAR: 'taz',
     METRIC: 'avg_time',
     METRIC_DESC: 'Average Travel Time',
-	COLORVALS: [0, 15, 18, 21, 24, 27, 30, 500],
-    COLORS: ['#fef0f1','#fcd9db','#f9b8ba','#f69497','#f3787c','#e45b5d','#c73232'],
+	COLORVALS: {false: [0, 15, 18, 21, 24, 27, 30, 500], true: [-100, -3, -0.5, 0.5, 3, 500]},
+    COLORS: {false: ['#fef0f1','#fcd9db','#f9b8ba','#f69497','#f3787c','#e45b5d','#c73232'], true: ['#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c']},
 	STYLES_KEY: 'polygon',	
     COLOR_BY_BINS: true,
     POST_UNITS: 'minutes',
@@ -108,8 +108,8 @@ const VIZ_INFO = {
 	GEOID_VAR: 'taz',
     METRIC: 'vmt_per_pers',
     METRIC_DESC: 'Daily Vehicle Miles Traveled per Person',
-	COLORVALS: [0, 1, 2, 3, 4, 5, 6, 7, 8, 500],
-    COLORS: ['#fef0f1','#fde0e2','#facacc','#f8afb1','#f69497','#f47d80','#f26e72','#dd4f51','#c73232'],
+	COLORVALS: {false: [0, 1, 2, 3, 4, 5, 6, 7, 8, 500], true: [-100, -3, -0.1, 0.1, 3, 500]},
+    COLORS: {false: ['#fef0f1','#fde0e2','#facacc','#f8afb1','#f69497','#f47d80','#f26e72','#dd4f51','#c73232'], true: ['#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c']},
 	STYLES_KEY: 'polygon',	
 	COLOR_BY_BINS: true,
     POST_UNITS: '',
@@ -581,8 +581,8 @@ async function drawMapFeatures(queryMapData=true) {
     
     if (0 == 0) {
 	//if (map_vals.length > 0) {	
-	  sel_colorvals = VIZ_INFO[app.selectedViz]['COLORVALS'];
-	  sel_colors = VIZ_INFO[app.selectedViz]['COLORS'];
+	  sel_colorvals = VIZ_INFO[app.selectedViz]['COLORVALS'][app.comp_check];
+	  sel_colors = VIZ_INFO[app.selectedViz]['COLORS'][app.comp_check];
 
       let bw_widths;
       if (app.bwidth_check) {
@@ -632,7 +632,7 @@ async function drawMapFeatures(queryMapData=true) {
 		
 		let units = VIZ_INFO[app.selectedViz]['POST_UNITS'];
         legHTML = '<h4>' + VIZ_INFO[app.selectedViz]['METRIC_DESC'] +
-                  (app.pct_check? ' % Diff': (units!=''? ' (' + VIZ_INFO[app.selectedViz]['POST_UNITS'] + ')': '')) +
+                  (app.comp_check? ' Diff': (units!=''? ' (' + VIZ_INFO[app.selectedViz]['POST_UNITS'] + ')': '')) +
                   '</h4>' + legHTML;
                   
         if (app.bwidth_check) {
