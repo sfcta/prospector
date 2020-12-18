@@ -64,7 +64,7 @@ const VIZ_INFO = {
     METRIC: 'spd_ratio',
     METRIC_DESC: 'Speed Ratio',
 	BWIDTH_METRIC: 'totvol',
-	COLORVALS: {false: [0, .5, .7, .8, .9, 500], true: [-10, -0.2, -0.1, 0.1, 0.2, 500]},
+	COLORVALS: {false: [0, .5, .7, .8, .9, 500], true: [-10, -0.1, -0.05, 0.05, 0.1, 500]},
     COLORS: {false: ['#c73232','#f26e72','#f8afb1','#facacc','#fef0f1'], true: ['#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6']},
 	BWVALS: [0, 1000, 5000, 25000, 125000, 500000],
 	BWIDTHS: [1, 2, 4, 8, 10],
