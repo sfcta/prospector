@@ -718,54 +718,54 @@ function buildChartHtmlFromData() {
   new Morris.Bar({
 	  element: 'chart1',
 	  data: [
-	  {m: '', a: a[0], b: b[0]},
+	  {m: '', b: b[0], a: a[0]},
 	  ],
 	  xkey: 'm',
-	  ykeys: app.selectedScn==1? ['b']: ['a', 'b'],
-	  labels: app.selectedScn==1? ['Base']: ['Scn', 'Base'],
+	  ykeys: app.selectedScn==1? ['b']: ['b', 'a'],
+	  labels: app.selectedScn==1? ['Base']: ['Base', 'Scn'],
 	  axes: false,
 	  grid: false,
 	  hideHover: true,
-	  barColors: app.selectedScn==1? ['#38bebb']: ['#f56e71', '#38bebb'],
+	  barColors: app.selectedScn==1? ['#38bebb']: ['#38bebb', '#f56e71'],
   });
   new Morris.Bar({
 	  element: 'chart2',
 	  data: [
-	  {m: '', a: a[1], b: b[1]},
+	  {m: '', b: b[1], a: a[1]},
 	  ],
 	  xkey: 'm',
-	  ykeys: app.selectedScn==1? ['b']: ['a', 'b'],
-	  labels: app.selectedScn==1? ['Base']: ['Scn', 'Base'],
+	  ykeys: app.selectedScn==1? ['b']: ['b', 'a'],
+	  labels: app.selectedScn==1? ['Base']: ['Base', 'Scn'],
 	  axes: false,
 	  grid: false,
 	  hideHover: true,
-	  barColors: app.selectedScn==1? ['#38bebb']: ['#f56e71', '#38bebb'],
+	  barColors: app.selectedScn==1? ['#38bebb']: ['#38bebb', '#f56e71'],
   });
   new Morris.Bar({
 	  element: 'chart3',
 	  data: [
-	  {m: '', a: a[2], b: b[2]},
+	  {m: '', b: b[2], a: a[2]},
 	  ],
 	  xkey: 'm',
-	  ykeys: app.selectedScn==1? ['b']: ['a', 'b'],
-	  labels: app.selectedScn==1? ['Base']: ['Scn', 'Base'],
+	  ykeys: app.selectedScn==1? ['b']: ['b', 'a'],
+	  labels: app.selectedScn==1? ['Base']: ['Base', 'Scn'],
 	  axes: false,
 	  grid: false,
 	  hideHover: true,
-	  barColors: app.selectedScn==1? ['#38bebb']: ['#f56e71', '#38bebb'],
+	  barColors: app.selectedScn==1? ['#38bebb']: ['#38bebb', '#f56e71'],
   });
   new Morris.Bar({
 	  element: 'chart4',
 	  data: [
-	  {m: '', a: a[3], b: b[3]},
+	  {m: '', b: b[3], a: a[3]},
 	  ],
 	  xkey: 'm',
-	  ykeys: app.selectedScn==1? ['b']: ['a', 'b'],
-	  labels: app.selectedScn==1? ['Base']: ['Scn', 'Base'],
+	  ykeys: app.selectedScn==1? ['b']: ['b', 'a'],
+	  labels: app.selectedScn==1? ['Base']: ['Base', 'Scn'],
 	  axes: false,
 	  grid: false,
 	  hideHover: true,
-	  barColors: app.selectedScn==1? ['#38bebb']: ['#f56e71', '#38bebb'],
+	  barColors: app.selectedScn==1? ['#38bebb']: ['#38bebb', '#f56e71'],
   });
 }
 
