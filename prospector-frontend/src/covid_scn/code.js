@@ -116,98 +116,9 @@ const VIZ_INFO = {
   }  
 };
 
-const SCEN_DEF = {
-	1: {'name': 'Baseline (pre-COVID)', 'desc': ''},
-	2: {'name': 'Shelter in Place', 'desc': ''},
-	3: {'name': 'Carmageddon', 'desc': ''},
-	4: {'name': 'Remote Work Forever', 'desc': ''},
-	5: {'name': 'Lingering Fears', 'desc': ''},
-	6: {'name': 'Doldrums', 'desc': ''},
-	7: {'name': 'K Recovery', 'desc': ''},
-	8: {'name': 'Transit Demand Worst Case', 'desc': ''},
-	9: {'name': 'Transit Trendline', 'desc': ''},
-}
-let scn_list = [];
-for (const prop in SCEN_DEF) {
-	scn_list.push({id: prop, name: SCEN_DEF[prop]['name']});
-}
-
-const SCEN_SUMMARY = {
-	1: [{key: 'SF Resident Trips', value: '2,850,049'}, 
-		{key: 'Vehicle Miles Traveled', value: '9.53 million'}, 
-		{key: 'Average Speed', value: '20.9 mph'}, 
-		{key: 'Transit Mode Share', value: '21.1%'},
-		{key: 'Muni Boardings', value: '662,788'},
-		{key: 'BART Boardings', value: '416,767'},
-		{key: 'Caltrain Boardings', value: '62,853'}],
-	2: [{key: 'SF Resident Trips', value: '724,966'}, 
-		{key: 'Vehicle Miles Traveled', value: '3.73 million'}, 
-		{key: 'Average Speed', value: '25.1 mph'}, 
-		{key: 'Transit Mode Share', value: '8.1%'},
-		{key: 'Muni Boardings', value: '66,859'},
-		{key: 'BART Boardings', value: '25,613'},
-		{key: 'Caltrain Boardings', value: '6,509'}],
-	3: [{key: 'SF Resident Trips', value: '2,830,916'}, 
-		{key: 'Vehicle Miles Traveled', value: '10.45 million'}, 
-		{key: 'Average Speed', value: '18.9 mph'}, 
-		{key: 'Transit Mode Share', value: '7.6%'},
-		{key: 'Muni Boardings', value: '223,082'},
-		{key: 'BART Boardings', value: '99,088'},
-		{key: 'Caltrain Boardings', value: '22,359'}],
-	4: [{key: 'SF Resident Trips', value: '2,217,657'}, 
-		{key: 'Vehicle Miles Traveled', value: '7.71 million'}, 
-		{key: 'Average Speed', value: '22.5 mph'}, 
-		{key: 'Transit Mode Share', value: '10.7%'},
-		{key: 'Muni Boardings', value: '264,253'},
-		{key: 'BART Boardings', value: '102,849'},
-		{key: 'Caltrain Boardings', value: '18,706'}],
-	5: [{key: 'SF Resident Trips', value: '1,675,785'}, 
-		{key: 'Vehicle Miles Traveled', value: '6.95 million'}, 
-		{key: 'Average Speed', value: '22.5 mph'}, 
-		{key: 'Transit Mode Share', value: '14.2%'},
-		{key: 'Muni Boardings', value: '264,097'},
-		{key: 'BART Boardings', value: '123,704'},
-		{key: 'Caltrain Boardings', value: '21,740'}],
-	6: [{key: 'SF Resident Trips', value: '1,843,623'}, 
-		{key: 'Vehicle Miles Traveled', value: '7.19 million'}, 
-		{key: 'Average Speed', value: '22.5 mph'}, 
-		{key: 'Transit Mode Share', value: '17.0%'},
-		{key: 'Muni Boardings', value: '303,345'},
-		{key: 'BART Boardings', value: '168,360'},
-		{key: 'Caltrain Boardings', value: '39,313'}],
-	7: [{key: 'SF Resident Trips', value: '2,511,373'}, 
-		{key: 'Vehicle Miles Traveled', value: '8.55 million'}, 
-		{key: 'Average Speed', value: '21.6 mph'}, 
-		{key: 'Transit Mode Share', value: '11.5%'},
-		{key: 'Muni Boardings', value: '315,038'},
-		{key: 'BART Boardings', value: '133,129'},
-		{key: 'Caltrain Boardings', value: '23,340'}],
-	8: [{key: 'SF Resident Trips', value: '2,227,271'}, 
-		{key: 'Vehicle Miles Traveled', value: '8.00 million'}, 
-		{key: 'Average Speed', value: '22.0 mph'}, 
-		{key: 'Transit Mode Share', value: '8.9%'},
-		{key: 'Muni Boardings', value: '247,117'},
-		{key: 'BART Boardings', value: '93,269'},
-		{key: 'Caltrain Boardings', value: '14,322'}],
-	9: [{key: 'SF Resident Trips', value: '2,541,408'}, 
-		{key: 'Vehicle Miles Traveled', value: '8.77 million'}, 
-		{key: 'Average Speed', value: '21.4 mph'}, 
-		{key: 'Transit Mode Share', value: '14.8%'},
-		{key: 'Muni Boardings', value: '421,350'},
-		{key: 'BART Boardings', value: '229,428'},
-		{key: 'Caltrain Boardings', value: '34,369'}]
-}
-const SCEN_IDMAP = {
-	'low,low,low,low,low': 1,
-	'high,high,high,high,high': 2,
-	'low,low,low,high,high': 3,
-	'low,high,low,med,med': 4,
-	'low,med,med,med,med': 5,
-	'high,low,med,low,high': 6,
-	'med,med,low,med,med': 7,
-	'low,high,low,high,low': 8,
-	'low,med,low,med,low': 9,
-}
+let SCEN_IDMAP = {};
+let ID_SCENMAP = {};
+let SCEN_DEF = {};
 
 const YR_VAR = 'year';
 const TOD_VAR = 'tp';
@@ -251,13 +162,13 @@ async function initialPrep() {
 
   console.log('1...');
   _featJson['hlinks'] = await fetchMapFeatures();
+  await fetchScnSumm();
 
   console.log('2... ');
   await drawMapFeatures();
   
   console.log('3... ');
-  //await buildChartHtmlFromData();
-  //updateStats();
+  await buildChartHtmlFromData();
   
   console.log('4... ');
   await fetchAddLayers();
@@ -310,6 +221,30 @@ async function fetchOtherMapFeatures() {
 	}
 }
 
+async function fetchScnSumm() {
+	const scn_url = API_SERVER + 'covid_scn_summ';
+	try {
+    let resp = await fetch(scn_url);
+    let rows = await resp.json();
+
+    // do some parsing and stuff
+    for (let row of rows) {
+	  let key = row['unemp']+','+row['wfh']+','+row['actavd']+','+row['trnavd']+','+row['trnsvcimp'];
+	  SCEN_IDMAP[key] = row['scn_id'];
+	  ID_SCENMAP[row['scn_id']] = key;
+	  SCEN_DEF[row['scn_id']] = row;
+    }
+	for (let i = 1; i < 11; i++) {
+	  app.scenario_options.push({id: i, name: SCEN_DEF[i]['name']});
+	}
+	app.scnTitle = SCEN_DEF[app.selectedScn]['name'];
+	app.rows = SCEN_DEF[app.selectedScn];
+
+  } catch (error) {
+    console.log('scenario table error: ' + error);
+  }
+}
+
 async function fetchAddLayers() {
   try {/*
     for (let item of ADDLAYERS) {
@@ -328,14 +263,6 @@ async function fetchAddLayers() {
     }*/
   } catch (error) {
     console.log('additional layers error: ' + error);
-  }
-}
-
-function updateStats() {
-  for (let i = 0; i < _aggregateData.length; i++) {
-    for (let m of app.metric_options) {
-      app.aggData[i][m.value] = _aggregateData[i][m.value].toLocaleString();
-    }
   }
 }
 
@@ -511,150 +438,151 @@ async function drawMapFeatures(queryMapData=true) {
       await getMapData();
 	}
 
-    let map_metric;
-    let bwidth_metric;
-    map_vals = [];
-    bwidth_vals = [];
-    for (let feat of cleanFeatures) {
-	  map_metric = null;
-	  bwidth_metric = null;
-	  feat['base'] = null;
-	  feat['comp'] = null;
-	  
-	  if (app.selectedViz == 'ASPD') {
-		  if (base_lookup[app.selected_timep2].hasOwnProperty(feat[GEOID_VAR])) {
-			if (app.comp_check) {
-				feat['base'] = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_metric+'_base'];
-				feat['comp'] = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_metric];
-				map_metric = feat['comp']-feat['base'];
-			} else {
-				map_metric = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_metric];
-			}
-			
-			bwidth_metric = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_bwidth];
-			feat['cspd'] = base_lookup[app.selected_timep2][feat[GEOID_VAR]]['cspd'];
-			feat['fspd'] = base_lookup[app.selected_timep2][feat[GEOID_VAR]]['fspd'];
+    if (app.selectedScn > 0) {
+		let map_metric;
+		let bwidth_metric;
+		map_vals = [];
+		bwidth_vals = [];
+		for (let feat of cleanFeatures) {
+		  map_metric = null;
+		  bwidth_metric = null;
+		  feat['base'] = null;
+		  feat['comp'] = null;
+		  
+		  if (app.selectedViz == 'ASPD') {
+			  if (base_lookup[app.selected_timep2].hasOwnProperty(feat[GEOID_VAR])) {
+				if (app.comp_check) {
+					feat['base'] = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_metric+'_base'];
+					feat['comp'] = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_metric];
+					map_metric = feat['comp']-feat['base'];
+				} else {
+					map_metric = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_metric];
+				}
+				
+				bwidth_metric = base_lookup[app.selected_timep2][feat[GEOID_VAR]][sel_bwidth];
+				feat['cspd'] = base_lookup[app.selected_timep2][feat[GEOID_VAR]]['cspd'];
+				feat['fspd'] = base_lookup[app.selected_timep2][feat[GEOID_VAR]]['fspd'];
+			  }
+		  } else if (app.selectedViz == 'TCROWD') {
+			  if (base_lookup[app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
+				if (app.comp_check) {
+					feat['base'] = base_lookup[app.selected_timep][feat[GEOID_VAR]][sel_metric+'_base'];
+					feat['comp'] = base_lookup[app.selected_timep][feat[GEOID_VAR]][sel_metric];
+					map_metric = feat['comp']-feat['base'];
+				} else {
+					map_metric = base_lookup[app.selected_timep][feat[GEOID_VAR]][sel_metric];
+				}
+				
+				bwidth_metric = base_lookup[app.selected_timep][feat[GEOID_VAR]][sel_bwidth];
+			  }
+		  } else if (app.selectedViz == 'TTIME') {
+			  if (base_lookup[app.selected_income][app.selected_purp].hasOwnProperty(feat[GEOID_VAR])) {
+				if (app.comp_check) {
+					feat['base'] = base_lookup[app.selected_income][app.selected_purp][feat[GEOID_VAR]][sel_metric+'_base'];
+					feat['comp'] = base_lookup[app.selected_income][app.selected_purp][feat[GEOID_VAR]][sel_metric];
+					map_metric = feat['comp']-feat['base'];
+				} else {
+					map_metric = base_lookup[app.selected_income][app.selected_purp][feat[GEOID_VAR]][sel_metric];
+				}
+			  }
+		  } else {
+			  if (base_lookup.hasOwnProperty(feat[GEOID_VAR])) {
+				if (app.comp_check) {
+					feat['base'] = base_lookup[feat[GEOID_VAR]][sel_metric+'_base'];
+					feat['comp'] = base_lookup[feat[GEOID_VAR]][sel_metric];
+					map_metric = feat['comp']-feat['base'];
+				} else {
+					map_metric = base_lookup[feat[GEOID_VAR]][sel_metric];
+				}
+			  }
 		  }
-	  } else if (app.selectedViz == 'TCROWD') {
-		  if (base_lookup[app.selected_timep].hasOwnProperty(feat[GEOID_VAR])) {
-			if (app.comp_check) {
-				feat['base'] = base_lookup[app.selected_timep][feat[GEOID_VAR]][sel_metric+'_base'];
-				feat['comp'] = base_lookup[app.selected_timep][feat[GEOID_VAR]][sel_metric];
-				map_metric = feat['comp']-feat['base'];
-			} else {
-				map_metric = base_lookup[app.selected_timep][feat[GEOID_VAR]][sel_metric];
-			}
-			
-			bwidth_metric = base_lookup[app.selected_timep][feat[GEOID_VAR]][sel_bwidth];
-		  }
-	  } else if (app.selectedViz == 'TTIME') {
-		  if (base_lookup[app.selected_income][app.selected_purp].hasOwnProperty(feat[GEOID_VAR])) {
-			if (app.comp_check) {
-				feat['base'] = base_lookup[app.selected_income][app.selected_purp][feat[GEOID_VAR]][sel_metric+'_base'];
-				feat['comp'] = base_lookup[app.selected_income][app.selected_purp][feat[GEOID_VAR]][sel_metric];
-				map_metric = feat['comp']-feat['base'];
-			} else {
-				map_metric = base_lookup[app.selected_income][app.selected_purp][feat[GEOID_VAR]][sel_metric];
-			}
-		  }
-	  } else {
-		  if (base_lookup.hasOwnProperty(feat[GEOID_VAR])) {
-			if (app.comp_check) {
-				feat['base'] = base_lookup[feat[GEOID_VAR]][sel_metric+'_base'];
-				feat['comp'] = base_lookup[feat[GEOID_VAR]][sel_metric];
-				map_metric = feat['comp']-feat['base'];
-			} else {
-				map_metric = base_lookup[feat[GEOID_VAR]][sel_metric];
-			}
-		  }
-	  }
-	
-	  if (map_metric !== null) {
-	    map_metric = Math.round(map_metric*prec)/prec;
-	    map_vals.push(map_metric);
-	  }
-	  feat['metric'] = map_metric;
-	
-	  if (bwidth_metric !== null) {
-		bwidth_metric = Math.round(bwidth_metric);
-		bwidth_vals.push(bwidth_metric);
-	  }
-	  feat['bwmetric'] = bwidth_metric;
-    }
-    map_vals = map_vals.sort((a, b) => a - b);
-    bwidth_vals = bwidth_vals.sort((a, b) => a - b);       
-    
-    if (0 == 0) {
-	//if (map_vals.length > 0) {	
-	  sel_colorvals = VIZ_INFO[app.selectedViz]['COLORVALS'][app.comp_check];
-	  sel_colors = VIZ_INFO[app.selectedViz]['COLORS'][app.comp_check];
-
-      let bw_widths;
-      if (app.bwidth_check) {
-		sel_bwvals = VIZ_INFO[app.selectedViz]['BWVALS'];  
-        bw_widths = VIZ_INFO[app.selectedViz]['BWIDTHS']; 
-        for (let feat of cleanFeatures) {
-          if (feat['bwmetric'] !== null) {
-            if (sel_bwvals.length <= 2){
-              feat['bwmetric_scaled'] = bw_widths;
-            } else {
-              for (var i = 0; i < sel_bwvals.length-1; i++) {
-                if (feat['bwmetric'] <= sel_bwvals[i + 1]) {
-                  feat['bwmetric_scaled'] = 1.2*bw_widths[i];
-                  break;
-                }
-              }
-            }
-            //feat['bwmetric_scaled'] = (feat['bwmetric']-bwidth_vals[0])*(MAX_BWIDTH-MIN_BWIDTH)/(bwidth_vals[bwidth_vals.length-1]-bwidth_vals[0])+MIN_BWIDTH;
-          } else {
-            feat['bwmetric_scaled'] = null;
-          }
-        }
-      }
-
-      if (geoLayer) mymap.removeLayer(geoLayer);
-      if (mapLegend) mymap.removeControl(mapLegend);
-      geoLayer = L.geoJSON(cleanFeatures, {
-        style: styleByMetricColor,
-        onEachFeature: function(feature, layer) {
-          layer.on({
-            mouseover: hoverFeature,
-            click: clickedOnFeature,
-            });
-        },
-      });
-      geoLayer.addTo(mymap);
-
-      mapLegend = L.control({ position: 'bottomright' });
-      mapLegend.onAdd = function(map) {
-        let div = L.DomUtil.create('div', 'legend');
-        let legHTML = getLegHTML(
-          sel_colorvals,
-          sel_colors,
-          true,
-          (app.pct_check && app.comp_check)? '%': ''
-        );
 		
-		let units = VIZ_INFO[app.selectedViz]['POST_UNITS'];
-        legHTML = '<h4>' + VIZ_INFO[app.selectedViz]['METRIC_DESC'] +
-                  (app.comp_check? ' Diff': (units!=''? ' (' + VIZ_INFO[app.selectedViz]['POST_UNITS'] + ')': '')) +
-                  '</h4>' + legHTML;
-                  
-        if (app.bwidth_check) {
-          legHTML += '<hr/>' + '<h4>Volume</h4>';
-          legHTML += getBWLegHTML(sel_bwvals, bw_widths);
-        }
-        
-        div.innerHTML = legHTML;
-        return div;
-      };
-      mapLegend.addTo(mymap);
-      
-      if (selectedGeo) {
-        resetPopGeo();
-      }
-    }
+		  if (map_metric !== null) {
+			map_metric = Math.round(map_metric*prec)/prec;
+			map_vals.push(map_metric);
+		  }
+		  feat['metric'] = map_metric;
+		
+		  if (bwidth_metric !== null) {
+			bwidth_metric = Math.round(bwidth_metric);
+			bwidth_vals.push(bwidth_metric);
+		  }
+		  feat['bwmetric'] = bwidth_metric;
+		}
+		map_vals = map_vals.sort((a, b) => a - b);
+		bwidth_vals = bwidth_vals.sort((a, b) => a - b);       
+		
+		if (0 == 0) {
+		//if (map_vals.length > 0) {	
+		  sel_colorvals = VIZ_INFO[app.selectedViz]['COLORVALS'][app.comp_check];
+		  sel_colors = VIZ_INFO[app.selectedViz]['COLORS'][app.comp_check];
 
+		  let bw_widths;
+		  if (app.bwidth_check) {
+			sel_bwvals = VIZ_INFO[app.selectedViz]['BWVALS'];  
+			bw_widths = VIZ_INFO[app.selectedViz]['BWIDTHS']; 
+			for (let feat of cleanFeatures) {
+			  if (feat['bwmetric'] !== null) {
+				if (sel_bwvals.length <= 2){
+				  feat['bwmetric_scaled'] = bw_widths;
+				} else {
+				  for (var i = 0; i < sel_bwvals.length-1; i++) {
+					if (feat['bwmetric'] <= sel_bwvals[i + 1]) {
+					  feat['bwmetric_scaled'] = 1.2*bw_widths[i];
+					  break;
+					}
+				  }
+				}
+				//feat['bwmetric_scaled'] = (feat['bwmetric']-bwidth_vals[0])*(MAX_BWIDTH-MIN_BWIDTH)/(bwidth_vals[bwidth_vals.length-1]-bwidth_vals[0])+MIN_BWIDTH;
+			  } else {
+				feat['bwmetric_scaled'] = null;
+			  }
+			}
+		  }
+
+		  if (geoLayer) mymap.removeLayer(geoLayer);
+		  if (mapLegend) mymap.removeControl(mapLegend);
+		  geoLayer = L.geoJSON(cleanFeatures, {
+			style: styleByMetricColor,
+			onEachFeature: function(feature, layer) {
+			  layer.on({
+				mouseover: hoverFeature,
+				click: clickedOnFeature,
+				});
+			},
+		  });
+		  geoLayer.addTo(mymap);
+
+		  mapLegend = L.control({ position: 'bottomright' });
+		  mapLegend.onAdd = function(map) {
+			let div = L.DomUtil.create('div', 'legend');
+			let legHTML = getLegHTML(
+			  sel_colorvals,
+			  sel_colors,
+			  true,
+			  (app.pct_check && app.comp_check)? '%': ''
+			);
+			
+			let units = VIZ_INFO[app.selectedViz]['POST_UNITS'];
+			legHTML = '<h4>' + VIZ_INFO[app.selectedViz]['METRIC_DESC'] +
+					  (app.comp_check? ' Diff': (units!=''? ' (' + VIZ_INFO[app.selectedViz]['POST_UNITS'] + ')': '')) +
+					  '</h4>' + legHTML;
+					  
+			if (app.bwidth_check) {
+			  legHTML += '<hr/>' + '<h4>Volume</h4>';
+			  legHTML += getBWLegHTML(sel_bwvals, bw_widths);
+			}
+			
+			div.innerHTML = legHTML;
+			return div;
+		  };
+		  mapLegend.addTo(mymap);
+		  
+		  if (selectedGeo) {
+			resetPopGeo();
+		  }
+		}
+	}
   } catch(error) {
     console.log(error);
   }
@@ -767,60 +695,100 @@ function resetPopGeo() {
 }
 
 let trendChart = null;
-function buildChartHtmlFromData(geoid = null) {
-  document.getElementById('longchart').innerHTML = '';
-
-  if (geoid) {
-    let selgeodata = [];
-    for (let yr of YR_LIST) {
-      let row = {};
-      row['year'] = yr.toString();
-      for (let met of app.metric_options) {
-        row[met.value] = base_lookup[geoid][met.value+yr];
-      }
-      selgeodata.push(row);
-    } 
-    trendChart = new Morris.Line({
-      data: selgeodata,
-      element: 'longchart',
-      gridTextColor: '#aaa',
-      hideHover: true,
-      labels: [app.selected_metric.toUpperCase()],
-      lineColors: ['#f56e71'],
-      xkey: 'year',
-      smooth: false,
-      parseTime: false,
-      xLabelAngle: 45,
-      ykeys: [app.selected_metric],
-    });
-  } else {
-    trendChart = new Morris.Line({
-      data: _aggregateData,
-      element: 'longchart',
-      gridTextColor: '#aaa',
-      hideHover: true,
-      labels: [app.selected_metric.toUpperCase()],
-      lineColors: ['#f56e71'],
-      xkey: 'year',
-      smooth: false,
-      parseTime: false,
-      xLabelAngle: 45,
-      ykeys: [app.selected_metric],
-    });
-  }    
-  
+let summChart = null;
+let chartProp = [
+{col: 'res_trips', l: 'SF-Res Trips (000s)', s: 1000, p:1},
+{col: 'avg_spd', l: 'Avg. Speed (mph)', s: 1, p:10},
+{col: 'muni', l: 'Muni Brdgs. (000s)', s: 1000, p:1},
+{col: 'vmt', l: 'VMT (million)', s: 1000000, p:100},
+];
+function buildChartHtmlFromData() {
+  document.getElementById('chart1').innerHTML = '';
+  document.getElementById('chart2').innerHTML = '';
+  document.getElementById('chart3').innerHTML = '';
+  document.getElementById('chart4').innerHTML = '';
+  let a = [];
+  let b = [];
+  for (let ob of chartProp) {
+	  let scn = SCEN_DEF[app.selectedScn]; 
+	  let base = SCEN_DEF[1];
+	  a.push(Math.round(scn[ob['col']]*ob['p']/ob['s'])/(ob['p']));
+	  b.push(Math.round(base[ob['col']]*ob['p']/ob['s'])/(ob['p']));
+  }
+  new Morris.Bar({
+	  element: 'chart1',
+	  data: [
+	  {m: '', a: a[0], b: b[0]},
+	  ],
+	  xkey: 'm',
+	  ykeys: app.selectedScn==1? ['b']: ['a', 'b'],
+	  labels: app.selectedScn==1? ['Base']: ['Scn', 'Base'],
+	  axes: false,
+	  grid: false,
+	  hideHover: true,
+	  barColors: app.selectedScn==1? ['#38bebb']: ['#f56e71', '#38bebb'],
+  });
+  new Morris.Bar({
+	  element: 'chart2',
+	  data: [
+	  {m: '', a: a[1], b: b[1]},
+	  ],
+	  xkey: 'm',
+	  ykeys: app.selectedScn==1? ['b']: ['a', 'b'],
+	  labels: app.selectedScn==1? ['Base']: ['Scn', 'Base'],
+	  axes: false,
+	  grid: false,
+	  hideHover: true,
+	  barColors: app.selectedScn==1? ['#38bebb']: ['#f56e71', '#38bebb'],
+  });
+  new Morris.Bar({
+	  element: 'chart3',
+	  data: [
+	  {m: '', a: a[2], b: b[2]},
+	  ],
+	  xkey: 'm',
+	  ykeys: app.selectedScn==1? ['b']: ['a', 'b'],
+	  labels: app.selectedScn==1? ['Base']: ['Scn', 'Base'],
+	  axes: false,
+	  grid: false,
+	  hideHover: true,
+	  barColors: app.selectedScn==1? ['#38bebb']: ['#f56e71', '#38bebb'],
+  });
+  new Morris.Bar({
+	  element: 'chart4',
+	  data: [
+	  {m: '', a: a[3], b: b[3]},
+	  ],
+	  xkey: 'm',
+	  ykeys: app.selectedScn==1? ['b']: ['a', 'b'],
+	  labels: app.selectedScn==1? ['Base']: ['Scn', 'Base'],
+	  axes: false,
+	  grid: false,
+	  hideHover: true,
+	  barColors: app.selectedScn==1? ['#38bebb']: ['#f56e71', '#38bebb'],
+  });
 }
 
 async function selectionChanged() {
+  if (popSelGeo) popSelGeo.remove();
   let scn_key = app.selected_dim1+','+app.selected_dim2+','+app.selected_dim3+','+app.selected_dim4+','+app.selected_dim5;
   if (SCEN_IDMAP.hasOwnProperty(scn_key)) {
 	  app.selectedScn = SCEN_IDMAP[scn_key];
 	  app.scnTitle = SCEN_DEF[app.selectedScn]['name'];
-	  app.rows = SCEN_SUMMARY[app.selectedScn];
 	  drawMapFeatures();
+	  buildChartHtmlFromData();
+	  
+	  let preScn = app.scenario_options.filter(entry => entry['id']== app.selectedScn);
+	  app.selectedPreset = preScn.length > 0? preScn[0]['id']: 0;
   } else {
+	  base_lookup = {};
 	  app.scnTitle = 'Results Pending';
-	  app.rows = [];
+	  app.selectedScn = 0;
+	  app.selectedPreset = 0;
+	  document.getElementById('chart1').innerHTML = '';
+	  document.getElementById('chart2').innerHTML = '';
+	  document.getElementById('chart3').innerHTML = '';
+	  document.getElementById('chart4').innerHTML = '';
 	  if (geoLayer) mymap.removeLayer(geoLayer);
       if (mapLegend) mymap.removeControl(mapLegend);
   }
@@ -844,6 +812,7 @@ function metricChanged(metric) {
   app.selected_metric = metric;
 }
 function compMode(check) {
+  if (popSelGeo) popSelGeo.remove();
   drawMapFeatures(false);
 }
 function tpChanged(chosentp) {
@@ -915,6 +884,17 @@ function dim4Changed(chosen) {
 function dim5Changed(chosen) {
   app.selected_dim5 = chosen.toLowerCase();
   selectionChanged();
+}
+let slideval_map = {'low': 'Low', 'med': 'Med', 'high': 'High'};
+function presetChanged(scn) {
+	if (scn>0) {
+		let key = ID_SCENMAP[scn].split(',');
+		app.dim1Value = slideval_map[key[0]];
+		app.dim2Value = slideval_map[key[1]];
+		app.dim3Value = slideval_map[key[2]];
+		app.dim4Value = slideval_map[key[3]];
+		app.dim5Value = slideval_map[key[4]];
+	}
 }
 
 // SLIDERS ----
@@ -1027,10 +1007,10 @@ let app = new Vue({
 	isAspdHidden: false,
 	isTrnHidden: true,
 	isTTHidden: true,
+	selectedPreset: 1,
 	selectedScn: 1,
-	scnTitle: 'Baseline',
-	rows: SCEN_SUMMARY[1],
-	scenario_options: scn_list,
+	scnTitle: '',
+	scenario_options: [{id: 0, name: ''}],
 	
 	dim1Slider: dim1Slider,
 	dim2Slider: dim2Slider,
@@ -1121,6 +1101,7 @@ let app = new Vue({
     addLayers:[],
   },
   watch: {
+	selectedPreset: presetChanged,
     dim1Value: dim1Changed,
 	dim2Value: dim2Changed,
 	dim3Value: dim3Changed,

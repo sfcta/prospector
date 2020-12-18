@@ -51,5 +51,14 @@ th:last-child {
 .col1 {width: 55%; float: left; padding-bottom: 5px;}
 .col2 {width: 45%; float: left;}
 
+.chcol1, .chcol2, .chcol3, .chcol4 {
+	width: 25%; 
+	float: left;
+	color: #fff;
+}
+#chart1, #chart2, #chart3, #chart4 {
+  height:200px;
+}
+
 
   

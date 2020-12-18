@@ -31,7 +31,7 @@
 
         <div id="picker">
 		  <h5 class="col1">CHOOSE PRESET SCENARIO</h5>
-		  <select v-model="selectedScn" class="col2">
+		  <select v-model="selectedPreset" class="col2">
             <option v-for="option in scenario_options" v-bind:value="option.id">
               ${option.name}
             </option>
@@ -120,24 +120,37 @@
 		<div class="pickers">
 		  <hr/>
 		  <h5>SCENARIO: ${scnTitle}</h5>
+		  <div id="chart1" class="chcol1">
+                <div class="ui active dimmer">
+                  <div class="ui text loader">Loading</div>
+                </div>
+          </div>
+		  <div id="chart2" class="chcol2"></div>
+		  <div id="chart3" class="chcol3"></div>
+		  <div id="chart4" class="chcol4"></div>
+		  
+		  <div class="chcol1">SF-Res Trips (000s)</div>
+		  <div class="chcol2">Avg. Speed (mph)</div>
+		  <div class="chcol3">Muni Brdgs. (000s)</div>
+		  <div class="chcol4">VMT (million)</div>
 		  <!--h5 style="margin-top:5px">SCENARIO SUMMARY</h5-->
-			<table id="sumtable">
-				<!--thead>
+			<!--table id="sumtable">
+				<thead>
 				  <tr>
 					<th>Operator</th>
 					<th>Weighted Trips</th>
 				  </tr>
-				</thead-->
+				</thead>
 				<tbody>
 					<tr v-for="row in rows">
 						<td>${row.key}</td>
 						<td>${row.value}</td>
 					</tr>
 				</tbody>
-			</table>
+			</table-->
 		</div>
         
-		<hr/>
+		<div class="col-3"><hr/></div>
         <a class="agency-link" target="_blank" href="https://www.sfcta.org">
           <img class="img-logo" src="/assets/SFCTA Logo dark-background.svg">
         </a>
