@@ -595,7 +595,7 @@ function styleByMetricColor(feat) {
               sel_colors,
               true
               );
-  if (feat['metric']==0) color = MISSING_COLOR;
+  //if (feat['metric']==0) color = MISSING_COLOR;
   if (!app.bwidth_check) {
 	let fo = 0.7;
 	if (feat['metric']==0 || !color) {
