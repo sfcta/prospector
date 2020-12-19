@@ -238,6 +238,7 @@ async function fetchScnSumm() {
 	  app.scenario_options.push({id: i, name: SCEN_DEF[i]['name']});
 	}
 	app.scnTitle = SCEN_DEF[app.selectedScn]['name'];
+	app.scnDesc = SCEN_DEF[app.selectedScn]['description'];
 	app.rows = SCEN_DEF[app.selectedScn];
 
   } catch (error) {
@@ -775,6 +776,7 @@ async function selectionChanged() {
   if (SCEN_IDMAP.hasOwnProperty(scn_key)) {
 	  app.selectedScn = SCEN_IDMAP[scn_key];
 	  app.scnTitle = SCEN_DEF[app.selectedScn]['name'];
+	  app.scnDesc = SCEN_DEF[app.selectedScn]['description'];
 	  drawMapFeatures();
 	  buildChartHtmlFromData();
 	  
@@ -783,6 +785,7 @@ async function selectionChanged() {
   } else {
 	  base_lookup = {};
 	  app.scnTitle = 'Results Pending';
+	  app.scnDesc = 'Results Pending';
 	  app.selectedScn = 0;
 	  app.selectedPreset = 0;
 	  document.getElementById('chart1').innerHTML = '';
@@ -1010,6 +1013,7 @@ let app = new Vue({
 	selectedPreset: 1,
 	selectedScn: 1,
 	scnTitle: '',
+	scnDesc: '',
 	scenario_options: [{id: 0, name: ''}],
 	
 	dim1Slider: dim1Slider,
