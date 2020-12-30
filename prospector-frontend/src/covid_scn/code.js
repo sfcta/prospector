@@ -695,14 +695,23 @@ function resetPopGeo() {
   //buildChartHtmlFromData();
 }
 
-let trendChart = null;
-let summChart = null;
+
 let chartProp = [
 {col: 'res_trips', l: 'SF-Res Trips (000s)', s: 1000, p:1},
 {col: 'avg_spd', l: 'Avg. Speed (mph)', s: 1, p:10},
 {col: 'muni', l: 'Muni Brdgs. (000s)', s: 1000, p:1},
 {col: 'vmt', l: 'VMT (million)', s: 1000000, p:100},
 ];
+let barColor1 = '#348cc0';
+let barColor2 = '#cd7f9e';
+function customHover(index, options, content, row) {
+  if (app.selectedScn==1) {
+	return '<p style="color: ' + barColor1 + '">' + row.b.toLocaleString() + '</p>';
+  } else {
+	return '<p style="color: ' + barColor1 + '">' + row.b.toLocaleString() + '</p>' +
+	       '<p style="color: ' + barColor2 + '">' + row.a.toLocaleString() + '</p>';
+  }
+}
 function buildChartHtmlFromData() {
   document.getElementById('chart1').innerHTML = '';
   document.getElementById('chart2').innerHTML = '';
@@ -723,11 +732,12 @@ function buildChartHtmlFromData() {
 	  ],
 	  xkey: 'm',
 	  ykeys: app.selectedScn==1? ['b']: ['b', 'a'],
-	  labels: app.selectedScn==1? ['Base']: ['Base', 'Scn'],
+	  labels: app.selectedScn==1? ['']: ['', ''],
 	  axes: false,
 	  grid: false,
 	  hideHover: true,
-	  barColors: app.selectedScn==1? ['#B9D9EC']: ['#B9D9EC', '#cd7f9e'],
+	  barColors: app.selectedScn==1? [barColor1]: [barColor1, barColor2],
+	  hoverCallback: customHover,
   });
   new Morris.Bar({
 	  element: 'chart2',
@@ -736,11 +746,12 @@ function buildChartHtmlFromData() {
 	  ],
 	  xkey: 'm',
 	  ykeys: app.selectedScn==1? ['b']: ['b', 'a'],
-	  labels: app.selectedScn==1? ['Base']: ['Base', 'Scn'],
+	  labels: app.selectedScn==1? ['']: ['', ''],
 	  axes: false,
 	  grid: false,
 	  hideHover: true,
-	  barColors: app.selectedScn==1? ['#B9D9EC']: ['#B9D9EC', '#cd7f9e'],
+	  barColors: app.selectedScn==1? [barColor1]: [barColor1, barColor2],
+	  hoverCallback: customHover,
   });
   new Morris.Bar({
 	  element: 'chart3',
@@ -749,11 +760,12 @@ function buildChartHtmlFromData() {
 	  ],
 	  xkey: 'm',
 	  ykeys: app.selectedScn==1? ['b']: ['b', 'a'],
-	  labels: app.selectedScn==1? ['Base']: ['Base', 'Scn'],
+	  labels: app.selectedScn==1? ['']: ['', ''],
 	  axes: false,
 	  grid: false,
 	  hideHover: true,
-	  barColors: app.selectedScn==1? ['#B9D9EC']: ['#B9D9EC', '#cd7f9e'],
+	  barColors: app.selectedScn==1? [barColor1]: [barColor1, barColor2],
+	  hoverCallback: customHover,
   });
   new Morris.Bar({
 	  element: 'chart4',
@@ -762,11 +774,12 @@ function buildChartHtmlFromData() {
 	  ],
 	  xkey: 'm',
 	  ykeys: app.selectedScn==1? ['b']: ['b', 'a'],
-	  labels: app.selectedScn==1? ['Base']: ['Base', 'Scn'],
+	  labels: app.selectedScn==1? ['']: ['', ''],
 	  axes: false,
 	  grid: false,
 	  hideHover: true,
-	  barColors: app.selectedScn==1? ['#B9D9EC']: ['#B9D9EC', '#cd7f9e'],
+	  barColors: app.selectedScn==1? [barColor1]: [barColor1, barColor2],
+	  hoverCallback: customHover,
   });
 }
 

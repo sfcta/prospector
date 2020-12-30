@@ -75,6 +75,7 @@ th:last-child {
 	width: 25%; 
 	float: left;
 	color: #fff;
+	text-align: center;
 }
 #chart1, #chart2, #chart3, #chart4 {
   height:150px;
