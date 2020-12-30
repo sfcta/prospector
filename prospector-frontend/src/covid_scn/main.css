@@ -1,28 +1,36 @@
 /* CSS Layout for CHAMPLU ONLY goes here */
 
 .ui.color1.button {
-  background-color: #f56e71;
+  background-color: #ffb81d;
   color: #fff;
 }
 .ui.color1.button.active {
-  background-color: #f56e71;
+  background-color: #ffb81d;
+  color: #000000;
 }
 
 .ui.color2.button {
-  background-color: #38bebb;
+  background-color: #ffb81d;
   color: #fff;
 }
 .ui.color2.button.active {
-  background-color: #38bebb;
+  background-color: #ffb81d;
+  color: #000000;
 }
 
 .ui.button {
   margin: 1% 1%;
 }
 
+.ui.toggle.checkbox label:before,
+.ui.toggle.checkbox label:hover:before,
+.ui.toggle.checkbox input:focus~label:before{
+  background-color: grey;
+}
+
 .ui.toggle.checkbox input:focus:checked~label:before,
 .ui.toggle.checkbox input:checked~label:before {
-  background-color: #f56e71!important;
+  background-color: #ffb81d!important;
 }
 
 table#sumtable thead th, tbody, td {   
@@ -41,15 +49,15 @@ th:last-child {
 
 [class*="col-"] {
   float: left;
-  padding: 12px 5px;
+  padding: 5px 5px;
 }
 
 .col-1 {width: 60%;}
 .col-2 {width: 40%;}
 .col-3 {width: 100%;}
 
-.col1 {width: 55%; float: left; padding-bottom: 5px;}
-.col2 {width: 45%; float: left;}
+.col1 {width: 70%; float: left; padding-bottom: 5px;}
+.col2 {width: 30%; float: left;}
 
 .chcol1, .chcol2, .chcol3, .chcol4 {
 	width: 25%; 
@@ -57,7 +65,7 @@ th:last-child {
 	color: #fff;
 }
 #chart1, #chart2, #chart3, #chart4 {
-  height:200px;
+  height:150px;
 }
 
 /* Tooltip container */

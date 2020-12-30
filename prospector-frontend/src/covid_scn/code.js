@@ -64,10 +64,10 @@ const VIZ_INFO = {
     METRIC: 'spd_ratio',
     METRIC_DESC: 'Speed Ratio',
 	BWIDTH_METRIC: 'totvol',
-	COLORVALS: {false: [0, .5, .7, .8, .9, 500], true: [-10, -0.1, -0.05, 0.05, 0.1, 500]},
-    COLORS: {false: ['#c73232','#f26e72','#f8afb1','#facacc','#fef0f1'], true: ['#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6']},
+	COLORVALS: {false: [0, .5, .55, .6, .7, 500], true: [-10, -0.1, -0.05, 0.05, 0.1, 500]},
+    COLORS: {false: ['#C41D4A','#D07960','#E4B55E','#D4DA73','#B9D9EC'], true: ['#c31c4a','#f48f72','#dedede','#9fc8e5','#3687b5']},
 	BWVALS: [0, 1000, 5000, 25000, 125000, 500000],
-	BWIDTHS: [1, 2, 4, 8, 10],
+	BWIDTHS: [1, 2, 4, 8, 16],
 	STYLES_KEY: 'line',
     COLOR_BY_BINS: true,
     POST_UNITS: '',
@@ -81,7 +81,7 @@ const VIZ_INFO = {
     METRIC_DESC: 'Crowding',
 	BWIDTH_METRIC: 'ab_vol',
 	COLORVALS: {false: [0, 0.5, 0.85, 1, 500], true: [-10, -0.2, -0.05, 0.05, 0.2, 500]},
-    COLORS: {false: ['#fde0e2','#f7a6a9','#f37377','#c73232'], true: ['#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c']},
+    COLORS: {false: ['#B9D9EC','#D4DA73','#EAA45D','#C41D4A'], true: ['#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c']},
 	BWVALS: [0, 500, 2500, 5000, 10000, 500000],
 	BWIDTHS: [1, 2, 4, 8, 16],
 	STYLES_KEY: 'line',	
@@ -96,7 +96,7 @@ const VIZ_INFO = {
     METRIC: 'avg_time',
     METRIC_DESC: 'Average Travel Time',
 	COLORVALS: {false: [0, 15, 18, 21, 24, 27, 30, 500], true: [-100, -3, -0.5, 0.5, 3, 500]},
-    COLORS: {false: ['#fef0f1','#fcd9db','#f9b8ba','#f69497','#f3787c','#e45b5d','#c73232'], true: ['#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c']},
+    COLORS: {false: ['#FFEFE2','#FFD5C3','#FFBCA3','#EF938D','#E06C77','#D2445F','#C41D4A'], true: ['#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c']},
 	STYLES_KEY: 'polygon',	
     COLOR_BY_BINS: true,
     POST_UNITS: 'minutes',
@@ -109,7 +109,7 @@ const VIZ_INFO = {
     METRIC: 'vmt_per_pers',
     METRIC_DESC: 'Daily Vehicle Miles Traveled per Person',
 	COLORVALS: {false: [0, 1, 2, 3, 4, 5, 6, 7, 8, 500], true: [-100, -3, -0.1, 0.1, 3, 500]},
-    COLORS: {false: ['#fef0f1','#fde0e2','#facacc','#f8afb1','#f69497','#f47d80','#f26e72','#dd4f51','#c73232'], true: ['#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c']},
+    COLORS: {false: ['#FFEFE2','#FFDFCE','#FFCDB8','#FFBCA3','#F39C92','#E77B80','#DB5C6D','#CF3B5C','#C41D4A'], true: ['#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c']},
 	STYLES_KEY: 'polygon',	
 	COLOR_BY_BINS: true,
     POST_UNITS: '',
@@ -727,7 +727,7 @@ function buildChartHtmlFromData() {
 	  axes: false,
 	  grid: false,
 	  hideHover: true,
-	  barColors: app.selectedScn==1? ['#38bebb']: ['#38bebb', '#f56e71'],
+	  barColors: app.selectedScn==1? ['#B9D9EC']: ['#B9D9EC', '#cd7f9e'],
   });
   new Morris.Bar({
 	  element: 'chart2',
@@ -740,7 +740,7 @@ function buildChartHtmlFromData() {
 	  axes: false,
 	  grid: false,
 	  hideHover: true,
-	  barColors: app.selectedScn==1? ['#38bebb']: ['#38bebb', '#f56e71'],
+	  barColors: app.selectedScn==1? ['#B9D9EC']: ['#B9D9EC', '#cd7f9e'],
   });
   new Morris.Bar({
 	  element: 'chart3',
@@ -753,7 +753,7 @@ function buildChartHtmlFromData() {
 	  axes: false,
 	  grid: false,
 	  hideHover: true,
-	  barColors: app.selectedScn==1? ['#38bebb']: ['#38bebb', '#f56e71'],
+	  barColors: app.selectedScn==1? ['#B9D9EC']: ['#B9D9EC', '#cd7f9e'],
   });
   new Morris.Bar({
 	  element: 'chart4',
@@ -766,7 +766,7 @@ function buildChartHtmlFromData() {
 	  axes: false,
 	  grid: false,
 	  hideHover: true,
-	  barColors: app.selectedScn==1? ['#38bebb']: ['#38bebb', '#f56e71'],
+	  barColors: app.selectedScn==1? ['#B9D9EC']: ['#B9D9EC', '#cd7f9e'],
   });
 }
 
@@ -905,7 +905,7 @@ let dim1Slider = {
   clickable: true,
   data: ['Low','Med','High'],
   disabled: false,
-  dotSize: 16,
+  dotSize: 20,
   height: 3,
   lazy: true,
   marks: true,
@@ -916,15 +916,15 @@ let dim1Slider = {
   speed: 0.25,
   style: { marginTop: '0px'},
   tooltipPlacement: 'top',
-  tooltipStyle: { backgroundColor: '#f56e71', borderColor: '#f56e71' },
+  tooltipStyle: { backgroundColor: '#ffb81d', borderColor: '#ffb81d' },
   width: 'auto',
-  dotStyle: {border: '2px solid #f56e71'},
+  dotStyle: {backgroundColor: '#ffb81d', border: '2px solid #ffb81d'},
 };
 let dim2Slider = {
   clickable: true,
   data: ['Low','Med','High'],
   disabled: false,
-  dotSize: 16,
+  dotSize: 20,
   height: 3,
   lazy: true,
   marks: true,
@@ -936,13 +936,13 @@ let dim2Slider = {
   tooltipPlacement: 'top',
   tooltipStyle: { backgroundColor: '#f56e71', borderColor: '#f56e71' },
   width: 'auto',
-  dotStyle: {border: '2px solid #f56e71'},
+  dotStyle: {backgroundColor: '#ffb81d', border: '2px solid #ffb81d'},
 };
 let dim3Slider = {
   clickable: true,
   data: ['Low','Med','High'],
   disabled: false,
-  dotSize: 16,
+  dotSize: 20,
   height: 3,
   lazy: true,
   marks: true,
@@ -954,13 +954,13 @@ let dim3Slider = {
   tooltipPlacement: 'top',
   tooltipStyle: { backgroundColor: '#f56e71', borderColor: '#f56e71' },
   width: 'auto',
-  dotStyle: {border: '2px solid #f56e71'},
+  dotStyle: {backgroundColor: '#ffb81d', border: '2px solid #ffb81d'},
 };
 let dim4Slider = {
   clickable: true,
   data: ['Low','Med','High'],
   disabled: false,
-  dotSize: 16,
+  dotSize: 20,
   height: 3,
   lazy: true,
   marks: true,
@@ -972,13 +972,13 @@ let dim4Slider = {
   tooltipPlacement: 'top',
   tooltipStyle: { backgroundColor: '#f56e71', borderColor: '#f56e71' },
   width: 'auto',
-  dotStyle: {border: '2px solid #f56e71'},
+  dotStyle: {backgroundColor: '#ffb81d', border: '2px solid #ffb81d'},
 };
 let dim5Slider = {
   clickable: true,
   data: ['Low','Med','High'],
   disabled: false,
-  dotSize: 16,
+  dotSize: 20,
   height: 3,
   lazy: true,
   marks: true,
@@ -990,7 +990,7 @@ let dim5Slider = {
   tooltipPlacement: 'top',
   tooltipStyle: { backgroundColor: '#f56e71', borderColor: '#f56e71' },
   width: 'auto',
-  dotStyle: {border: '2px solid #f56e71'},
+  dotStyle: {backgroundColor: '#ffb81d', border: '2px solid #ffb81d'},
 };
 
 let app = new Vue({
