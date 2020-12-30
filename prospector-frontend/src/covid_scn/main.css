@@ -89,7 +89,7 @@ th:last-child {
 /* Tooltip text */
 .tooltip .tooltiptext {
   visibility: hidden;
-  background-color: #f56e71;
+  background-color: #cd7f9e;
   color: #fff;
   width: 220px;
   bottom: 100%;
