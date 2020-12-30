@@ -916,9 +916,9 @@ let dim1Slider = {
   speed: 0.25,
   style: { marginTop: '0px'},
   tooltipPlacement: 'top',
-  tooltipStyle: { backgroundColor: '#ffb81d', borderColor: '#ffb81d' },
+  tooltipStyle: {backgroundColor: '#ffb81d', color: '#000000'},
   width: 'auto',
-  dotStyle: {backgroundColor: '#ffb81d', border: '2px solid #ffb81d'},
+  dotStyle: {backgroundColor: '#ffb81d', border: '0px'},
 };
 let dim2Slider = {
   clickable: true,
@@ -934,9 +934,9 @@ let dim2Slider = {
   speed: 0.25,
   style: { marginTop: '0px'},
   tooltipPlacement: 'top',
-  tooltipStyle: { backgroundColor: '#f56e71', borderColor: '#f56e71' },
+  tooltipStyle: {backgroundColor: '#ffb81d', color: '#000000'},
   width: 'auto',
-  dotStyle: {backgroundColor: '#ffb81d', border: '2px solid #ffb81d'},
+  dotStyle: {backgroundColor: '#ffb81d', border: '0px'},
 };
 let dim3Slider = {
   clickable: true,
@@ -952,9 +952,9 @@ let dim3Slider = {
   speed: 0.25,
   style: { marginTop: '0px'},
   tooltipPlacement: 'top',
-  tooltipStyle: { backgroundColor: '#f56e71', borderColor: '#f56e71' },
+  tooltipStyle: {backgroundColor: '#ffb81d', color: '#000000'},
   width: 'auto',
-  dotStyle: {backgroundColor: '#ffb81d', border: '2px solid #ffb81d'},
+  dotStyle: {backgroundColor: '#ffb81d', border: '0px'},
 };
 let dim4Slider = {
   clickable: true,
@@ -970,9 +970,9 @@ let dim4Slider = {
   speed: 0.25,
   style: { marginTop: '0px'},
   tooltipPlacement: 'top',
-  tooltipStyle: { backgroundColor: '#f56e71', borderColor: '#f56e71' },
+  tooltipStyle: {backgroundColor: '#ffb81d', color: '#000000'},
   width: 'auto',
-  dotStyle: {backgroundColor: '#ffb81d', border: '2px solid #ffb81d'},
+  dotStyle: {backgroundColor: '#ffb81d', border: '0px'},
 };
 let dim5Slider = {
   clickable: true,
@@ -988,9 +988,9 @@ let dim5Slider = {
   speed: 0.25,
   style: { marginTop: '0px'},
   tooltipPlacement: 'top',
-  tooltipStyle: { backgroundColor: '#f56e71', borderColor: '#f56e71' },
+  tooltipStyle: {backgroundColor: '#ffb81d', color: '#000000'},
   width: 'auto',
-  dotStyle: {backgroundColor: '#ffb81d', border: '2px solid #ffb81d'},
+  dotStyle: {backgroundColor: '#ffb81d', border: '0px'},
 };
 
 let app = new Vue({
