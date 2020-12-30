@@ -1014,7 +1014,7 @@ let app = new Vue({
 	selectedScn: 1,
 	scnTitle: '',
 	scnDesc: '',
-	scenario_options: [{id: 0, name: ''}],
+	scenario_options: [],
 	
 	dim1Slider: dim1Slider,
 	dim2Slider: dim2Slider,
