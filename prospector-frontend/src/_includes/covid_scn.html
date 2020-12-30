@@ -4,7 +4,7 @@
     <div id="layer-widgets">
       <button class="ui tiny color2 icon button"
               v-on:click="clickedShowHide">
-              <i class="angle double icon"
+              <i class="angle double black icon"
               v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
       </button>
     </div>
@@ -30,7 +30,7 @@
         <div id="picker" style="margin-top:15px">
 		  
 		  <h3>CHOOSE PRESET SCENARIO</h3>
-		  <select v-model="selectedPreset" class="col-3" style="background-color: #ffb81d">
+		  <select v-model="selectedPreset" class="col-3">
             <option v-for="option in scenario_options" v-bind:value="option.id">
               ${option.name}
             </option>

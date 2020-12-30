@@ -24,13 +24,25 @@
 
 .ui.toggle.checkbox label:before,
 .ui.toggle.checkbox label:hover:before,
-.ui.toggle.checkbox input:focus~label:before{
+.ui.toggle.checkbox input:focus~label:before {
   background-color: grey;
 }
 
 .ui.toggle.checkbox input:focus:checked~label:before,
 .ui.toggle.checkbox input:checked~label:before {
   background-color: #ffb81d!important;
+}
+
+select.col-3 {
+  width: 100%;
+  background-color: #ffb81d;
+  outline: 0px;
+  border-radius: 5px;
+}
+
+.col-3 option:not(:checked) { 
+  background-color: grey; 
+  color: #fff;
 }
 
 table#sumtable thead th, tbody, td {   
