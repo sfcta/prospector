@@ -66,8 +66,8 @@ const VIZ_INFO = {
 	BWIDTH_METRIC: 'totvol',
 	COLORVALS: {false: [0, .5, .55, .6, .7, 500], true: [-10, -0.1, -0.05, 0.05, 0.1, 500]},
     COLORS: {false: ['#C41D4A','#D07960','#E4B55E','#D4DA73','#B9D9EC'], true: ['#c31c4a','#f48f72','#dedede','#9fc8e5','#3687b5']},
-	BWVALS: [0, 1000, 5000, 25000, 125000, 500000],
-	BWIDTHS: [1, 2, 4, 8, 16],
+	BWVALS: {AM: [0, 500, 2500, 10000, 25000, 500000], PM: [0, 500, 2500, 10000, 25000, 500000], DAILY: [0, 1000, 5000, 25000, 125000, 500000]},
+	BWIDTHS: {AM: [0.5, 1, 4, 8, 16], PM: [0.5, 1, 4, 8, 16], DAILY: [1, 2, 4, 8, 16]},
 	STYLES_KEY: 'line',
     COLOR_BY_BINS: true,
     POST_UNITS: '',
@@ -81,7 +81,7 @@ const VIZ_INFO = {
     METRIC_DESC: 'Crowding',
 	BWIDTH_METRIC: 'ab_vol',
 	COLORVALS: {false: [0, 0.5, 0.85, 1, 500], true: [-10, -0.2, -0.05, 0.05, 0.2, 500]},
-    COLORS: {false: ['#B9D9EC','#D4DA73','#EAA45D','#C41D4A'], true: ['#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c']},
+    COLORS: {false: ['#B9D9EC','#D4DA73','#EAA45D','#C41D4A'], true: ['#3687b5','#9fc8e5','#dedede','#f48f72','#c31c4a']},
 	BWVALS: [0, 500, 2500, 5000, 10000, 500000],
 	BWIDTHS: [1, 2, 4, 8, 16],
 	STYLES_KEY: 'line',	
@@ -96,7 +96,7 @@ const VIZ_INFO = {
     METRIC: 'avg_time',
     METRIC_DESC: 'Average Travel Time',
 	COLORVALS: {false: [0, 15, 18, 21, 24, 27, 30, 500], true: [-100, -3, -0.5, 0.5, 3, 500]},
-    COLORS: {false: ['#FFEFE2','#FFD5C3','#FFBCA3','#EF938D','#E06C77','#D2445F','#C41D4A'], true: ['#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c']},
+    COLORS: {false: ['#FFEFE2','#FFD5C3','#FFBCA3','#EF938D','#E06C77','#D2445F','#C41D4A'], true: ['#3687b5','#9fc8e5','#dedede','#f48f72','#c31c4a']},
 	STYLES_KEY: 'polygon',	
     COLOR_BY_BINS: true,
     POST_UNITS: 'minutes',
@@ -109,7 +109,7 @@ const VIZ_INFO = {
     METRIC: 'vmt_per_pers',
     METRIC_DESC: 'Daily Vehicle Miles Traveled per Person',
 	COLORVALS: {false: [0, 1, 2, 3, 4, 5, 6, 7, 8, 500], true: [-100, -3, -0.1, 0.1, 3, 500]},
-    COLORS: {false: ['#FFEFE2','#FFDFCE','#FFCDB8','#FFBCA3','#F39C92','#E77B80','#DB5C6D','#CF3B5C','#C41D4A'], true: ['#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c']},
+    COLORS: {false: ['#FFEFE2','#FFDFCE','#FFCDB8','#FFBCA3','#F39C92','#E77B80','#DB5C6D','#CF3B5C','#C41D4A'], true: ['#3687b5','#9fc8e5','#dedede','#f48f72','#c31c4a']},
 	STYLES_KEY: 'polygon',	
 	COLOR_BY_BINS: true,
     POST_UNITS: '',
@@ -520,8 +520,14 @@ async function drawMapFeatures(queryMapData=true) {
 
 		  let bw_widths;
 		  if (app.bwidth_check) {
-			sel_bwvals = VIZ_INFO[app.selectedViz]['BWVALS'];  
-			bw_widths = VIZ_INFO[app.selectedViz]['BWIDTHS']; 
+			if (app.selectedViz=='ASPD') {
+				sel_bwvals = VIZ_INFO[app.selectedViz]['BWVALS'][app.selected_timep2];  
+				bw_widths = VIZ_INFO[app.selectedViz]['BWIDTHS'][app.selected_timep2]; 
+			} else {
+				sel_bwvals = VIZ_INFO[app.selectedViz]['BWVALS'];  
+				bw_widths = VIZ_INFO[app.selectedViz]['BWIDTHS']; 
+			}
+			
 			for (let feat of cleanFeatures) {
 			  if (feat['bwmetric'] !== null) {
 				if (sel_bwvals.length <= 2){
@@ -657,7 +663,7 @@ function clickedOnFeature(e) {
   e.target.setStyle(styles[VIZ_INFO[app.selectedViz]['STYLES_KEY']].popup);
   let geo = e.target.feature;
   selGeoId = geo[GEOID_VAR];
-
+  
   // unselect the previously-selected selection, if there is one
   if (selectedGeo && selectedGeo.feature[GEOID_VAR] != geo[GEOID_VAR]) {
     prevSelectedGeo = selectedGeo;
@@ -903,6 +909,7 @@ function dim5Changed(chosen) {
 }
 let slideval_map = {'low': 'Low', 'med': 'Med', 'high': 'High'};
 function presetChanged(scn) {
+	console.log(scn);
 	if (scn>0) {
 		let key = ID_SCENMAP[scn].split(',');
 		app.dim1Value = slideval_map[key[0]];
