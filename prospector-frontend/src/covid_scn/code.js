@@ -791,7 +791,7 @@ function buildChartHtmlFromData() {
 
 async function selectionChanged() {
   if (popSelGeo) popSelGeo.remove();
-  let scn_key = app.selected_dim1+','+app.selected_dim2+','+app.selected_dim3+','+app.selected_dim4+','+app.selected_dim5;
+  let scn_key = app.dim1Value.toLowerCase()+','+app.dim2Value.toLowerCase()+','+app.dim3Value.toLowerCase()+','+app.dim4Value.toLowerCase()+','+app.dim5Value.toLowerCase();
   if (SCEN_IDMAP.hasOwnProperty(scn_key)) {
 	  app.selectedScn = SCEN_IDMAP[scn_key];
 	  app.scnTitle = SCEN_DEF[app.selectedScn]['name'];
@@ -887,29 +887,8 @@ function clickViz(chosenviz) {
   drawMapFeatures();
 }
 
-function dim1Changed(chosen) {
-  app.selected_dim1 = chosen.toLowerCase();
-  selectionChanged();
-}
-function dim2Changed(chosen) {
-  app.selected_dim2 = chosen.toLowerCase();
-  selectionChanged();
-}
-function dim3Changed(chosen) {
-  app.selected_dim3 = chosen.toLowerCase();
-  selectionChanged();
-}
-function dim4Changed(chosen) {
-  app.selected_dim4 = chosen.toLowerCase();
-  selectionChanged();
-}
-function dim5Changed(chosen) {
-  app.selected_dim5 = chosen.toLowerCase();
-  selectionChanged();
-}
 let slideval_map = {'low': 'Low', 'med': 'Med', 'high': 'High'};
 function presetChanged(scn) {
-	console.log(scn);
 	if (scn>0) {
 		let key = ID_SCENMAP[scn].split(',');
 		app.dim1Value = slideval_map[key[0]];
@@ -1075,11 +1054,6 @@ let app = new Vue({
 	{text: 'MEDIUM', value: 'med'},
 	{text: 'HIGH', value: 'high'},
 	],
-	selected_dim1: 'low',
-	selected_dim2: 'low',
-	selected_dim3: 'low',
-	selected_dim4: 'low',
-	selected_dim5: 'low',
 	
 	year_options: [
     {text: '2015', value: '2015'},
@@ -1131,11 +1105,11 @@ let app = new Vue({
   },
   watch: {
 	selectedPreset: presetChanged,
-    dim1Value: dim1Changed,
-	dim2Value: dim2Changed,
-	dim3Value: dim3Changed,
-	dim4Value: dim4Changed,
-	dim5Value: dim5Changed,
+    dim1Value: selectionChanged,
+	dim2Value: selectionChanged,
+	dim3Value: selectionChanged,
+	dim4Value: selectionChanged,
+	dim5Value: selectionChanged,
 	comp_check: compMode,
   },
   methods: {
