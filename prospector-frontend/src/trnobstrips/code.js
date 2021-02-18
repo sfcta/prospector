@@ -53,7 +53,7 @@ let streetLayer = L.tileLayer(url2, {
   accessToken:token,
   pane: 'shadowPane',
 });
-//streetLayer.addTo(mymap);
+streetLayer.addTo(mymap);
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
@@ -562,7 +562,7 @@ function styleByMetricColor(feat) {
               sel_binsflag
               );
   //if (!color) color = MISSING_COLOR;
-  let fo = 0.7;
+  let fo = 1.0;
   if (feat['metric']==0 || !color) {
     fo = 0;
   }
