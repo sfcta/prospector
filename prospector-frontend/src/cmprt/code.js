@@ -35,7 +35,7 @@ mymap.setView([37.76889, -122.440997], 13);
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
-const GEO_VIEW = 'cmp_segments_master';
+const GEO_VIEW = 'cmp_segments_plus';
 const VIZ_LIST = ['ASPD','SPDIFFPCT','VMT','VMTDIFFPCT'];
 const VIZ_INFO = {
   ASPD: {
