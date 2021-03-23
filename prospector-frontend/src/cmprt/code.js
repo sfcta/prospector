@@ -285,24 +285,26 @@ function getInfoHtml(geo) {
   }
   
   if (app.selectedViz != 'ASPD' && app.selectedViz != 'VMT') {
-	let base_col, comp_col, base_desc, comp_desc, units;
+	let base_col, comp_col, base_desc, comp_desc, units, num_dec;
 	if (app.selectedViz == 'SPDIFFPCT') {
 		base_col = 'base_speed';
 		comp_col = 'avg_speed';
 		base_desc = 'Base Speed';
 		comp_desc = 'Average Speed';
 		units = 'mph';
+		num_dec = 100;
 	} else if (app.selectedViz == 'VMTDIFFPCT') {
 		base_col = 'base_vol';
 		comp_col = 'imp_vol';
 		base_desc = 'Base VMT';
 		comp_desc = 'Average VMT';
-		units = '';		
+		units = '';
+		num_dec = 1;		
 	}
     let base_val = null;
-    if (geo[base_col] !== null) base_val = (Math.round(geo[base_col]*100)/100).toLocaleString();
+    if (geo[base_col] !== null) base_val = (Math.round(geo[base_col]*num_dec)/num_dec).toLocaleString();
     let comp_val = null;
-    if (geo[comp_col] !== null) comp_val = (Math.round(geo[comp_col]*100)/100).toLocaleString();
+    if (geo[comp_col] !== null) comp_val = (Math.round(geo[comp_col]*num_dec)/num_dec).toLocaleString();
     let metric_val = 0;
     if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
     
