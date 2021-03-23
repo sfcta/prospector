@@ -280,7 +280,7 @@ function getInfoHtml(geo) {
   
   if (app.selectedViz == 'VMT') {
     let metric_val = 0;
-    if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
+    if (geo.metric !== null) metric_val = (Math.round(geo.metric)).toLocaleString();
 	retval += `<b> ${VIZ_INFO[app.selectedViz]['METRIC_DESC']}: </b>` + `${metric_val}` + VIZ_INFO[app.selectedViz]['POST_UNITS'];
   }
   
