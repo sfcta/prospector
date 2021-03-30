@@ -26,6 +26,8 @@ import 'isomorphic-fetch';
 import vueSlider from 'vue-slider-component';
 import Cookies from 'js-cookie';
 
+// test_change
+
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
 let getLegHTML = maplib.getLegHTML2;
