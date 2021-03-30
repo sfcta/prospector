@@ -38,6 +38,9 @@ mymap.setView([37.76889, -122.440997], 13);
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'sf_xd_2002';
+const API_SERVER2 = 'https://api.sfcta.org/commapi/';
+const AGG_VIEW = 'sf_xd_2002_agg_view';
+const AGG_TABLE = 'sf_xd_2002_agg';
 const VIZ_LIST = ['ASPD','SPDIFFPCT','SPDIFF'];
 const GEOID_VAR = 'seg_id';
 const VIZ_INFO = {
@@ -90,12 +93,12 @@ let aggdata_view = 'inrix_rt_weekly_allxd_agg';
 let aggdata_label = 'All Segments Combined';
 let selGeoId;
 
-let geoLayer, mapLegend;
+let geoLayer, aggLayer, mapLegend;
 let selMetricData;
 let popHoverSegment, popSelSegment;
 let selectedSegment, prevselectedSegment;
 
-let _segmentJson;
+let _segmentJson, _aggJson;
 let _allCmpData;
 let _aggregateData;
 let _diffData;
@@ -106,7 +109,7 @@ async function initialPrep() {
   _segmentJson = await fetchRoadSegments();
 
   console.log('2...');
-  //_allCmpData = await fetchAllCmpSegmentData(data_view);
+  _aggJson = await fetchAggSegments();
 
   console.log('3...');
   //_aggregateData = await fetchAggregateData(aggdata_view);
@@ -132,6 +135,25 @@ async function fetchRoadSegments() {
       segment['type'] = 'Feature';
       segment['geometry'] = JSON.parse(segment.geometry);
 	  segment[GEOID_VAR] = segment.xdsegid;
+    }
+    return segments;
+
+  } catch (error) {
+    console.log('map segment error: ' + error);
+  }
+}
+
+async function fetchAggSegments() {
+  const geo_url = API_SERVER2 + AGG_VIEW;
+
+  try {
+    let resp = await fetch(geo_url);
+    let segments = await resp.json();
+
+    // do some parsing and stuff
+    for (let segment of segments) {
+      segment['type'] = 'Feature';
+      segment['geometry'] = JSON.parse(segment.geometry);
     }
     return segments;
 
@@ -283,6 +305,7 @@ function drawMapSegments() {
   let cleanSegments = _segmentJson.slice();
 
   if (geoLayer) mymap.removeLayer(geoLayer);
+  if (aggLayer) mymap.removeLayer(aggLayer);
   if (mapLegend) mymap.removeControl(mapLegend);
 
   geoLayer = L.geoJSON(cleanSegments, {
@@ -295,6 +318,17 @@ function drawMapSegments() {
     },
   });
   geoLayer.addTo(mymap);
+  
+  aggLayer = L.geoJSON(_aggJson, {
+    style: styleByMetricColor2,
+    /*onEachFeature: function(feature, layer) {
+      layer.on({
+        mouseover: hoverFeature,
+        click: clickedOnFeature,
+      });
+    },*/
+  });
+  aggLayer.addTo(mymap);
 
   /*mapLegend = L.control({ position: 'bottomright' });
   mapLegend.onAdd = function(map) {
@@ -317,6 +351,12 @@ function styleByMetricColor(segment) {
 
   let color = 'green';
   return { color: color, weight: 6, opacity: 0.5 };
+}
+
+function styleByMetricColor2(segment) {
+
+  let color = 'orange';
+  return { color: color, weight: 3, opacity: 1.0 };
 }
 
 let infoPanelTimeout;
