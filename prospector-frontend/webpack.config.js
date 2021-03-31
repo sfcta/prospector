@@ -30,7 +30,8 @@ const sfcta_components = [
      'survey2018',
      'trnobstrips',
 	 'covid_scn',
-	 'linkagg_inrix'
+	 'linkagg_inrix',
+     'tncparking'
 	 //'cmp-v0',
 ];
 
