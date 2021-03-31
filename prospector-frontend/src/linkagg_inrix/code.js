@@ -33,8 +33,9 @@ let mymap = maplib.sfmap;
 var zoom_level = 13;
 mymap.setView([37.76889, -122.440997], zoom_level);
 
-const API_SERVER = 'https://api.sfcta.org/api/';
-const GEO_VIEW = 'cmp_segments_master';
+const API_SERVER = 'https://api.sfcta.org/commapi/';
+const AGG_VIEW = 'sf_xd_2002_agg_view';
+const AGG_TABLE = 'sf_xd_2002_agg';
 
 let geoLayer;
 let links;
@@ -48,7 +49,7 @@ async function initialPrep() {
 }
 
 async function getLinks() {
-  const geo_url = API_SERVER + GEO_VIEW + '?select=geometry,cmp_segid,cmp_name,cmp_from,cmp_to,direction,length';
+  const geo_url = API_SERVER + AGG_VIEW //+ '?select=geometry,cmp_segid,cmp_name,cmp_from,cmp_to,direction,length';
 
   try {
     let resp = await fetch(geo_url);
@@ -65,6 +66,8 @@ async function getLinks() {
       segid_to_attrs[segment['cmp_segid']] = segment;
 
     }
+
+    console.log(segments)
     return segments;
 
   } catch (error) {
