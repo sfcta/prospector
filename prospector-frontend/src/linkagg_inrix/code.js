@@ -32,12 +32,9 @@ var maplib = require('../jslib/maplib');
 let mymap = maplib.sfmap;
 mymap.setView([37.76889, -122.440997], 13);
 
-const AGG_TABLE = 'sf_xd_2002_agg';
-
-// TODO
-let segid_to_attrs = {};
+let gid_to_attrs = {};
 let selected_links = new Set();
-// TODO
+let all_cmpsegids = [];
 
 let geoPopup;
 
@@ -48,15 +45,21 @@ let newsegs_layer;
 let links;
 let aggs; 
 
+var combo_to_segs = {};
+var new_combinations = [];
+
+var cmp_segids = []
+
 async function initialPrep() {
   links = await getLinks();
-  aggs = await getAggregatedLinks();
+  //aggs = await getAggregatedLinks();
+  aggs = await getWritableLinks();
   document.getElementById("layerbutton").click();
 }
 
 async function getLinks() {
   try {
-    let resp = await fetch('https://api.sfcta.org/api/sf_xd_2002');
+    let resp = await fetch('https://api.sfcta.org/api/sf_xd_2002'); 
     let segments = await resp.json();
 
     // Parse geometry & rename. 
@@ -68,7 +71,7 @@ async function getLinks() {
       segment['linktype'] = 'raw';
       segment['id'] = 'raw_' + String(segment.gid);
 
-      segid_to_attrs[segment['gid']] = segment;
+      gid_to_attrs[segment['gid']] = segment;
     }
     return segments;
 
@@ -77,27 +80,31 @@ async function getLinks() {
   }
 }
 
-async function getAggregatedLinks() {
+
+async function getWritableLinks() {
   try {
-    let resp = await fetch('https://api.sfcta.org/commapi/sf_xd_2002_agg_view');
+    let resp = await fetch('https://api.sfcta.org/commapi/sf_xd_2002_agg'); // 'https://api.sfcta.org/commapi/sf_xd_2002_agg_view'
     let segments = await resp.json();
 
     // Parse geometry & rename. 
     for (let segment of segments) {
+      segment['geometry'] = segment.geom; // Only diff with sf_xd_2002_agg_view is: JSON.parse(segment.geometry);
       segment['type'] = 'Feature';
-      segment['geometry'] = JSON.parse(segment.geometry);
       segment['clicked'] = false;
       segment['combined'] = true; 
       segment['linktype'] = 'agg';
       segment['id'] = 'agg_' + String(segment.gid);
+
+      all_cmpsegids.push(segment.cmp_segid)
     }
+
     return segments;
+
 
   } catch (error) {
     console.log('map segment error: ' + error);
   }
 }
-
 
 //////////////////////////////////////////// ADD LAYERS ////////////////////////////////////////////////////
 
@@ -305,28 +312,23 @@ function createAggButton(combination) {
   // X Button
   document.getElementById(btn_id+'_x').addEventListener("click", function() {
     buttonClose(combination.gid);
-    console.log('closing... ' + String(btn_id))
 
-    delete segid_to_attrs[btn_id];
+    // Remove segment, update map. 
+    delete gid_to_attrs[btn_id];
     for (let i=0; i<new_combinations.length; i++) {
       if (new_combinations[i]['gid']==btn_id) {new_combinations.splice(i, 1)}
     }
     for (let i=0; i<aggs.length; i++) {
       if (aggs[i]['gid']==btn_id) {aggs.splice(i, 1)}
     }
-
     showExtraLayers();
-
-    //e.target.feature['clicked'] = false; 
-    //mouseoutFeature(e);
-    //selected_links.delete(btn_id);
   })
 }
 
 
 function createLinkButton(e) {
 
-  createCombineButton()
+  createCombineButton();
 
   // Create button
   var text = e.target.feature.gid + ': ' + e.target.feature.roadname + ' (' + e.target.feature.bearing + ')';
@@ -390,12 +392,6 @@ function createCombineButton() {
   document.getElementById("combineButton").addEventListener("click", function() {combine()})
 }
 
-function createUncombineButton(e) {
-  var button = '<button class="fluid ui red button">Uncombine</button>'
-  $("#combineButton").append(button)
-  document.getElementById("combineButton").addEventListener("click", function() {uncombine(e.target.feature.gid)})
-}
-
 function createPushToDBButton() {
   $("#pushtoDb").empty();
   var button = '<button class="fluid ui blue button">Push to Database</button>'
@@ -403,25 +399,67 @@ function createPushToDBButton() {
   document.getElementById("pushtoDb").addEventListener("click", function() {pushToDB()})
 }
 
+
+
+function prepareComboForDB(combo) {
+  let to_push = {};
+  to_push['gid'] = combo.gid;
+  to_push['cmp_segid'] = combo.cmp_segid; // need to create!
+  to_push['geom'] = combo.geometry;
+  to_push['direction'] = combo.direction;
+  to_push['cmp_to'] = combo.cmp_to;
+  to_push['cmp_from'] = combo.cmp_from;
+  to_push['length'] = combo.length;
+  to_push['cls_hcm00'] = combo.cls_hcm00;
+  to_push['cls_hcm85'] = combo.cls_hcm85;
+
+  return to_push
+}
+
+
+async function postAggregation(agg) {
+  console.log('Posting aggregation...')
+
+  var write_url = 'https://api.sfcta.org/commapi/sf_xd_2002_agg'
+
+  try {
+    await fetch(write_url, {
+      method: 'POST',
+      body: JSON.stringify(agg),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    console.log('Successfully posted: ' + String(agg.cmp_segid))
+  } catch (e) {
+    console.log('Error posting: ' + String(agg.cmp_segid))
+    console.log(e)
+  }
+}
+
+
 function pushToDB() {
-  console.log('pushing to db...')
+
+  $("#pushtoDb").empty();
+  $('#createdAggs').empty()
+
+  // Prepare for pushing to db
+  for (let i=0; i<new_combinations.length; i++) {
+    var to_push = prepareComboForDB(new_combinations[i]);
+    postAggregation(to_push)
+  }
+
+
+  // Reset
+  new_combinations = [];
 }
 
 
-function uncombine(x) {
-  console.log('uncombining')
-}
-
-
-var combo_to_segs = {};
-var new_combinations = [];
 
 function combine() {
 
-  console.log('COMBINING...')
-
   var combination = -1;
-  var new_seg_id = Math.max.apply(null, Object.keys(segid_to_attrs)) + 1;
+  var new_gid = Math.max.apply(null, Object.keys(gid_to_attrs)) + 1;
   var segs = [];
 
   // Combine
@@ -429,32 +467,36 @@ function combine() {
 
     if (combination==-1) {
       // Initialize 
-      combination = {...segid_to_attrs[segid]};
-      combination['cmp_from'] = document.getElementById('cmp_from').value;;
-      combination['cmp_to'] = document.getElementById('cmp_to').value;;
-      combination['cmp_name'] = document.getElementById('cmp_name').value;;
-      combination['direction'] = document.getElementById('cmp_direction').value;;
+      combination = {...gid_to_attrs[segid]};
+      combination['cmp_from'] = document.getElementById('cmp_from').value;
+      combination['cmp_to'] = document.getElementById('cmp_to').value;
+      combination['cmp_name'] = document.getElementById('cmp_name').value;
+      combination['direction'] = document.getElementById('cmp_direction').value;
+      combination['cls_hcm00'] = document.getElementById('cls_hcm00').value;
+      combination['cls_hcm85'] = document.getElementById('cls_hcm85').value;
+      combination['cmp_segid'] = Math.max(...all_cmpsegids) + 1
       combination['combined'] = true;
       combination['clicked'] = true;
       combination['new'] = true;
-      combination['gid'] = new_seg_id;
+      combination['gid'] = new_gid;
       combination['linktype'] = 'agg';
-      combination['id'] = 'agg_' + String(new_seg_id);
+      combination['length'] = combination['miles'];
+      combination['id'] = 'agg_' + String(new_gid);
     } else {
       // Combine lengths & geometries
-      combination['length'] += segid_to_attrs[segid]['miles']
-      combination['geometry']['coordinates'] = combination['geometry']['coordinates'].concat(segid_to_attrs[segid]['geometry']['coordinates'])
+      combination['length'] += gid_to_attrs[segid]['miles']
+      combination['geometry']['coordinates'] = combination['geometry']['coordinates'].concat(gid_to_attrs[segid]['geometry']['coordinates'])
     }
     segs.push(segid)
   }) 
 
   if (combination != -1) {
     // Add to dataset
-    segid_to_attrs[new_seg_id] = combination
+    gid_to_attrs[new_gid] = combination
     new_combinations.push(combination)
     aggs.push(combination)
     
-    combo_to_segs[new_seg_id] = segs;
+    combo_to_segs[new_gid] = segs;
 
     // Add to list of created aggregations
     createAggButton(combination);
@@ -473,8 +515,13 @@ function combine() {
     document.getElementById('cmp_to').value = '';
     document.getElementById('cmp_name').value = '';
     document.getElementById('cmp_direction').value = '';
+    document.getElementById('cls_hcm00').value = '';
+    document.getElementById('cls_hcm85').value = '';
   }
 }
+
+
+////////////////////////////////////////////// TBD ///////////////////////////////////////////////////////
 
 
 /*
@@ -490,6 +537,18 @@ function mouseoverButton(e, btn_id) {
 function mouseoutButton(e, btn_id) {
   document.getElementById(btn_id+'_o').style.color = 'black'
 }
+
+
+function uncombine(x) {
+  console.log('uncombining')
+}
+
+function createUncombineButton(e) {
+  var button = '<button class="fluid ui red button">Uncombine</button>'
+  $("#combineButton").append(button)
+  document.getElementById("combineButton").addEventListener("click", function() {uncombine(e.target.feature.gid)})
+}
+
 */
 
 

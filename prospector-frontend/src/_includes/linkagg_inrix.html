@@ -16,7 +16,7 @@
     <hr style="margin-bottom:20px; margin-top:15px;">
 
     <h5 style="font-size: 20px; margin-top:15px;">Selected Links</h5>
-    <div id="selectedLinks"> <p> Select links by clicking on segments of Full INRIX Network layer. </p> </div>
+    <div id="selectedLinks"> <p i='linkDescription'> Select links by clicking on segments of the Full INRIX Network layer. </p> </div>
     <hr style="margin-bottom:20px; margin-top:15px;">
 
     <h5 style="font-size: 20px; margin-top:15px; margin-bottom:20px;">Aggregated Link Details</h5>
@@ -36,6 +36,14 @@
     <div class="ui input">
       <input type="text" id='cmp_direction' placeholder="S">
     </div>
+    <h4 style="margin-top:10px;">cls_hcm00</h4>
+    <div class="ui input">
+      <input type="text" id='cls_hcm00' placeholder="4">
+    </div>
+    <h4 style="margin-top:10px;">cls_hcm85</h4>
+    <div class="ui input">
+      <input type="text" id='cls_hcm85' placeholder="3">
+    </div>
 
     <div id="combineButton"></div>
 
@@ -50,7 +58,7 @@
 
     <hr style="margin-bottom:20px; margin-top:15px;">
     <h3 style="font-size: 20px; margin-top:15px;">Created Aggregations</h3>
-    <div id="createdAggs"> <p> Create aggregations by 1) selecting links 2) defining features 3) pressing the Combine Button. </p> </div>
+    <div id="createdAggs"> <p i='aggDescription'> Create aggregations by 1) selecting links 2) defining features 3) pressing the Combine Button. </p> </div>
     <div id="pushtoDb"></div>
 
 
