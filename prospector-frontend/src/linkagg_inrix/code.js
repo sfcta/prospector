@@ -36,9 +36,11 @@ let gid_to_attrs = {};
 let selected_links = new Set();
 let all_cmpsegids = [];
 
-let all_agg_gids = [];
+let all_agg_gids;
 
 let geoPopup;
+
+let selection_type; // either agg or raw
 
 let raw_layer;
 let agg_layer;
@@ -52,6 +54,7 @@ var new_combinations = [];
 
 async function initialPrep() {
 
+  document.getElementById("agglinkdetails").style.display = "none";
 
   // Add color to buttons (move to html/css)
   document.getElementsByClassName("layer_description")[0].style.color = 'CornflowerBlue';
@@ -59,9 +62,8 @@ async function initialPrep() {
   document.getElementsByClassName("layer_description")[2].style.color = 'Orange';
 
   links = await getLinks();
-  //aggs = await getAggregatedLinks();
-  aggs = await getWritableLinks();
-  document.getElementById("layerbutton").click();
+  aggs = await getAggLinks();
+  document.getElementsByClassName("layerbutton")[1].click();
 }
 
 async function getLinks() {
@@ -88,7 +90,8 @@ async function getLinks() {
 }
 
 
-async function getWritableLinks() {
+async function getAggLinks() {
+  all_agg_gids = [];
   try {
     let resp = await fetch('https://api.sfcta.org/commapi/sf_xd_2002_agg'); // 'https://api.sfcta.org/commapi/sf_xd_2002_agg_view'
     let segments = await resp.json();
@@ -120,7 +123,7 @@ async function getWritableLinks() {
 const ADDLAYERS = [
   {name: 'Full INRIX Network'},
   {name: 'Aggregated Network'}, 
-  {name: 'New Aggregated Segments'}
+  {name: 'Uncommitted Aggregated Segments'}
 ]
 
 function showExtraLayers(e) {
@@ -148,7 +151,7 @@ function showExtraLayers(e) {
   }
 
   // New Segments
-  if (app.addLayers.includes('New Aggregated Segments')) {
+  if (app.addLayers.includes('Uncommitted Aggregated Segments')) {
       drawNewLinks();
   } else {
     try {
@@ -270,7 +273,13 @@ function getLinkColor(feature) {
 
 function clickedOnFeature(e) {
 
-  console.log('clickedonfeature')
+  if (e.target.feature['linktype']=='raw') {
+    document.getElementById("agglinkdetails").style.display = "block";  
+  } else if (e.target.feature['linktype']=='agg') {
+    document.getElementById("agglinkdetails").style.display = "none";  
+    createRemoveFromDBButton();
+  }
+
 
   // Edit Link
   e.target.feature['clicked'] = !e.target.feature['clicked'];
@@ -334,6 +343,8 @@ function createAggButton(combination) {
 
     buttonClose(combination.gid);
 
+
+
     // Remove segment, update map. 
     delete gid_to_attrs[btn_id];
     for (let i=0; i<new_combinations.length; i++) {
@@ -360,8 +371,7 @@ function createLinkButton(e) {
     var text = e.target.feature.gid + ': ' + e.target.feature.roadname + ' (' + e.target.feature.bearing + ')';
     createCombineButton();
   } else {
-    var text = e.target.feature.cmp_segid + ': ' + e.target.feature.cmp_name + ' from ' + e.target.feature.cmp_from + ' to ' + e.target.feature.cmp_to;
-    createRemoveFromDBButton();
+    var text = e.target.feature.gid + ': ' + e.target.feature.cmp_name + ' from ' + e.target.feature.cmp_from + ' to ' + e.target.feature.cmp_to;
   }
   
   var btn_id = e.target.feature.gid;
@@ -414,6 +424,11 @@ function buttonClose(gid) {
   if ($('#selectedLinks').text().trim().length == 0 ) {
     $("#combineButton").empty()
     $("#removeLinks").empty()
+    document.getElementById("agglinkdetails").style.display = "none"; 
+  }
+
+  if ($('#createdAggs').text().trim().length == 0 ) {
+    $('#pushtoDb').empty()
   }
 }
 
@@ -422,7 +437,10 @@ function createCombineButton() {
   $('#combineButton').empty()
   var button = '<button class="fluid ui blue button">Combine</button>'
   $("#combineButton").append(button)
-  document.getElementById("combineButton").addEventListener("click", function() {combine()})
+  document.getElementById("combineButton").addEventListener("click", function() {
+    document.getElementById("agglinkdetails").style.display = "none";
+    combine()
+  })
 }
 
 function createRemoveFromDBButton() {
@@ -439,8 +457,56 @@ function createPushToDBButton() {
   document.getElementById("pushtoDb").addEventListener("click", function() {pushToDB()})
 }
 
-function removeFromDB() {
-  console.log('Removing from db...')
+async function removeFromDB() {
+
+  console.log(selected_links)
+
+  for (let i=0; i<Array.from(selected_links).length; i++) {
+
+    var gid = Array.from(selected_links)[i]
+
+    console.log('Removing...' + gid)
+
+    // Make sure to check that this is an AGG link *not* a RAW link
+    /*
+    if (gid_to_attrs[gid]['linktype'] == 'agg') {
+      
+   }
+   */
+
+    var write_url = 'https://api.sfcta.org/commapi/sf_xd_2002_agg?gid=eq.' + String(gid)
+
+    console.log(write_url)
+
+    try {
+      var resp = await fetch(write_url, {
+        method: 'DELETE',
+        //body: JSON.stringify(agg),
+        //headers: {
+        //  'Content-Type': 'application/json'
+        //}
+      })
+      if (resp.status==204) {
+        window.alert('Successfully removed gid ' + String(gid));
+      } else {
+        window.alert('Failed to remove ' + String(gid));
+      }
+    } catch (e) {
+      window.alert(resp.statusText);
+      console.log('Error posting: ' + String(agg.cmp_segid))
+      console.log(e)
+    }
+  }
+
+  // Reload agg-links
+  aggs = await getAggLinks();
+  drawAggLinks();
+
+  selected_links = [];
+
+  // Clear link section 
+  $('#removeLinks').empty()
+  $('#selectedLinks').empty()
 }
 
 function prepareComboForDB(combo) {
@@ -462,7 +528,6 @@ function prepareComboForDB(combo) {
 
 
 async function postAggregation(agg) {
-  console.log('Posting aggregation...')
 
   var write_url = 'https://api.sfcta.org/commapi/sf_xd_2002_agg'
 
@@ -474,7 +539,7 @@ async function postAggregation(agg) {
         'Content-Type': 'application/json'
       }
     })
-    console.log(resp.statusText)
+    window.alert(resp.statusText);
   } catch (e) {
     console.log('Error posting: ' + String(agg.cmp_segid))
     console.log(e)
@@ -487,12 +552,16 @@ function pushToDB() {
   $("#pushtoDb").empty();
   $('#createdAggs').empty()
 
-  // Prepare for pushing to db
+  // For each aggregation
   for (let i=0; i<new_combinations.length; i++) {
+    new_combinations[i]['linktype'] = 'agg';
+    aggs.push(new_combinations[i])
     var to_push = prepareComboForDB(new_combinations[i]);
     postAggregation(to_push)
   }
 
+  //drawNewLinks();
+  //drawAggLinks();
 
   // Reset
   new_combinations = [];
@@ -546,12 +615,9 @@ function combine() {
   // Deal with the combination
   if (combination != -1) {
 
-    console.log(combination['geometry'])
-
     // Add to dataset
-    gid_to_attrs[new_gid] = combination
+    //gid_to_attrs[new_gid] = combination
     new_combinations.push(combination)
-    aggs.push(combination)
     all_agg_gids.push(new_gid)
     
     combo_to_segs[new_gid] = segs;
