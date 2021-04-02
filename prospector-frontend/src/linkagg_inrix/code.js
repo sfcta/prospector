@@ -36,6 +36,8 @@ let gid_to_attrs = {};
 let selected_links = new Set();
 let all_cmpsegids = [];
 
+let all_agg_gids = [];
+
 let geoPopup;
 
 let raw_layer;
@@ -99,6 +101,8 @@ async function getWritableLinks() {
       segment['combined'] = true; 
       segment['linktype'] = 'agg';
       segment['id'] = 'agg_' + String(segment.gid);
+
+      all_agg_gids.push(segment['gid'])
 
       all_cmpsegids.push(segment.cmp_segid)
     }
@@ -228,16 +232,16 @@ function mouseoutFeature(e) {
 
 function hoverFeature(e) {
 
-  if (e.target.feature['linktype']=='agg') {
+  if (e.target.feature['linktype']=='raw') {
+    var content = 'gid: ' + String(e.target.feature.gid) + '<br>' + 
+    'Street: ' + e.target.feature.roadname + '<br>' + 
+    'Direction: ' + e.target.feature.bearing
+  } else {
     var content = 'gid: ' + String(e.target.feature.gid) + '<br>' + 
         'Name: ' + e.target.feature.cmp_name + '<br>' + 
         'From: ' + e.target.feature.cmp_from + '<br>' + 
         'To: ' + e.target.feature.cmp_to + '<br>' +
         'Direction: ' + e.target.feature.direction
-  } else {
-    var content = 'gid: ' + String(e.target.feature.gid) + '<br>' + 
-        'Street: ' + e.target.feature.roadname + '<br>' + 
-        'Direction: ' + e.target.feature.bearing
   }
 
   if (e.type == 'mouseover') {
@@ -266,6 +270,8 @@ function getLinkColor(feature) {
 
 function clickedOnFeature(e) {
 
+  console.log('clickedonfeature')
+
   // Edit Link
   e.target.feature['clicked'] = !e.target.feature['clicked'];
   e.target.setStyle({'color':'#FFD700'});
@@ -288,6 +294,7 @@ function createAggButton(combination) {
   // Create button
   var text = combination.gid + ': ' + combination.cmp_name + ' From ' + combination.cmp_from + ' To ' + combination.cmp_to + ' (' + combination.direction + ')';
   var btn_id = combination.gid;
+
   var button = 
     `
     <div class="ui left labeled button" tabindex="0" 
@@ -297,7 +304,7 @@ function createAggButton(combination) {
     >
       <a class="ui basic label" 
     ` 
-    + ' id="' + btn_id + '_o"' + 
+    + ' id="' + btn_id + '_o" style="color:orange"' + 
     `
       >
     `
@@ -335,6 +342,9 @@ function createAggButton(combination) {
     for (let i=0; i<aggs.length; i++) {
       if (aggs[i]['gid']==btn_id) {aggs.splice(i, 1)}
     }
+    for (let i=0; i<all_agg_gids.length; i++) {
+      if (all_agg_gids[i]==btn_id) {all_agg_gids.splice(i, 1)}
+    }
     showExtraLayers();
   })
 
@@ -364,7 +374,7 @@ function createLinkButton(e) {
     >
       <a class="ui basic label" 
     ` 
-    + ' id="' + btn_id + '_o"' + 
+    + ' id="' + btn_id + '_o" style="color:' + getLinkColor(e.target.feature) + '"' + 
     `
       >
     `
@@ -445,6 +455,7 @@ function prepareComboForDB(combo) {
   to_push['length'] = combo.length;
   to_push['cls_hcm00'] = combo.cls_hcm00;
   to_push['cls_hcm85'] = combo.cls_hcm85;
+  to_push['xd_ids'] = String(combo.xd_ids);
 
   return to_push
 }
@@ -456,14 +467,14 @@ async function postAggregation(agg) {
   var write_url = 'https://api.sfcta.org/commapi/sf_xd_2002_agg'
 
   try {
-    await fetch(write_url, {
+    var resp = await fetch(write_url, {
       method: 'POST',
       body: JSON.stringify(agg),
       headers: {
         'Content-Type': 'application/json'
       }
     })
-    console.log('Successfully posted: ' + String(agg.cmp_segid))
+    console.log(resp.statusText)
   } catch (e) {
     console.log('Error posting: ' + String(agg.cmp_segid))
     console.log(e)
@@ -492,15 +503,16 @@ function pushToDB() {
 function combine() {
 
   var combination = -1;
-  var new_gid = Math.max.apply(null, Object.keys(gid_to_attrs)) + 1;
+  var new_gid = Math.max.apply(null, all_agg_gids) + 1;
   var segs = [];
 
   // Create the combination
-  selected_links.forEach(function(segid) {
+  selected_links.forEach(function(gid) {
 
     if (combination==-1) {
+
       // Initialize 
-      combination = {...gid_to_attrs[segid]};
+      combination = {...gid_to_attrs[gid]};
       combination['cmp_from'] = document.getElementById('cmp_from').value;
       combination['cmp_to'] = document.getElementById('cmp_to').value;
       combination['cmp_name'] = document.getElementById('cmp_name').value;
@@ -515,21 +527,32 @@ function combine() {
       combination['linktype'] = 'new';
       combination['length'] = combination['miles'];
       combination['id'] = 'agg_' + String(new_gid);
-      //combination['xd_ids'] = [];
+      combination['xd_ids'] = [gid_to_attrs[gid].xdsegid];
+      // Create MultiLineString
+      combination['geometry'] = {
+        'type':'MultiLineString',
+        'coordinates':[combination['geometry']['coordinates']]
+      }
     } else {
-      // Combine lengths & geometries
-      combination['length'] += gid_to_attrs[segid]['miles'];
-      combination['geometry']['coordinates'] = combination['geometry']['coordinates'].concat(gid_to_attrs[segid]['geometry']['coordinates']);
+      // Combine lengths, geometries, segments
+      combination['length'] += gid_to_attrs[gid]['miles'];
+      combination['xd_ids'].push(gid_to_attrs[gid].xdsegid)
+    
+      combination['geometry']['coordinates'].push(gid_to_attrs[gid]['geometry']['coordinates'])
     }
-    segs.push(segid)
+    segs.push(gid)
   }) 
 
   // Deal with the combination
   if (combination != -1) {
+
+    console.log(combination['geometry'])
+
     // Add to dataset
     gid_to_attrs[new_gid] = combination
     new_combinations.push(combination)
     aggs.push(combination)
+    all_agg_gids.push(new_gid)
     
     combo_to_segs[new_gid] = segs;
 
@@ -556,38 +579,6 @@ function combine() {
     all_cmpsegids.push(combination['cmp_segid'])
   }
 }
-
-
-////////////////////////////////////////////// TBD ///////////////////////////////////////////////////////
-
-
-/*
-
-function buttonMain(e) {
-  // pass
-}
-
-function mouseoverButton(e, btn_id) {
-  document.getElementById(btn_id+'_o').style.color = '#FFD700'
-}
-
-function mouseoutButton(e, btn_id) {
-  document.getElementById(btn_id+'_o').style.color = 'black'
-}
-
-
-function uncombine(x) {
-  console.log('uncombining')
-}
-
-function createUncombineButton(e) {
-  var button = '<button class="fluid ui red button">Uncombine</button>'
-  $("#combineButton").append(button)
-  document.getElementById("combineButton").addEventListener("click", function() {uncombine(e.target.feature.gid)})
-}
-
-*/
-
 
 ////////////////////////////////////////////// VUE ///////////////////////////////////////////////////////
 
