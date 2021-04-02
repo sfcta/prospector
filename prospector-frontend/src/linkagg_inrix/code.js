@@ -48,9 +48,14 @@ let aggs;
 var combo_to_segs = {};
 var new_combinations = [];
 
-var cmp_segids = []
-
 async function initialPrep() {
+
+
+  // Add color to buttons (move to html/css)
+  document.getElementsByClassName("layer_description")[0].style.color = 'CornflowerBlue';
+  document.getElementsByClassName("layer_description")[1].style.color = 'Green';
+  document.getElementsByClassName("layer_description")[2].style.color = 'Orange';
+
   links = await getLinks();
   //aggs = await getAggregatedLinks();
   aggs = await getWritableLinks();
@@ -178,7 +183,7 @@ function drawAggLinks() {
       layer.on({
         mouseover: mouseoverFeature,
         mouseout: mouseoutFeature,
-        //click: clickedOnFeature,
+        click: clickedOnFeature,
       });
     },
 
@@ -189,7 +194,7 @@ function drawAggLinks() {
 function drawNewLinks() {
   if (newsegs_layer) mymap.removeLayer(newsegs_layer);
   newsegs_layer = L.geoJSON(new_combinations, {
-    style: {'color':'green'},
+    style: {'color':'orange'},
     onEachFeature: function(feature, layer) {
       feature['clicked'] = false; 
       layer.on({
@@ -247,7 +252,15 @@ function hoverFeature(e) {
 
 
 function getLinkColor(feature) {
-  return ((feature['linktype']=='raw') ? 'CornflowerBlue' : 'green')
+
+  if (feature['linktype']=='raw') {
+    return 'CornflowerBlue'
+  } else if (feature['linktype']=='agg') {
+    return 'Green'
+  } else {
+    return 'Orange'
+  }
+
 }
 
 
@@ -311,6 +324,7 @@ function createAggButton(combination) {
 
   // X Button
   document.getElementById(btn_id+'_x').addEventListener("click", function() {
+
     buttonClose(combination.gid);
 
     // Remove segment, update map. 
@@ -323,15 +337,23 @@ function createAggButton(combination) {
     }
     showExtraLayers();
   })
+
+  // TODO -- remove cmp_segid all_cmp_segids
 }
 
 
 function createLinkButton(e) {
 
-  createCombineButton();
 
   // Create button
-  var text = e.target.feature.gid + ': ' + e.target.feature.roadname + ' (' + e.target.feature.bearing + ')';
+  if (e.target.feature.linktype=='raw') {
+    var text = e.target.feature.gid + ': ' + e.target.feature.roadname + ' (' + e.target.feature.bearing + ')';
+    createCombineButton();
+  } else {
+    var text = e.target.feature.cmp_segid + ': ' + e.target.feature.cmp_name + ' from ' + e.target.feature.cmp_from + ' to ' + e.target.feature.cmp_to;
+    createRemoveFromDBButton();
+  }
+  
   var btn_id = e.target.feature.gid;
   var button = 
     `
@@ -372,7 +394,7 @@ function createLinkButton(e) {
     buttonClose(e.target.feature.gid);
     e.target.feature['clicked'] = false; 
     mouseoutFeature(e);
-    selected_links.delete(btn_id);
+    if (e.target.feature.linktype=='raw') {selected_links.delete(btn_id);}
   })
 }
 
@@ -381,6 +403,7 @@ function buttonClose(gid) {
   document.getElementById(gid).remove();
   if ($('#selectedLinks').text().trim().length == 0 ) {
     $("#combineButton").empty()
+    $("#removeLinks").empty()
   }
 }
 
@@ -392,6 +415,13 @@ function createCombineButton() {
   document.getElementById("combineButton").addEventListener("click", function() {combine()})
 }
 
+function createRemoveFromDBButton() {
+  $('#removeLinks').empty()
+  var button = '<button class="fluid ui red button">Remove Aggregate Link(s) From Database</button>'
+  $("#removeLinks").append(button)
+  document.getElementById("removeLinks").addEventListener("click", function() {removeFromDB()})
+}
+
 function createPushToDBButton() {
   $("#pushtoDb").empty();
   var button = '<button class="fluid ui blue button">Push to Database</button>'
@@ -399,15 +429,18 @@ function createPushToDBButton() {
   document.getElementById("pushtoDb").addEventListener("click", function() {pushToDB()})
 }
 
-
+function removeFromDB() {
+  console.log('Removing from db...')
+}
 
 function prepareComboForDB(combo) {
   let to_push = {};
   to_push['gid'] = combo.gid;
-  to_push['cmp_segid'] = combo.cmp_segid; // need to create!
+  to_push['cmp_segid'] = combo.cmp_segid;
   to_push['geom'] = combo.geometry;
   to_push['direction'] = combo.direction;
   to_push['cmp_to'] = combo.cmp_to;
+  to_push['cmp_name'] = combo.cmp_name;
   to_push['cmp_from'] = combo.cmp_from;
   to_push['length'] = combo.length;
   to_push['cls_hcm00'] = combo.cls_hcm00;
@@ -462,8 +495,8 @@ function combine() {
   var new_gid = Math.max.apply(null, Object.keys(gid_to_attrs)) + 1;
   var segs = [];
 
-  // Combine
-  selected_links.forEach(function(segid){
+  // Create the combination
+  selected_links.forEach(function(segid) {
 
     if (combination==-1) {
       // Initialize 
@@ -479,17 +512,19 @@ function combine() {
       combination['clicked'] = true;
       combination['new'] = true;
       combination['gid'] = new_gid;
-      combination['linktype'] = 'agg';
+      combination['linktype'] = 'new';
       combination['length'] = combination['miles'];
       combination['id'] = 'agg_' + String(new_gid);
+      //combination['xd_ids'] = [];
     } else {
       // Combine lengths & geometries
-      combination['length'] += gid_to_attrs[segid]['miles']
-      combination['geometry']['coordinates'] = combination['geometry']['coordinates'].concat(gid_to_attrs[segid]['geometry']['coordinates'])
+      combination['length'] += gid_to_attrs[segid]['miles'];
+      combination['geometry']['coordinates'] = combination['geometry']['coordinates'].concat(gid_to_attrs[segid]['geometry']['coordinates']);
     }
     segs.push(segid)
   }) 
 
+  // Deal with the combination
   if (combination != -1) {
     // Add to dataset
     gid_to_attrs[new_gid] = combination
@@ -517,6 +552,8 @@ function combine() {
     document.getElementById('cmp_direction').value = '';
     document.getElementById('cls_hcm00').value = '';
     document.getElementById('cls_hcm85').value = '';
+
+    all_cmpsegids.push(combination['cmp_segid'])
   }
 }
 

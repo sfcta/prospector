@@ -17,32 +17,35 @@
 
     <h5 style="font-size: 20px; margin-top:15px;">Selected Links</h5>
     <div id="selectedLinks"> <p i='linkDescription'> Select links by clicking on segments of the Full INRIX Network layer. </p> </div>
+    <div id='removeLinks'></div>
     <hr style="margin-bottom:20px; margin-top:15px;">
 
-    <h5 style="font-size: 20px; margin-top:15px; margin-bottom:20px;">Aggregated Link Details</h5>
-    <h4>Name</h4>
-    <div class="ui input">
-      <input type="text" id='cmp_name' placeholder="Stanyan">
-    </div>
-    <h4 style="margin-top:10px;">From</h4>
-    <div class="ui input">
-      <input type="text" id='cmp_from' placeholder="Fulton">
-    </div>
-    <h4 style="margin-top:10px;">To</h4>
-    <div class="ui input">
-      <input type="text" id='cmp_to' placeholder="Turk">
-    </div>
-    <h4 style="margin-top:10px;">Direction</h4>
-    <div class="ui input">
-      <input type="text" id='cmp_direction' placeholder="S">
-    </div>
-    <h4 style="margin-top:10px;">cls_hcm00</h4>
-    <div class="ui input">
-      <input type="text" id='cls_hcm00' placeholder="4">
-    </div>
-    <h4 style="margin-top:10px;">cls_hcm85</h4>
-    <div class="ui input">
-      <input type="text" id='cls_hcm85' placeholder="3">
+    <div id='agglinkdetails'>
+      <h5 style="font-size: 20px; margin-top:15px; margin-bottom:20px;">Aggregated Link Details</h5>
+      <h4>Name</h4>
+      <div class="ui input">
+        <input type="text" id='cmp_name' placeholder="Stanyan">
+      </div>
+      <h4 style="margin-top:10px;">From</h4>
+      <div class="ui input">
+        <input type="text" id='cmp_from' placeholder="Fulton">
+      </div>
+      <h4 style="margin-top:10px;">To</h4>
+      <div class="ui input">
+        <input type="text" id='cmp_to' placeholder="Turk">
+      </div>
+      <h4 style="margin-top:10px;">Direction</h4>
+      <div class="ui input">
+        <input type="text" id='cmp_direction' placeholder="S">
+      </div>
+      <h4 style="margin-top:10px;">cls_hcm00</h4>
+      <div class="ui input">
+        <input type="text" id='cls_hcm00' placeholder="4">
+      </div>
+      <h4 style="margin-top:10px;">cls_hcm85</h4>
+      <div class="ui input">
+        <input type="text" id='cls_hcm85' placeholder="3">
+      </div>
     </div>
 
     <div id="combineButton"></div>
@@ -53,7 +56,7 @@
     
     <div v-for="item in extraLayers" class="ui toggle checkbox">
       <input type="checkbox" v-bind:value="item.name" v-model="addLayers" id="layerbutton">
-      <label><h5>${item.name}</h5></label>
+      <label><h5 class="layer_description">${item.name}</h5></label>
     </div>
 
     <hr style="margin-bottom:20px; margin-top:15px;">
