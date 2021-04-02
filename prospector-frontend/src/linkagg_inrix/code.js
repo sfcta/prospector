@@ -32,41 +32,46 @@ var maplib = require('../jslib/maplib');
 let mymap = maplib.sfmap;
 mymap.setView([37.76889, -122.440997], 13);
 
+// Maps the *full INRIX network GID* to an object with features of that GID
 let gid_to_attrs = {};
+
+// Current selected links. Right now includes both full INRIX network & Aggregated Network links. TODO: FIX THIS perhaps. 
 let selected_links = new Set();
-let all_cmpsegids = [];
 
-let all_agg_gids;
+// A list of all cmp_segids *in the Aggregated INRIX network*. Useful for generating new segids for user-created aggregations. 
+let agg_segids;
 
+// A list of all GIDs *in the Aggregated INRIX network*. Useful for generating new GIDs for user-created aggregations. 
+let agg_gids;
+
+// Tooltip
 let geoPopup;
 
-let selection_type; // either agg or raw
+// Three layers of the map:
+let fullinrix_layer;   // Full INRIX network 
+let agg_layer;         // Aggregated Network
+let newaggs_layer;     // User-defined aggregations not yet committed to Aggregated network
 
-let raw_layer;
-let agg_layer;
-let newsegs_layer;
-
-let links;
-let aggs; 
-
-var combo_to_segs = {};
-var new_combinations = [];
+// Data for each layer
+let fullinrix_data;
+let agg_data; 
+var newaggs_data = [];
 
 async function initialPrep() {
-
-  document.getElementById("agglinkdetails").style.display = "none";
 
   // Add color to buttons (move to html/css)
   document.getElementsByClassName("layer_description")[0].style.color = 'CornflowerBlue';
   document.getElementsByClassName("layer_description")[1].style.color = 'Green';
   document.getElementsByClassName("layer_description")[2].style.color = 'Orange';
 
-  links = await getLinks();
-  aggs = await getAggLinks();
+  fullinrix_data = await getFullINRIXLinks();
+  agg_data = await getAggLinks();
+
+  // Click Full INRIX Network button
   document.getElementsByClassName("layerbutton")[1].click();
 }
 
-async function getLinks() {
+async function getFullINRIXLinks() {
   try {
     let resp = await fetch('https://api.sfcta.org/api/sf_xd_2002'); 
     let segments = await resp.json();
@@ -91,7 +96,8 @@ async function getLinks() {
 
 
 async function getAggLinks() {
-  all_agg_gids = [];
+  agg_gids = [];
+  agg_segids = [];
   try {
     let resp = await fetch('https://api.sfcta.org/commapi/sf_xd_2002_agg'); // 'https://api.sfcta.org/commapi/sf_xd_2002_agg_view'
     let segments = await resp.json();
@@ -105,9 +111,8 @@ async function getAggLinks() {
       segment['linktype'] = 'agg';
       segment['id'] = 'agg_' + String(segment.gid);
 
-      all_agg_gids.push(segment['gid'])
-
-      all_cmpsegids.push(segment.cmp_segid)
+      agg_gids.push(segment['gid'])
+      agg_segids.push(segment['cmp_segid'])
     }
 
     return segments;
@@ -130,10 +135,10 @@ function showExtraLayers(e) {
 
   // Raw Layer
   if (app.addLayers.includes('Full INRIX Network')) {
-    drawRawLinks();
+    drawFullINRIXLinks();
   } else {
     try {
-      mymap.removeLayer(raw_layer)
+      mymap.removeLayer(fullinrix_layer)
     } catch (e) {
       // layer not created yet
     }
@@ -155,7 +160,7 @@ function showExtraLayers(e) {
       drawNewLinks();
   } else {
     try {
-      mymap.removeLayer(newsegs_layer)
+      mymap.removeLayer(newaggs_layer)
     } catch (e) {
       // layer not created yet
     }
@@ -164,9 +169,9 @@ function showExtraLayers(e) {
 
 //////////////////////////////////////////// FUNCTIONS /////////////////////////////////////////////////////
 
-function drawRawLinks() {
-  if (raw_layer) mymap.removeLayer(raw_layer);
-  raw_layer = L.geoJSON(links, {
+function drawFullINRIXLinks() {
+  if (fullinrix_layer) mymap.removeLayer(fullinrix_layer);
+  fullinrix_layer = L.geoJSON(fullinrix_data, {
     style: {"color": "CornflowerBlue"},
     onEachFeature: function(feature, layer) {
       feature['clicked'] = false; 
@@ -178,12 +183,12 @@ function drawRawLinks() {
     },
 
   });
-  raw_layer.addTo(mymap);
+  fullinrix_layer.addTo(mymap);
 }
 
 function drawAggLinks() {
   if (agg_layer) mymap.removeLayer(agg_layer);
-  agg_layer = L.geoJSON(aggs, {
+  agg_layer = L.geoJSON(agg_data, {
     style: {'color':'green'},
     onEachFeature: function(feature, layer) {
       feature['clicked'] = false; 
@@ -199,8 +204,8 @@ function drawAggLinks() {
 }
 
 function drawNewLinks() {
-  if (newsegs_layer) mymap.removeLayer(newsegs_layer);
-  newsegs_layer = L.geoJSON(new_combinations, {
+  if (newaggs_layer) mymap.removeLayer(newaggs_layer);
+  newaggs_layer = L.geoJSON(newaggs_data, {
     style: {'color':'orange'},
     onEachFeature: function(feature, layer) {
       feature['clicked'] = false; 
@@ -212,7 +217,7 @@ function drawNewLinks() {
     },
 
   });
-  newsegs_layer.addTo(mymap);
+  newaggs_layer.addTo(mymap);
 }
 
 
@@ -347,14 +352,16 @@ function createAggButton(combination) {
 
     // Remove segment, update map. 
     delete gid_to_attrs[btn_id];
-    for (let i=0; i<new_combinations.length; i++) {
-      if (new_combinations[i]['gid']==btn_id) {new_combinations.splice(i, 1)}
+    for (let i=0; i<newaggs_data.length; i++) {
+      if (newaggs_data[i]['gid']==btn_id) {newaggs_data.splice(i, 1)}
     }
-    for (let i=0; i<aggs.length; i++) {
-      if (aggs[i]['gid']==btn_id) {aggs.splice(i, 1)}
+    for (let i=0; i<agg_data.length; i++) {
+      if (agg_data[i]['gid']==btn_id) {agg_data.splice(i, 1)}
     }
-    for (let i=0; i<all_agg_gids.length; i++) {
-      if (all_agg_gids[i]==btn_id) {all_agg_gids.splice(i, 1)}
+
+  // Remove GID from the list of all aggregate GIDs. 
+    for (let i=0; i<agg_gids.length; i++) {
+      if (agg_gids[i]==btn_id) {agg_gids.splice(i, 1)}
     }
     showExtraLayers();
   })
@@ -459,8 +466,6 @@ function createPushToDBButton() {
 
 async function removeFromDB() {
 
-  console.log(selected_links)
-
   for (let i=0; i<Array.from(selected_links).length; i++) {
 
     var gid = Array.from(selected_links)[i]
@@ -499,10 +504,10 @@ async function removeFromDB() {
   }
 
   // Reload agg-links
-  aggs = await getAggLinks();
+  agg_data = await getAggLinks();
   drawAggLinks();
 
-  selected_links = [];
+  selected_links = new Set();
 
   // Clear link section 
   $('#removeLinks').empty()
@@ -553,10 +558,10 @@ function pushToDB() {
   $('#createdAggs').empty()
 
   // For each aggregation
-  for (let i=0; i<new_combinations.length; i++) {
-    new_combinations[i]['linktype'] = 'agg';
-    aggs.push(new_combinations[i])
-    var to_push = prepareComboForDB(new_combinations[i]);
+  for (let i=0; i<newaggs_data.length; i++) {
+    newaggs_data[i]['linktype'] = 'agg';
+    agg_data.push(newaggs_data[i])
+    var to_push = prepareComboForDB(newaggs_data[i]);
     postAggregation(to_push)
   }
 
@@ -564,7 +569,7 @@ function pushToDB() {
   //drawAggLinks();
 
   // Reset
-  new_combinations = [];
+  newaggs_data = [];
 }
 
 
@@ -572,7 +577,7 @@ function pushToDB() {
 function combine() {
 
   var combination = -1;
-  var new_gid = Math.max.apply(null, all_agg_gids) + 1;
+  var new_gid = Math.max.apply(null, agg_gids) + 1;
   var segs = [];
 
   // Create the combination
@@ -588,7 +593,7 @@ function combine() {
       combination['direction'] = document.getElementById('cmp_direction').value;
       combination['cls_hcm00'] = document.getElementById('cls_hcm00').value;
       combination['cls_hcm85'] = document.getElementById('cls_hcm85').value;
-      combination['cmp_segid'] = Math.max(...all_cmpsegids) + 1
+      combination['cmp_segid'] = Math.max(...agg_segids) + 1
       combination['combined'] = true;
       combination['clicked'] = true;
       combination['new'] = true;
@@ -617,10 +622,8 @@ function combine() {
 
     // Add to dataset
     //gid_to_attrs[new_gid] = combination
-    new_combinations.push(combination)
-    all_agg_gids.push(new_gid)
-    
-    combo_to_segs[new_gid] = segs;
+    newaggs_data.push(combination)
+    agg_gids.push(new_gid)
 
     // Add to list of created aggregations
     createAggButton(combination);
@@ -642,7 +645,7 @@ function combine() {
     document.getElementById('cls_hcm00').value = '';
     document.getElementById('cls_hcm85').value = '';
 
-    all_cmpsegids.push(combination['cmp_segid'])
+    agg_segids.push(combination['cmp_segid'])
   }
 }
 
