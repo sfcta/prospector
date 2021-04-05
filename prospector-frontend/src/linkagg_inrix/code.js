@@ -59,6 +59,8 @@ var newaggs_data = [];
 
 async function initialPrep() {
 
+  app.segmentLength = 0;
+
   // Add color to buttons (move to html/css)
   document.getElementsByClassName("layer_description")[0].style.color = 'CornflowerBlue';
   document.getElementsByClassName("layer_description")[1].style.color = 'Green';
@@ -73,6 +75,7 @@ async function initialPrep() {
 
 async function getFullINRIXLinks() {
   try {
+
     let resp = await fetch('https://api.sfcta.org/api/sf_xd_2002'); 
     let segments = await resp.json();
 
@@ -84,6 +87,7 @@ async function getFullINRIXLinks() {
       segment['combined'] = false;
       segment['linktype'] = 'raw';
       segment['id'] = 'raw_' + String(segment.gid);
+      segment['length'] = segment['miles']
 
       gid_to_attrs[segment['gid']] = segment;
     }
@@ -242,14 +246,16 @@ function hoverFeature(e) {
 
   if (e.target.feature['linktype']=='raw') {
     var content = 'gid: ' + String(e.target.feature.gid) + '<br>' + 
-    'Street: ' + e.target.feature.roadname + '<br>' + 
-    'Direction: ' + e.target.feature.bearing
+        'Street: ' + e.target.feature.roadname + '<br>' + 
+        'Direction: ' + e.target.feature.bearing + '<br>' + 
+        'Length: ' + e.target.feature.length.toFixed(2) + ' miles'
   } else {
     var content = 'gid: ' + String(e.target.feature.gid) + '<br>' + 
         'Name: ' + e.target.feature.cmp_name + '<br>' + 
         'From: ' + e.target.feature.cmp_from + '<br>' + 
         'To: ' + e.target.feature.cmp_to + '<br>' +
-        'Direction: ' + e.target.feature.direction
+        'Direction: ' + e.target.feature.direction + '<br>' + 
+        'Length: ' + e.target.feature.length.toFixed(2) + ' miles'
   }
 
   if (e.type == 'mouseover') {
@@ -372,6 +378,7 @@ function createAggButton(combination) {
 
 function createLinkButton(e) {
 
+  app.segmentLength += e.target.feature.length;
 
   // Create button
   if (e.target.feature.linktype=='raw') {
@@ -418,6 +425,7 @@ function createLinkButton(e) {
 
   // X Button
   document.getElementById(btn_id+'_x').addEventListener("click", function() {
+    app.segmentLength -= e.target.feature.length
     buttonClose(e.target.feature.gid);
     e.target.feature['clicked'] = false; 
     mouseoutFeature(e);
@@ -599,7 +607,7 @@ function combine() {
       combination['new'] = true;
       combination['gid'] = new_gid;
       combination['linktype'] = 'new';
-      combination['length'] = combination['miles'];
+      combination['length'] = combination['length'];
       combination['id'] = 'agg_' + String(new_gid);
       combination['xd_ids'] = [gid_to_attrs[gid].xdsegid];
       // Create MultiLineString
@@ -609,7 +617,7 @@ function combine() {
       }
     } else {
       // Combine lengths, geometries, segments
-      combination['length'] += gid_to_attrs[gid]['miles'];
+      combination['length'] += gid_to_attrs[gid]['length'];
       combination['xd_ids'].push(gid_to_attrs[gid].xdsegid)
     
       combination['geometry']['coordinates'].push(gid_to_attrs[gid]['geometry']['coordinates'])
@@ -658,6 +666,7 @@ let app = new Vue({
     isPanelHidden: false,
     extraLayers: ADDLAYERS,
     addLayers:[],
+    segmentLength:0
   },
   methods: {
     addLayers: showExtraLayers
