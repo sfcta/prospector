@@ -12,6 +12,10 @@
 
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
 
+    <div id="dimmer"  class="ui active dimmer">
+      <div class="ui text loader">Loading</div>
+    </div>
+
     <h3 style="font-size: 30px; margin-top:15px;">Select & Combine Links</h3>
     <hr style="margin-bottom:20px; margin-top:15px;">
 
@@ -62,7 +66,6 @@
 
     <hr style="margin-bottom:20px; margin-top:15px;">
     <h3 style="font-size: 20px; margin-top:15px;">Created Aggregations</h3>
-    <p i='aggDescription'> Create aggregations by 1) selecting links 2) defining features 3) pressing the Combine Button. </p> 
     <div id="createdAggs"> </div>
     <div id="pushtoDb"></div>
 

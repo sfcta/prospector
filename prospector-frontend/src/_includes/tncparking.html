@@ -59,21 +59,38 @@
                   &#9658;
           </button>
 
+        <h5 style="margin-top:20px; margin-bottom:5px">CHOOSE ATTRIBUTE:</h5>
+          <button class="mini ui inverted button"
+                  v-on:click="pickTotalDuration" 
+                  v-bind:class="{ active: isTotalDurationActive, white: isTotalDurationActive}">
+                  Total Duration
+          </button>
+          <button class="mini ui inverted button"
+                  v-on:click="pickEvents" 
+                  v-bind:class="{ active: isEventsActive, white: isEventsActive}">
+                  Total Events
+          </button>
+          <button class="mini ui inverted button"
+                  v-on:click="pickAvgDuration" 
+                  v-bind:class="{ active: isAvgDurationActive, white: isAvgDurationActive}">
+                  Average Duration
+          </button>
+
         <h5 style="margin-top:20px; margin-bottom:0px">CHOOSE TIME OF DAY:</h5>
-	    	<div id="timeslider">
-	      		<vue-slider id='timeslider'
-	      					v-bind="timeSlider"
-	      					v-model="sliderValue"
-	      					style="width:85%; margin-right:0px; float:left">
-	      		</vue-slider>
-		        <button class="mini ui inverted button"
-		        		id="play_button"
-		                v-on:click="clickTODPlay" 
-		                v-bind:class="{ active: isPlayTODActive, red: isPlayTODActive}"
-		                style="margin-top:9px">
-		                &#9658;
-		    	</button>
-	        </div>
+        <div id="timeslider">
+            <vue-slider id='timeslider'
+                  v-bind="timeSlider"
+                  v-model="sliderValue"
+                  style="width:85%; margin-right:0px; float:left">
+            </vue-slider>
+            <button class="mini ui inverted button"
+                id="play_button"
+                    v-on:click="clickTODPlay" 
+                    v-bind:class="{ active: isPlayTODActive, red: isPlayTODActive}"
+                    style="margin-top:9px">
+                    &#9658;
+          </button>
+          </div>
       </div>
 
     </div>
@@ -113,7 +130,7 @@
         <img class="img-logo" src="/assets/SFCTA Logo dark-background.svg" width="50%">
         </a>
       </div>
-  	</div>
+    </div>
   </div>
 
   <div id="sfmap"></div>

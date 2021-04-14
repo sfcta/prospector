@@ -71,6 +71,9 @@ async function initialPrep() {
 
   // Click Full INRIX Network button
   document.getElementsByClassName("layerbutton")[1].click();
+
+  // End Loader
+  document.getElementById("dimmer").outerHTML = "";
 }
 
 async function getFullINRIXLinks() {
@@ -114,6 +117,7 @@ async function getAggLinks() {
       segment['combined'] = true; 
       segment['linktype'] = 'agg';
       segment['id'] = 'agg_' + String(segment.gid);
+      segment['original'] = true; 
 
       agg_gids.push(segment['gid'])
       agg_segids.push(segment['cmp_segid'])
@@ -135,11 +139,11 @@ const ADDLAYERS = [
   {name: 'Uncommitted Aggregated Segments'}
 ]
 
-function showExtraLayers(e) {
+function showExtraLayers(reset_inrix=false) {
 
   // Raw Layer
   if (app.addLayers.includes('Full INRIX Network')) {
-    drawFullINRIXLinks();
+    drawFullINRIXLinks(reset_inrix);
   } else {
     try {
       mymap.removeLayer(fullinrix_layer)
@@ -173,12 +177,20 @@ function showExtraLayers(e) {
 
 //////////////////////////////////////////// FUNCTIONS /////////////////////////////////////////////////////
 
-function drawFullINRIXLinks() {
+function drawFullINRIXLinks(reset=false) {
+
   if (fullinrix_layer) mymap.removeLayer(fullinrix_layer);
   fullinrix_layer = L.geoJSON(fullinrix_data, {
-    style: {"color": "CornflowerBlue"},
+    style: function(feature) {
+
+      let col = 'CornflowerBlue';
+      if (feature['clicked'] && (!reset)) {
+        col = '#FFD700'
+      }
+      return {'color': col}
+    },
     onEachFeature: function(feature, layer) {
-      feature['clicked'] = false; 
+      if (reset) {feature['clicked'] = false; }
       layer.on({
         mouseover: mouseoverFeature,
         mouseout: mouseoutFeature,
@@ -249,13 +261,17 @@ function hoverFeature(e) {
         'Street: ' + e.target.feature.roadname + '<br>' + 
         'Direction: ' + e.target.feature.bearing + '<br>' + 
         'Length: ' + e.target.feature.length.toFixed(2) + ' miles'
+
   } else {
     var content = 'gid: ' + String(e.target.feature.gid) + '<br>' + 
         'Name: ' + e.target.feature.cmp_name + '<br>' + 
         'From: ' + e.target.feature.cmp_from + '<br>' + 
         'To: ' + e.target.feature.cmp_to + '<br>' +
         'Direction: ' + e.target.feature.direction + '<br>' + 
-        'Length: ' + e.target.feature.length.toFixed(2) + ' miles'
+        'Length: ' + e.target.feature.length.toFixed(2) + ' miles <br>' + 
+        'cls_hcm00: ' + e.target.feature.cls_hcm00 + '<br>' + 
+        'cls_hcm85: ' +  e.target.feature.cls_hcm85
+
   }
 
   if (e.type == 'mouseover') {
@@ -303,6 +319,7 @@ function clickedOnFeature(e) {
     selected_links.add(btn_id);
     createLinkButton(e);
   } else {
+    app.segmentLength -= e.target.feature.length;
     selected_links.delete(btn_id);
     buttonClose(e.target.feature.gid);
   }
@@ -353,8 +370,6 @@ function createAggButton(combination) {
   document.getElementById(btn_id+'_x').addEventListener("click", function() {
 
     buttonClose(combination.gid);
-
-
 
     // Remove segment, update map. 
     delete gid_to_attrs[btn_id];
@@ -454,7 +469,8 @@ function createCombineButton() {
   $("#combineButton").append(button)
   document.getElementById("combineButton").addEventListener("click", function() {
     document.getElementById("agglinkdetails").style.display = "none";
-    combine()
+    combine();
+    app.segmentLength = 0
   })
 }
 
@@ -462,7 +478,9 @@ function createRemoveFromDBButton() {
   $('#removeLinks').empty()
   var button = '<button class="fluid ui red button">Remove Aggregate Link(s) From Database</button>'
   $("#removeLinks").append(button)
-  document.getElementById("removeLinks").addEventListener("click", function() {removeFromDB()})
+  document.getElementById("removeLinks").addEventListener("click", function() {
+    removeFromDB()
+  })
 }
 
 function createPushToDBButton() {
@@ -474,52 +492,44 @@ function createPushToDBButton() {
 
 async function removeFromDB() {
 
+  app.segmentLength = 0; 
+
+  // Remove all links in selected_links from db
   for (let i=0; i<Array.from(selected_links).length; i++) {
 
     var gid = Array.from(selected_links)[i]
 
-    console.log('Removing...' + gid)
+    // Don't allow user to remove original aggregated links
+    if (gid <= 269) {
+      window.alert('Cannot remove original aggregated link segments (1-269)');
+    } else {
 
-    // Make sure to check that this is an AGG link *not* a RAW link
-    /*
-    if (gid_to_attrs[gid]['linktype'] == 'agg') {
-      
-   }
-   */
+      var write_url = 'https://api.sfcta.org/commapi/sf_xd_2002_agg?gid=eq.' + String(gid)
 
-    var write_url = 'https://api.sfcta.org/commapi/sf_xd_2002_agg?gid=eq.' + String(gid)
-
-    console.log(write_url)
-
-    try {
-      var resp = await fetch(write_url, {
-        method: 'DELETE',
-        //body: JSON.stringify(agg),
-        //headers: {
-        //  'Content-Type': 'application/json'
-        //}
-      })
-      if (resp.status==204) {
-        window.alert('Successfully removed gid ' + String(gid));
-      } else {
-        window.alert('Failed to remove ' + String(gid));
+      try {
+        var resp = await fetch(write_url, {method: 'DELETE',})
+        if (resp.status==204) {
+          window.alert('Successfully removed gid ' + String(gid));
+        } else {
+          window.alert('Failed to remove ' + String(gid));
+        }
+      } catch (e) {
+        window.alert(resp.statusText);
+        console.log('Error posting: ' + String(agg.cmp_segid))
+        console.log(e)
       }
-    } catch (e) {
-      window.alert(resp.statusText);
-      console.log('Error posting: ' + String(agg.cmp_segid))
-      console.log(e)
+
+        // Reload agg-links
+        agg_data = await getAggLinks();
+        drawAggLinks();
+
+        selected_links = new Set();
+
+        // Clear link section 
+        $('#removeLinks').empty()
+        $('#selectedLinks').empty()
     }
   }
-
-  // Reload agg-links
-  agg_data = await getAggLinks();
-  drawAggLinks();
-
-  selected_links = new Set();
-
-  // Clear link section 
-  $('#removeLinks').empty()
-  $('#selectedLinks').empty()
 }
 
 function prepareComboForDB(combo) {
@@ -557,6 +567,7 @@ async function postAggregation(agg) {
     console.log('Error posting: ' + String(agg.cmp_segid))
     console.log(e)
   }
+
 }
 
 
@@ -570,14 +581,14 @@ function pushToDB() {
     newaggs_data[i]['linktype'] = 'agg';
     agg_data.push(newaggs_data[i])
     var to_push = prepareComboForDB(newaggs_data[i]);
-    postAggregation(to_push)
+    postAggregation(to_push);
   }
-
-  //drawNewLinks();
-  //drawAggLinks();
 
   // Reset
   newaggs_data = [];
+
+  getAggLinks()
+  showExtraLayers()
 }
 
 
@@ -618,9 +629,8 @@ function combine() {
     } else {
       // Combine lengths, geometries, segments
       combination['length'] += gid_to_attrs[gid]['length'];
-      combination['xd_ids'].push(gid_to_attrs[gid].xdsegid)
-    
-      combination['geometry']['coordinates'].push(gid_to_attrs[gid]['geometry']['coordinates'])
+      combination['xd_ids'].push(gid_to_attrs[gid].xdsegid);
+      combination['geometry']['coordinates'].push(gid_to_attrs[gid]['geometry']['coordinates']);
     }
     segs.push(gid)
   }) 
@@ -637,7 +647,6 @@ function combine() {
     createAggButton(combination);
 
     // Reset Selected Links
-    showExtraLayers();
     $("#selectedLinks").empty()
     $("#combineButton").empty()
     selected_links = new Set();
@@ -653,7 +662,9 @@ function combine() {
     document.getElementById('cls_hcm00').value = '';
     document.getElementById('cls_hcm85').value = '';
 
-    agg_segids.push(combination['cmp_segid'])
+    agg_segids.push(combination['cmp_segid']);
+
+    showExtraLayers(true);
   }
 }
 
