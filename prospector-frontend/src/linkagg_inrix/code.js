@@ -578,7 +578,7 @@ async function postAggregation(agg) {
 }
 
 
-function pushToDB() {
+async function pushToDB() {
 
   $("#pushtoDb").empty();
   $('#createdAggs').empty()
