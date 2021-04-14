@@ -139,7 +139,7 @@ const ADDLAYERS = [
   {name: 'Uncommitted Aggregated Segments'}
 ]
 
-function showExtraLayers(reset_inrix=false) {
+function showExtraLayers(a, b, reset_inrix=false) {
 
   // Raw Layer
   if (app.addLayers.includes('Full INRIX Network')) {
@@ -177,20 +177,19 @@ function showExtraLayers(reset_inrix=false) {
 
 //////////////////////////////////////////// FUNCTIONS /////////////////////////////////////////////////////
 
-function drawFullINRIXLinks(reset=false) {
+function drawFullINRIXLinks(reset_colors=false) {
 
   if (fullinrix_layer) mymap.removeLayer(fullinrix_layer);
   fullinrix_layer = L.geoJSON(fullinrix_data, {
     style: function(feature) {
-
       let col = 'CornflowerBlue';
-      if (feature['clicked'] && (!reset)) {
+      if (feature['clicked'] && (!reset_colors)) {
         col = '#FFD700'
       }
       return {'color': col}
     },
     onEachFeature: function(feature, layer) {
-      if (reset) {feature['clicked'] = false; }
+      if (reset_colors) {feature['clicked'] = false; }
       layer.on({
         mouseover: mouseoverFeature,
         mouseout: mouseoutFeature,
@@ -562,10 +561,18 @@ async function postAggregation(agg) {
         'Content-Type': 'application/json'
       }
     })
-    window.alert(resp.statusText);
+    if (resp.statusText == 'Conflict') {
+      window.alert('Conflict.');
+    } else {
+      window.alert(resp.statusText);
+    }
+    
   } catch (e) {
-    console.log('Error posting: ' + String(agg.cmp_segid))
-    console.log(e)
+    console.log(e);
+    if (e=='TypeError: Failed to fetch') {
+      var mssg = 'Successfully posted: ' + String(agg.cmp_segid)
+      window.alert(mssg);
+    }
   }
 
 }
@@ -578,17 +585,20 @@ function pushToDB() {
 
   // For each aggregation
   for (let i=0; i<newaggs_data.length; i++) {
-    newaggs_data[i]['linktype'] = 'agg';
-    agg_data.push(newaggs_data[i])
-    var to_push = prepareComboForDB(newaggs_data[i]);
-    postAggregation(to_push);
+    var resp = await postAggregation(prepareComboForDB(newaggs_data[i]));
+    if (resp == 'Created') {
+      newaggs_data[i]['linktype'] = 'agg';
+      agg_data.push(newaggs_data[i])
+    } else {
+      // do something
+    }
   }
 
   // Reset
   newaggs_data = [];
 
   getAggLinks()
-  showExtraLayers()
+  showExtraLayers(true)
 }
 
 
@@ -664,7 +674,7 @@ function combine() {
 
     agg_segids.push(combination['cmp_segid']);
 
-    showExtraLayers(true);
+    showExtraLayers();
   }
 }
 
@@ -695,8 +705,7 @@ let slideapp = new Vue({
     isPanelHidden: false,
   },
   methods: {
-    clickedShowHide: clickedShowHide,
-    addLayers: showExtraLayers
+    clickedShowHide: clickedShowHide
   }
 });
 
