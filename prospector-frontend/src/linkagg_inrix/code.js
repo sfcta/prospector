@@ -79,7 +79,7 @@ async function initialPrep() {
 async function getFullINRIXLinks() {
   try {
 
-    let resp = await fetch('https://api.sfcta.org/api/sf_xd_2002'); 
+    let resp = await fetch('https://api.sfcta.org/api/sf_xd_2101'); 
     let segments = await resp.json();
 
     // Parse geometry & rename. 
@@ -106,7 +106,7 @@ async function getAggLinks() {
   agg_gids = [];
   agg_segids = [];
   try {
-    let resp = await fetch('https://api.sfcta.org/commapi/sf_xd_2002_agg_view');
+    let resp = await fetch('https://api.sfcta.org/commapi/sf_xd_2101_agg_view');
     let segments = await resp.json();
 
     // Parse geometry & rename. 
@@ -503,7 +503,7 @@ async function removeFromDB() {
       window.alert('Cannot remove original aggregated link segments (1-269)');
     } else {
 
-      var write_url = 'https://api.sfcta.org/commapi/sf_xd_2002_agg?gid=eq.' + String(gid)
+      var write_url = 'https://api.sfcta.org/commapi/sf_xd_2101_agg?gid=eq.' + String(gid)
 
       try {
         var resp = await fetch(write_url, {method: 'DELETE',})
@@ -551,7 +551,7 @@ function prepareComboForDB(combo) {
 
 async function postAggregation(agg) {
 
-  var write_url = 'https://api.sfcta.org/commapi/sf_xd_2002_agg'
+  var write_url = 'https://api.sfcta.org/commapi/sf_xd_2101_agg'
 
   try {
     var resp = await fetch(write_url, {
