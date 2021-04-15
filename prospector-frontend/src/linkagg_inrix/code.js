@@ -32,6 +32,9 @@ var maplib = require('../jslib/maplib');
 let mymap = maplib.sfmap;
 mymap.setView([37.76889, -122.440997], 13);
 
+const RAW_ID_COL = 'xdsegid';
+const AGG_ID_COL = 'cmp_segid';
+
 // Maps the *full INRIX network GID* to an object with features of that GID
 let gid_to_attrs = {};
 
@@ -89,10 +92,10 @@ async function getFullINRIXLinks() {
       segment['clicked'] = false;
       segment['combined'] = false;
       segment['linktype'] = 'raw';
-      segment['id'] = 'raw_' + String(segment.gid);
+      segment['id'] = 'raw_' + String(segment[RAW_ID_COL]);
       segment['length'] = segment['miles']
 
-      gid_to_attrs[segment['gid']] = segment;
+      gid_to_attrs[segment[RAW_ID_COL]] = segment;
     }
     return segments;
 
@@ -116,11 +119,11 @@ async function getAggLinks() {
       segment['clicked'] = false;
       segment['combined'] = true; 
       segment['linktype'] = 'agg';
-      segment['id'] = 'agg_' + String(segment.gid);
+      segment['id'] = 'agg_' + String(segment[AGG_ID_COL]);
       segment['original'] = true; 
 
-      agg_gids.push(segment['gid'])
-      agg_segids.push(segment['cmp_segid'])
+      agg_gids.push(segment['gid']);
+      agg_segids.push(segment[AGG_ID_COL]);
     }
 
     return segments;
@@ -256,13 +259,13 @@ function mouseoutFeature(e) {
 function hoverFeature(e) {
 
   if (e.target.feature['linktype']=='raw') {
-    var content = 'gid: ' + String(e.target.feature.gid) + '<br>' + 
+    var content = RAW_ID_COL + ': ' + String(e.target.feature[RAW_ID_COL]) + '<br>' + 
         'Street: ' + e.target.feature.roadname + '<br>' + 
         'Direction: ' + e.target.feature.bearing + '<br>' + 
         'Length: ' + e.target.feature.length.toFixed(2) + ' miles'
 
   } else {
-    var content = 'gid: ' + String(e.target.feature.gid) + '<br>' + 
+    var content = AGG_ID_COL + ': ' + String(e.target.feature[AGG_ID_COL]) + '<br>' + 
         'Name: ' + e.target.feature.cmp_name + '<br>' + 
         'From: ' + e.target.feature.cmp_from + '<br>' + 
         'To: ' + e.target.feature.cmp_to + '<br>' +
@@ -298,20 +301,19 @@ function getLinkColor(feature) {
 
 
 function clickedOnFeature(e) {
-
+  var btn_id;
   if (e.target.feature['linktype']=='raw') {
     document.getElementById("agglinkdetails").style.display = "block";  
+    btn_id = e.target.feature[RAW_ID_COL];
   } else if (e.target.feature['linktype']=='agg') {
-    document.getElementById("agglinkdetails").style.display = "none";  
+    document.getElementById("agglinkdetails").style.display = "none"; 
+    btn_id = e.target.feature[AGG_ID_COL];    
     createRemoveFromDBButton();
   }
-
 
   // Edit Link
   e.target.feature['clicked'] = !e.target.feature['clicked'];
   e.target.setStyle({'color':'#FFD700'});
-
-  var btn_id = e.target.feature.gid;
 
   // Handle Button
   if (!selected_links.has(btn_id)) {
@@ -320,7 +322,7 @@ function clickedOnFeature(e) {
   } else {
     app.segmentLength -= e.target.feature.length;
     selected_links.delete(btn_id);
-    buttonClose(e.target.feature.gid);
+    buttonClose(e.target.feature[RAW_ID_COL]);
   }
 }
 
@@ -328,8 +330,8 @@ function clickedOnFeature(e) {
 function createAggButton(combination) {
 
   // Create button
-  var text = combination.gid + ': ' + combination.cmp_name + ' From ' + combination.cmp_from + ' To ' + combination.cmp_to + ' (' + combination.direction + ')';
-  var btn_id = combination.gid;
+  var text = combination[AGG_ID_COL] + ': ' + combination.cmp_name + ' From ' + combination.cmp_from + ' To ' + combination.cmp_to + ' (' + combination.direction + ')';
+  var btn_id = combination[AGG_ID_COL];
 
   var button = 
     `
@@ -391,18 +393,19 @@ function createAggButton(combination) {
 
 
 function createLinkButton(e) {
-
+  var txt, btn_id;
   app.segmentLength += e.target.feature.length;
 
   // Create button
   if (e.target.feature.linktype=='raw') {
-    var text = e.target.feature.gid + ': ' + e.target.feature.roadname + ' (' + e.target.feature.bearing + ')';
+    txt = e.target.feature[RAW_ID_COL] + ': ' + e.target.feature.roadname + ' (' + e.target.feature.bearing + ')';
     createCombineButton();
+    btn_id = e.target.feature[RAW_ID_COL];
   } else {
-    var text = e.target.feature.gid + ': ' + e.target.feature.cmp_name + ' from ' + e.target.feature.cmp_from + ' to ' + e.target.feature.cmp_to;
+    txt = e.target.feature[AGG_ID_COL] + ': ' + e.target.feature.cmp_name + ' from ' + e.target.feature.cmp_from + ' to ' + e.target.feature.cmp_to;
+    btn_id = e.target.feature[AGG_ID_COL];
   }
   
-  var btn_id = e.target.feature.gid;
   var button = 
     `
     <div class="ui left labeled button" tabindex="0" 
@@ -416,7 +419,7 @@ function createLinkButton(e) {
     `
       >
     `
-    + text + 
+    + txt + 
     `
       </a>
       <div class="ui icon button""
@@ -440,7 +443,7 @@ function createLinkButton(e) {
   // X Button
   document.getElementById(btn_id+'_x').addEventListener("click", function() {
     app.segmentLength -= e.target.feature.length
-    buttonClose(e.target.feature.gid);
+    buttonClose(e.target.feature[RAW_ID_COL]);
     e.target.feature['clicked'] = false; 
     mouseoutFeature(e);
     if (e.target.feature.linktype=='raw') {selected_links.delete(btn_id);}
@@ -496,25 +499,25 @@ async function removeFromDB() {
   // Remove all links in selected_links from db
   for (let i=0; i<Array.from(selected_links).length; i++) {
 
-    var gid = Array.from(selected_links)[i]
+    var segid = Array.from(selected_links)[i]
 
     // Don't allow user to remove original aggregated links
-    if (gid <= 269) {
+    if (segid <= 269) {
       window.alert('Cannot remove original aggregated link segments (1-269)');
     } else {
 
-      var write_url = 'https://api.sfcta.org/commapi/sf_xd_2101_agg?gid=eq.' + String(gid)
+      var write_url = 'https://api.sfcta.org/commapi/sf_xd_2101_agg?' + AGG_ID_COL + '=eq.' + String(segid)
 
       try {
         var resp = await fetch(write_url, {method: 'DELETE',})
         if (resp.status==204) {
-          window.alert('Successfully removed gid ' + String(gid));
+          window.alert('Successfully removed ' + AGG_ID_COL + ' ' + String(segid));
         } else {
-          window.alert('Failed to remove ' + String(gid));
+          window.alert('Failed to remove ' + String(segid));
         }
       } catch (e) {
         window.alert(resp.statusText);
-        console.log('Error posting: ' + String(agg.cmp_segid))
+        console.log('Error posting: ' + String(segid))
         console.log(e)
       }
 
@@ -672,7 +675,7 @@ function combine() {
     document.getElementById('cls_hcm00').value = '';
     document.getElementById('cls_hcm85').value = '';
 
-    agg_segids.push(combination['cmp_segid']);
+    agg_segids.push(combination[AGG_ID_COL]);
 
     showExtraLayers();
   }
