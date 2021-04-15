@@ -106,12 +106,12 @@ async function getAggLinks() {
   agg_gids = [];
   agg_segids = [];
   try {
-    let resp = await fetch('https://api.sfcta.org/commapi/sf_xd_2002_agg'); // 'https://api.sfcta.org/commapi/sf_xd_2002_agg_view'
+    let resp = await fetch('https://api.sfcta.org/commapi/sf_xd_2002_agg_view');
     let segments = await resp.json();
 
     // Parse geometry & rename. 
     for (let segment of segments) {
-      segment['geometry'] = segment.geom; // Only diff with sf_xd_2002_agg_view is: JSON.parse(segment.geometry);
+      segment['geometry'] = JSON.parse(segment.geometry);
       segment['type'] = 'Feature';
       segment['clicked'] = false;
       segment['combined'] = true; 
