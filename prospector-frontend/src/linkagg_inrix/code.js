@@ -89,6 +89,7 @@ async function getFullINRIXLinks() {
     for (let segment of segments) {
       segment['type'] = 'Feature';
       segment['geometry'] = JSON.parse(segment.geometry);
+      segment['geomjson'] = JSON.parse(segment.geomjson);
       segment['clicked'] = false;
       segment['combined'] = false;
       segment['linktype'] = 'raw';
@@ -538,7 +539,7 @@ function prepareComboForDB(combo) {
   let to_push = {};
   to_push['gid'] = combo.gid;
   to_push['cmp_segid'] = combo.cmp_segid;
-  to_push['geom'] = combo.geometry;
+  to_push['geom'] = combo.geomjson;
   to_push['direction'] = combo.direction;
   to_push['cmp_to'] = combo.cmp_to;
   to_push['cmp_name'] = combo.cmp_name;
@@ -634,16 +635,16 @@ function combine() {
       combination['length'] = combination['length'];
       combination['id'] = 'agg_' + String(new_gid);
       combination['xd_ids'] = [gid_to_attrs[gid].xdsegid];
-      // Create MultiLineString
-      combination['geometry'] = {
-        'type':'MultiLineString',
-        'coordinates':[combination['geometry']['coordinates']]
-      }
     } else {
       // Combine lengths, geometries, segments
       combination['length'] += gid_to_attrs[gid]['length'];
       combination['xd_ids'].push(gid_to_attrs[gid].xdsegid);
-      combination['geometry']['coordinates'].push(gid_to_attrs[gid]['geometry']['coordinates']);
+      let curr_coords = combination['geomjson']['coordinates'];
+      let new_coords = gid_to_attrs[gid]['geomjson']['coordinates'];
+      let c1 = curr_coords[curr_coords.length - 1];
+      let c2 = new_coords[0];
+      if (c1[0]==c2[0] && c1[1]==c2[1]) new_coords = new_coords.slice(1);
+      combination['geomjson']['coordinates'] = curr_coords.concat(new_coords);
     }
     segs.push(gid)
   }) 
