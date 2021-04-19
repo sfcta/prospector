@@ -38,6 +38,7 @@ mymap.setView([37.76889, -122.440997], zoomLevel);
 let stripes = new L.StripePattern({weight:2,spaceWeight:3,opacity:0.6,angle:135}); 
 stripes.addTo(mymap);
 
+
 let addLayerStore = {};
 
 let mapLegend;
@@ -94,6 +95,9 @@ let geom_dict = {}
 let geoPopup;
 let selectedGeo;
 
+let selected_attr = 'total_duration'
+var maxval; // maximum value of selected attribute
+
 // FUNCTIONS-----------------------------------------------------------------
 
 function setup() {
@@ -109,12 +113,11 @@ function setup() {
     .then(function(jsonData) {
       tnc_parking = jsonData;
       selectedData = jsonData;
-      buildChart();
       updateLabels();
       buildMapData();
       buildTNCLayer();
-      app.chartTitle = 'Parking Duration in Minutes';
       fetchAddLayers();
+      hist();
     })
     .catch(function(error) {console.log('err:' + error)})
 
@@ -236,89 +239,130 @@ function minsToHours(num) {
 }
 
 
-// BAR CHART--------------------------------
 
-function getYMax() {
+// Histogram
+function hist() {
 
-  if (selectedGeo) {return 'auto'};
+  var margin = {top: 20, right: 20, bottom: 35, left: 50},
+    width = document.getElementById('longchart').clientWidth - margin.left - margin.right,
+    height = document.getElementById('longchart').clientHeight - margin.top - margin.bottom;
 
-  if (app.day != 0) {
-    return 6000
-  } else {
-    if (app.isAllDay) {
-      return 25000
-    }
-      return 25000
-  }
-}
-
-
-
-function buildChart(data) {
-
-  // Remove current chart
   $('#longchart').empty()
 
-  // Get data
-  data = buildChartData(selectedData)
+  var svg = d3.select('#longchart')
+    .append('svg')
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
 
-  // Bar color
-  let color_main = getLocationColor();
+  // add the x Axis
+  var x = d3.scaleLinear()
+            .domain([0, getXDomain()]) // d3.max(mapData, function(d) { return +d.total_duration })
+            .range([0, width]);
+  svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x))
+      .style('color', 'white');
 
-  currentChart = new Morris.Bar({
-    element: 'longchart',
-    data: data,
-    xkey: 'hour',
-    ykeys: ['total_duration'],
-    ymax: getYMax(),
-    labels: ['Duration', 'Hour'],
-    hideHover: 'true',
-    xLabelAngle: 60,
-    hoverCallback: function(index, options, content, row) {
-      return '<b>'+row['hour']+'</b>' + '<br>' + tidyNumber(row['total_duration']);
-    },
-    barColors: function (x) {
-      if ((x['label'] != hourLabels[app.sliderValue-1]) && (!app.isAllDay)) {
-        return '#5a5a5a'; // gray
-      } else { 
-        return color_main
-      }
-    },
-  })
+  // text label for the x axis
 
-  document.getElementById("longchart").style.cursor = "pointer"
+  if (selected_attr == 'total_duration') {var xlab = 'Total Duration (Minutes)'}
+  if (selected_attr == 'avg_duration') {var xlab = 'Average Duration (Minutes)'}
+  if (selected_attr == 'events') {var xlab = 'Events'}
 
-  currentChart.on('click', function(i, row) {app.sliderValue = i+1;})
+  svg.append("text")             
+      .attr("transform",
+            "translate(" + (width/2) + " ," + 
+                           (height + margin.top + 10) + ")")
+      .style("text-anchor", "middle")
+      .style("font-size", "12px")
+      .style("fill", "white")
+      .text(xlab);
+
+  // set the parameters for the histogram
+  var histogram = d3.histogram()
+      .value(function(d) { return d[selected_attr]; })
+      .domain(x.domain())
+      .thresholds(x.ticks(50)); // then the numbers of bins
+
+  // And apply this function to data to get the bins
+  var bins = histogram(mapData);
+
+  var ymax = getYMax(bins)
+
+  // Y axis: scale and draw:
+  var y = d3.scaleLinear()
+      .range([height, 0]);
+      y.domain([0, ymax]);   // d3.max(bins, function(d) { return d.length; })
+  svg.append("g")
+      .call(d3.axisLeft(y)
+        .ticks(6))
+      .style('color', 'white');
+
+  // Y axis label
+  svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", -40)
+      .attr("x", -height/2)
+      .style("text-anchor", "middle")
+      .style("fill", "white")
+      .style("font-size", "12px")
+      .attr("font-family", "Arial")
+      .text("n Locations"); 
+
+  // append the bar rectangles to the svg element
+  var col = getLocationColor()
+  svg.selectAll("rect")
+      .data(bins)
+      .enter()
+      .append("rect")
+        .attr("x", 1)
+        .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
+        .attr("width", function(d) { return x(d.x1) - x(d.x0) -1 ; })
+        .attr("height", function(d) { return height - y(d.length); })
+        .style("fill", col)
+
 }
 
-function buildChartData(data) {
-  let hourlyTotals = {};
 
-  // Initialize
-  for (let hour in [...Array(24).keys()]) {
-    hourlyTotals[hour] = {'hour':hourLabels[hour], 'total_duration':0};
-  } 
+// BAR CHART--------------------------------
 
-  for (let i in data) {
-    let elem = data[i];
+function getYMax(bins) {
+  // Depends on a few things: [total vs. avg] [selected geo] []
 
-    // Filter by clicked point if appropriate
-    if ((selectedGeo) && (elem.geom_id != selectedGeo)) {continue};
-
-    // Increment values
-    hourlyTotals[elem.hour]['total_duration'] += elem.avg_total_minutes;
+  if (selected_attr=='avg_duration') {
+      if (!app.isAllDay) {
+        if (app.day != 0) {
+              return 600
+        }
+      }
   }
 
-  chartData = Object.values(hourlyTotals);
+  if (selected_attr=='events') {
+    return 5000;
+  }
 
-  return chartData
+  return d3.max(bins, function(d) { return d.length; })
 }
+
+
+function getXDomain() {
+  if (selected_attr == 'events') {
+    return 10
+  }
+
+  return 60
+}
+
 
 // MAIN MAP--------------------------------
 
 function buildMapData() {
 
   mapData = {};
+  maxval = -10; 
 
   for (let i in selectedData) {
     let elem = selectedData[i];
@@ -334,6 +378,7 @@ function buildMapData() {
     // Increment values
     mapData[elem['geom_id']]['total_duration'] += elem.avg_total_minutes;
     mapData[elem['geom_id']]['events'] += elem.avg_events;
+
   }
 
   // Dict -> Array of objects
@@ -342,8 +387,9 @@ function buildMapData() {
   // Calculate average duration
   mapData.forEach(function(elem) {
 
-    // TODO -- WRONG 
     elem['avg_duration'] = elem['total_duration'] / elem['events'];
+
+    if (elem[selected_attr] > maxval) {maxval = elem[selected_attr]}
 
   })
 
@@ -360,9 +406,19 @@ function circleColor(feature) {
 
 function getScalingFactor() {
   var scaling_factor = 1;
-  if ((app.day == 0) && (app.isAllDay)) {
-    scaling_factor = .3
+  // All days selected
+  if (app.day == 0) {
+    if (app.isAllDay) {
+      scaling_factor = .3
+    } else {
+      scaling_factor = 1
+      if (selected_attr == 'events') {scaling_factor *= 2}
+    }
   }
+
+  if (selected_attr == 'avg_duration') {scaling_factor = 1}
+  if (selected_attr == 'events') {scaling_factor *= 2}
+
 
   if (mymap.getZoom() > zoomLevel) {
     scaling_factor *= (mymap.getZoom()-zoomLevel+1)
@@ -371,9 +427,11 @@ function getScalingFactor() {
   return scaling_factor
 }
 
+
 mymap.on('zoomend', function() {
   buildTNCLayer()
 })
+
 
 function buildLegend() {
 
@@ -385,8 +443,12 @@ function buildLegend() {
   let font_sizes = [15, 12, 11, 9]
   let scaling_factor = getScalingFactor();
 
-  mapLegend = L.control({position: 'bottomleft'}); // Todo -- change to bottomright
-  let labels = ['<b>Total Duration (Hours)</b>']
+  if (selected_attr == 'total_duration') {var lab = 'Total Duration (Minutes)'}
+  if (selected_attr == 'avg_duration') {var lab = 'Average Duration (Minutes)'}
+  if (selected_attr == 'events') {var lab = 'Events'}
+
+  mapLegend = L.control({position: 'bottomleft'});
+  let labels = ['<b>' + lab + '</b>']
 
   mapLegend.onAdd = function(map) {
 
@@ -395,8 +457,9 @@ function buildLegend() {
     for (let i=0; i<4; i++) {
 
       let radius = circle_radii[i];
-      let hours = minsToHours((radius/scaling_factor)**2);
-      let lab = (hours >= 1) ? hours.toFixed(0) : hours.toFixed(2);
+      //let hours = minsToHours((radius/scaling_factor)**2);
+      //let lab = (hours >= 1) ? hours.toFixed(0) : hours.toFixed(2);
+      let lab = ((radius/scaling_factor)**2).toFixed(0)
       labels.push(
         `
           <div class="legend-circle" 
@@ -428,7 +491,7 @@ function buildTNCLayer() {
   parkingLayer = L.geoJSON(mapData, {
     style: {"color": '#1279c6', "weight": 0.1, "opacity": 0.15},
     pointToLayer: function(feature, latlng) {
-      return new L.CircleMarker(latlng, {radius: Math.sqrt(feature['total_duration'])*scaling_factor, 
+      return new L.CircleMarker(latlng, {radius: Math.sqrt(feature[selected_attr])*scaling_factor, 
                                          fillOpacity: 0.7, 
                                          fillColor:circleColor(feature)});
     },
@@ -510,14 +573,15 @@ function clickedOnFeature(e) {
       })
       e.target.feature['hover'] = false
       updateLabels();
-      buildChart();
+      //buildChart();
+      hist()
+      //density()
     }) 
 
   updateLabels(); // Update bar chart labels
-  buildChart(); // Update bar chart
+  hist()
 
 }
-
 
 // BUTTON HANDLERS --------------------------
 
@@ -526,9 +590,9 @@ async function clickDay(chosenDay, silent=false) {
 
   if (!silent) {play();} // Handle play button if Day was clicked by user
   updateSelectedData(); // Update selected data (for Chart & Map)
-  buildChart(); // Bar chart
   buildMapData() // Update map data
   buildTNCLayer(); // Update map
+  hist();
 
 }
 
@@ -541,9 +605,9 @@ function pickAllLocations(thing) {
   chosenLocation = 'All';
 
   updateSelectedData(); // Update selected data (for Chart & Map)
-  buildChart(); // Bar chart
   buildMapData() // Update map data
   buildTNCLayer(); // Update map
+  hist();
 }
 
 function pickOnStreet(thing) {
@@ -555,9 +619,11 @@ function pickOnStreet(thing) {
   chosenLocation = 'onstreet';
 
   updateSelectedData(); // Update selected data (for Chart & Map)
-  buildChart(); // Bar chart
   buildMapData() // Update map data
   buildTNCLayer(); // Update map
+
+  //density();
+  hist()
 }
 
 function pickOffStreet(thing) {
@@ -568,10 +634,10 @@ function pickOffStreet(thing) {
   app.isAllActive = false; 
   chosenLocation = 'offstreet';
 
-  updateSelectedData(); // Update selected data  (for Chart & Map)
-  buildChart(); // Bar chart
+  updateSelectedData(); // Update selected data (for Chart & Map)
   buildMapData() // Update map data
   buildTNCLayer(); // Update map
+  hist()
 }
 
 function sliderChanged(index, silent=false) {
@@ -579,11 +645,57 @@ function sliderChanged(index, silent=false) {
   app.isAllDay = (index==0);
 
   play();
-  currentChart.setData(chartData); // Update bar colors
+  hist()
   buildMapData(); // Update map data
   buildTNCLayer(); // Update map
 
 }
+
+
+function pickTotalDuration() {
+  app.isTotalDurationActive = true;
+  app.isAvgDurationActive = false; 
+  app.isEventsActive = false; 
+
+  selected_attr = 'total_duration'
+  app.chartTitle = 'Total Parking Duration';
+
+  updateSelectedData(); // Update selected data (for Chart & Map)
+  buildMapData() // Update map data
+  buildTNCLayer(); // Update map
+  hist()
+}
+
+
+function pickAvgDuration() {
+  app.isTotalDurationActive = false;
+  app.isAvgDurationActive = true; 
+  app.isEventsActive = false; 
+
+  selected_attr = 'avg_duration'
+  app.chartTitle = 'Average Parking Duration';
+
+  updateSelectedData(); // Update selected data (for Chart & Map)
+  buildMapData() // Update map data
+  buildTNCLayer(); // Update map
+  hist()
+}
+
+
+function pickEvents() {
+  app.isTotalDurationActive = false;
+  app.isAvgDurationActive = false; 
+  app.isEventsActive = true; 
+
+  selected_attr = 'events'
+  app.chartTitle = 'Number of Parking Events';
+
+  updateSelectedData(); // Update selected data (for Chart & Map)
+  buildMapData() // Update map data
+  buildTNCLayer(); // Update map
+  hist()
+}
+
 
 // PLAY -------------------------------------------------------------------------
 
@@ -690,10 +802,13 @@ let app = new Vue({
     isOffStreetActive: false,
     isPlayDOWActive: false,
     isPlayTODActive: false,
+    isTotalDurationActive:true,
+    isAvgDurationActive:false,
+    isEventsActive:false,
     sliderValue: 0,
     timeSlider: timeSlider,
     isAllDay: true,
-    chartTitle:'',
+    chartTitle:'Total Parking Duration',
     chartSubTitle: '',
     chartSubSubTitle: '',
     extraLayers:ADDLAYERS,
@@ -705,6 +820,9 @@ let app = new Vue({
     pickAllLocations: pickAllLocations, 
     pickOnStreet: pickOnStreet, 
     pickOffStreet: pickOffStreet,
+    pickTotalDuration:pickTotalDuration,
+    pickAvgDuration:pickAvgDuration,
+    pickEvents:pickEvents,
     clickDOWPlay: clickDOWPlay,
     clickTODPlay: clickTODPlay,
     getSliderValue: _.debounce(function() {sliderChanged(this.sliderValue);}, 30),
