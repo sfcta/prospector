@@ -208,6 +208,7 @@ async function resetColors(type) {
 
 function drawFullINRIXLinks(reset_colors=false) {
 
+
   if (fullinrix_layer) mymap.removeLayer(fullinrix_layer);
   fullinrix_layer = L.geoJSON(fullinrix_data, {
     style: function(feature) {
@@ -229,9 +230,11 @@ function drawFullINRIXLinks(reset_colors=false) {
 }
 
 function drawAggLinks() {
+
   if (agg_layer) mymap.removeLayer(agg_layer);
   agg_layer = L.geoJSON(agg_data, {
     style: function(feature) {
+      //if (feature['cmp_segid'] > 400) {return {'color':'red'}}
       return {'color' : feature['clicked'] ? '#FFD700' : 'green'};
     },
     onEachFeature: function(feature, layer) {
@@ -563,7 +566,6 @@ async function removeFromDB() {
       try {
         var resp = await fetch(write_url, {method: 'DELETE',})
       } catch (e) {
-        console.log('Error posting: ' + String(segid))
         console.log(e)
       }
     }
@@ -694,7 +696,7 @@ function combine() {
 
     // Increment gid, segid
     agg_gids.push(new_gid);
-    agg_segids.push(combination['xdsegid']);
+    agg_segids.push(new_segid);
 
     // Add to list of created aggregations
     createAggButton(combination);
