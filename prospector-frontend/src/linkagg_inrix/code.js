@@ -432,7 +432,7 @@ function createAggButton(combination) {
       if (agg_gids[i]==combination['gid']) {agg_gids.splice(i, 1)}
     }
     for (let i=0; i<agg_segids.length; i++) {
-      if (agg_segids[i]==combination['gid']) {agg_segids.splice(i, 1)}
+      if (agg_segids[i]==combination['cmp_segid']) {agg_segids.splice(i, 1)}
     }
     showLayers();
   })
