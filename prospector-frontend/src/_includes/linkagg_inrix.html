@@ -22,11 +22,16 @@
     <h5 style="font-size: 20px; margin-top:15px;">Selected Links</h5>
     <p id=lengthP style="font-size: 12px; margin-top:10px;">Total Length: ${Math.abs(segmentLength.toFixed(2))} miles</p>
     <div id="selectedLinks"></div>
-    <div id='removeLinks'></div>
+    <div id='removeLink'></div>
+    <div id='editLink'></div>
 
     <div id='agglinkdetails' style="display:none">
       <hr style="margin-bottom:20px; margin-top:15px;">
       <h5 style="font-size: 20px; margin-top:15px; margin-bottom:20px;">Aggregated Link Details</h5>
+      <h4>CMP Segment ID</h4>
+      <div class="ui input">
+        <input type="text" id='cmp_segid' placeholder="415">
+      </div>
       <h4>Name</h4>
       <div class="ui input">
         <input type="text" id='cmp_name' placeholder="Stanyan">
@@ -41,7 +46,7 @@
       </div>
       <h4 style="margin-top:10px;">Direction</h4>
       <div class="ui input">
-        <input type="text" id='cmp_direction' placeholder="S">
+        <input type="text" id='direction' placeholder="S">
       </div>
       <h4 style="margin-top:10px;">cls_hcm00</h4>
       <div class="ui input">
@@ -54,6 +59,7 @@
     </div>
 
     <div id="combineButton"></div>
+    <div id="pushEdits"></div>
 
     <hr style="margin-bottom:20px;margin-top:15px;" />
 

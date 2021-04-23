@@ -39,7 +39,7 @@ const AGG_ID_COL = 'cmp_segid';
 let id_to_attrs = {};
 
 // Current selected links.
-let selected = {'raw': new Set(), 'agg': new Set()};
+let selected = {'raw': new Set(), 'agg': 'None'};
 
 // A list of all cmp_segids, GIDs *in the Aggregated INRIX network*. Useful for generating new segids, gids for user-created aggregations. 
 let agg_segids, agg_gids;
@@ -89,7 +89,7 @@ async function getFullINRIXLinks() {
       segment['clicked'] = false;
       segment['linktype'] = 'raw';
       segment['id'] = 'raw_' + String(segment[RAW_ID_COL]);
-      segment['length'] = segment['miles']
+      segment['length'] = segment['miles'];
 
       id_to_attrs[segment['id']] = segment;
     }
@@ -208,7 +208,6 @@ async function resetColors(type) {
 
 function drawFullINRIXLinks(reset_colors=false) {
 
-
   if (fullinrix_layer) mymap.removeLayer(fullinrix_layer);
   fullinrix_layer = L.geoJSON(fullinrix_data, {
     style: function(feature) {
@@ -234,7 +233,7 @@ function drawAggLinks() {
   if (agg_layer) mymap.removeLayer(agg_layer);
   agg_layer = L.geoJSON(agg_data, {
     style: function(feature) {
-      //if (feature['cmp_segid'] > 400) {return {'color':'red'}}
+      //if (feature['cmp_segid'] > 269) {return {'color':'gold'}}
       return {'color' : feature['clicked'] ? '#FFD700' : 'green'};
     },
     onEachFeature: function(feature, layer) {
@@ -265,6 +264,14 @@ function drawNewLinks() {
   newaggs_layer.addTo(mymap);
 }
 
+
+function unclick(btn_id) {
+
+  let data = (btn_id.split('_')[0]=='raw') ? fullinrix_data : agg_data;
+  for (let i=0; i<data.length; i++) {
+    if (data[i]['id'] == btn_id) {data[i]['clicked']=false;}
+  }
+}
 
 
 function mouseoverFeature(e) {
@@ -333,52 +340,117 @@ function clickedOnFeature(e) {
   e.target.feature['clicked'] = !e.target.feature['clicked'];
   var btn_id = e.target.feature['id'];
 
-  // 'raw' or 'agg'
+  // 'raw' or 'agg' or 'new'
   let linktype = e.target.feature['linktype'];
 
-  // If this link wasn't already selected
-  if (!selected[linktype].has(btn_id)) {
+  if (linktype=='agg') {
 
-    // Add to list of selected ids
-    selected[linktype].add(btn_id);
+    // If clicked
+    if (e.target.feature['clicked']) {
 
-    // Create the link button
-    createLinkButton(e);
+      // Remove previously selected if necessary
+      if (selected['agg'] != 'None') {
+        unclick(selected['agg']);
+        clear('agg');
+      };
 
-    // Increment segment length
-    app.segmentLength += e.target.feature.length;
+      // Add button ID to list of selected
+      selected['agg'] = btn_id;
 
-    // Clear opposite selected
-    (linktype=='raw') ? clear('agg') : clear('raw');
+      // Increment segment length
+      app.segmentLength = e.target.feature.length;
 
-    // Show or hide link aggregation details
-    let show_or_hide = (linktype=='raw') ? "block" : "none"
-    document.getElementById("agglinkdetails").style.display = show_or_hide;
+      // Create Agg buttons
+      createLinkButton(e);
+      createRemoveFromDBButton();
+      createEditLinkButton();
 
-    // Create Remove-From-DB button if appropriate
-    if (linktype=='agg') {createRemoveFromDBButton()}
+      // Remove Raw buttons
+      $("#combineButton").empty()
+      document.getElementById("agglinkdetails").style.display = "none"; 
 
-  } else { // This link was already selected
+      // Clear raw selections if necessary
+      if (selected['raw'].size != 0) {clear('raw')};
 
-    // Decrement segment length
-    app.segmentLength -= e.target.feature.length;
+    } else { // If unclicked
 
-    // Remove from list of selected ids
-    selected[linktype].delete(btn_id);
+      // Reset list of selected
+      selected['agg'] = 'None';
 
-    // Remove that button
-    buttonClose(btn_id);
+      // Remove that button
+      buttonClose(btn_id);
+
+      // Reset segment length
+      app.segmentLength = 0; 
+    }
+  } else if (linktype == 'raw') {
+
+    // If this link wasn't already selected
+    if (!selected['raw'].has(btn_id)) {
+
+      // Add to list of selected ids
+      selected['raw'].add(btn_id);
+
+      // Create the link button
+      createLinkButton(e);
+
+      // Remove agg buttons
+      $("#removeLink").empty()
+      $("#editLink").empty()
+      $("#pushEdits").empty();
+
+      // Increment segment length
+      app.segmentLength += e.target.feature.length;
+
+      // Clear agg selections if necessary
+      if (selected['agg'] != 'None') {clear('agg')};
+
+      // Show link aggregation details
+      document.getElementById("agglinkdetails").style.display = "block";
+      document.getElementById('cmp_segid').value = Math.max(...agg_segids) + 1;
+
+
+    } else { // This link was already selected
+
+      // Decrement segment length
+      app.segmentLength -= e.target.feature.length;
+
+      // Remove from list of selected ids
+      selected['raw'].delete(btn_id);
+
+      // Remove that button
+      buttonClose(btn_id);
+    }
   }
+
+  // Re-draw
+  showLayers();
 }
 
 
 function clear(linktype) {
 
-  for (var i=0; i<selected[linktype].length; i++) {
-    buttonClose(selected[linktype][i])
-  }
+  if (linktype=='agg') {
 
-  selected[linktype] = new Set();
+    // Close aggregate button
+    buttonClose(selected['agg']);
+    unclick(selected['agg']);
+
+    // Reset selected
+    selected['agg'] = 'None';
+
+  } else if (linktype=='raw') {
+
+    // Close raw buttons
+    var ids = Array.from(selected['raw'])
+    for (var i=0; i<ids.length; i++) {
+      buttonClose(ids[i]);
+      unclick(ids[i]);
+    }
+
+    // Reset selected
+    selected['raw'] = new Set();
+  }
 }
 
 
@@ -432,7 +504,7 @@ function createAggButton(combination) {
       if (agg_gids[i]==combination['gid']) {agg_gids.splice(i, 1)}
     }
     for (let i=0; i<agg_segids.length; i++) {
-      if (agg_segids[i]==combination['gid']) {agg_segids.splice(i, 1)}
+      if (agg_segids[i]==combination['cmp_segid']) {agg_segids.splice(i, 1)}
     }
     showLayers();
   })
@@ -441,7 +513,7 @@ function createAggButton(combination) {
 
 function createLinkButton(e) {
   var txt;
-  var btn_id = btn_id = e.target.feature['id'];
+  var btn_id = e.target.feature['id'];
   var linktype = e.target.feature['linktype'];
 
   // Create button
@@ -450,6 +522,9 @@ function createLinkButton(e) {
     createCombineButton();
   } else {
     txt = e.target.feature[AGG_ID_COL] + ': ' + e.target.feature.cmp_name + ' from ' + e.target.feature.cmp_from + ' to ' + e.target.feature.cmp_to;
+    if (linktype == 'agg') {
+
+    }
   }
   
   var button = 
@@ -479,24 +554,21 @@ function createLinkButton(e) {
     `
   $("#selectedLinks").append(button)
 
-  // Create button listeners
+  // Create button listener
+  document.getElementById(btn_id+'_x').addEventListener("click", function() {clickButtonX(e, btn_id)})
+}
 
-  // X Button
-  document.getElementById(btn_id+'_x').addEventListener("click", function() {
-
-    // Adjust total length count
-    app.segmentLength -= e.target.feature.length
-
-    // Remove link button (& others if appropriate)
-    buttonClose(btn_id);
-
-    // Re-color link
-    e.target.feature['clicked'] = false; 
-    showLayers();
-
-    // Remove from list of selected links
-    selected[linktype].delete(btn_id);
-  })
+function clickButtonX(e, btn_id) {
+  app.segmentLength -= e.target.feature.length; // Adjust total length count
+  buttonClose(btn_id); // Remove link button (& others if appropriate)
+  e.target.feature['clicked'] = false; // Re-color link
+  showLayers();
+  if (e.target.feature['linktype']=='raw') {
+    selected['raw'].delete(btn_id);
+  } else if (e.target.feature['linktype']=='agg') {
+    selected['agg'] = 'None';
+  }
+  
 }
 
 
@@ -508,7 +580,9 @@ function buttonClose(id) {
   // Adjust other buttons / desciptions as necessary
   if ($('#selectedLinks').text().trim().length == 0 ) {
     $("#combineButton").empty()
-    $("#removeLinks").empty()
+    $("#removeLink").empty()
+    $("#editLink").empty()
+    $("#pushEdits").empty();
     document.getElementById("agglinkdetails").style.display = "none"; 
   }
   if ($('#createdAggs').text().trim().length == 0 ) {
@@ -529,11 +603,20 @@ function createCombineButton() {
 }
 
 function createRemoveFromDBButton() {
-  $('#removeLinks').empty()
-  var button = '<button class="fluid ui red button">Remove Aggregate Link(s) From Database</button>'
-  $("#removeLinks").append(button)
-  document.getElementById("removeLinks").addEventListener("click", function() {
+  $('#removeLink').empty()
+  var button = '<button class="fluid ui red button">Remove Aggregate Link From Database</button>'
+  $("#removeLink").append(button)
+  document.getElementById("removeLink").addEventListener("click", function() {
     removeFromDB();
+  })
+}
+
+function createEditLinkButton() {
+  $('#editLink').empty()
+  var button = '<button class="fluid ui green button">Edit Aggregate Link</button>'
+  $("#editLink").append(button)
+  document.getElementById("editLink").addEventListener("click", function() {
+    editLink();
   })
 }
 
@@ -544,41 +627,45 @@ function createPushToDBButton() {
   document.getElementById("pushtoDb").addEventListener("click", function() {pushToDB()})
 }
 
+function createPushEditsButton() {
+  $("#pushEdits").empty();
+  var button = '<button class="fluid ui blue button">Push Edits</button>'
+  $("#pushEdits").append(button)
+  document.getElementById("pushEdits").addEventListener("click", function() {pushEdits()})
+}
+
 async function removeFromDB() {
 
-  // Array of IDs to remove
-  var to_remove = Array.from(selected['agg']);
+  var segid = parseInt(selected['agg'].split('_')[1])
 
-  for (let i=0; i<to_remove.length; i++) {
+  // Don't allow user to remove original aggregated links
+  if (segid <= 269) {
+    window.alert('Cannot edit original aggregated link segments (1-269)');
+  } else {
 
-    var segid = parseInt(to_remove[i].split('_')[1])
+    // Reset segment length
+    app.segmentLength = 0; 
 
-    // Don't allow user to remove original aggregated links
-    if (segid <= 269) {
-      window.alert('Cannot remove original aggregated link segments (1-269)');
-    } else {
+    var write_url = 'https://api.sfcta.org/commapi/sf_xd_2101_agg?cmp_segid=eq.' + String(segid)
 
-      // Reset segment length
-      app.segmentLength = 0; 
-
-      var write_url = 'https://api.sfcta.org/commapi/sf_xd_2101_agg?cmp_segid=eq.' + String(segid)
-
-      try {
-        var resp = await fetch(write_url, {method: 'DELETE',})
-      } catch (e) {
-        console.log(e)
-      }
+    try {
+      var resp = await fetch(write_url, {method: 'DELETE',})
+    } catch (e) {
+      console.log(e)
     }
   }
   // Reload agg-links
   agg_data = await getAggLinks();
   showLayers();
 
-  selected['agg'] = new Set();
+  selected['agg'] = 'None';
 
   // Clear link section 
-  $('#removeLinks').empty()
+  $('#removeLink').empty()
   $('#selectedLinks').empty()
+  $("#editLink").empty()
+  $("#pushEdits").empty();
+  document.getElementById("agglinkdetails").style.display = "none"; 
 }
 
 function prepareComboForDB(combo) {
@@ -635,13 +722,64 @@ async function pushToDB() {
 }
 
 
+function prepareEdits(edit) {
+  let to_push = {};
+  to_push['gid'] = edit.gid;
+  to_push['cmp_segid'] = edit.cmp_segid;
+  to_push['geom'] = edit.geom;
+  to_push['direction'] = edit.direction;
+  to_push['cmp_to'] = edit.cmp_to;
+  to_push['cmp_name'] = edit.cmp_name;
+  to_push['cmp_from'] = edit.cmp_from;
+  to_push['length'] = edit.length;
+  to_push['cls_hcm00'] = edit.cls_hcm00;
+  to_push['cls_hcm85'] = edit.cls_hcm85;
+  to_push['xd_ids'] = String(edit.xd_ids);
+
+  return to_push
+}
+
+
+function pushEdits() {
+  
+  // Current values
+  var edit = id_to_attrs[selected['agg']];
+
+  if (edit['cmp_segid'] > 269) {
+    // Set new values
+    edit['cmp_segid'] = parseInt(document.getElementById('cmp_segid').value);
+    let attrs = ['cmp_name', 'cmp_from', 'cmp_to', 'direction', 'cls_hcm00', 'cls_hcm85'];
+    for (let i=0; i<attrs.length; i++) {
+      edit[attrs[i]] = document.getElementById(attrs[i]).value;
+    }
+
+    let to_push = prepareEdits(edit);
+
+    removeFromDB();
+    postAggregation(to_push)
+
+    // Reset user values
+    document.getElementById('cmp_segid').value = '';
+    document.getElementById('cmp_from').value = '';
+    document.getElementById('cmp_from').value = '';
+    document.getElementById('cmp_to').value = '';
+    document.getElementById('cmp_name').value = '';
+    document.getElementById('direction').value = '';
+    document.getElementById('cls_hcm00').value = '';
+    document.getElementById('cls_hcm85').value = '';
+
+  } else {
+    window.alert('Cannot edit original aggregated link segments (1-269)');
+  }
+}
+
+
 
 function combine() {
 
   var combination = -1;
 
   var new_gid = Math.max.apply(null, agg_gids) + 1;
-  var new_segid = Math.max(...agg_segids) + 1;
 
   // Create the combination
   selected['raw'].forEach(function(id) {
@@ -653,16 +791,16 @@ function combine() {
       combination['cmp_from'] = document.getElementById('cmp_from').value;
       combination['cmp_to'] = document.getElementById('cmp_to').value;
       combination['cmp_name'] = document.getElementById('cmp_name').value;
-      combination['direction'] = document.getElementById('cmp_direction').value;
+      combination['direction'] = document.getElementById('direction').value;
       combination['cls_hcm00'] = document.getElementById('cls_hcm00').value;
       combination['cls_hcm85'] = document.getElementById('cls_hcm85').value;
-      combination['cmp_segid'] = new_segid;
+      combination['cmp_segid'] = document.getElementById('cmp_segid').value;
       combination['clicked'] = true;
       combination['new'] = true;
       combination['gid'] = new_gid;
       combination['linktype'] = 'new';
       combination['length'] = combination['length'];
-      combination['id'] = 'agg_' + String(new_segid);
+      combination['id'] = 'agg_' + combination['cmp_segid'];
       combination['xd_ids'] = [id_to_attrs[id].xdsegid];
       combination['geometry'] = {
         'type':'MultiLineString',
@@ -696,7 +834,7 @@ function combine() {
 
     // Increment gid, segid
     agg_gids.push(new_gid);
-    agg_segids.push(new_segid);
+    agg_segids.push(document.getElementById('cmp_segid').value);
 
     // Add to list of created aggregations
     createAggButton(combination);
@@ -711,13 +849,30 @@ function combine() {
 
     // Reset user values
     document.getElementById('cmp_from').value = '';
+    document.getElementById('cmp_from').value = '';
     document.getElementById('cmp_to').value = '';
     document.getElementById('cmp_name').value = '';
-    document.getElementById('cmp_direction').value = '';
+    document.getElementById('direction').value = '';
     document.getElementById('cls_hcm00').value = '';
     document.getElementById('cls_hcm85').value = '';
 
     resetColors('combine');
+  }
+}
+
+
+function editLink() {
+
+  createPushEditsButton();
+
+  let agg_attrs = id_to_attrs[selected['agg']];
+
+  document.getElementById("agglinkdetails").style.display = "block"; 
+
+  // Set current values
+  let attrs = ['cmp_segid', 'cmp_name', 'cmp_from', 'cmp_to', 'direction', 'cls_hcm00', 'cls_hcm85'];
+  for (let i=0; i<attrs.length; i++) {
+    document.getElementById(attrs[i]).value = agg_attrs[attrs[i]];
   }
 }
 
