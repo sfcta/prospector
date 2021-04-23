@@ -702,7 +702,7 @@ async function postAggregation(agg) {
     console.log(e);
   }
 
-}
+} 
 
 
 async function pushToDB() {
