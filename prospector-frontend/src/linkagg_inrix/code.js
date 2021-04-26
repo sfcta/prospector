@@ -702,6 +702,7 @@ async function postAggregation(agg) {
     console.log(e);
   }
 
+
 } 
 
 
@@ -719,6 +720,23 @@ async function pushToDB() {
   agg_data = await getAggLinks();  
 
   resetColors('push')
+}
+
+async function removeNulls() {
+  /*
+  var write_url = 'https://api.sfcta.org/commapi/sf_xd_2101_agg?gid=eq.'
+
+  var gids = [664, 663, 565, 663]
+
+  for (let i=0; i<gids.length; i++) {
+    try {
+      var resp = await fetch(write_url + String(gids[i]), {method: 'DELETE',})
+      console.log(resp)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+  */
 }
 
 
@@ -740,14 +758,20 @@ function prepareEdits(edit) {
 }
 
 
-function pushEdits() {
+async function pushEdits() {
   
   // Current values
   var edit = id_to_attrs[selected['agg']];
 
-  if (edit['cmp_segid'] > 269) {
+  var cmp_segid = parseInt(document.getElementById('cmp_segid').value)
+
+  console.log('Pushing...');
+  console.log(cmp_segid)
+
+  if (cmp_segid != '') {
+
     // Set new values
-    edit['cmp_segid'] = parseInt(document.getElementById('cmp_segid').value);
+    edit['cmp_segid'] = cmp_segid;
     let attrs = ['cmp_name', 'cmp_from', 'cmp_to', 'direction', 'cls_hcm00', 'cls_hcm85'];
     for (let i=0; i<attrs.length; i++) {
       edit[attrs[i]] = document.getElementById(attrs[i]).value;
@@ -755,22 +779,24 @@ function pushEdits() {
 
     let to_push = prepareEdits(edit);
 
-    removeFromDB();
-    postAggregation(to_push)
+    await removeFromDB();
+    await postAggregation(to_push);
 
-    // Reset user values
-    document.getElementById('cmp_segid').value = '';
-    document.getElementById('cmp_from').value = '';
-    document.getElementById('cmp_from').value = '';
-    document.getElementById('cmp_to').value = '';
-    document.getElementById('cmp_name').value = '';
-    document.getElementById('direction').value = '';
-    document.getElementById('cls_hcm00').value = '';
-    document.getElementById('cls_hcm85').value = '';
+    agg_data = await getAggLinks();  
+    showLayers();
+    resetUserValues();
+  } 
+}
 
-  } else {
-    window.alert('Cannot edit original aggregated link segments (1-269)');
-  }
+function resetUserValues() {
+  document.getElementById('cmp_segid').value = '';
+  document.getElementById('cmp_from').value = '';
+  document.getElementById('cmp_from').value = '';
+  document.getElementById('cmp_to').value = '';
+  document.getElementById('cmp_name').value = '';
+  document.getElementById('direction').value = '';
+  document.getElementById('cls_hcm00').value = '';
+  document.getElementById('cls_hcm85').value = '';
 }
 
 
@@ -847,14 +873,7 @@ function combine() {
     // Create push to db button
     createPushToDBButton();
 
-    // Reset user values
-    document.getElementById('cmp_from').value = '';
-    document.getElementById('cmp_from').value = '';
-    document.getElementById('cmp_to').value = '';
-    document.getElementById('cmp_name').value = '';
-    document.getElementById('direction').value = '';
-    document.getElementById('cls_hcm00').value = '';
-    document.getElementById('cls_hcm85').value = '';
+    resetUserValues()
 
     resetColors('combine');
   }
@@ -874,6 +893,7 @@ function editLink() {
   for (let i=0; i<attrs.length; i++) {
     document.getElementById(attrs[i]).value = agg_attrs[attrs[i]];
   }
+
 }
 
 ////////////////////////////////////////////// VUE ///////////////////////////////////////////////////////
