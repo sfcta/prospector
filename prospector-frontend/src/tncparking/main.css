@@ -251,3 +251,21 @@ p.legend-row {
   float:right;
   font-size: 5;
 }
+
+svg {
+    position: absolute;
+    margin-top:auto;
+    margin-bottom:auto;
+    margin-left:auto;
+    margin-right: auto;
+    display: block;
+}
+
+#legend {
+    position: absolute;
+    left: 60px;
+    bottom: 10px;
+    width: 100px;
+    height: 100px;
+    z-index: 2;
+}
