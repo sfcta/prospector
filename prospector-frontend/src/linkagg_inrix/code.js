@@ -73,6 +73,9 @@ async function initialPrep() {
 
   // End Loader
   document.getElementById("dimmer").outerHTML = "";
+
+  // Initialize listeners
+  createListeners();
 }
 
 async function getFullINRIXLinks() {
@@ -230,11 +233,21 @@ function drawFullINRIXLinks(reset_colors=false) {
 
 function drawAggLinks() {
 
-  if (agg_layer) mymap.removeLayer(agg_layer);
+  if (agg_layer) mymap.removeLayer(agg_layer); // 'cmp_segid', 'cmp_name', 'cmp_from', 'cmp_to', 'cls_hcm85', 'cls_hcm00', 'direction'
   agg_layer = L.geoJSON(agg_data, {
     style: function(feature) {
-      //if (feature['cmp_segid'] > 269) {return {'color':'gold'}}
-      return {'color' : feature['clicked'] ? '#FFD700' : 'green'};
+      if (feature['cmp_segid'] >= 666) {return {'color':'#FFD700'}}
+      if (feature['clicked']) {
+        return '#FFD700'
+      } else {
+        if ((feature['cmp_segid']=='')||(feature['cmp_name']=='')||(feature['cmp_from']=='')||(feature['cmp_to']=='')||(feature['cls_hcm85']=='')||(feature['cls_hcm00']=='')||(feature['direction']=='')) {
+          // Highlight if information is missing
+          return {'color':'red'}
+        } else {
+          return {'color':'green'}
+        }
+      }
+      //return {'color' : feature['clicked'] ? '#FFD700' : 'green'};
     },
     onEachFeature: function(feature, layer) {
       layer.on({
@@ -595,6 +608,31 @@ function createCombineButton() {
   $('#combineButton').empty()
   var button = '<button class="fluid ui blue button">Combine</button>'
   $("#combineButton").append(button)
+}
+
+function createRemoveFromDBButton() {
+  $('#removeLink').empty()
+  var button = '<button class="fluid ui red button">Remove Aggregate Link From Database</button>'
+  $("#removeLink").append(button)
+}
+
+function createEditLinkButton() {
+  $('#editLink').empty()
+  var button = '<button class="fluid ui green button">Edit Aggregate Link</button>'
+  $("#editLink").append(button)
+}
+
+function createPushToDBButton() {
+  $("#pushtoDb").empty();
+  var button = '<button class="fluid ui blue button">Push to Database</button>'
+  $("#pushtoDb").append(button)
+}
+
+function createListeners() {
+  document.getElementById("pushEdits").addEventListener("click", function() {pushEdits()});
+  document.getElementById("pushtoDb").addEventListener("click", function() {pushToDB()});
+  document.getElementById("editLink").addEventListener("click", function() {editLink()});
+  document.getElementById("removeLink").addEventListener("click", function() {removeFromDB()});
   document.getElementById("combineButton").addEventListener("click", function() {
     document.getElementById("agglinkdetails").style.display = "none";
     combine();
@@ -602,36 +640,10 @@ function createCombineButton() {
   })
 }
 
-function createRemoveFromDBButton() {
-  $('#removeLink').empty()
-  var button = '<button class="fluid ui red button">Remove Aggregate Link From Database</button>'
-  $("#removeLink").append(button)
-  document.getElementById("removeLink").addEventListener("click", function() {
-    removeFromDB();
-  })
-}
-
-function createEditLinkButton() {
-  $('#editLink').empty()
-  var button = '<button class="fluid ui green button">Edit Aggregate Link</button>'
-  $("#editLink").append(button)
-  document.getElementById("editLink").addEventListener("click", function() {
-    editLink();
-  })
-}
-
-function createPushToDBButton() {
-  $("#pushtoDb").empty();
-  var button = '<button class="fluid ui blue button">Push to Database</button>'
-  $("#pushtoDb").append(button)
-  document.getElementById("pushtoDb").addEventListener("click", function() {pushToDB()})
-}
-
 function createPushEditsButton() {
   $("#pushEdits").empty();
   var button = '<button class="fluid ui blue button">Push Edits</button>'
   $("#pushEdits").append(button)
-  document.getElementById("pushEdits").addEventListener("click", function() {pushEdits()})
 }
 
 async function removeFromDB() {
@@ -759,14 +771,11 @@ function prepareEdits(edit) {
 
 
 async function pushEdits() {
-  
+
   // Current values
   var edit = id_to_attrs[selected['agg']];
 
   var cmp_segid = parseInt(document.getElementById('cmp_segid').value)
-
-  console.log('Pushing...');
-  console.log(cmp_segid)
 
   if (cmp_segid != '') {
 
