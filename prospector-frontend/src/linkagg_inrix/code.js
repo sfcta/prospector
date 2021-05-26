@@ -235,7 +235,7 @@ function drawAggLinks() {
 
   if (agg_layer) mymap.removeLayer(agg_layer); // 'cmp_segid', 'cmp_name', 'cmp_from', 'cmp_to', 'cls_hcm85', 'cls_hcm00', 'direction'
   agg_layer = L.geoJSON(agg_data, {
-    style: function(feature) {
+    style: function(feature) { 
       if (feature['clicked']) {
         return '#FFD700'
       } else {
