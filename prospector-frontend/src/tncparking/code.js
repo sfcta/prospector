@@ -108,7 +108,7 @@ function setup() {
     .then(function(jsonData) {createGeoIDDict(jsonData)})
     .catch(function(error) {console.log('err:' + error)})
   // Temporal observations.
-  fetch('http://api.sfcta.org/api/tnc_parking')
+  fetch('http://api.sfcta.org/api/tnc_parking_v2')
     .then((resp) => resp.json())
     .then(function(jsonData) {
       tnc_parking = jsonData;
@@ -160,8 +160,13 @@ function createGeoIDDict(json) {
   geom_dict = {}
 
   for (var i in json) {
-    var element = json[i]
-    let geom_id = element['geom_id'].replace('.0', ''); // To Do -- fix in original DF 
+    var element = json[i];
+    var geom_id;
+    if (element['location_type'] == 'onstreet') {
+      geom_id = element['ab'];
+    } else {
+      geom_id = element['mazid'];
+    }
     geom_dict[geom_id] = {'geometry':element['geometry'], 'location_type':element['location_type']}
   }
 }
@@ -368,6 +373,14 @@ function buildMapData() {
     let elem = selectedData[i];
     // Filter by hour if necessary.
     if ((!app.isAllDay) && (elem.hour != (app.sliderValue-1))) {continue};
+
+    try {
+      let tmp = geom_dict[elem.geom_id].location_type;
+    } catch (e) {
+      console.log(e);
+      console.log(elem)
+      console.log(elem.geom_id)
+    }
 
     // Initialize 
     if (!(elem['geom_id'] in mapData)) {
