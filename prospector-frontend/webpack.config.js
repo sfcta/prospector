@@ -31,7 +31,9 @@ const sfcta_components = [
      'trnobstrips',
 	 'covid_scn',
 	 'linkagg_inrix',
-     'tncparking'
+     'tncparking',
+     'cmp_test',
+     'epc'
 	 //'cmp-v0',
 ];
 
