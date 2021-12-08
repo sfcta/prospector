@@ -36,7 +36,7 @@ mymap.setView([37.76889, -122.440997], 13);
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'cmp_segments_master';
-const VIZ_LIST = ['ALOS', 'TSPD', 'TRLB', 'ATRAT'];
+const VIZ_LIST = ['ALOS', 'ABUFI', 'TSPD', 'TRLB', 'ATRAT'];
 const VIZ_INFO = {
   ALOS: {
     TXT: 'Auto Level-of-Service (LOS)',
@@ -50,7 +50,20 @@ const VIZ_INFO = {
     CHART_PREC: 1,
     POST_UNITS: '',
   },
-
+  
+  ABUFI: {
+    TXT: 'Auto Buffer Time Index',
+    VIEW: 'cmp_autotransit',
+    METRIC: 'auto_bi',
+    METRIC_DESC: 'Auto Buffer Time Index',
+    COLOR_BY_BINS: true,
+    COLORVALS: [0, 5, 10, 20, 30, 40],
+    COLORS: ['#ccc', '#060', '#9f0', '#ff3', '#f90', '#f60', '#c00'],
+    CHARTINFO: 'AUTO RELIABILITY TREND:',
+    CHART_PREC: 1,
+    POST_UNITS: '%',
+  },
+  
   TSPD: {
     TXT: 'Transit Speed',
     VIEW: 'cmp_autotransit',
@@ -156,7 +169,7 @@ async function fetchCmpSegments() {
 async function fetchAllCmpSegmentData(dat_view) {
   //FIXME this should be a map()
   let params =
-    'select=cmp_segid,year,period,los_hcm85,transit_speed,transit_cv,atspd_ratio,auto_speed';
+    'select=cmp_segid,year,period,los_hcm85,transit_speed,transit_cv,atspd_ratio,auto_speed,auto_bi';
 
   let data_url = API_SERVER + dat_view + '?' + params;
 
@@ -523,11 +536,12 @@ function buildChartHtmlFromCmpData(json = null) {
     });
   } else {
     let ykey_tmp, lab_tmp;
-    if (app.selectedViz == 'ALOS') {
+    let xd_arr = ['ALOS', 'ABUFI']
+    if (xd_arr.includes(app.selectedViz)) {
       ykey_tmp = ['art', 'fwy'];
       lab_tmp = ['Arterial', 'Freeway'];
       new Morris.Line({
-        data: _aggregateData[app.selectedViz][selPeriod].concat(_aggregateData_xd[app.selectedViz][selPeriod]),
+        data: (app.selectedViz=='ALOS')? _aggregateData[app.selectedViz][selPeriod].concat(_aggregateData_xd[app.selectedViz][selPeriod]): _aggregateData_xd[app.selectedViz][selPeriod],
         element: 'longchart',
         gridTextColor: '#aaa',
         hideHover: true,
