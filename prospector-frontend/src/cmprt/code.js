@@ -35,12 +35,12 @@ mymap.setView([37.76889, -122.440997], 13);
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
-const GEO_VIEW = 'cmp_segments_plus';
+const GEO_VIEW = 'cmp_segments_exp';
 const VIZ_LIST = ['ASPD','SPDIFFPCT','VMT','VMTDIFFPCT'];
 const VIZ_INFO = {
   ASPD: {
     TXT: 'Auto Level-of-Service (LOS)',
-    VIEW: 'inrix_rt_weekly',
+    VIEW: 'inrix_rt_weekly_exp',
     METRIC: 'los_hcm85',
     METRIC_DESC: 'Level of Service',
     COLOR_BY_BINS: false,
@@ -52,7 +52,7 @@ const VIZ_INFO = {
   },
   SPDIFFPCT: {
     TXT: 'Speed Change Relative to Pre-COVID',
-    VIEW: 'inrix_rt_weekly',
+    VIEW: 'inrix_rt_weekly_exp',
     METRIC: 'pct_diff',
     METRIC_DESC: 'Pct Speed Change',
     COLOR_BY_BINS: true,
@@ -64,7 +64,7 @@ const VIZ_INFO = {
   },
   SPDIFF: {
     TXT: 'Absolute Speed Change from Pre-COVID',
-    VIEW: 'inrix_rt_weekly',
+    VIEW: 'inrix_rt_weekly_exp',
     METRIC: 'spd_diff',
     METRIC_DESC: 'Speed Change',
     COLOR_BY_BINS: true,
@@ -76,7 +76,7 @@ const VIZ_INFO = {
   },
   VMT: {
     TXT: 'Vehicle Miles Traveled (VMT)',
-    VIEW: 'inrix_rt_weekly',
+    VIEW: 'inrix_rt_weekly_exp',
     METRIC: 'imp_vol',
     METRIC_DESC: 'Daily VMT per mile',
     COLOR_BY_BINS: true,
@@ -88,7 +88,7 @@ const VIZ_INFO = {
   },
   VMTDIFFPCT: {
     TXT: 'VMT Change Relative to Pre-COVID',
-    VIEW: 'inrix_rt_weekly',
+    VIEW: 'inrix_rt_weekly_exp',
     METRIC: 'pct_voldiff',
     METRIC_DESC: 'Pct VMT Change',
     COLOR_BY_BINS: true,
@@ -100,14 +100,20 @@ const VIZ_INFO = {
   },  
 };
 const MISSING_COLOR = '#ccd';
+const hourLabels = ['12 AM','1 AM','2 AM', '3 AM','4 AM','5 AM','6 AM','7 AM',
+                  '8 AM','9 AM','10 AM','11 AM',
+                  'Noon','1 PM','2 PM','3 PM',
+                  '4 PM','5 PM','6 PM','7 PM',
+                  '8 PM','9 PM','10 PM','11 PM'];
 
 let init_selectedViz = VIZ_LIST[0];
 
 let data_view = VIZ_INFO[init_selectedViz]['VIEW'];
 let selviz_metric = VIZ_INFO[init_selectedViz]['METRIC'];
 let selPeriod = 'AM';
-let aggdata_view = 'inrix_rt_weekly_agg';
-let diffdata_view = 'inrix_rt_weeklydiff';
+let aggdata_view = 'inrix_rt_weekly_exp_agg';
+let hrdata_view = 'inrix_rt_hourly_exp';
+let hr_aggdata_view = 'inrix_rt_hourly_exp_agg';
 let aggdata_label = 'All Segments Combined';
 let selGeoId;
 
@@ -119,6 +125,8 @@ let selectedSegment, prevselectedSegment;
 let _segmentJson;
 let _allCmpData;
 let _aggregateData;
+let _hrData;
+let _hrAggData;
 
 async function initialPrep() {
 
@@ -130,14 +138,17 @@ async function initialPrep() {
 
   console.log('3...');
   _aggregateData = await fetchAggregateData(aggdata_view);
+  
+  console.log('4...');
+  _hrAggData = await fetchHrAggData(hr_aggdata_view);
 
-  console.log('4... ');
+  console.log('5... ');
   await buildChartHtmlFromCmpData();
 
-  console.log('5...');
+  console.log('6...');
   await updateSliderData();
 
-  console.log('6 !!!');
+  console.log('7 !!!');
 }
 
 async function fetchCmpSegments() {
@@ -265,6 +276,76 @@ async function parseAllAggregateData(buildAggData, jsonData, viz) {
 
 }
 
+async function fetchHourlyData() {
+  let params =
+    'select=cmp_segid,year,date,period,los_hcm85,avg_speed,base_speed,spd_diff,pct_diff';
+
+  let data_url = API_SERVER + hrdata_view + '?' + params + '&date=eq.' + app.sliderValue;
+
+  selMetricData = {};
+
+  try {
+    let resp = await fetch(data_url);
+    return await resp.json();
+
+  } catch (error) {console.log('hourly data fetch error: ' + error);}
+}
+
+async function fetchHrAggData(aggdat_view) {
+  let buildAggData = {};
+
+  const url = API_SERVER + aggdat_view
+    + '?select=fac_typ,period,date,viz,metric';
+
+  try {
+    let resp = await fetch(url);
+    let jsonData = await resp.json();
+
+    for (let viz of VIZ_LIST) {
+      parseHrAggregateData(buildAggData, jsonData, viz);
+    }
+    return buildAggData;
+
+  } catch(error) {
+    console.log('hourly aggregate data error: ' + error);
+  }
+}
+
+async function parseHrAggregateData(buildAggData, jsonData, viz) {
+  buildAggData[viz] = {};
+
+  let vizData = jsonData.filter(row => row['viz'] === viz);
+
+  let byDate = {};
+  for (let entry of vizData) {
+    let val = Number(entry.metric).toFixed(
+      VIZ_INFO[viz]['CHART_PREC']
+    );
+    if (val === 'NaN') continue;
+    let hour = parseInt(entry.period)
+    if (!byDate[entry.date]) {
+        byDate[entry.date] = {};
+        byDate[entry.date][hour] = {};
+    } else if (!byDate[entry.date][hour]) {
+        byDate[entry.date][hour] = {};
+    }        
+    byDate[entry.date][hour][entry.fac_typ] = val;
+  }
+  
+  let data;
+  for (let date of Object.keys(byDate).sort()) {
+    data = [];
+    for (let tod of Object.keys(byDate[date]).map(i=>Number(i)).sort(function (a,b) { return a-b; })) {
+      data.push({
+        tod: hourLabels[tod],
+        art: byDate[date][tod]['Arterial'],
+        fwy: byDate[date][tod]['Freeway'],
+      });
+    }
+    buildAggData[viz][date] = data;
+  }
+}
+
 // hover panel -------------------
 let infoPanel = L.control();
 
@@ -330,33 +411,57 @@ infoPanel.update = function(geo) {
 };
 infoPanel.addTo(mymap);
 
-function drawMapSegments() {
+async function drawMapSegments(dateChanged=true) {
 
   // create a clean copy of the segment Json
   let cleanSegments = _segmentJson.slice();
   
-  let relevantRows = _allCmpData.filter(row => row.date==app.sliderValue && row.period===selPeriod);
-
+  let relevantRows;
   let lookup = {};
-  for (let row of relevantRows) {
-    lookup[row.cmp_segid] = row;
-  };
-
-  // update metric-colored segment data
-  for (let segment of cleanSegments) {
-    if (lookup[segment.cmp_segid]) {
-      segment['metric'] = lookup[segment.cmp_segid][selviz_metric];
-	  segment['base_speed'] = lookup[segment.cmp_segid]['base_speed'];
-      segment['avg_speed'] = lookup[segment.cmp_segid]['avg_speed'];
-	  segment['base_vol'] = lookup[segment.cmp_segid]['base_vol'];
-      segment['imp_vol'] = lookup[segment.cmp_segid]['imp_vol'];
-    } else {
-      segment['metric'] = null;
-	  segment['base_speed'] = null;
-      segment['avg_speed'] = null;
-	  segment['base_vol'] = null;
-      segment['imp_vol'] = null;
-    }
+  if ((app.isHRActive) && (['ASPD','SPDIFFPCT'].includes(app.selectedViz))) {
+      if (dateChanged || _hrData==null) {
+        _hrData = await fetchHourlyData();  
+      }
+      relevantRows = _hrData.filter(row => row.period===String(app.hrValue));
+      for (let row of relevantRows) {
+        lookup[row.cmp_segid] = row;
+      }
+      
+      // update metric-colored segment data
+      for (let segment of cleanSegments) {
+        if (lookup[segment.cmp_segid]) {
+          segment['metric'] = lookup[segment.cmp_segid][selviz_metric];
+          segment['base_speed'] = lookup[segment.cmp_segid]['base_speed'];
+          segment['avg_speed'] = lookup[segment.cmp_segid]['avg_speed'];
+        } else {
+          segment['metric'] = null;
+          segment['base_speed'] = null;
+          segment['avg_speed'] = null;
+        }
+      }      
+  } else {
+      if ((['VMT','VMTDIFFPCT'].includes(app.selectedViz)) && (app.isHRActive)) app.pickAM('AM');
+      relevantRows = _allCmpData.filter(row => row.date==app.sliderValue && row.period===selPeriod);
+      for (let row of relevantRows) {
+        lookup[row.cmp_segid] = row;
+      }
+      
+      // update metric-colored segment data
+      for (let segment of cleanSegments) {
+        if (lookup[segment.cmp_segid]) {
+          segment['metric'] = lookup[segment.cmp_segid][selviz_metric];
+          segment['base_speed'] = lookup[segment.cmp_segid]['base_speed'];
+          segment['avg_speed'] = lookup[segment.cmp_segid]['avg_speed'];
+          segment['base_vol'] = lookup[segment.cmp_segid]['base_vol'];
+          segment['imp_vol'] = lookup[segment.cmp_segid]['imp_vol'];
+        } else {
+          segment['metric'] = null;
+          segment['base_speed'] = null;
+          segment['avg_speed'] = null;
+          segment['base_vol'] = null;
+          segment['imp_vol'] = null;
+        }
+      }
   }
 
   if (geoLayer) mymap.removeLayer(geoLayer);
@@ -491,9 +596,18 @@ function showVizChartForSelectedSegment() {
   if ((selviz_metric == 'imp_vol') || (selviz_metric == 'pct_voldiff')) metric_col = 'imp_vol';
 
   if (_selectedGeo) {
-    let segmentData = _allCmpData
-      .filter(row => row.cmp_segid == _selectedGeo.cmp_segid)
-      .filter(row => row[metric_col] != null);
+    let segmentData;
+    if (app.isHRActive) {
+      segmentData = _hrData
+        .filter(row => row.cmp_segid == _selectedGeo.cmp_segid)
+        .filter(row => row.date == app.sliderValue)
+        .filter(row => row[metric_col] != null);        
+    } else {
+      segmentData = _allCmpData
+        .filter(row => row.cmp_segid == _selectedGeo.cmp_segid)
+        .filter(row => row[metric_col] != null);
+    }
+    
     buildChartHtmlFromCmpData(segmentData);
 	
 	let tmptxt = `${_selectedGeo.cmp_name} ${_selectedGeo.direction}-bound`;
@@ -523,22 +637,35 @@ function buildChartHtmlFromCmpData(json = null) {
         VIZ_INFO[app.selectedViz]['CHART_PREC']
       );
       if (val === 'NaN') continue;
-      if (!byYear[entry.date]) byYear[entry.date] = {};
-      byYear[entry.date][entry.period] = val;
-    }
-    for (let date of Object.keys(byYear).sort()) {
-      if (app.isAMActive) {
-        data.push({date: date, period: byYear[date]['AM']});
+      
+      if (app.isHRActive) {
+        byYear[entry.period] = val;  
       } else {
-        data.push({date: date, period: byYear[date]['PM']});
+        if (!byYear[entry.date]) byYear[entry.date] = {};
+        byYear[entry.date][entry.period] = val;
       }
+    }
+    if (app.isHRActive) {
+        for (let tod of Object.keys(byYear).map(i=>Number(i)).sort(function (a,b) { return a-b; })) {
+          data.push({tod: hourLabels[tod], period: byYear[tod]});
+          maxHeight = Math.max(maxHeight, byYear[tod]);
+      }  
+    } else {
+      for (let date of Object.keys(byYear).sort()) {
+        if (app.isAMActive) {
+          data.push({date: date, period: byYear[date]['AM']});
+        } else {
+        data.push({date: date, period: byYear[date]['PM']});
+        }
 
-      // use the same scale for am/pm even though we only show one
-      if (byYear[date]['AM'])
-        maxHeight = Math.max(maxHeight, byYear[date]['AM']);
-      if (byYear[date]['PM'])
-        maxHeight = Math.max(maxHeight, byYear[date]['PM']);
-    }    
+        // use the same scale for am/pm even though we only show one
+        if (byYear[date]['AM'])
+          maxHeight = Math.max(maxHeight, byYear[date]['AM']);
+        if (byYear[date]['PM'])
+          maxHeight = Math.max(maxHeight, byYear[date]['PM']);
+      }
+    }
+        
 
     // scale ymax to either 30 or 70:
     maxHeight = maxHeight <= 30 ? 30 : maxHeight <= 70 ? 70 : Math.round(maxHeight/100)*100;
@@ -557,20 +684,37 @@ function buildChartHtmlFromCmpData(json = null) {
 		lab_tmp = 'Daily';
 		col_tmp = '#99f';
 	}
-    new Morris.Line({
-      data: data,
-      element: 'longchart',
-      hideHover: true,
-      labels: [lab_tmp],
-      lineColors: [col_tmp],
-      //postUnits: VIZ_INFO[app.selectedViz]['POST_UNITS'],
-      xkey: 'date',
-      xLabelAngle: 45,
-      ykeys: ['period'],
-      ymax: scale,
-      parseTime: false,
-      pointSize: 2,
-    });
+    if (app.isHRActive) {
+      new Morris.Area({
+        data: data,
+        element: 'longchart',
+        hideHover: true,
+        labels: ['speed'],
+        lineColors: ['#1fc231'],
+        fillOpacity: 0.4,
+        xkey: 'tod',
+        xLabelAngle: 45,
+        ykeys: ['period'],
+        ymax: scale,
+        parseTime: false,
+        pointSize: 2,
+      });        
+    } else {
+      new Morris.Line({
+        data: data,
+        element: 'longchart',
+        hideHover: true,
+        labels: [lab_tmp],
+        lineColors: [col_tmp],
+        xkey: 'date',
+        xLabelAngle: 45,
+        ykeys: ['period'],
+        ymax: scale,
+        parseTime: false,
+        pointSize: 2,
+      });
+    }
+    
   } else {
     let ykey_tmp, lab_tmp, col_tmp, viz_tmp,ymax_tmp;
     ykey_tmp = ['art', 'fwy'];
@@ -586,14 +730,14 @@ function buildChartHtmlFromCmpData(json = null) {
 		ymax_tmp = 12;
 	}
     new Morris.Line({
-      data: _aggregateData[viz_tmp][selPeriod],
+      data: app.isHRActive? _hrAggData[viz_tmp][app.sliderValue]: _aggregateData[viz_tmp][selPeriod],
       element: 'longchart',
       gridTextColor: '#aaa',
       hideHover: true,
       labels: lab_tmp,
       lineColors: col_tmp,
       //postUnits: VIZ_INFO['ASPD']['POST_UNITS'],
-      xkey: 'date',
+      xkey: app.isHRActive? 'tod': 'date',
       xLabelAngle: 45,
       ykeys: ykey_tmp,
       ymax: ymax_tmp,
@@ -607,6 +751,7 @@ function pickAM(thing) {
   selPeriod = 'AM';
   app.isAMActive = true;
   app.isPMActive = false;
+  app.isHRActive = false;
 
   drawMapSegments();
   highlightSelectedSegment();
@@ -617,18 +762,36 @@ function pickPM(thing) {
   selPeriod = 'PM';
   app.isAMActive = false;
   app.isPMActive = true;
+  app.isHRActive = false;
 
   drawMapSegments();
   highlightSelectedSegment();
   showVizChartForSelectedSegment();
 }
 
-function sliderChanged(thing) {
-  drawMapSegments();
+async function pickHR(thing) {
+  selPeriod = 'HR';
+  app.isAMActive = false;
+  app.isPMActive = false;
+  app.isHRActive = true;
+
+  await drawMapSegments();
+  highlightSelectedSegment();
+  showVizChartForSelectedSegment();
+}
+
+async function sliderChanged(thing) {
+  await drawMapSegments();
+  highlightSelectedSegment();
+  if (app.isHRActive) showVizChartForSelectedSegment();
+}
+
+function hrChanged(thing) {
+  drawMapSegments(false);
   highlightSelectedSegment();
 }
 
-function clickViz(chosenviz) {
+async function clickViz(chosenviz) {
   app.selectedViz = chosenviz;
   if (chosenviz=='VMT' || chosenviz=='VMTDIFFPCT') {
 	  app.isTPHidden = true;
@@ -642,7 +805,7 @@ function clickViz(chosenviz) {
   data_view = VIZ_INFO[chosenviz]['VIEW'];
   selviz_metric = VIZ_INFO[chosenviz]['METRIC'];
 
-  drawMapSegments();
+  await drawMapSegments();
 
   if (_selectedGeo) {
     showVizChartForSelectedSegment();
@@ -693,6 +856,27 @@ let timeSlider = {
   dotStyle: {border: '2px solid #eaae00'},
 };
 
+let hrSlider = {
+  min: 0,
+  max: 23,
+  clickable: true,
+  dotSize: 16,
+  eventType: 'auto',
+  height: 3,
+  lazy: false,
+  marks: true,
+  hideLabel: true,
+  process: false,
+  speed: 0.25,
+  style: { marginTop: '0px', marginBottom: '40px' },
+  tooltip: 'always',
+  tooltipPlacement: 'bottom',
+  tooltipStyle: { backgroundColor: '#eaae00', borderColor: '#eaae00' },
+  tooltipFormatter: idx => hourLabels[idx],
+  width: 'auto',
+  dotStyle: {border: '2px solid #eaae00'},
+};
+
 let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
@@ -703,18 +887,23 @@ let app = new Vue({
     chartSubtitle: aggdata_label,
     isAMActive: true,
     isPMActive: false,
+    isHRActive: false,
     selectedViz: VIZ_LIST[0],
     sliderValue: 0,
     timeSlider: timeSlider,
+    hrValue: 8,
+    hrSlider: hrSlider,
     vizlist: VIZ_LIST,
     vizinfo: VIZ_INFO,
   },
   watch: {
     sliderValue: sliderChanged,
+    hrValue: hrChanged,
   },
   methods: {
     pickAM: pickAM,
     pickPM: pickPM,
+    pickHR: pickHR,
     clickToggleHelp: clickToggleHelp,
     clickedShowHide: clickedShowHide,
     clickViz: clickViz,

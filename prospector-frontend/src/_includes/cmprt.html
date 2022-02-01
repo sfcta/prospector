@@ -55,6 +55,12 @@
 
       <div class="logo">
         <div class="pickers">
+        
+            <div v-if="isHRActive & !isTPHidden">
+                <h5 style="margin-top:10px">CHOOSE TIME OF DAY:</h5>
+                <vue-slider v-bind="hrSlider" v-model="hrValue"></vue-slider>
+            </div>
+        
             <h5 style="margin-top:10px">CHOOSE WEEK:</h5>
             <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
 			<div v-if="!isTPHidden">
@@ -67,6 +73,10 @@
 						v-bind:class="{ active: isPMActive, yellow: isPMActive }"
 						 class="mini ui grey button">
 						 PM</button>
+                <button v-on:click="pickHR"
+						v-bind:class="{ active: isHRActive, yellow: isHRActive }"
+						 class="mini ui grey button">
+						 Hourly</button>         
 			</div>
         </div>
         <br>
