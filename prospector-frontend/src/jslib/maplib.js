@@ -65,6 +65,7 @@ function getDistColor(d){
 }
 
 function getColorByBin(x, bins, colors){
+  if (x==null) return null;
   for (var i=0; i < bins.length; i++){
     if (x <= bins[i]) return colors[i];
   }
