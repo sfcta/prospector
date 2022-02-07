@@ -139,15 +139,21 @@ function styleByColorFunc(feat) {
 function addGeoLayer(jsonData){
 
   tazVar = app.dirSel==app.dirOrig? 'dtaz' : 'otaz';
-
+  let cleanFeatures = JSON.parse(JSON.stringify(Object.values(geoFeatures)));
+  
+  let skimLookup = {};
   for(let rec in jsonData){
-    if(typeof geoFeatures[jsonData[rec][tazVar]] !== 'undefined'){
-      geoFeatures[jsonData[rec][tazVar]]['skim_value'] = jsonData[rec]['totivt']/100;
-    }
+    skimLookup[jsonData[rec][tazVar]] = jsonData[rec];
+  }
+  let skm_var = 'totivt';
+  for (let feat of cleanFeatures) {
+    if(typeof skimLookup[feat.taz] !== 'undefined') {
+        feat['skim_value'] = skimLookup[feat.taz][skm_var]/100;
+    }  
   }
 
-  if (geoLayer) geoLayer.clearLayers();
-  geoLayer = L.geoJSON(Object.values(geoFeatures), {
+  if (geoLayer) mymap.removeLayer(geoLayer);
+  geoLayer = L.geoJSON(cleanFeatures, {
     style: styleByColorFunc,
     onEachFeature: function(feature, layer) {
       layer.on({
@@ -178,7 +184,7 @@ function addGeoLayer(jsonData){
 let tazMarker;
 let geoFeatures = {};
 let geoIds = [];
-let tazVar = 'otaz';
+let tazVar;
 // fetch the year details in data
 function updateOptionsData() {
   let tazSelOptions = [];
