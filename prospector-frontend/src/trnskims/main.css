@@ -3,12 +3,13 @@
 
 h3 {color: white; padding-top:5px;}
 
+select {
+    padding: 3px 3px;
+}
+
 #container {
   height:100%;
   width:100%;
-}
-
-#panel {
 }
 
 #sfmap {
@@ -33,11 +34,11 @@ h3 {color: white; padding-top:5px;}
 #picker { width:100%; margin-right:20px;}
 
 .column1 {width:50%; float: left; margin-top:15px; margin-bottom:15px;}
-.column2 {width:50%; float: right; margin-top:15px; margin-bottom:15px;}
+.column2 {width:40%; float: right; margin-top:15px; margin-bottom:15px; margin-left:15px;}
 
 .info {
     padding: 6px 8px;
-    font: 14px/16px Arial, Helvetica, sans-serif;
+    font: 14px/18px Arial, Helvetica, sans-serif;
     background: white;
     background: rgba(255,255,255,0.8);
     box-shadow: 0 0 15px rgba(0,0,0,0.2);

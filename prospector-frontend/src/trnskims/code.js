@@ -22,13 +22,15 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 // Use npm and babel to support IE11/Safari
 import 'babel-polyfill';
 import 'isomorphic-fetch';
+
 Vue.component('v-select', VueSelect.VueSelect);
 
 const API_SERVER = 'http://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
 const TABLES_VIEW = 'trnskim_tables';
 const MISSING_COLOR = '#ccc';
-const DISTANCE_BINS = [0, 5, 10, 15, 20, 25, 30]
+const FARE_BINS = [0, 2, 4, 6, 8, 10, 12];
+const DISTANCE_BINS = [0, 15, 30, 45, 60, 75, 90];
 const DISTANCE_COLORS = ['#ccc', '#1a9850', '#91cf60', '#d9ef8b', '#ffffbf', '#fee08b', '#fc8d59', '#d73027']
 const DEFAULT_ZOOM = 12;
 
@@ -50,7 +52,7 @@ let iconDest = maplib.iconDest;
 let styles = maplib.styles;
 let getLegHTML = maplib.getLegHTML;
 let geoColorFunc = maplib.colorFunc.distance;
-let geoLayer;
+let geoLayer, mapLegend;
 let selTAZProps;
 let addLayerStore = {};
 
@@ -90,18 +92,11 @@ info.update = function (props, seltaz=['',''], odind) {
       '<b>' + pref + seltaz[0] + '</b>, Neighborhood: ' + seltaz[1] + '<br/>' +
       (props ?
       '<b>' + suff + props.taz + '</b>, Neighborhood: ' + props.nhood + '<br/>' +
-      '<b>' + 'Time: ' + props.skim_value + ' mins</b>'
+      '<b>' + (app.skimSelVal=='fare'? 'Fare: $' + props.skim_value: 'Time: ' + props.skim_value + ' mins') + 
+      '</b>'
       : 'Hover over a TAZ');
 };
 info.addTo(mymap);
-
-let legend = L.control({position: 'bottomright'});
-legend.onAdd = function (map) {
-  let div = L.DomUtil.create('div', 'info legend')
-  div.innerHTML = '<h4>Time (mins)</h4>' + getLegHTML(DISTANCE_BINS, DISTANCE_COLORS);
-  return div;
-};
-legend.addTo(mymap);
 
 function queryServer() {
 
@@ -110,7 +105,7 @@ function queryServer() {
   urlparams += '=eq.' + app.tazSelVal.value;
   urlparams += '&tp=eq.' + app.timepSelVal;
   urlparams += '&mode=eq.' + app.modeSelVal;
-  urlparams += '&select=otaz,dtaz,totivt';
+  //urlparams += '&select=otaz,dtaz,totivt';
   dataurl += urlparams;
 
   // Fetch viz data
@@ -127,7 +122,9 @@ function queryServer() {
 let segmentLos = {};
 
 function styleByColorFunc(feat) {
-  let color = maplib.getColorByBin(feat.skim_value, DISTANCE_BINS, DISTANCE_COLORS);
+  let bins = DISTANCE_BINS;
+  if (app.skimSelVal == 'fare') bins = FARE_BINS;
+  let color = maplib.getColorByBin(feat.skim_value, bins, DISTANCE_COLORS);
   if (!color) color = MISSING_COLOR;
   return {fillColor: color,
           fillOpacity: 0.65,
@@ -145,14 +142,21 @@ function addGeoLayer(jsonData){
   for(let rec in jsonData){
     skimLookup[jsonData[rec][tazVar]] = jsonData[rec];
   }
-  let skm_var = 'totivt';
+
   for (let feat of cleanFeatures) {
     if(typeof skimLookup[feat.taz] !== 'undefined') {
-        feat['skim_value'] = skimLookup[feat.taz][skm_var]/100;
+        let skm_val = skimLookup[feat.taz][app.skimSelVal];
+        if (app.skimSelVal == 'fare') {
+          skm_val = ((skm_val/100)/0.416).toPrecision(3); // 2020$
+        } else {
+          skm_val = (skm_val/100).toPrecision(3);
+        }
+        feat['skim_value'] = skm_val;
     }  
   }
 
   if (geoLayer) mymap.removeLayer(geoLayer);
+  if (mapLegend) mymap.removeControl(mapLegend);
   geoLayer = L.geoJSON(cleanFeatures, {
     style: styleByColorFunc,
     onEachFeature: function(feature, layer) {
@@ -166,7 +170,19 @@ function addGeoLayer(jsonData){
 
   geoLayer.addTo(mymap);
 
-
+  mapLegend = L.control({position: 'bottomright'});
+  mapLegend.onAdd = function (map) {
+    let div = L.DomUtil.create('div', 'info legend')
+    if (app.skimSelVal == 'fare') {
+      div.innerHTML = '<h4>Fare (2020$)</h4>';
+      div.innerHTML += getLegHTML(FARE_BINS, DISTANCE_COLORS);
+    } else {
+      div.innerHTML = '<h4>Time (mins)</h4>';
+      div.innerHTML += getLegHTML(DISTANCE_BINS, DISTANCE_COLORS);
+    }
+    return div;
+  };
+  mapLegend.addTo(mymap);
 
   /*
 
@@ -266,12 +282,21 @@ let app = new Vue({
     tableSelVal: {label:''},
     copytableSelVal: null,
     
+    skimSelOptions: [
+    {text: 'Total Time', value: 'tottime'},
+    {text: 'Total In-Vehicle Time (IVT)', value: 'totivt'},
+    {text: 'Total Out-Vehicle Time (OVT)', value: 'totovt'},
+    {text: 'Fare', value: 'fare'},
+    ],
+    skimSelVal: 'tottime',
+    
     modeSelOptions: [
     {text: 'Local Bus', value: 1},
     {text: 'Light Rail', value: 2},
     {text: 'Premium (Caltrain/Express Bus)', value: 3},
     {text: 'Ferry', value: 4},
-    {text: 'BART', value: 5}
+    {text: 'BART', value: 5},
+    {text: 'Transit (Tour)', value: 6}
     ],
     modeSelVal: 1,
     
@@ -290,6 +315,7 @@ let app = new Vue({
     dirSel: usrOptionChanged,
     modeSelVal: usrOptionChanged,
     timepSelVal: usrOptionChanged,
+    skimSelVal: usrOptionChanged,
   }
 });
 

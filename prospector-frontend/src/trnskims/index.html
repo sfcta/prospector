@@ -8,38 +8,40 @@ css: main.css
 <h2>Transit Skims</h2>
 
 <div id="panel">
-    <div class="dashboard">
       <div id="picker">
-        <div>
+        <div class="column1">
           <h4>Select Transit Skim Table</h4>
           <v-select v-model="tableSelVal" :options="tableSelOptions"></v-select>
-        </div>
-        <div class="column1">
+          
           <h4>Select Mode</h4>
           <select v-model="modeSelVal">
               <option v-for="option in modeSelOptions" v-bind:value="option.value">
                 ${option.text}
               </option>
-          </select>  
+          </select>
+
+          <br><br><input type="radio" v-model="dirSel" v-bind:value="dirOrig">From Origin
+          <br><input type="radio" v-model="dirSel" v-bind:value="dirDest">To Destination          
         </div>
         <div class="column2">
+          <h4>Select Skim Attribute</h4>
+          <select v-model="skimSelVal">
+              <option v-for="option in skimSelOptions" v-bind:value="option.value">
+                ${option.text}
+              </option>
+          </select> 
+
           <h4>Select Time Period</h4>
           <select v-model="timepSelVal">
               <option v-for="option in timepSelOptions" v-bind:value="option.value">
                 ${option.text}
               </option>
-          </select>
-        </div>
-        <div class="column1">
-          <input type="radio" v-model="dirSel" v-bind:value="dirOrig">From Origin <br>
-          <input type="radio" v-model="dirSel" v-bind:value="dirDest">To Destination
-        </div>
-        <div class="column2">
-            <h4>Select TAZ</h4>
-            <v-select v-model="tazSelVal" :options="tazSelOptions"></v-select>
+          </select> 
+
+          <h4>Select TAZ</h4>
+          <v-select v-model="tazSelVal" :options="tazSelOptions"></v-select>          
         </div>
       </div>
-    </div>
 </div>
 
 <div id="sfmap"></div>
