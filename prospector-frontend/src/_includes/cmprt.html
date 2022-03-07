@@ -58,13 +58,25 @@
         
             <div v-if="isHRActive & !isTPHidden">
                 <h5 style="margin-top:10px">CHOOSE TIME OF DAY:</h5>
-                <vue-slider v-bind="hrSlider" v-model="hrValue"></vue-slider>
+                <vue-slider v-bind="hrSlider" 
+                    v-model="hrValue"
+                    style="width:85%; margin-right:5px; float:left">
+                </vue-slider>
+                <button class="mini ui inverted button"
+                    style="padding: 5px 10px; margin-left: 10px;"
+                    v-on:click="clickTODPlay" 
+                    v-bind:class="{ active: isPlayTODActive, red: isPlayTODActive}">
+                    <div v-if="isPlayTODActive"><b>&#2405;</b></div>
+                    <div v-else>&#9658;</div>
+                </button>
             </div>
         
-            <h5 style="margin-top:10px">CHOOSE WEEK:</h5>
-            <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
+            <h5 style="margin-top:20px">CHOOSE WEEK:</h5>
+            <vue-slider v-bind="timeSlider" v-model="sliderValue"
+                style="width:95%;">
+            </vue-slider>
 			<div v-if="!isTPHidden">
-				<h5>CHOOSE TIME PERIOD:</h5>
+				<h5 style="margin-top:3px">CHOOSE TIME PERIOD:</h5>
 				<button v-on:click="pickAM"
 						v-bind:class="{ active: isAMActive, yellow: isAMActive}"
 						 class="mini ui grey button">

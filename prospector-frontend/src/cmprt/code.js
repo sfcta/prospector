@@ -787,6 +787,8 @@ async function sliderChanged(thing) {
 }
 
 function hrChanged(thing) {
+  killTimeouts();
+  if (app.isPlayTODActive) {playTOD();}
   drawMapSegments(false);
   highlightSelectedSegment();
 }
@@ -832,6 +834,29 @@ async function updateSliderData() {
     });
 
   return;
+}
+
+// Store timeout IDs. 
+var timeouts = []; 
+
+function killTimeouts() {
+  for (var i=0; i < timeouts.length; i++) {
+      clearTimeout(timeouts[i]);
+  }
+  timeouts = [];
+}
+function clickTODPlay() {
+  app.isPlayTODActive = !app.isPlayTODActive;
+  killTimeouts();
+  if (app.isPlayTODActive) {playTOD();}
+}
+
+function playTOD() {
+  var delay = 1500; 
+  var hr = app.hrValue+1; 
+  if (hr==24) {hr=0;}; 
+
+  timeouts.push(setTimeout(function(){app.hrValue = hr}, delay))
 }
 
 // SLIDER ----
@@ -888,6 +913,7 @@ let app = new Vue({
     isAMActive: true,
     isPMActive: false,
     isHRActive: false,
+    isPlayTODActive: false,
     selectedViz: VIZ_LIST[0],
     sliderValue: 0,
     timeSlider: timeSlider,
@@ -907,6 +933,7 @@ let app = new Vue({
     clickToggleHelp: clickToggleHelp,
     clickedShowHide: clickedShowHide,
     clickViz: clickViz,
+    clickTODPlay: clickTODPlay,
   },
   components: {
     vueSlider,
