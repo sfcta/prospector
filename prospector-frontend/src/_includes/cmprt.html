@@ -71,7 +71,7 @@
                 </button>
             </div>
         
-            <h5 style="margin-top:20px">CHOOSE WEEK:</h5>
+            <h5 style="margin-top:20px">CHOOSE MONTH:</h5>
             <vue-slider v-bind="timeSlider" v-model="sliderValue"
                 style="width:95%;">
             </vue-slider>
@@ -110,11 +110,11 @@
         Explore how congestion in San Francisco has changed since the March 2020 shelter-in-place order. 
 		Automobile Level-of-Service (LOS) and Vehicle Miles Traveled (VMT) per mile are presented for key segments in the transportation network. 
 		In addition, changes in these metrics relative to pre-COVID conditions can be viewed.</br>
-        The LOS are calculated using speed data from INRIX Roadway Analytics. Speeds are weekly averages calculated using
+        The LOS are calculated using speed data from INRIX Roadway Analytics. Speeds are monthly averages calculated using
         data from Tuesday through Thursday of each week. 
 		VMT metrics are derived using imputed vehicle volumes from observed speeds and Volume Delay Functions (VDF). 
 		Total peak period VMT for key segments is expanded to Daily Citywide estimate by applying expansions factors derived from historic Caltrans VMT estimated for San Francisco.
-		The data on this website are updated every one to two weeks.
+		The data on this website are updated every month.
         
         <ul>
         <li><b>Auto Level-of-Service (LOS)</b> grades road segments by vehicle delay with "A" describing free flow,
@@ -131,7 +131,7 @@
         <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
         <ul>
-        <li>Move the week slider to update map with data from chosen week.</li>
+        <li>Move the month slider to update map with data from chosen month.</li>
         <li>Choose time period to update map for AM (7a-9a) or PM (4:30p-6:30p) peak.</li>
         <li>Click on a roadway segment on the map to see segment-specific trends.</li>
         </ul>
