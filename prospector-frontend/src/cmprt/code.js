@@ -440,7 +440,10 @@ async function drawMapSegments(dateChanged=true) {
         }
       }      
   } else {
-      if ((['VMT','VMTDIFFPCT'].includes(app.selectedViz)) && (app.isHRActive)) app.pickAM('AM');
+      if ((['VMT','VMTDIFFPCT'].includes(app.selectedViz)) && (app.isHRActive)) {
+          app.pickAM('AM');
+          app.isPlayTODActive = false;
+      }
       relevantRows = _allCmpData.filter(row => row.date==app.sliderValue && row.period===selPeriod);
       for (let row of relevantRows) {
         lookup[row.cmp_segid] = row;
