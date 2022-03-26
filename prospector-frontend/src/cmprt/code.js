@@ -784,14 +784,23 @@ async function pickHR(thing) {
 }
 
 async function sliderChanged(thing) {
+  if (app.isPlayMonActive) {
+    if (app.isPlayTODActive) {
+      killTimeouts(timeouts);
+      playTOD();
+    } else {
+      killTimeouts(timeouts_mon);
+      playMon();
+    }
+  }
   await drawMapSegments();
   highlightSelectedSegment();
   if (app.isHRActive) showVizChartForSelectedSegment();
 }
 
 function hrChanged(thing) {
-  killTimeouts();
-  if (app.isPlayTODActive) {playTOD();}
+  killTimeouts(timeouts);
+  if (app.isPlayTODActive) playTOD();
   drawMapSegments(false);
   highlightSelectedSegment();
 }
@@ -841,25 +850,56 @@ async function updateSliderData() {
 
 // Store timeout IDs. 
 var timeouts = []; 
+var timeouts_mon = [];
 
-function killTimeouts() {
-  for (var i=0; i < timeouts.length; i++) {
-      clearTimeout(timeouts[i]);
+function killTimeouts(touts_arr) {
+  for (var i=0; i < touts_arr.length; i++) {
+      clearTimeout(touts_arr[i]);
   }
-  timeouts = [];
+  touts_arr = [];
 }
 function clickTODPlay() {
   app.isPlayTODActive = !app.isPlayTODActive;
-  killTimeouts();
-  if (app.isPlayTODActive) {playTOD();}
+  killTimeouts(timeouts);
+  if (app.isPlayTODActive) {
+    playTOD();
+  } else {
+    if (app.isPlayMonActive) playMon();
+  } 
 }
 
 function playTOD() {
   var delay = 1500; 
   var hr = app.hrValue+1; 
-  if (hr==24) {hr=0;}; 
+  if (hr==24) {
+    hr=0
+    if (app.isPlayMonActive) {
+      timeouts.push(setTimeout(function(){
+          app.hrValue = hr;
+          var idx = app.timeSlider.data.indexOf(app.sliderValue) + 1;
+          if (idx >= app.timeSlider.data.length) idx = 0;
+          app.sliderValue = app.timeSlider.data[idx];          
+        }, 
+      delay))
+    } else {
+      timeouts.push(setTimeout(function(){app.hrValue = hr}, delay));
+      hr = hr+1;
+    }
+  }
+  timeouts.push(setTimeout(function(){app.hrValue = hr}, delay));
+}
 
-  timeouts.push(setTimeout(function(){app.hrValue = hr}, delay))
+function clickMonPlay() {
+  app.isPlayMonActive = !app.isPlayMonActive;
+  killTimeouts(timeouts_mon);
+  if (app.isPlayMonActive && !app.isPlayTODActive) {playMon();}
+}
+function playMon() {
+  var delay = 2500;
+  var idx = app.timeSlider.data.indexOf(app.sliderValue) + 1;
+  if (idx >= app.timeSlider.data.length) idx = 0;
+  
+  timeouts_mon.push(setTimeout(function(){app.sliderValue = app.timeSlider.data[idx]}, delay))
 }
 
 // SLIDER ----
@@ -917,6 +957,7 @@ let app = new Vue({
     isPMActive: false,
     isHRActive: false,
     isPlayTODActive: false,
+    isPlayMonActive: false,
     selectedViz: VIZ_LIST[0],
     sliderValue: 0,
     timeSlider: timeSlider,
@@ -937,6 +978,7 @@ let app = new Vue({
     clickedShowHide: clickedShowHide,
     clickViz: clickViz,
     clickTODPlay: clickTODPlay,
+    clickMonPlay: clickMonPlay,
   },
   components: {
     vueSlider,

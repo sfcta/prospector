@@ -73,8 +73,15 @@
         
             <h5 style="margin-top:20px">CHOOSE MONTH:</h5>
             <vue-slider v-bind="timeSlider" v-model="sliderValue"
-                style="width:95%;">
+                style="width:85%; margin-right:5px; float:left">
             </vue-slider>
+            <button class="mini ui inverted button"
+                    style="padding: 5px 10px; margin-left: 10px;"
+                    v-on:click="clickMonPlay" 
+                    v-bind:class="{ active: isPlayMonActive, red: isPlayMonActive}">
+                    <div v-if="isPlayMonActive"><b>&#2405;</b></div>
+                    <div v-else>&#9658;</div>
+            </button>
 			<div v-if="!isTPHidden">
 				<h5 style="margin-top:3px">CHOOSE TIME PERIOD:</h5>
 				<button v-on:click="pickAM"
