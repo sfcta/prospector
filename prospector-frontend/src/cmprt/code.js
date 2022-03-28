@@ -634,6 +634,18 @@ function buildChartHtmlFromCmpData(json = null) {
       metric_col = 'avg_speed';
     if ((selviz_metric == VIZ_INFO['VMT']['METRIC']) || (selviz_metric == VIZ_INFO['VMTDIFFPCT']['METRIC']))
       metric_col = 'imp_vol';
+     
+    if (app.isHRActive) {
+      for (let i=0; i<24; i++) {
+        byYear[i] = null;  
+      }
+    } else {
+      for (let d of app.timeSlider.data) {
+        byYear[d] = {};
+        byYear[d]['AM'] = null;
+        byYear[d]['PM'] = null;
+      }
+    }
     
     for (let entry of json) {
       let val = Number(entry[metric_col]).toFixed(
@@ -644,7 +656,7 @@ function buildChartHtmlFromCmpData(json = null) {
       if (app.isHRActive) {
         byYear[entry.period] = val;  
       } else {
-        if (!byYear[entry.date]) byYear[entry.date] = {};
+        //if (!byYear[entry.date]) byYear[entry.date] = {};
         byYear[entry.date][entry.period] = val;
       }
     }
