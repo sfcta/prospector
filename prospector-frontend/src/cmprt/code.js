@@ -895,7 +895,6 @@ function playTOD() {
       delay))
     } else {
       timeouts.push(setTimeout(function(){app.hrValue = hr}, delay));
-      hr = hr+1;
     }
   }
   timeouts.push(setTimeout(function(){app.hrValue = hr}, delay));
