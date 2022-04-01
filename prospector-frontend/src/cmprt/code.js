@@ -700,7 +700,7 @@ function buildChartHtmlFromCmpData(json = null) {
 		col_tmp = '#99f';
 	}
     if (app.isHRActive) {
-      new Morris.Area({
+      new Morris.Line({
         data: data,
         element: 'longchart',
         hideHover: true,
