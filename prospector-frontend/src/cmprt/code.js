@@ -390,7 +390,7 @@ function getInfoHtml(geo) {
     if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
     
     retval += '<b> ' + base_desc + ' (pre-covid): </b>' + `${base_val}` + units + '<br/>' +
-              '<b> ' + comp_desc + ' (year-month of ' + `${app.sliderValue.slice(5)}` +  '): </b>' + `${comp_val}` + units + '<br/>' +
+              '<b> ' + comp_desc + ' (year-month of ' + `${app.sliderValue}` +  '): </b>' + `${comp_val}` + units + '<br/>' +
               `<b> ${VIZ_INFO[app.selectedViz]['METRIC_DESC']}: </b>` + `${metric_val}` + VIZ_INFO[app.selectedViz]['POST_UNITS'];
   }
 
