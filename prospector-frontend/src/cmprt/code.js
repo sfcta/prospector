@@ -750,7 +750,7 @@ function buildChartHtmlFromCmpData(json = null) {
         ykeys: ['period','ref'],
         ymax: scale,
         parseTime: false,
-        pointSize: 2,
+        pointSize: [2, 0],
       });        
     } else {
       new Morris.Line({
@@ -801,7 +801,7 @@ function buildChartHtmlFromCmpData(json = null) {
       ykeys: app.isHRActive? ['fwy', 'fwy_ref', 'art', 'art_ref']: ykey_tmp,
       ymax: ymax_tmp,
       parseTime: false,
-      pointSize: 2,
+      pointSize: app.isHRActive? [2, 0, 2, 0]: 2,
     });   
   }
 }
