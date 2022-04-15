@@ -125,7 +125,7 @@ let selectedSegment, prevselectedSegment;
 let _segmentJson;
 let _allCmpData;
 let _aggregateData;
-let _hrData;
+let _hrData, _hrData_PreCOVID;
 let _hrAggData;
 
 async function initialPrep() {
@@ -279,16 +279,36 @@ async function parseAllAggregateData(buildAggData, jsonData, viz) {
 async function fetchHourlyData() {
   let params =
     'select=cmp_segid,year,date,period,los_hcm85,avg_speed,base_speed,spd_diff,pct_diff';
-
   let data_url = API_SERVER + hrdata_view + '?' + params + '&date=eq.' + app.sliderValue;
-
-  selMetricData = {};
 
   try {
     let resp = await fetch(data_url);
     return await resp.json();
 
   } catch (error) {console.log('hourly data fetch error: ' + error);}
+}
+
+async function fetchPreCOVIDHourlyData(refDate) {
+  let params =
+    'select=cmp_segid,period,avg_speed';
+  let data_url = API_SERVER + hrdata_view + '?' + params + '&date=eq.' + refDate;
+
+  try {
+    let resp = await fetch(data_url);
+    let jsonData = await resp.json();
+    _hrData_PreCOVID = {};
+    for (let rec of jsonData) {
+        if (_hrData_PreCOVID[rec['cmp_segid']]) {
+          _hrData_PreCOVID[rec['cmp_segid']][parseInt(rec.period)] = rec.avg_speed;  
+        } else {
+          _hrData_PreCOVID[rec['cmp_segid']] = {};
+          for (let i=0; i<24; i++) {
+            _hrData_PreCOVID[rec['cmp_segid']][i] = null;  
+          }
+          _hrData_PreCOVID[rec['cmp_segid']][parseInt(rec.period)] = rec.avg_speed;
+        }
+    }
+  } catch (error) {console.log('hourly data Pre-COVID fetch error: ' + error);}
 }
 
 async function fetchHrAggData(aggdat_view) {
@@ -621,6 +641,19 @@ function showVizChartForSelectedSegment() {
   }
 }
 
+function addRefData(cdata) {
+    let ref_date = app.timeSlider.data[0];
+    if (app.sliderValue == ref_date) return cdata;
+    
+    let i=0;
+    for (let o of _hrAggData['ASPD'][ref_date]) {   
+      cdata[i]['art_ref'] = o['art'];
+      cdata[i]['fwy_ref'] = o['fwy'];
+      i += 1;
+    }
+    return cdata;
+}
+
 function buildChartHtmlFromCmpData(json = null) {
   document.getElementById('longchart').innerHTML = '';
 
@@ -662,7 +695,12 @@ function buildChartHtmlFromCmpData(json = null) {
     }
     if (app.isHRActive) {
         for (let tod of Object.keys(byYear).map(i=>Number(i)).sort(function (a,b) { return a-b; })) {
-          data.push({tod: hourLabels[tod], period: byYear[tod]});
+          let ref_spd = null;
+          if(_hrData_PreCOVID[json[0]['cmp_segid']]) {
+            ref_spd = _hrData_PreCOVID[json[0]['cmp_segid']][tod];
+            if (ref_spd !==null) ref_spd = ref_spd.toFixed(VIZ_INFO[app.selectedViz]['CHART_PREC']);
+          }
+          data.push({tod: hourLabels[tod], period: byYear[tod], ref: ref_spd});
           maxHeight = Math.max(maxHeight, byYear[tod]);
       }  
     } else {
@@ -704,12 +742,12 @@ function buildChartHtmlFromCmpData(json = null) {
         data: data,
         element: 'longchart',
         hideHover: true,
-        labels: ['speed'],
-        lineColors: ['#1fc231'],
+        labels: ['Speed', 'Speed Pre-COVID'],
+        lineColors: ['#1fc231', '#6d8e71'],
         fillOpacity: 0.4,
         xkey: 'tod',
         xLabelAngle: 45,
-        ykeys: ['period'],
+        ykeys: ['period','ref'],
         ymax: scale,
         parseTime: false,
         pointSize: 2,
@@ -732,9 +770,9 @@ function buildChartHtmlFromCmpData(json = null) {
     
   } else {
     let ykey_tmp, lab_tmp, col_tmp, viz_tmp,ymax_tmp;
-    ykey_tmp = ['art', 'fwy'];
-    lab_tmp = ['Arterial', 'Freeway'];
-	col_tmp = ['#f66', '#99f'];
+    ykey_tmp = ['fwy', 'art'];
+    lab_tmp = ['Freeway', 'Arterial'];
+	col_tmp = ['#99f', '#f66'];
 	viz_tmp = 'ASPD';
 	ymax_tmp = 70;
 	if (app.selectedViz == 'VMT' || app.selectedViz == 'VMTDIFFPCT') {
@@ -744,17 +782,23 @@ function buildChartHtmlFromCmpData(json = null) {
 		viz_tmp = 'VMT';
 		ymax_tmp = 12;
 	}
+    let chart_data;
+    if (app.isHRActive) {
+      chart_data = addRefData(_hrAggData[viz_tmp][app.sliderValue]);
+    } else {
+      chart_data = _aggregateData[viz_tmp][selPeriod];
+    }
     new Morris.Line({
-      data: app.isHRActive? _hrAggData[viz_tmp][app.sliderValue]: _aggregateData[viz_tmp][selPeriod],
+      data: chart_data,
       element: 'longchart',
       gridTextColor: '#aaa',
       hideHover: true,
-      labels: lab_tmp,
-      lineColors: col_tmp,
+      labels: app.isHRActive? ['Freeway', 'Freeway Pre-COVID', 'Arterial', 'Arterial Pre-COVID']: lab_tmp,
+      lineColors: app.isHRActive? ['#99f', '#a3a3b7', '#f66', '#d09595']: col_tmp,
       //postUnits: VIZ_INFO['ASPD']['POST_UNITS'],
       xkey: app.isHRActive? 'tod': 'date',
       xLabelAngle: 45,
-      ykeys: ykey_tmp,
+      ykeys: app.isHRActive? ['fwy', 'fwy_ref', 'art', 'art_ref']: ykey_tmp,
       ymax: ymax_tmp,
       parseTime: false,
       pointSize: 2,
@@ -855,8 +899,8 @@ async function updateSliderData() {
       datelist = datelist.sort();
       app.timeSlider.data = datelist;
       app.sliderValue = datelist[datelist.length - 1];
+      fetchPreCOVIDHourlyData(datelist[0]);
     });
-
   return;
 }
 
