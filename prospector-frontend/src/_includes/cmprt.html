@@ -95,7 +95,7 @@
                 <button v-on:click="pickHR"
 						v-bind:class="{ active: isHRActive, yellow: isHRActive }"
 						 class="mini ui grey button">
-						 Hourly</button>         
+						 1-Hour</button>         
 			</div>
         </div>
         <br>
@@ -119,7 +119,7 @@
 		In addition, changes in these metrics relative to pre-COVID conditions can be viewed.</br>
         The LOS are calculated using speed data from INRIX Roadway Analytics. Speeds are monthly averages calculated using
         data from Tuesday through Thursday of each week. 
-		VMT metrics are derived using imputed vehicle volumes from observed speeds and Volume Delay Functions (VDF). 
+		VMT estimates are derived using imputed vehicle volumes from observed speeds and Volume Delay Functions (VDF). 
 		Total peak period VMT for key segments is expanded to Daily Citywide estimate by applying expansions factors derived from historic Caltrans VMT estimated for San Francisco.
 		The data on this website are updated every month.
         
@@ -138,8 +138,10 @@
         <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
         <ul>
-        <li>Move the month slider to update map with data from chosen month.</li>
-        <li>Choose time period to update map for AM (7a-9a) or PM (4:30p-6:30p) peak.</li>
+        <li>Move the month slider to update map with data from chosen month. Click the play button to automatically cycle through months.</li>
+        <li>Choose time period to update map for AM (7a-9a) peak, PM (4:30p-6:30p) peak or 1-Hour time periods.</li>
+        <li>Choosing the 1-Hour period provides an additional time-of-day option to update the map for a given hour of the day.</li>
+        <li>The chart on the side panel shows trends across the months when AM or PM peak periods are selected. It shows the variation across an average day when 1-Hour time period is chosen.</li>
         <li>Click on a roadway segment on the map to see segment-specific trends.</li>
         </ul>
 
