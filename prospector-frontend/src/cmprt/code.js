@@ -924,8 +924,9 @@ function clickTODPlay() {
   } 
 }
 
+var play_delay;
 function playTOD() {
-  var delay = 1500; 
+  play_delay = 1500; 
   var hr = app.hrValue+1; 
   if (hr==24) {
     hr=0
@@ -936,12 +937,12 @@ function playTOD() {
           if (idx >= app.timeSlider.data.length) idx = 0;
           app.sliderValue = app.timeSlider.data[idx];          
         }, 
-      delay))
+      play_delay))
     } else {
-      timeouts.push(setTimeout(function(){app.hrValue = hr}, delay));
+      timeouts.push(setTimeout(function(){app.hrValue = hr}, play_delay));
     }
   }
-  timeouts.push(setTimeout(function(){app.hrValue = hr}, delay));
+  timeouts.push(setTimeout(function(){app.hrValue = hr}, play_delay));
 }
 
 function clickMonPlay() {
@@ -950,11 +951,11 @@ function clickMonPlay() {
   if (app.isPlayMonActive && !app.isPlayTODActive) {playMon();}
 }
 function playMon() {
-  var delay = 2500;
+  play_delay = app.isHRActive? 2250: 1500;
   var idx = app.timeSlider.data.indexOf(app.sliderValue) + 1;
   if (idx >= app.timeSlider.data.length) idx = 0;
   
-  timeouts_mon.push(setTimeout(function(){app.sliderValue = app.timeSlider.data[idx]}, delay))
+  timeouts_mon.push(setTimeout(function(){app.sliderValue = app.timeSlider.data[idx]}, play_delay))
 }
 
 // SLIDER ----
