@@ -29,6 +29,7 @@ import Cookies from 'js-cookie';
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
 let getLegHTML = maplib.getLegHTML2;
+let getLegHTML2 = maplib.getLegHTML3;
 let getColorFromVal = maplib.getColorFromVal2;
 let mymap = maplib.sfmap;
 mymap.setView([37.76889, -122.440997], 13);
@@ -504,12 +505,23 @@ async function drawMapSegments(dateChanged=true) {
   mapLegend = L.control({ position: 'bottomright' });
   mapLegend.onAdd = function(map) {
     let div = L.DomUtil.create('div', 'info legend');
-    let legHTML = getLegHTML(
-      VIZ_INFO[app.selectedViz]['COLORVALS'],
-      VIZ_INFO[app.selectedViz]['COLORS'],
-      VIZ_INFO[app.selectedViz]['COLOR_BY_BINS'],
-      VIZ_INFO[app.selectedViz]['POST_UNITS']
-    );
+    let legHTML;
+    if (app.selectedViz == 'SPDIFFPCT') {
+      legHTML = getLegHTML2(
+        VIZ_INFO[app.selectedViz]['COLORVALS'],
+        VIZ_INFO[app.selectedViz]['COLORS'],
+        VIZ_INFO[app.selectedViz]['COLOR_BY_BINS'],
+        VIZ_INFO[app.selectedViz]['POST_UNITS']
+      );
+    } else {
+      legHTML = getLegHTML(
+        VIZ_INFO[app.selectedViz]['COLORVALS'],
+        VIZ_INFO[app.selectedViz]['COLORS'],
+        VIZ_INFO[app.selectedViz]['COLOR_BY_BINS'],
+        VIZ_INFO[app.selectedViz]['POST_UNITS']
+      );
+    }
+ 
     div.innerHTML =
       '<h4>' + VIZ_INFO[app.selectedViz]['METRIC_DESC'] + '</h4>' + legHTML;
 
