@@ -76,7 +76,7 @@ const ADDLAYERS = [
     style: { opacity: 1, weight: 2, color: 'grey', fillPattern: stripes, interactive: false},
   },
   {
-    view: 'sup_district_boundaries', name: 'Supervisorial District Boundaries',
+    view: 'sup_district_boundaries_2022', name: 'Supervisorial District Boundaries',
     style: { opacity: 1, weight: 3, color: '#730073', fillOpacity: 0, interactive: false},
     info: 'https://sfbos.org/',
   },
