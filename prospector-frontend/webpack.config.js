@@ -34,7 +34,8 @@ const sfcta_components = [
 	 'linkagg_inrix',
      'tncparking',
      'cmp_test',
-     'epc'
+     'epc',
+     'epc2'
 	 //'cmp-v0',
 ];
 
