@@ -57,8 +57,13 @@
             <input type="checkbox" value="sfparks" v-model="addLayers">
             <label><h5>Major Parks</h5></label>
           </div>
+
+          <hr/>
+          <h5>POPULATION BREAKDOWN</h5>
+          <div id="popchart"></div>
+          <div id="popchart_info"></div>
           
-          <br><br>
+          <br><br><hr/>
           <h5>YOUR FEEDBACK</h5>
           <form class="ui tiny equal width form" v-on:submit.prevent="handleSubmit">
             <div class="ui field">

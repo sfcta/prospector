@@ -34,37 +34,37 @@ mymap.setView([37.76889, -122.440997], 13);
 mymap.removeLayer(baseLayer);
 let url = 'https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
 let token = 'pk.eyJ1Ijoic2ZjdGEiLCJhIjoiY2ozdXBhNm1mMDFkaTJ3dGRmZHFqanRuOCJ9.KDmACTJBGNA6l0CyPi1Luw';
-let attribution ='<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
-                 '<a href="http://mapbox.com">Mapbox</a>';
+let attribution = '<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
+  '<a href="http://mapbox.com">Mapbox</a>';
 baseLayer = L.tileLayer(url, {
-  attribution:attribution,
+  attribution: attribution,
   maxZoom: 18,
-  accessToken:token,
+  accessToken: token,
 }).addTo(mymap);
 
 let url2 = 'https://api.mapbox.com/styles/v1/sfcta/cjscclu2q07qn1fpimxuf2wbd/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
 let streetLayer = L.tileLayer(url2, {
-  attribution:attribution,
+  attribution: attribution,
   maxZoom: 18,
-  accessToken:token,
+  accessToken: token,
   pane: 'shadowPane',
 });
 streetLayer.addTo(mymap);
 
-let stripes = new L.StripePattern({weight:3,spaceWeight:3,opacity:0.6,angle:135}); stripes.addTo(mymap);
+let stripes = new L.StripePattern({ weight: 3, spaceWeight: 3, opacity: 0.6, angle: 135 }); stripes.addTo(mymap);
 
 const ADDLAYERS = [
   {
     view: 'sup_district_boundaries_2022', name: 'Supervisorial District Boundaries',
-    style: { opacity: 1, weight: 3, color: '#730073', fillOpacity: 0, interactive: false},
+    style: { opacity: 1, weight: 3, color: '#730073', fillOpacity: 0, interactive: false },
   },
   {
     view: 'sfparks', name: 'Major Parks',
-    style: { opacity: 1, weight: 2, color: 'grey', fillPattern: stripes, interactive: false},
+    style: { opacity: 1, weight: 2, color: 'grey', fillPattern: stripes, interactive: false },
   },
   {
     view: 'hin2017', name: 'High Injury Network',
-    style: { opacity: 1, weight: 3, color: '#FF8C00', interactive: false},
+    style: { opacity: 1, weight: 3, color: '#FF8C00', interactive: false },
   },
 ]
 
@@ -80,40 +80,50 @@ const GEOTYPE = 'EPC';
 const GEOID_VAR = 'geoid';
 
 const FRAC_COLS = [];
-const YR_LIST = [2015,2050];
+const YR_LIST = [2015, 2050];
 
 const INT_COLS = [];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ffffcc';
-const COLORRAMP = {SEQ: ['#fceca8', '#f6c558', '#dc9e48', '#8f5448'],
-                    DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
+const COLORRAMP = {
+  SEQ: ['#fceca8', '#f6c558', '#dc9e48', '#8f5448'],
+  DIV: ['#d7191c', '#fdae61', '#ffffbf', '#a6d96a', '#1a9641']
+};
 
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'min': {'base':[50,70,90],},
-  'linc': {'base':[25,30,35],},
-  'o75': {'base':[5,10,15],},
-  'disab': {'base':[10,25,40],},
-  'lep': {'base':[10,20,30],},
-  'zvhh': {'base':[5,10,15],},
-  'spfam': {'base':[10,20,30],},
-  'rentb': {'base':[5,15,25],},
+  'min': { 'base': [50, 70, 90], },
+  'linc': { 'base': [25, 30, 35], },
+  'o75': { 'base': [5, 10, 15], },
+  'disab': { 'base': [10, 25, 40], },
+  'lep': { 'base': [10, 20, 30], },
+  'zvhh': { 'base': [5, 10, 15], },
+  'spfam': { 'base': [10, 20, 30], },
+  'rentb': { 'base': [5, 15, 25], },
 };
 
-const METRIC_UNITS = {'pop': '000s per sq. mi.',
-                      'tot': '000s per sq. mi.',
-                      'jobpop': '000s per sq. mi.'};
-const METRIC_DESC = {'pop': 'Population','tot': 'Jobs',
-                      'jobpop': 'Jobs+Population',
+const METRIC_UNITS = {
+  'pop': '000s per sq. mi.',
+  'tot': '000s per sq. mi.',
+  'jobpop': '000s per sq. mi.'
 };
-const METRIC_DESC_SHORT = {'min': 'Minority Pop','linc': 'Low-Income Pop','o75': 'Over 75 yrs Pop','disab': 'Disabled Pop',
-                      'lep': 'Low English Pop','zvhh': 'Zero-Veh HH','spfam': 'Single-Parent Fam','rentb': 'Rent-Burdened HH'
+const METRIC_DESC = {
+  'pop': 'Population', 'tot': 'Jobs',
+  'jobpop': 'Jobs+Population',
+};
+const METRIC_DESC_SHORT = {
+  'min': 'Minority Pop', 'linc': 'Low-Income Pop', 'o75': 'Over 75 yrs Pop', 'disab': 'Disabled Pop',
+  'lep': 'Low English Pop', 'zvhh': 'Zero-Veh HH', 'spfam': 'Single-Parent Fam', 'rentb': 'Rent-Burdened HH'
 };
 const VARMAP = [
-  {'min':'pct_minori','linc':'pct_below2','o75':'pct_over75','disab':'pct_disab',
-  'lep':'pct_lep','zvhh':'pct_zvhhs','spfam':'pct_spfam','rentb':'pct_hus_re'},
-  {'min':'pct_mino_1','linc':'pct_lowinc','o75':'pct_over_1','disab':'pct_disab_',
-  'lep':'pct_lep_1','zvhh':'pct_zvhh','spfam':'pct_spfam_','rentb':'pct_rent50'}
+  {
+    'min': 'pct_minori', 'linc': 'pct_below2', 'o75': 'pct_over75', 'disab': 'pct_disab',
+    'lep': 'pct_lep', 'zvhh': 'pct_zvhhs', 'spfam': 'pct_spfam', 'rentb': 'pct_hus_re'
+  },
+  {
+    'min': 'pct_mino_1', 'linc': 'pct_lowinc', 'o75': 'pct_over_1', 'disab': 'pct_disab_',
+    'lep': 'pct_lep_1', 'zvhh': 'pct_zvhh', 'spfam': 'pct_spfam_', 'rentb': 'pct_rent50'
+  }
 ];
 
 let sel_colorvals, sel_colors, sel_binsflag;
@@ -133,10 +143,10 @@ async function initialPrep() {
 
   console.log('2... ');
   await drawMapFeatures();
-  
+
   console.log('3... ');
   await fetchAddLayers();
-  
+
   console.log('4... ');
   await checkCookie();
 
@@ -144,7 +154,7 @@ async function initialPrep() {
 }
 
 async function fetchMapFeatures() {
-  const geo_url = API_SERVER + GEO_VIEW + '?select=geoid,geometry';
+  const geo_url = API_SERVER + GEO_VIEW/* + '?select=geoid,geometry'*/;
 
   try {
     let resp = await fetch(geo_url);
@@ -164,12 +174,12 @@ async function fetchMapFeatures() {
 }
 async function updateGeoType(obj) {
   obj['bgflag'] = 0;
-  if (obj[GEOID_VAR].length==11) {
-    obj['tract_id'] = obj[GEOID_VAR].substring(5,11);
+  if (obj[GEOID_VAR].length == 11) {
+    obj['tract_id'] = obj[GEOID_VAR].substring(5, 11);
     obj['bg_id'] = 'NA';
-  } else if (obj[GEOID_VAR].length==12) {
-    obj['tract_id'] = obj[GEOID_VAR].substring(5,11);
-    obj['bg_id'] = obj[GEOID_VAR].substring(11,12);
+  } else if (obj[GEOID_VAR].length == 12) {
+    obj['tract_id'] = obj[GEOID_VAR].substring(5, 11);
+    obj['bg_id'] = obj[GEOID_VAR].substring(11, 12);
     obj['bgflag'] = 1;
   } else {
     throw 'ERROR: Unknown feature/geography!!!' + GEOID_VAR + ': ' + obj[GEOID_VAR];
@@ -201,7 +211,7 @@ async function fetchAddLayers() {
 // hover panel -------------------
 let infoPanel = L.control();
 
-infoPanel.onAdd = function(map) {
+infoPanel.onAdd = function (map) {
   // create a div with a class "info"
   this._div = L.DomUtil.create('div', 'info-panel-hide');
   return this._div;
@@ -209,20 +219,21 @@ infoPanel.onAdd = function(map) {
 
 function getInfoHtml(geo) {
   let retval = '<b>TRACT ID: </b>' + `${geo['tract_id']}<br/>` +
-                '<b>BLOCKGROUP ID: </b>' + `${geo['bg_id']}<br/><hr>`;
-                
+    '<b>BLOCKGROUP ID: </b>' + `${geo['bg_id']}<br/><hr>`;
+  console.log(geo)
+
   if (app.selected_metric != 'None') {
     retval += `<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + `<b> Percent: </b>` + `${geo['metric']}` + `%`;
   }
-  return retval; 
+  return retval;
 }
 
-infoPanel.update = function(geo) {
+infoPanel.update = function (geo) {
   infoPanel._div.innerHTML = '';
   infoPanel._div.className = 'info-panel';
   if (geo) this._div.innerHTML = getInfoHtml(geo);
 
-  infoPanelTimeout = setTimeout(function() {
+  infoPanelTimeout = setTimeout(function () {
     // use CSS to hide the info-panel
     infoPanel._div.className = 'info-panel-hide';
     // and clear the hover too
@@ -244,12 +255,12 @@ async function getMapData() {
     }
   }
   for (let entry of jsonData) {
-    
+
     base_lookup[entry[GEOID_VAR]] = entry;
-    
+
     for (let yr of YR_LIST) {
       for (let met of app.metric_options) {
-        tmp[yr][met.value] += entry[met.value+yr];
+        tmp[yr][met.value] += entry[met.value + yr];
       }
     }
   }
@@ -266,7 +277,7 @@ async function getMapData() {
 
 let base_lookup;
 let map_vals;
-async function drawMapFeatures(queryMapData=true) {
+async function drawMapFeatures(queryMapData = true) {
 
   // create a clean copy of the feature Json
   if (!_featJson) return;
@@ -275,7 +286,7 @@ async function drawMapFeatures(queryMapData=true) {
 
   let base_metric = sel_metric + app.sliderValue[0];
   let comp_metric = sel_metric + app.sliderValue[1];
-  if (base_metric==comp_metric) {
+  if (base_metric == comp_metric) {
     app.comp_check = false;
     app.pct_check = false;
   } else {
@@ -286,7 +297,7 @@ async function drawMapFeatures(queryMapData=true) {
   try {
     if (queryMapData) {
       if (base_lookup == undefined) await getMapData();
-      
+
       let map_metric;
       map_vals = [];
       for (let feat of cleanFeatures) {
@@ -295,67 +306,67 @@ async function drawMapFeatures(queryMapData=true) {
         if (app.comp_check) {
           if (base_lookup.hasOwnProperty(feat[GEOID_VAR])) {
             let feat_entry = base_lookup[feat[GEOID_VAR]];
-            map_metric = Math.round(feat_entry[comp_metric]/(feat['sq_mile']*1000)) - Math.round(feat_entry[base_metric]/(feat['sq_mile']*1000));
+            map_metric = Math.round(feat_entry[comp_metric] / (feat['sq_mile'] * 1000)) - Math.round(feat_entry[base_metric] / (feat['sq_mile'] * 1000));
             feat['base'] = feat_entry[base_metric];
             feat['comp'] = feat_entry[comp_metric];
             if (app.pct_check && app.comp_check) {
-              if (feat_entry[base_metric]>0) {
-                map_metric = map_metric*100/feat_entry[base_metric];
+              if (feat_entry[base_metric] > 0) {
+                map_metric = map_metric * 100 / feat_entry[base_metric];
               }
             }
           }
         } else {
           if (base_lookup.hasOwnProperty(feat[GEOID_VAR])) {
-            map_metric = base_lookup[feat[GEOID_VAR]][VARMAP[0][sel_metric]]*100;
+            map_metric = base_lookup[feat[GEOID_VAR]][VARMAP[0][sel_metric]] * 100;
           }
-        }       
-        
+        }
+
         if (map_metric !== null) {
-          map_metric = Math.round(map_metric*prec)/prec;
+          map_metric = Math.round(map_metric * prec) / prec;
           map_vals.push(map_metric);
         }
         feat['metric'] = map_metric;
       }
-      map_vals = map_vals.sort((a, b) => a - b);  
+      map_vals = map_vals.sort((a, b) => a - b);
     }
-    
+
     if (map_vals.length > 0) {
       let color_func;
       let sel_colorvals2;
       let bp;
-      
+
       if (queryMapData) {
         sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
-        
+
         if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) {
           sel_binsflag = false;
-          color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
+          color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length - 1] + 1]));
           sel_colorvals2 = sel_colorvals.slice(0);
-          
+
           app.bp0 = 0;
           app.bp1 = 0;
           app.bp2 = 0;
           app.bp3 = 0;
           app.bp4 = 0;
           app.bp5 = 1;
-          
-        } else {         
+
+        } else {
           let mode = 'base';
-          if (app.comp_check){
-            if(app.pct_check){
+          if (app.comp_check) {
+            if (app.pct_check) {
               mode = 'pctdiff';
             } else {
               mode = 'diff';
             }
           }
-          
+
           let custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
           sel_colorvals = [map_vals[0]].concat(custom_bps);
-          (map_vals[map_vals.length-1] > custom_bps[custom_bps.length-1])? sel_colorvals.push(map_vals[map_vals.length-1]): sel_colorvals.push(custom_bps[custom_bps.length-1]+1);
+          (map_vals[map_vals.length - 1] > custom_bps[custom_bps.length - 1]) ? sel_colorvals.push(map_vals[map_vals.length - 1]) : sel_colorvals.push(custom_bps[custom_bps.length - 1] + 1);
 
           bp = Array.from(sel_colorvals).sort((a, b) => a - b);
           app.bp0 = bp[0];
-          app.bp5 = bp[bp.length-1];
+          app.bp5 = bp[bp.length - 1];
           app.bp1 = custom_bps[0];
           app.bp2 = custom_bps[1];
           app.bp3 = custom_bps[2];
@@ -364,34 +375,34 @@ async function drawMapFeatures(queryMapData=true) {
 
           sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
           //updateColorScheme(sel_colorvals);
-          sel_binsflag = true; 
+          sel_binsflag = true;
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
-          sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
+          sel_colorvals2 = sel_colorvals.slice(0, sel_colorvals.length - 1);
         }
       } else {
         throw 'ERROR: This step should not be occurring!!!';
       }
-      
+
       sel_colors = [];
-      for(let i of sel_colorvals2) {
+      for (let i of sel_colorvals2) {
         sel_colors.push(color_func(i).hex());
       }
- 
+
       if (geoLayer) mymap.removeLayer(geoLayer);
       if (mapLegend) mymap.removeControl(mapLegend);
       geoLayer = L.geoJSON(cleanFeatures, {
         style: styleByMetricColor,
-        onEachFeature: function(feature, layer) {
+        onEachFeature: function (feature, layer) {
           layer.on({
             mouseover: hoverFeature,
             click: clickedOnFeature,
-            });
+          });
         },
       });
       geoLayer.addTo(mymap);
 
       mapLegend = L.control({ position: 'bottomright' });
-      mapLegend.onAdd = function(map) {
+      mapLegend.onAdd = function (map) {
         let div = L.DomUtil.create('div', 'legend');
         let legHTML = getLegHTML(
           sel_colorvals,
@@ -401,13 +412,15 @@ async function drawMapFeatures(queryMapData=true) {
         );
 
         legHTML = '<h4>' + METRIC_DESC_SHORT[sel_metric] +
-                  (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(sel_metric)? ('<br>(' + METRIC_UNITS[sel_metric] + ')') : '')) +
-                  '</h4>' + legHTML;
+          (app.pct_check ? ' % Diff' : (METRIC_UNITS.hasOwnProperty(sel_metric) ? ('<br>(' + METRIC_UNITS[sel_metric] + ')') : '')) +
+          '</h4>' + legHTML;
         div.innerHTML = legHTML;
         return div;
       };
       if (app.selected_metric != 'None') mapLegend.addTo(mymap);
-      
+
+
+
       if (selectedGeo) {
         if (base_lookup.hasOwnProperty(selectedGeo.feature[GEOID_VAR])) {
           //buildChartHtmlFromData(selectedGeo.feature[GEOID_VAR]);
@@ -421,31 +434,31 @@ async function drawMapFeatures(queryMapData=true) {
       }
     }
 
-  } catch(error) {
+  } catch (error) {
     console.log(error);
   }
 }
 
 function updateColorScheme(colorvals) {
-  if (colorvals[0] * colorvals[colorvals.length-1] >= 0) {
+  if (colorvals[0] * colorvals[colorvals.length - 1] >= 0) {
     app.selected_colorscheme = COLORRAMP.SEQ;
   } else {
     app.selected_colorscheme = COLORRAMP.DIV;
-  } 
+  }
 }
 
 function styleByMetricColor(feat) {
   let color = getColorFromVal(
-              feat['metric'],
-              sel_colorvals,
-              sel_colors,
-              sel_binsflag
-              );
+    feat['metric'],
+    sel_colorvals,
+    sel_colors,
+    sel_binsflag
+  );
   if (!color) color = MISSING_COLOR;
   if (app.selected_metric == 'None') {
-    return { fillColor: '#baa0d2', opacity: 0, weight: 0, color: color, fillOpacity: 0.5};
+    return { fillColor: '#baa0d2', opacity: 0, weight: 0, color: color, fillOpacity: 0.5 };
   } else {
-    return { fillColor: color, opacity: 1, weight: 1, color: color, fillOpacity: 1};
+    return { fillColor: color, opacity: 1, weight: 1, color: color, fillOpacity: 1 };
   }
 }
 
@@ -455,7 +468,7 @@ let oldHoverTarget;
 function hoverFeature(e) {
   clearTimeout(infoPanelTimeout);
   infoPanel.update(e.target.feature);
-  
+
   // don't do anything else if the feature is already clicked
   if (selGeoId === e.target.feature[GEOID_VAR]) return;
 
@@ -468,7 +481,7 @@ function hoverFeature(e) {
   let highlightedGeo = e.target;
   highlightedGeo.bringToFront();
   highlightedGeo.setStyle(styles.selected);
-  oldHoverTarget = e.target; 
+  oldHoverTarget = e.target;
 }
 
 function highlightSelectedSegment() {
@@ -482,7 +495,7 @@ function highlightSelectedSegment() {
         selectedGeo = e;
         return;
       }
-    } catch(error) {}
+    } catch (error) { }
   });
 }
 
@@ -510,6 +523,36 @@ function clickedOnFeature(e) {
   } else {
     resetPopGeo();
   }
+
+  // TODO: finish this selector to set selected donut slice to selected metric
+  // let metricIndex = {
+  //   pop_minori:0,
+  //   pop_below2: 1,
+  //   pop_over75: 2
+  // }
+
+  // ADDED: CHART
+  // document.getElementById('popchart').innerHTML = ""
+  // document.getElementById('popchartinfo').innerHTML= ""
+
+  new Morris.Donut({
+    element: 'popchart',
+    data: [
+      { label: 'Minority', value: geo['pop_minori'] || 0 },
+      { label: 'Low Income', value: geo['pop_below2'] || 0 },
+      { label: 'Elderly', value: geo['pop_over75'] || 0 },
+      { label: 'Disability', value: geo['pop_disabi'] || 0 },
+      { label: 'Low English Prof.', value: geo['pop_lep'] || 0 },
+      { label: 'Zero-Veh HH', value: geo['pop_zvhh'] || 0 },
+      { label: 'Single Parent', value: geo['pop_spfam'] || 0 },
+      { label: 'Rent Burdened', value: geo['pop_hus_ri'] || 0 },
+    ]
+  })
+  document.getElementById('popchartinfo').innerHTML=`
+    <h5>Total tract population: ${geo['tot_pop']}</h5>
+  `
+
+
 }
 
 let popSelGeo;
@@ -521,7 +564,7 @@ function showGeoDetails(latlng) {
     .addTo(mymap);
 
   // Revert to overall chart when no segment selected
-  popSelGeo.on('remove', function(e) {
+  popSelGeo.on('remove', function (e) {
     resetPopGeo();
   });
 }
@@ -545,10 +588,10 @@ async function selectionChanged(thing) {
 
 function yrChanged(yr) {
   app.selected_year = yr;
-  if (yr=='diff') {
+  if (yr == 'diff') {
     app.sliderValue = YR_LIST;
   } else {
-    app.sliderValue = [yr,yr];
+    app.sliderValue = [yr, yr];
   }
 }
 
@@ -579,7 +622,7 @@ let app = new Vue({
   delimiters: ['${', '}'],
   components: {
     'vue-recaptcha': VueRecaptcha
-  },  
+  },
   data: {
     isPanelHidden: false,
     extraLayers: ADDLAYERS,
@@ -591,32 +634,32 @@ let app = new Vue({
     bp3: 0.0,
     bp4: 0.0,
     bp5: 0.0,
-    aggData: [{pop:0,tot:0,jobpop:0},
-              {pop:0,tot:0,jobpop:0}],
-    
+    aggData: [{ pop: 0, tot: 0, jobpop: 0 },
+    { pop: 0, tot: 0, jobpop: 0 }],
+
     year_options: [
-    {text: 'Year 2015', value: '2015'},
-    {text: 'Year 2050', value: '2050'},
-    {text: 'Change', value: 'diff'},
+      { text: 'Year 2015', value: '2015' },
+      { text: 'Year 2050', value: '2050' },
+      { text: 'Change', value: 'diff' },
     ],
     selected_year: '2015',
-    sliderValue: [YR_LIST[0],YR_LIST[0]],
-    
+    sliderValue: [YR_LIST[0], YR_LIST[0]],
+
     selected_metric: 'None',
     metric_options: [
-    {text: 'None', value: 'None'},
-    {text: 'Minority', value: 'min'},
-    {text: 'Low Income', value: 'linc'},
-    {text: 'Elderly', value: 'o75'},
-    {text: 'Disability', value: 'disab'},
-    {text: 'Low English Prof.', value: 'lep'},
-    {text: 'Zero-Veh HH', value: 'zvhh'},
-    {text: 'Single Parent', value: 'spfam'},
-    {text: 'Rent Burdened', value: 'rentb'},
+      { text: 'None', value: 'None' },
+      { text: 'Minority', value: 'min' },
+      { text: 'Low Income', value: 'linc' },
+      { text: 'Elderly', value: 'o75' },
+      { text: 'Disability', value: 'disab' },
+      { text: 'Low English Prof.', value: 'lep' },
+      { text: 'Zero-Veh HH', value: 'zvhh' },
+      { text: 'Single Parent', value: 'spfam' },
+      { text: 'Rent Burdened', value: 'rentb' },
     ],
     chartTitle: METRIC_DESC['pop'] + ' Trend',
-    chartSubtitle: chart_deftitle, 
-    
+    chartSubtitle: chart_deftitle,
+
     selected_colorscheme: COLORRAMP.SEQ,
     modeMap: {
       '#ffffcc,#663399': 'lch',
@@ -629,7 +672,7 @@ let app = new Vue({
     comment_instruction: 'Please provide feedback. What do you think about this map? (800 maximum characters)',
     submit_loading: false,
     submit_disabled: false,
-    addLayers:[],
+    addLayers: [],
   },
   watch: {
     sliderValue: selectionChanged,
@@ -663,7 +706,7 @@ function clickedShowHide(e) {
   app.isPanelHidden = slideapp.isPanelHidden;
   // leaflet map needs to be force-recentered, and it is slow.
   for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
-    setTimeout(function() {
+    setTimeout(function () {
       mymap.invalidateSize()
     }, delay)
   }
@@ -691,7 +734,7 @@ let helpPanel = new Vue({
   methods: {
     clickToggleHelp: clickToggleHelp,
   },
-  mounted: function() {
+  mounted: function () {
     document.addEventListener('keydown', e => {
       if (this.showHelp && e.keyCode == 27) {
         clickToggleHelp();
@@ -703,8 +746,8 @@ let helpPanel = new Vue({
 /* Cookie functions for comments*/
 function setCookie(cname, exdays) {
   var d = new Date();
-  d.setTime(d.getTime() + (exdays*24*60*60*1000));
-  var expires = "expires="+ d.toUTCString();
+  d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+  var expires = "expires=" + d.toUTCString();
   document.cookie = cname + "=" + d.getTime() + ";" + expires + ";path=/";
 }
 
@@ -712,7 +755,7 @@ function getCookie(cname) {
   var name = cname + "=";
   var decodedCookie = decodeURIComponent(document.cookie);
   var ca = decodedCookie.split(';');
-  for(var i = 0; i <ca.length; i++) {
+  for (var i = 0; i < ca.length; i++) {
     var c = ca[i];
     while (c.charAt(0) == ' ') {
       c = c.substring(1);
@@ -744,7 +787,7 @@ let comment = {
 
 function showPosition(position) {
   comment.comment_latitude = position.coords.latitude;
-  comment.comment_longitude = position.coords.longitude; 
+  comment.comment_longitude = position.coords.longitude;
 }
 
 async function postComments(comment) {
@@ -754,7 +797,7 @@ async function postComments(comment) {
     await fetch(comment_url, {
       method: 'POST',
       body: JSON.stringify(comment),
-      headers:{
+      headers: {
         'Content-Type': 'application/json',
       }
     });
@@ -767,9 +810,9 @@ function handleSubmit() {
   this.$refs.recaptcha.execute();
   let timestamp = new Date();
   app.submit_loading = true;
-  
-  setTimeout(function() {
-    if (app.comment==null | app.comment=='') {
+
+  setTimeout(function () {
+    if (app.comment == null | app.comment == '') {
       app.submit_loading = false;
     } else {
       comment.select_metric = app.selected_metric;
@@ -807,15 +850,15 @@ function onCaptchaVerified(recaptchaToken) {
     method: 'POST',
     mode: 'no-cors',
     body: JSON.stringify(verifyCaptchaOptions),
-    headers:{
+    headers: {
       'Content-Type': 'application/json',
     }
   })
-  .catch(error => console.error('Error:', error))
-  .then(response => function (response) {
-    // JSON.stringify(response)
-    console.log("Congratulations! We think you are human.");
-  });
+    .catch(error => console.error('Error:', error))
+    .then(response => function (response) {
+      // JSON.stringify(response)
+      console.log("Congratulations! We think you are human.");
+    });
 }
 
 function onCaptchaExpired() {
