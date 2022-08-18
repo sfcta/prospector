@@ -153,6 +153,12 @@ async function initialPrep() {
   console.log('5 !!!');
 }
 
+let totalCityData = {}
+let barChart;
+let setDataToCityTotals
+let cityBarData = []
+
+
 async function fetchMapFeatures() {
   const geo_url = API_SERVER + GEO_VIEW/* + '?select=geoid,geometry'*/;
 
@@ -166,11 +172,71 @@ async function fetchMapFeatures() {
       feat['geometry'] = JSON.parse(feat.geometry);
       feat = updateGeoType(feat);
     }
+
+    console.log('features:', features)
+
+
+    totalCityData = features.reduce((a, b) => {
+      const metrics = ['below2', 'disabi', 'hus_re', 'lep', 'minori', 'over75', 'spfam', 'zvhhs']
+      let retObj = {}
+      metrics.forEach(metric => {
+        // retObj[`pct_${metric}`] = a[`pct_${metric}`] + b[`pct_${metric}`]
+        retObj[`pop_${metric}`] = 0 + a[`pop_${metric}`] + b[`pop_${metric}`]
+      })
+
+      return retObj
+    })
+
+    cityBarData = [
+      { y: 'Minority', pop: totalCityData['pop_minori'] || 0 },
+      { y: 'Low Income', pop: totalCityData['pop_below2'] || 0 },
+      { y: 'Elderly', pop: totalCityData['pop_over75'] || 0 },
+      { y: 'Disability', pop: totalCityData['pop_disabi'] || 0 },
+      { y: 'Low English Prof.', pop: totalCityData['pop_lep'] || 0 },
+      { y: 'Zero-Veh HH', pop: totalCityData['pop_zvhh'] || 0 },
+      { y: 'Single Parent', pop: totalCityData['pop_spfam'] || 0 },
+      { y: 'Rent Burdened', pop: totalCityData['pop_hus_ri'] || 0 },
+    ]
+
+
+
+    // Object.keys(totalCityData).forEach(k => {
+    //   cityBarData.push({
+    //     y: k,
+    //     pop: totalCityData[k]
+    //   })
+    // })
+
+    console.log('city totals:', totalCityData)
+
+
+
+
+    barChart = new Morris.Bar({
+      element: 'popchart',
+      data: cityBarData,
+      xkey: 'y',
+      ykeys: ['pop'],
+      labels: ['Pop'],
+      barRatio: 1,
+      xLabelAngle: 90,
+      hideHover: true
+    })
+
+    setDataToCityTotals = () => {
+      console.debug('setting data to city totals')
+
+      barChart.setData(cityBarData)
+      document.getElementById('popchart_title').innerText = `POPULATION BREAKDOWN | CITYWIDE`
+    }
+
+
     return features;
 
   } catch (error) {
     console.log('map feature error: ' + error);
   }
+
 }
 async function updateGeoType(obj) {
   obj['bgflag'] = 0;
@@ -199,6 +265,7 @@ async function fetchAddLayers() {
       let lyr = L.geoJSON(features, {
         style: item.style,
         pane: 'shadowPane',
+
       }).addTo(mymap);
       addLayerStore[item.view] = lyr;
       mymap.removeLayer(lyr);
@@ -220,7 +287,6 @@ infoPanel.onAdd = function (map) {
 function getInfoHtml(geo) {
   let retval = '<b>TRACT ID: </b>' + `${geo['tract_id']}<br/>` +
     '<b>BLOCKGROUP ID: </b>' + `${geo['bg_id']}<br/><hr>`;
-  console.log(geo)
 
   if (app.selected_metric != 'None') {
     retval += `<b>${METRIC_DESC_SHORT[app.selected_metric]}</b>` + `<b> Percent: </b>` + `${geo['metric']}` + `%`;
@@ -395,7 +461,7 @@ async function drawMapFeatures(queryMapData = true) {
         onEachFeature: function (feature, layer) {
           layer.on({
             mouseover: hoverFeature,
-            click: clickedOnFeature,
+            click: clickedOnFeature
           });
         },
       });
@@ -508,6 +574,25 @@ function clickedOnFeature(e) {
   let geo = e.target.feature;
   selGeoId = geo[GEOID_VAR];
 
+  let newData = [
+    { y: 'Minority', pop: geo['pop_minori'] || 0 },
+    { y: 'Low Income', pop: geo['pop_below2'] || 0 },
+    { y: 'Elderly', pop: geo['pop_over75'] || 0 },
+    { y: 'Disability', pop: geo['pop_disabi'] || 0 },
+    { y: 'Low English Prof.', pop: geo['pop_lep'] || 0 },
+    { y: 'Zero-Veh HH', pop: geo['pop_zvhh'] || 0 },
+    { y: 'Single Parent', pop: geo['pop_spfam'] || 0 },
+    { y: 'Rent Burdened', pop: geo['pop_hus_ri'] || 0 },
+  ]
+
+  // Update data
+  barChart.setData(newData)
+
+  // Update title of chart section
+  document.getElementById('popchart_title').innerText = `POPULATION BREAKDOWN | TRACT ${geo.tract}`
+
+  console.debug('New bar data:', newData)
+
   // unselect the previously-selected selection, if there is one
   if (selectedGeo && selectedGeo.feature[GEOID_VAR] != geo[GEOID_VAR]) {
     prevSelectedGeo = selectedGeo;
@@ -523,36 +608,6 @@ function clickedOnFeature(e) {
   } else {
     resetPopGeo();
   }
-
-  // TODO: finish this selector to set selected donut slice to selected metric
-  // let metricIndex = {
-  //   pop_minori:0,
-  //   pop_below2: 1,
-  //   pop_over75: 2
-  // }
-
-  // ADDED: CHART
-  // document.getElementById('popchart').innerHTML = ""
-  // document.getElementById('popchartinfo').innerHTML= ""
-
-  new Morris.Donut({
-    element: 'popchart',
-    data: [
-      { label: 'Minority', value: geo['pop_minori'] || 0 },
-      { label: 'Low Income', value: geo['pop_below2'] || 0 },
-      { label: 'Elderly', value: geo['pop_over75'] || 0 },
-      { label: 'Disability', value: geo['pop_disabi'] || 0 },
-      { label: 'Low English Prof.', value: geo['pop_lep'] || 0 },
-      { label: 'Zero-Veh HH', value: geo['pop_zvhh'] || 0 },
-      { label: 'Single Parent', value: geo['pop_spfam'] || 0 },
-      { label: 'Rent Burdened', value: geo['pop_hus_ri'] || 0 },
-    ]
-  })
-  document.getElementById('popchartinfo').innerHTML=`
-    <h5>Total tract population: ${geo['tot_pop']}</h5>
-  `
-
-
 }
 
 let popSelGeo;
@@ -566,6 +621,7 @@ function showGeoDetails(latlng) {
   // Revert to overall chart when no segment selected
   popSelGeo.on('remove', function (e) {
     resetPopGeo();
+    setDataToCityTotals();
   });
 }
 
@@ -647,7 +703,7 @@ let app = new Vue({
 
     selected_metric: 'None',
     metric_options: [
-      { text: 'None', value: 'None' },
+      { text: 'None selected', value: 'None' },
       { text: 'Minority', value: 'min' },
       { text: 'Low Income', value: 'linc' },
       { text: 'Elderly', value: 'o75' },
