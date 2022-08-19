@@ -126,6 +126,8 @@ const VARMAP = [
   }
 ];
 
+
+
 let sel_colorvals, sel_colors, sel_binsflag;
 
 let chart_deftitle = 'All ' + GEOTYPE + 's Combined';
@@ -136,21 +138,34 @@ let _aggregateData;
 let prec;
 let addLayerStore = {};
 
+// Will be used to highlight the selected metric in the bar graph
+let metricOptionsIndex = {
+  None: -1,
+  min:0,
+  linc:1,
+  o75:2,
+  disab:3,
+  lep:4,
+  zvhh:5,
+  spfam:6,
+  rentb:7
+}
+
 async function initialPrep() {
 
-  console.log('1...');
+  console.info('1... Fetching map features.');
   _featJson = await fetchMapFeatures();
 
-  console.log('2... ');
+  console.info('2... Map features fetched, drawing features.');
   await drawMapFeatures();
 
-  console.log('3... ');
+  console.info('3... Features drawn, adding layers.');
   await fetchAddLayers();
 
-  console.log('4... ');
+  console.info('4... Layers added, checking cookies.');
   await checkCookie();
 
-  console.log('5 !!!');
+  console.info('5... Cookies checked, initial setup complete.');
 }
 
 let totalCityData = {}
@@ -172,9 +187,6 @@ async function fetchMapFeatures() {
       feat['geometry'] = JSON.parse(feat.geometry);
       feat = updateGeoType(feat);
     }
-
-    console.log('features:', features)
-
 
     totalCityData = features.reduce((a, b) => {
       const metrics = ['below2', 'disabi', 'hus_re', 'lep', 'minori', 'over75', 'spfam', 'zvhhs']
@@ -198,20 +210,6 @@ async function fetchMapFeatures() {
       { y: 'Rent Burdened', pop: totalCityData['pop_hus_ri'] || 0 },
     ]
 
-
-
-    // Object.keys(totalCityData).forEach(k => {
-    //   cityBarData.push({
-    //     y: k,
-    //     pop: totalCityData[k]
-    //   })
-    // })
-
-    console.log('city totals:', totalCityData)
-
-
-
-
     barChart = new Morris.Bar({
       element: 'popchart',
       data: cityBarData,
@@ -224,8 +222,6 @@ async function fetchMapFeatures() {
     })
 
     setDataToCityTotals = () => {
-      console.debug('setting data to city totals')
-
       barChart.setData(cityBarData)
       document.getElementById('popchart_title').innerText = `POPULATION BREAKDOWN | CITYWIDE`
     }
@@ -350,8 +346,8 @@ async function drawMapFeatures(queryMapData = true) {
   let cleanFeatures = _featJson.slice();
   let sel_metric = app.selected_metric;
 
-  let base_metric = sel_metric + app.sliderValue[0];
-  let comp_metric = sel_metric + app.sliderValue[1];
+  let base_metric = sel_metric //+ app.sliderValue[0];
+  let comp_metric = sel_metric //+ app.sliderValue[1];
   if (base_metric == comp_metric) {
     app.comp_check = false;
     app.pct_check = false;
@@ -440,7 +436,7 @@ async function drawMapFeatures(queryMapData = true) {
           if (custom_bps[0] < app.bp0) app.bp1 = app.bp0;
 
           sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
-          //updateColorScheme(sel_colorvals);
+          updateColorScheme(sel_colorvals); // this used to be commented out
           sel_binsflag = true;
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
           sel_colorvals2 = sel_colorvals.slice(0, sel_colorvals.length - 1);
@@ -585,13 +581,20 @@ function clickedOnFeature(e) {
     { y: 'Rent Burdened', pop: geo['pop_hus_ri'] || 0 },
   ]
 
+  // an attempt to make it clearer which metric is highlighted by making its label in the chart all caps
+  if (metricOptionsIndex[app.selected_metric] != -1) {
+    newData[metricOptionsIndex[app.selected_metric]] = {
+      y: newData[metricOptionsIndex[app.selected_metric]].y.toLocaleUpperCase(),
+      pop: newData[metricOptionsIndex[app.selected_metric]].pop 
+    }
+  }
+
   // Update data
   barChart.setData(newData)
+  
 
   // Update title of chart section
   document.getElementById('popchart_title').innerText = `POPULATION BREAKDOWN | TRACT ${geo.tract}`
-
-  console.debug('New bar data:', newData)
 
   // unselect the previously-selected selection, if there is one
   if (selectedGeo && selectedGeo.feature[GEOID_VAR] != geo[GEOID_VAR]) {
@@ -631,6 +634,7 @@ function resetPopGeo() {
   app.chartSubtitle = chart_deftitle;
 }
 
+// can arg 'thing' be removed?
 async function selectionChanged(thing) {
   app.chartTitle = METRIC_DESC[app.selected_metric] + ' Trend';
   if (app.sliderValue && app.selected_metric) {
@@ -642,6 +646,7 @@ async function selectionChanged(thing) {
   }
 }
 
+// can this be removed? there is no time based element to this vis
 function yrChanged(yr) {
   app.selected_year = yr;
   if (yr == 'diff') {
@@ -693,6 +698,8 @@ let app = new Vue({
     aggData: [{ pop: 0, tot: 0, jobpop: 0 },
     { pop: 0, tot: 0, jobpop: 0 }],
 
+    // Can this section be removed?
+    // It seems not, colour selection for some reason relies on slider value, which is based on YR values
     year_options: [
       { text: 'Year 2015', value: '2015' },
       { text: 'Year 2050', value: '2050' },
@@ -848,7 +855,6 @@ function showPosition(position) {
 
 async function postComments(comment) {
   const comment_url = COMMENT_SERVER + COMMENT_VIEW;
-  // console.log(JSON.stringify(comment))
   try {
     await fetch(comment_url, {
       method: 'POST',
@@ -858,7 +864,7 @@ async function postComments(comment) {
       }
     });
   } catch (error) {
-    console.log('comment error: ' + error);
+    console.error('comment error: ' + error);
   }
 }
 
@@ -879,7 +885,7 @@ function handleSubmit() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition);
       } else {
-        console.log("Geolocation is not supported by this browser.");
+        console.error("Geolocation is not supported by this browser.");
       }
       postComments(comment);
       app.comment_instruction = 'Thank you for your feedback!';
@@ -894,7 +900,7 @@ function onCaptchaVerified(recaptchaToken) {
   const self = this;
   self.$refs.recaptcha.reset();
   if (!recaptchaToken) {
-    return console.log("recaptchaToken is required");
+    return console.error("recaptchaToken is required");
   }
 
   const verifyCaptchaOptions = {
