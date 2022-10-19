@@ -92,14 +92,14 @@ const COLORRAMP = {
 
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'min': { 'base': [50, 70, 90], },
-  'linc': { 'base': [25, 30, 35], },
-  'o75': { 'base': [5, 10, 15], },
-  'disab': { 'base': [10, 25, 40], },
-  'lep': { 'base': [10, 20, 30], },
-  'zvhh': { 'base': [5, 10, 15], },
-  'spfam': { 'base': [10, 20, 30], },
-  'rentb': { 'base': [5, 15, 25], },
+  'min': { 'base': [25, 50, 75], },
+  'linc': { 'base': [25, 50, 75], },
+  'o75': { 'base': [25, 50, 75], },
+  'disab': { 'base': [25, 50, 75], },
+  'lep': { 'base': [25, 50, 75], },
+  'zvhh': { 'base': [25, 50, 75], },
+  'spfam': { 'base': [25, 50, 75], },
+  'rentb': { 'base': [25, 50, 75], },
 };
 
 const METRIC_UNITS = {
@@ -127,7 +127,6 @@ const VARMAP = [
 ];
 
 
-
 let sel_colorvals, sel_colors, sel_binsflag;
 
 let chart_deftitle = 'All ' + GEOTYPE + 's Combined';
@@ -137,6 +136,7 @@ let _featJson;
 let _aggregateData;
 let prec;
 let addLayerStore = {};
+let selectedTAZs = new Map()
 
 // Will be used to highlight the selected metric in the bar graph
 let metricOptionsIndex = {
@@ -566,6 +566,21 @@ let selectedGeo, prevSelectedGeo;
 let selectedLatLng;
 
 function clickedOnFeature(e) {
+  // console.debug(e.target.feature)
+  console.info(e.target.feature.gid, 'is already selected:', selectedTAZs.has(e.target.feature.gid))
+  
+  if(selectedTAZs.has(e.target.feature.gid)) {
+    console.info(e.target.feature.gid, 'is already selected, removing it from the map')
+    selectedTAZs.delete(e.target.feature.gid)
+  } else {
+    console.info(e.target.feature.gid, 'is not selected, adding it to the map')
+    selectedTAZs.set(e.target.feature.gid, e.target.feature)
+  }
+  
+  console.info(e.target.feature.gid, 'selected:', selectedTAZs.has(e.target.feature.gid) ? 'true' : 'false')
+  console.info('currently selected TAZs:', selectedTAZs.keys())
+
+
   e.target.setStyle(styles.popup);
   let geo = e.target.feature;
   selGeoId = geo[GEOID_VAR];
