@@ -2,130 +2,144 @@
 
   <div id="slide-panel" v-bind:class="{ shrunken: isPanelHidden}">
     <div id="layer-widgets">
-      <button class="ui tiny color1 icon button"
-              v-on:click="clickedShowHide">
-              <i class="angle double icon"
-              v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
+      <button class="ui tiny color1 icon button" v-on:click="clickedShowHide">
+        <i class="angle double icon" v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
       </button>
     </div>
-  </div> 
-  
+  </div>
+
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
-      <div id="preheader">
-        <hr/>
-        <h3 class="apptitle">Equity Priority Communities</h3>
-        <div id="helpbar">
-            <button class="ui mini right labeled icon color1 button"
-                    v-on:click="clickToggleHelp">
-                    <i class="help circle icon"></i>
-                    What is this?
-            </button>
-            &nbsp;
-            <button class="ui mini right labeled icon color1 button"
-                    v-on:click="this.window.open('https://mtc.ca.gov/planning/transportation/access-equity-mobility/equity-priority-communities','_blank')">
-                    <i class="arrow right icon"></i>
-                    Learn More
-            </button>
-            <hr/>
+    <div id="preheader">
+      <hr />
+      <h3 class="apptitle">Equity Priority Communities</h3>
+      <div id="helpbar">
+        <button class="ui mini right labeled icon color1 button" v-on:click="clickToggleHelp">
+          <i class="help circle icon"></i>
+          What is this?
+        </button>
+        &nbsp;
+        <button class="ui mini right labeled icon color1 button"
+          v-on:click="this.window.open('https://mtc.ca.gov/planning/transportation/access-equity-mobility/equity-priority-communities','_blank')">
+          <i class="arrow right icon"></i>
+          Learn More
+        </button>
+        <hr />
+      </div>
+
+      <div id="picker">
+        <h5>METRICS</h5>
+        <p>Multiple metrics are available, select one!</p>
+        <div>
+          <!-- <button v-for="item in metric_options" v-on:click="metricChanged(item.value)" class="ui tiny grey button"
+            v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
+            ${item.text}
+          </button> -->
+
+          
+            <form>
+              <select name="metrics" id="metrics" v-model="selected_metric">
+                <option v-for="item in metric_options" :value="item.value">${item.text}</option>
+              </select>
+            </form>
         </div>
 
-        <div id="picker">
-          <h5>CHOOSE MEASURE</h5>
+        <hr />
+
+        <h5>MAP LAYERS</h5>
+        <p>Add additional geographic data to the map.</p>
+
+        <div class="ui colorhin toggle checkbox">
+          <input type="checkbox" value="hin2017" v-model="addLayers">
+          <label>
+            <h5>High Injury Network</h5>
+          </label>
+        </div>
+        <div class="ui colorsup toggle checkbox">
+          <input type="checkbox" value="sup_district_boundaries_2022" v-model="addLayers">
+          <label>
+            <h5>Supervisorial District Boundaries</h5>
+          </label>
+        </div>
+        <div class="ui colorpar toggle checkbox">
+          <input type="checkbox" value="sfparks" v-model="addLayers">
+          <label>
+            <h5>Major Parks</h5>
+          </label>
+        </div>
+
+        <hr />
+        <h5 id="popchart_title">POPULATION BREAKDOWN | CITYWIDE</h5>
+        <div id="popchart" style="width: 100%; height: 25%;"></div>
+        <div id="popchart_info"></div>
+
+        <br><br>
+        <hr />
+        <h5>YOUR FEEDBACK</h5>
+        <form class="ui tiny equal width form" v-on:submit.prevent="handleSubmit">
+          <div class="ui field">
+            <textarea v-model="comment" class="fix" maxlength="800" rows="3" v-bind:disabled="submit_disabled==true"
+              type="text" v-bind:placeholder="comment_instruction"></textarea>
+          </div>
+
           <div>
-            <button v-for="item in metric_options"
-                  v-on:click="metricChanged(item.value)"
-                  class="ui tiny grey button"
-                  v-bind:class="{ active: item.value==selected_metric, color2: item.value==selected_metric }">
-                  ${item.text}
-            </button>
+            <vue-recaptcha ref="recaptcha" @verify="onCaptchaVerified" @expired="onCaptchaExpired" size="invisible"
+              sitekey="6Leo_KMUAAAAAFvGkrID2dHLQxe7gZefS2-xlV7w">
+            </vue-recaptcha>
+            <p>This site is protected by reCAPTCHA and the Google
+              <a href="https://policies.google.com/privacy">Privacy Policy</a> and
+              <a href="https://policies.google.com/terms">Terms of Service</a> apply.
+            </p>
+            <button class="ui tiny button color1" type="submit"
+              v-bind:class="{loading: submit_loading==true, disabled: submit_disabled==true}">Submit</button>
           </div>
-          
-          <hr/>
-          
-          <h5>MAP LAYERS</h5>
-          <p>Add additional geographic data to the map.</p>
-        
-          <div class="ui colorhin toggle checkbox">
-            <input type="checkbox" value="hin2017" v-model="addLayers">
-            <label><h5>High Injury Network</h5></label>
-          </div>          
-          <div class="ui colorsup toggle checkbox">
-            <input type="checkbox" value="sup_district_boundaries_2022" v-model="addLayers">
-            <label><h5>Supervisorial District Boundaries</h5></label>
-          </div>
-          <div class="ui colorpar toggle checkbox">
-            <input type="checkbox" value="sfparks" v-model="addLayers">
-            <label><h5>Major Parks</h5></label>
-          </div>
-          
-          <br><br>
-          <h5>YOUR FEEDBACK</h5>
-          <form class="ui tiny equal width form" v-on:submit.prevent="handleSubmit">
-            <div class="ui field">
-              <textarea v-model="comment" class="fix" maxlength="800" rows="3"
-                        v-bind:disabled="submit_disabled==true"
-                        type="text" v-bind:placeholder="comment_instruction"></textarea>
-            </div>
 
-            <div>
-                <vue-recaptcha ref="recaptcha" @verify="onCaptchaVerified"
-                               @expired="onCaptchaExpired" size="invisible"
-                               sitekey="6Leo_KMUAAAAAFvGkrID2dHLQxe7gZefS2-xlV7w">
-                </vue-recaptcha>
-                <p>This site is protected by reCAPTCHA and the Google
-                <a href="https://policies.google.com/privacy">Privacy Policy</a> and
-                <a href="https://policies.google.com/terms">Terms of Service</a> apply.</p>
-                <button class="ui tiny button color1" type="submit"
-                      v-bind:class="{loading: submit_loading==true, disabled: submit_disabled==true}">Submit</button>
-            </div>            
-
-          </form>
-
-        </div>
+        </form>
 
       </div>
-      
-      <div class="logo">
-        <hr/>
-        <a class="agency-link" target="_blank" href="https://www.sfcta.org">
-          <img class="img-logo" src="/assets/SFCTA Logo dark-background.svg">
-        </a>
-      </div>
+
+    </div>
+
+    <div class="logo">
+      <hr />
+      <a class="agency-link" target="_blank" href="https://www.sfcta.org">
+        <img class="img-logo" src="/assets/SFCTA Logo dark-background.svg">
+      </a>
+    </div>
   </div>
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
-  <div v-cloak> <!-- hides everything until Vue finished loading -->
-        <h2 style="margin-bottom:0px;">Equity Priority Communities</h2>
-        <hr style="margin-bottom:5px;margin-top:5px"/>
-        Use this tool to explore Equity Priority Communities (EPCs) identified for San Francisco.
+    <div v-cloak>
+      <!-- hides everything until Vue finished loading -->
+      <h2 style="margin-bottom:0px;">Equity Priority Communities</h2>
+      <hr style="margin-bottom:5px;margin-top:5px" />
+      Use this tool to explore Equity Priority Communities (EPCs) identified for San Francisco.
 
-        <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
-        <hr style="margin-bottom:5px;margin-top:5px"/>
-        <ul>
+      <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
+      <hr style="margin-bottom:5px;margin-top:5px" />
+      <ul>
         <li>Select an evaluation measure on the side panel to display it for each EPC on the map.</li>
-        </ul>
+      </ul>
 
-        <div style="margin-top:20px;">
-          <button v-on:click="clickToggleHelp" class="small ui right floated teal button">
-            &nbsp;OK&nbsp;
-          </button>
+      <div style="margin-top:20px;">
+        <button v-on:click="clickToggleHelp" class="small ui right floated teal button">
+          &nbsp;OK&nbsp;
+        </button>
 
-          <button v-on:click="this.window.open('/assets/SF_EPCs_2021.zip')"
-                  class="small ui right labeled icon floated color1 button"
-                  style="margin-right:5px">
-                  <i class="icon download"></i>
-                  Download data (.zip)
-          </button>
+        <button v-on:click="this.window.open('/assets/SF_EPCs_2021.zip')"
+          class="small ui right labeled icon floated color1 button" style="margin-right:5px">
+          <i class="icon download"></i>
+          Download data (.zip)
+        </button>
 
-          <button v-on:click="this.window.open('https://mtc.ca.gov/planning/transportation/access-equity-mobility/equity-priority-communities','_blank')"
-                  class="small ui right floated basic teal button"
-                  style="margin-right:5px">
-                  Learn more&hellip;
-          </button>
+        <button
+          v-on:click="this.window.open('https://mtc.ca.gov/planning/transportation/access-equity-mobility/equity-priority-communities','_blank')"
+          class="small ui right floated basic teal button" style="margin-right:5px">
+          Learn more&hellip;
+        </button>
 
-        </div>
+      </div>
+    </div>
   </div>
-  </div>
-  
+
   <div id="sfmap"></div>
 </div>

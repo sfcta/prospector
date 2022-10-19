@@ -35,7 +35,7 @@ const sfcta_components = [
      'tncparking',
      'cmp_test',
      'epc',
-     'epc2'
+    //  'epc2'
 	 //'cmp-v0',
 ];
 
