@@ -1,0 +1,85 @@
+<div id="container">
+
+  <div id="slide-panel" v-bind:class="{ shrunken: isPanelHidden}">
+    <div id="layer-widgets">
+      <button class="ui tiny green icon button"
+              v-on:click="clickedShowHide">
+              <i class="angle double icon"
+              v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
+      </button>
+    </div>
+  </div> 
+
+  <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
+
+    <div id="dimmer"  class="ui active dimmer">
+      <div class="ui text loader">Loading</div>
+    </div>
+
+    <h3 style="font-size: 30px; margin-top:15px;">Select & Combine Links</h3>
+    <hr style="margin-bottom:20px; margin-top:15px;">
+
+    <h5 style="font-size: 20px; margin-top:15px;">Selected Links</h5>
+    <p id=lengthP style="font-size: 12px; margin-top:10px;">Total Length: ${Math.abs(segmentLength.toFixed(2))} miles</p>
+    <div id="selectedLinks"></div>
+    <div id='removeLink'></div>
+    <div id='editLink'></div>
+
+    <div id='agglinkdetails' style="display:none">
+      <hr style="margin-bottom:20px; margin-top:15px;">
+      <h5 style="font-size: 20px; margin-top:15px; margin-bottom:20px;">Aggregated Link Details</h5>
+      <h4>CMP Segment ID</h4>
+      <div class="ui input">
+        <input type="text" id='cmp_segid' placeholder="415">
+      </div>
+      <h4>Name</h4>
+      <div class="ui input">
+        <input type="text" id='cmp_name' placeholder="Stanyan">
+      </div>
+      <h4 style="margin-top:10px;">From</h4>
+      <div class="ui input">
+        <input type="text" id='cmp_from' placeholder="Fulton">
+      </div>
+      <h4 style="margin-top:10px;">To</h4>
+      <div class="ui input">
+        <input type="text" id='cmp_to' placeholder="Turk">
+      </div>
+      <h4 style="margin-top:10px;">Direction</h4>
+      <div class="ui input"> 
+        <input type="text" id='direction' placeholder="S">
+      </div>
+      <h4 style="margin-top:10px;">cls_hcm00</h4>
+      <div class="ui input">
+        <input type="text" id='cls_hcm00' placeholder="4">
+      </div>
+      <h4 style="margin-top:10px;">cls_hcm85</h4>
+      <div class="ui input">
+        <input type="text" id='cls_hcm85' placeholder="3">
+      </div>
+    </div>
+
+    <div id="combineButton"></div>
+    <div id="pushEdits"></div>
+
+    <hr style="margin-bottom:20px;margin-top:15px;" />
+
+    <h5 style="font-size: 18px; margin-top:10px;">Layers</h5>
+    
+    <div v-for="item in extraLayers" class="ui toggle checkbox">
+      <input type="checkbox" v-bind:value="item.name" v-model="addLayers" class="layerbutton">
+      <label><h5 class="layer_description">${item.name}</h5></label>
+    </div>
+
+    <hr style="margin-bottom:20px; margin-top:15px;">
+    <h3 style="font-size: 20px; margin-top:15px;">Created Aggregations</h3>
+    <div id="createdAggs"> </div>
+    <div id="pushtoDb"></div>
+
+
+  </div>
+
+
+
+  <div id="sfmap"></div>
+
+</div>

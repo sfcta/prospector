@@ -55,10 +55,35 @@
 
       <div class="logo">
         <div class="pickers">
-            <h5 style="margin-top:10px">CHOOSE WEEK:</h5>
-            <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
+        
+            <div v-if="isHRActive & !isTPHidden">
+                <h5 style="margin-top:10px">CHOOSE TIME OF DAY:</h5>
+                <vue-slider v-bind="hrSlider" 
+                    v-model="hrValue"
+                    style="width:85%; margin-right:5px; float:left">
+                </vue-slider>
+                <button class="mini ui inverted button"
+                    style="padding: 5px 10px; margin-left: 10px;"
+                    v-on:click="clickTODPlay" 
+                    v-bind:class="{ active: isPlayTODActive, red: isPlayTODActive}">
+                    <div v-if="isPlayTODActive"><b>&#2405;</b></div>
+                    <div v-else>&#9658;</div>
+                </button>
+            </div>
+        
+            <h5 style="margin-top:20px">CHOOSE MONTH:</h5>
+            <vue-slider v-bind="timeSlider" v-model="sliderValue"
+                style="width:85%; margin-right:5px; float:left">
+            </vue-slider>
+            <button class="mini ui inverted button"
+                    style="padding: 5px 10px; margin-left: 10px;"
+                    v-on:click="clickMonPlay" 
+                    v-bind:class="{ active: isPlayMonActive, red: isPlayMonActive}">
+                    <div v-if="isPlayMonActive"><b>&#2405;</b></div>
+                    <div v-else>&#9658;</div>
+            </button>
 			<div v-if="!isTPHidden">
-				<h5>CHOOSE TIME PERIOD:</h5>
+				<h5 style="margin-top:3px">CHOOSE TIME PERIOD:</h5>
 				<button v-on:click="pickAM"
 						v-bind:class="{ active: isAMActive, yellow: isAMActive}"
 						 class="mini ui grey button">
@@ -67,6 +92,10 @@
 						v-bind:class="{ active: isPMActive, yellow: isPMActive }"
 						 class="mini ui grey button">
 						 PM</button>
+                <button v-on:click="pickHR"
+						v-bind:class="{ active: isHRActive, yellow: isHRActive }"
+						 class="mini ui grey button">
+						 1-Hour</button>         
 			</div>
         </div>
         <br>
@@ -88,11 +117,11 @@
         Explore how congestion in San Francisco has changed since the March 2020 shelter-in-place order. 
 		Automobile Level-of-Service (LOS) and Vehicle Miles Traveled (VMT) per mile are presented for key segments in the transportation network. 
 		In addition, changes in these metrics relative to pre-COVID conditions can be viewed.</br>
-        The LOS are calculated using speed data from INRIX Roadway Analytics. Speeds are weekly averages calculated using
+        The LOS are calculated using speed data from INRIX Roadway Analytics. Speeds are monthly averages calculated using
         data from Tuesday through Thursday of each week. 
-		VMT metrics are derived using imputed vehicle volumes from observed speeds and Volume Delay Functions (VDF). 
+		VMT estimates are derived using imputed vehicle volumes from observed speeds and Volume Delay Functions (VDF). 
 		Total peak period VMT for key segments is expanded to Daily Citywide estimate by applying expansions factors derived from historic Caltrans VMT estimated for San Francisco.
-		The data on this website are updated every one to two weeks.
+		The data on this website are updated every month.
         
         <ul>
         <li><b>Auto Level-of-Service (LOS)</b> grades road segments by vehicle delay with "A" describing free flow,
@@ -109,8 +138,10 @@
         <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
         <ul>
-        <li>Move the week slider to update map with data from chosen week.</li>
-        <li>Choose time period to update map for AM (7a-9a) or PM (4:30p-6:30p) peak.</li>
+        <li>Move the month slider to update map with data from chosen month. Click the play button to automatically cycle through months.</li>
+        <li>Choose time period to update map for AM (7a-9a) peak, PM (4:30p-6:30p) peak or 1-Hour time periods.</li>
+        <li>Choosing the 1-Hour period provides an additional time-of-day option to update the map for a given hour of the day.</li>
+        <li>The chart on the side panel shows trends across the months when AM or PM peak periods are selected. It shows the variation across an average day when 1-Hour time period is chosen.</li>
         <li>Click on a roadway segment on the map to see segment-specific trends.</li>
         </ul>
 

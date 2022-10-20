@@ -11,7 +11,7 @@
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
       <div id="preheader">
         <hr/>
-        <h3 class="apptitle">Bay Area Low Income Transit Use Map</h3>
+        <h3 class="apptitle">Bay Area Transit Riders Map (Pre-COVID)</h3>
         <div id="helpbar">
             <button class="ui mini right labeled icon violet button"
                     v-on:click="clickToggleHelp">
@@ -20,7 +20,7 @@
             </button>
             &nbsp;
             <button class="ui mini right labeled icon violet button"
-                    v-on:click="this.window.open('https://mtc.ca.gov/our-work/plans-projects/other-plans/regional-onboard-survey-program','_blank')">
+                    v-on:click="this.window.open('https://www.sfcta.org/blogs/new-interactive-rider-map-support-transit-agencies','_blank')">
                     <i class="arrow right icon"></i>
                     Learn More
             </button>
@@ -28,8 +28,6 @@
            </div>
 
           <div id="picker">
-            <!--h5 style="margin-top:15px">CHOOSE YEAR(S)</h5>
-            <vue-slider v-bind="scnSlider" v-model="sliderValue"></vue-slider-->
 
             <h5 style="margin-top:15px">VIEW TRANSIT TRIPS BY:</h5>
 			<div id="vizbuttons" class="compact ui horizontal mini buttons">
@@ -64,29 +62,13 @@
                 ${option.text}
               </option>
             </select-->            
-            
-            <!--h5 style="margin-top:15px">CHOOSE TIME PERIOD:</h5>
-            <select v-model="selected_dim3">
-              <option v-for="option in dim3_options" v-bind:value="option.value">
-                ${option.text}
-              </option>
-            </select-->
-            
-            <!--h5 style="margin-top:15px">CHOOSE NORMALIZER:</h5>
-            <select v-model="selected_norm">
-              <option v-for="option in norm_options" v-bind:value="option.value">
-                ${option.text}
-              </option>
-            </select-->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <!--input type="checkbox" id="pct_checkbox" v-model="pct_check" v-bind:disabled="!comp_check" style="margin-top:0px">
-            <label for="pct_checkbox"><b>&nbsp;&nbsp;PERCENT DIFF</b></label-->
 			
 			<h5 style="margin-top:15px">REGIONWIDE SUMMARY</h5>
 			<table id="sumtable">
 				<thead>
 				  <tr>
 					<th>Operator</th>
-					<th>Weighted Trips</th>
+					<th>Trips</th>
 				  </tr>
 				</thead>
 				<tbody>
@@ -96,27 +78,6 @@
 					</tr>
 				</tbody>
 			</table>
-            
-            <!--hr/>
-
-            <label><b>CHOOSE CUSTOM BREAK POINTS</b></label>
-            <br>
-            <input v-model.number="bp0" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488;margin-top:5px">
-            <input v-model.number.lazy="bp1" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
-            <input v-model.number.lazy="bp2" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
-            <input v-model.number.lazy="bp3" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
-            <input v-model.number.lazy="bp4" type="number" step="any" v-bind:disabled="!custom_check" style="width:55px;">
-            <input v-model.number="bp5" type="number" step="any" v-bind:disabled="true" style="width:55px;background-color:#f8d488">            
-
-            <button v-on:click="updateMap"
-                    v-bind:class="{ active: isUpdActive, yellow: isUpdActive}"
-                     class="mini ui grey button"
-                    v-bind:disabled="!custom_check" style="margin-top:10px">
-                     Update Map!</button>            
-
-            <h5 style="margin-top:25px">FREQUENCY DISTRIBUTION</h5>
-            <div id="dist-chart" style="height: 200px">
-            </div-->
             
           </div>
       </div>
@@ -143,13 +104,13 @@
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
   <div v-cloak> <!-- hides everything until Vue finished loading -->
-        <h2 style="margin-bottom:0px;">Bay Area Low Income Transit Use Map</h2>
+        <h2 style="margin-bottom:0px;">Bay Area Transit Riders Map</h2>
         <hr style="margin-bottom:5px;margin-top:5px"/>
-        This map shows transit trip patterns by low income travelers. Low income is defined as household income of $50,000 or less per year.
+        This map shows trip patterns of Bay Area transit riders.
 
         <ul>
         <li>Transit trips can be displayed by 1) where the trips started; 2) where transit vehicles were first boarded; or 3) where the travelers live.</li>
-        <li>Transit trip patterns by low income travelers can be compared to the transit trip patterns by non-low income travelers and by all travelers.</li>
+        <li>Transit trip patterns by low income travelers can be compared to the transit trip patterns by non-low income travelers and by all travelers. Low income is defined as household income of $50,000 or less per year.</li>
 		<li>Transit trips on each of the major transit systems can also be displayed individually.</li>
 		<li>Darker colors indicate higher intensities of transit trips.</li>
         </ul>
@@ -172,7 +133,7 @@
                   Download data (.zip)
           </button-->
 
-          <button v-on:click="this.window.open('https://mtc.ca.gov/our-work/plans-projects/other-plans/regional-onboard-survey-program','_blank')"
+          <button v-on:click="this.window.open('https://www.sfcta.org/blogs/new-interactive-rider-map-support-transit-agencies','_blank')"
                   class="small ui right floated basic violet button"
                   style="margin-right:5px">
                   Learn more&hellip;

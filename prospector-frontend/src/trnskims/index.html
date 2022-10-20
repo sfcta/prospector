@@ -1,0 +1,59 @@
+---
+layout: page
+title: SF-CHAMP Transit Skims
+thumbnail: scrnshot.png
+css: main.css
+---
+
+<h2>Transit Skims</h2>
+
+<div id="panel">
+      <div id="picker">
+        <div class="column1">
+          <h4>Select Transit Skim Table</h4>
+          <v-select v-model="tableSelVal" :options="tableSelOptions"></v-select>
+          
+          <h4>Select Mode</h4>
+          <select v-model="modeSelVal">
+              <option v-for="option in modeSelOptions" v-bind:value="option.value">
+                ${option.text}
+              </option>
+          </select>
+
+          <br><br><input type="radio" v-model="dirSel" v-bind:value="dirOrig">From Origin
+          <br><input type="radio" v-model="dirSel" v-bind:value="dirDest">To Destination          
+        </div>
+        <div class="column2">
+          <h4>Select Skim Attribute</h4>
+          <select v-model="skimSelVal">
+              <option v-for="option in skimSelOptions" v-bind:value="option.value">
+                ${option.text}
+              </option>
+          </select> 
+
+          <h4>Select Time Period</h4>
+          <select v-model="timepSelVal">
+              <option v-for="option in timepSelOptions" v-bind:value="option.value">
+                ${option.text}
+              </option>
+          </select> 
+
+          <h4>Select TAZ</h4>
+          <v-select v-model="tazSelVal" :options="tazSelOptions"></v-select>          
+        </div>
+      </div>
+</div>
+
+<div id="sfmap"></div>
+
+<div id="sliderpanel">
+   <p>Add additional geographic data to the map.</p>
+   <div v-for="item in extraLayers" class="ui toggle checkbox">
+     <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
+     <label><h5>${item.name}
+     <a class="icon" target="_blank" v-bind:href="item.info"><i v-if="item.info" class="question circle icon"></i></a>
+     </h5></label>
+   </div>
+</div>
+
+<script type="application/javascript" src="/bundles/trnskims.js"></script>

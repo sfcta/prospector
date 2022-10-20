@@ -1,0 +1,140 @@
+<div id="container">
+
+  <div id="slide-panel" v-bind:class="{ shrunken: isPanelHidden}">
+    <div id="layer-widgets">
+      <button class="ui tiny white icon button"
+              v-on:click="clickedShowHide">
+              <i class="angle double icon"
+              v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
+      </button>
+    </div> 
+  </div> 
+
+  <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
+
+    <div id="preheader"> 
+
+      <hr/>
+      <h3 class="apptitle">SF Parking Data from TNC</h3>
+
+      <hr/>
+      <br>
+
+      <div id="picker">
+
+        <h5 style="margin-top:10px; margin-bottom:5px">CHOOSE LOCATION:</h5>
+          <button class="mini ui inverted button"
+                  v-on:click="pickAllLocations" 
+                  v-bind:class="{ active: isAllActive, white: isAllActive}">
+                  All
+          </button>
+          <button class="mini ui blue inverted button"
+                  v-on:click="pickOnStreet" 
+                  v-bind:class="{ active: isOnStreetActive, blue: isOnStreetActive}">
+                  On-Street
+          </button>
+          <button class="mini ui orange inverted button"
+                  v-on:click="pickOffStreet" 
+                  v-bind:class="{ active: isOffStreetActive, orange: isOffStreetActive}">
+                  Off-Street
+          </button>
+
+
+        <br>
+
+
+        <h5 style="margin-top:20px; margin-bottom:5px">CHOOSE DAY OF WEEK:</h5>
+          <v-btn  id="dow"
+                  class="mini ui inverted button"
+                  v-for="(item, index) in days"
+                  v-on:click="clickDay(index)"
+                  v-bind:class="{ active: index==day, gray: true }">
+                  ${item}
+          </v-btn>
+          <button class="mini ui inverted button"
+                  id="play_button"
+                  v-on:click="clickDOWPlay" 
+                  v-bind:class="{ active: isPlayDOWActive, red: isPlayDOWActive}"
+                  style="margin-top:10px">
+                  &#9658;
+          </button>
+
+        <h5 style="margin-top:20px; margin-bottom:5px">CHOOSE ATTRIBUTE:</h5>
+          <button class="mini ui inverted button"
+                  v-on:click="pickTotalDuration" 
+                  v-bind:class="{ active: isTotalDurationActive, white: isTotalDurationActive}">
+                  Total Duration
+          </button>
+          <button class="mini ui inverted button"
+                  v-on:click="pickEvents" 
+                  v-bind:class="{ active: isEventsActive, white: isEventsActive}">
+                  Total Events
+          </button>
+          <button class="mini ui inverted button"
+                  v-on:click="pickAvgDuration" 
+                  v-bind:class="{ active: isAvgDurationActive, white: isAvgDurationActive}">
+                  Average Duration
+          </button>
+
+        <h5 style="margin-top:20px; margin-bottom:0px">CHOOSE TIME OF DAY:</h5>
+        <div id="timeslider">
+            <vue-slider id='timeslider'
+                  v-bind="timeSlider"
+                  v-model="sliderValue"
+                  style="width:85%; margin-right:0px; float:left">
+            </vue-slider>
+            <button class="mini ui inverted button"
+                id="play_button"
+                    v-on:click="clickTODPlay" 
+                    v-bind:class="{ active: isPlayTODActive, red: isPlayTODActive}"
+                    style="margin-top:9px">
+                    &#9658;
+          </button>
+          </div>
+      </div>
+
+    </div>
+
+      <div id="header">
+          <div id="stats-panel">
+            <hr style="margin-bottom:5px; margin-top:20px;" />
+            <div id="chartTitle"><h3 style="font-size: 22px; margin-top:10px;">${chartTitle}</h3></div>
+            <div id="chartSubTitle"><h5 style="font-size: 14px; margin-top:10px;">${chartSubTitle}</h5></div>
+            <div id="chartSubSubTitle"><h5 style="font-size: 12px; margin-top:10px;">${chartSubSubTitle}</h5></div>
+            <div id="longchart">
+                <div class="ui active dimmer">
+                  <div class="ui text loader">Loading</div>
+                </div>
+            </div>
+          </div>
+      </div>
+
+    <hr/>
+
+    <div>
+
+      <h5 style="font-size: 18px; margin-top:10px;">MAP LAYERS</h5>
+      <p>Add additional geographic data to the map.</p>
+      <div v-for="item in extraLayers" class="ui toggle checkbox">
+        <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
+        <label><h5>${item.name}
+        <a class="icon" target="_blank" v-bind:href="item.info"><i v-if="item.info" class="question circle icon"></i></a>
+        </h5></label>
+      </div>
+
+    </div>
+
+    <div class="logo">
+      <div>
+        <a class="agency-link" target="_blank" href="https://www.sfcta.org">
+        <img class="img-logo" src="/assets/SFCTA Logo dark-background.svg" width="50%">
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div id="sfmap"></div>
+
+  <div id="opacity_legend"></div>
+
+</div>

@@ -65,6 +65,7 @@ function getDistColor(d){
 }
 
 function getColorByBin(x, bins, colors){
+  if (x==null) return null;
   for (var i=0; i < bins.length; i++){
     if (x <= bins[i]) return colors[i];
   }
@@ -158,6 +159,28 @@ function getLegHTML2(vals, colors, bins=true, postunits='', reverse=false){
   return ret;
 }
 
+// this is yet another variation to have special text for a diverging color scheme with 5 bins
+function getLegHTML3(vals, colors, bins=true, postunits=''){
+  let ret = '';
+  if(bins){
+    ret += '<p class="legend-row"><i style="background:' + colors[0] + '"></i> ';
+    ret += 'slower than ' + (-1*vals[1]) + postunits + '</p>';
+    ret += '<p class="legend-row"><i style="background:' + colors[1] + '"></i> ' + (-1*vals[2]) + postunits + ' &ndash; ' + (-1*vals[1]) + postunits + ' slower' + '</p>';
+    ret += '<p class="legend-row"><i style="background:' + colors[2] + '"></i> ' + (-1*vals[2]) + postunits + ' slower &ndash; ' + vals[3] + postunits + ' faster' + '</p>';
+    ret += '<p class="legend-row"><i style="background:' + colors[3] + '"></i> ' + vals[3] + postunits + ' &ndash; ' + vals[4] + postunits + ' faster' + '</p>';
+    ret += '<p class="legend-row"><i style="background:' + colors[4] + '"></i> ' + 'faster than ' + vals[4] + postunits + '</p>';
+  } else{
+    for (var i = 0; i < vals.length; i++) {
+      ret +=
+          '<p class="legend-row"><i style="background:'
+          + colors[i] + '"></i> '
+          + vals[i] + postunits + (vals[i + 1] ? '<br>' : '')
+          + '</p>';
+    }
+  }
+  return ret;
+}
+
 function getBWLegHTML(vals, widths){
   let ret = '';
   for (var i = 0; i < vals.length-1; i++) {
@@ -194,6 +217,7 @@ module.exports = {
   getColorFromVal2: getColorFromVal2,
   getLegHTML: getLegHTML,
   getLegHTML2: getLegHTML2,
+  getLegHTML3: getLegHTML3,
   getBWLegHTML: getBWLegHTML,
   getQuantiles: getQuantiles,
   baseLayer: baseLayer,

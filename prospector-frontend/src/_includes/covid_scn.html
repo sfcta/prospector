@@ -27,7 +27,7 @@
             </button>
         </div>
 
-        <div id="picker" style="margin-top:15px">
+        <div id="picker" style="margin-top:20px">
 		  
 		  <h3>CHOOSE PRESET SCENARIO</h3>
 		  <select v-model="selectedPreset" class="col-3">
@@ -37,7 +37,7 @@
             </option>
           </select>
 		  
-		  <div style="margin-top:45px; margin-bottom:20px"><h3>CUSTOMIZE SCENARIO SETTINGS</h3></div>
+		  <div style="margin-top:50px; margin-bottom:20px"><h3>CUSTOMIZE SCENARIO SETTINGS</h3></div>
 
 		  <div class="col-1"><h5>Unemployment</h5></div>
 	      <div class="col-2"><vue-slider v-bind="dim1Slider" v-model="dim1Value"></vue-slider></div>
@@ -59,7 +59,7 @@
           <label><h5>COMPARE TO BASELINE (PRE-COVID)</h5></label>
          </div>
           
-         <h3 style="margin-top:10px">CHOOSE MAP</h3> 
+         <h3 style="margin-top:15px">CHOOSE MAP</h3> 
          <div id="vizbuttons" class="ui vertical buttons" style="margin-bottom:15px">
               <button v-for="item in vizlist"
                     v-on:click="clickViz(item)"
@@ -122,7 +122,7 @@
 		  <h5>SCENARIO: ${scnTitle} 
 		    <i class="tooltip question circle icon"><span class="tooltiptext"> ${scnDesc}</span></i>
 		  </h5>
-		  <h5 v-if="selectedScn>1"><span style="color: #348cc0">Baseline</span>&nbsp;&nbsp;&nbsp;<span style="color: #cd7f9e">Scenario</span></h5>
+		  <h5 v-if="selectedScn>1"><span style="color: #7FBADC">Baseline</span>&nbsp;&nbsp;&nbsp;<span style="color: #DBA4AA">Scenario</span></h5>
 		  
 		  <div id="chart1" class="chcol1">
                 <div class="ui active dimmer">
@@ -133,10 +133,10 @@
 		  <div id="chart3" class="chcol3"></div>
 		  <div id="chart4" class="chcol4"></div>
 		  
-		  <div class="chcol1">SF-Res Trips (000s)</div>
-		  <div class="chcol2">Avg. Speed (mph)</div>
-		  <div class="chcol3">Muni Brdgs. (000s)</div>
-		  <div class="chcol4">VMT (million)</div>
+		  <div class="chcol1">SF-Res Trips<br>(000s)</div>
+		  <div class="chcol2">Avg. Speed<br>(mph)</div>
+		  <div class="chcol3">Muni Brdgs.<br>(000s)</div>
+		  <div class="chcol4">VMT<br>(million)</div>
 		  <!--h5 style="margin-top:5px">SCENARIO SUMMARY</h5-->
 			<!--table id="sumtable">
 				<thead>

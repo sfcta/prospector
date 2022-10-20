@@ -4,8 +4,9 @@ const sfcta_components = [
      'cmp',
      'walkskims',
      'hwyskims',
+     'trnskims',
      'tnc',
-	   'autolos',
+	 'autolos',
      'tmcshp',
      'viz-template',
      'sftraveldemand',
@@ -30,6 +31,11 @@ const sfcta_components = [
      'survey2018',
      'trnobstrips',
 	 'covid_scn',
+	 'linkagg_inrix',
+     'tncparking',
+     'cmp_test',
+     'epc',
+    //  'epc2'
 	 //'cmp-v0',
 ];
 

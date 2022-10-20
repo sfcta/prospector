@@ -40,7 +40,7 @@ let attribution ='<a href="https://openstreetmap.org">OpenStreetMap</a> | ' +
                  '<a href="https://mapbox.com">Mapbox</a>';
 baseLayer = L.tileLayer(url, {
   attribution:attribution,
-  minZoom: 10,
+  minZoom: 12,
   maxZoom: 18,
   accessToken:token,
 }).addTo(mymap);
@@ -535,7 +535,7 @@ async function drawMapFeatures(queryMapData=true) {
 				} else {
 				  for (var i = 0; i < sel_bwvals.length-1; i++) {
 					if (feat['bwmetric'] <= sel_bwvals[i + 1]) {
-					  feat['bwmetric_scaled'] = 1.2*bw_widths[i];
+					  feat['bwmetric_scaled'] = 0.9*bw_widths[i];
 					  break;
 					}
 				  }

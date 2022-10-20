@@ -1,0 +1,271 @@
+/* CSS Layout for Standalone ONLY goes here */
+
+#slide-panel {
+  top: auto;
+  bottom: 90px;
+}
+
+.leaflet-bottom .legend.leaflet-control {
+    margin-bottom: 100px;
+}
+.leaflet-bottom .legend2.leaflet-control {
+    margin-bottom: 100px;
+}
+
+.ui.color1.button {
+  background-color: #8cb8ca;
+  color: #fff;
+}
+
+.ui.color2.button {
+  background-color: #ffb81d;
+  color: #fff;
+}
+.ui.color2.button.active {
+  background-color: #ffb81d;
+}
+
+.ui.button {
+  margin: 2% 1%;
+}
+
+
+/* Stand alone CSS */
+.container {
+  position: relative;
+  width:100%;
+  height:100%;
+  background-color:#f88;
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+}
+
+#container {
+  position: relative;
+  width:100%;
+  height:100%;
+  background-color:#888;
+}
+
+#panel {
+  display:table;
+  position: relative;
+  height:100%;
+  width:400px;
+  max-height:100%;
+  padding:0px 20px 0px 20px;
+  z-index:10;
+  background-color:#444;
+  float: right;
+  transition: margin 0.4s;
+}
+
+#slide-panel {
+  position: absolute;
+  right: 400px;
+  z-index: 10;
+  height:1%;
+  transition: margin 0.4s;
+}
+
+.shrunken {
+  margin-right: -394px;
+}
+
+#sfmap {
+  height:100%;
+  z-index:0;
+}
+
+.apptitle {
+  text-align:center;
+}
+
+#header {
+  display:table-row;
+  vertical-align:top;
+}
+
+#longchart {
+  height: 230px;
+}
+
+h1,h3,h4,h5,p {
+  color: #fff; 
+  margin: 1% auto;
+}
+.ui h2 {
+  color: #38bebb;
+}
+
+hr {margin: 1% 0px; }
+
+/* Extra context layers*/
+#layer-widgets {
+  border-radius: 7px 0px 0px 7px;
+  background-color: #555;
+  z-index: 7;
+}
+
+#layer-widgets button {
+  margin: 5px 5px 5px 5px;
+}
+.ui.toggle.checkbox {
+  margin: 2% 3%;
+}
+.ui.colorsup.toggle.checkbox input:focus:checked~label:before{
+  background-color: #767676!important;
+}
+.ui.colorsup.toggle.checkbox input:checked~label:before{
+  background-color: #767676!important;
+}
+.ui.colorhin.toggle.checkbox input:focus:checked~label:before{
+  background-color: #ff8d6d!important;
+}
+.ui.colorhin.toggle.checkbox input:checked~label:before{
+  background-color: #ff8d6d!important;
+}
+.ui.colorpar.toggle.checkbox input:focus:checked~label:before{
+  background-color: #9bae89!important;
+}
+.ui.colorpar.toggle.checkbox input:checked~label:before{
+  background-color: #9bae89!important;
+}
+
+table#citywide tbody th, td {   
+  background-color: #444;
+  color: #fff;
+  border: 0px;
+}
+
+/* Bottom agency and logo*/
+.logo {
+  display:table-row;
+  text-align:right;
+  height:80px;
+}
+a.agency {color: #fff;}
+table#table-logo {
+  margin-bottom: 0px;
+  background-color: transparent;
+  border: 0px;
+}
+.td-logo {
+  padding-right: 0px;
+}
+.img-logo {
+  display:block;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-right: auto;
+  width: 60%
+}
+table#table-logo tbody tr:nth-child(odd) td, tbody th {
+    background-color: transparent;
+}
+
+/*Legend*/
+.legend {
+  padding: 6px 8px;
+  font: 14px/16px Arial, Helvetica, sans-serif;
+  background: rgba(255,255,255,0.8);
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  border-radius: 5px;
+}
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 1;
+}
+p.legend-row {
+  margin-bottom: 3px;
+  color: #666;
+}
+.legend h4 {
+    margin: 0 0 5px;
+    color: #777;
+}
+
+/*Info panel*/
+.info-panel {
+    padding: 6px 8px;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+
+.info-panel-hide {
+    padding: 6px 8px;
+    background: rgba(255,255,255,0.8);
+    border-radius: 5px;
+
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s 0.5s, opacity 0.5s linear;
+}
+
+/*Help*/
+#helpbar {
+  text-align:center;
+}
+#helpbox {
+     position: absolute;
+     top:0;
+     left:0;
+     margin-top:8px;
+     margin-left: 8px;
+     width: 500px;
+     z-index:20;
+     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
+}
+
+/*Captcha*/
+.grecaptcha-badge { visibility: hidden; }
+
+
+/*Unique to tncparking below this point*/
+
+.legend-circle {
+  width: 40px; 
+  height: 40px;
+  color:white;
+  opacity:0.7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center; 
+  justify-content: center;
+  vertical-align: middle;
+  text-align:center;
+  margin-top: 2px;
+}
+
+#dow {
+  padding: 8px 10px;
+}
+
+#play_button {
+  padding: 5px 5px;
+  margin-left:0px;
+  float:right;
+  font-size: 5;
+}
+
+svg {
+    position: absolute;
+    margin-top:auto;
+    margin-bottom:auto;
+    margin-left:auto;
+    margin-right: auto;
+    display: block;
+}
+
+#legend {
+    position: absolute;
+    left: 60px;
+    bottom: 10px;
+    width: 100px;
+    height: 100px;
+    z-index: 2;
+}

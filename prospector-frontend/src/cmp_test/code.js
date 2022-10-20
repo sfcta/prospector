@@ -36,11 +36,12 @@ mymap.setView([37.76889, -122.440997], 13);
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'cmp_segments_master';
-const VIZ_LIST = ['ALOS', 'ABUFI', 'TSPD', 'TRLB', 'ATRAT'];
+//const VIZ_LIST = ['ALOS', 'TSPD', 'TRLB', 'ATRAT'];
+const VIZ_LIST = ['ALOS', 'ACOV', 'ABUFI', 'TSPD', 'TRLB', 'ATRAT'];
 const VIZ_INFO = {
   ALOS: {
     TXT: 'Auto Level-of-Service (LOS)',
-    VIEW: 'cmp_autotransit',
+    VIEW: 'cmp_autotransit_test',
     METRIC: 'los_hcm85',
     METRIC_DESC: 'Level of Service',
     COLOR_BY_BINS: false,
@@ -51,9 +52,21 @@ const VIZ_INFO = {
     POST_UNITS: '',
   },
   
+  ACOV: {
+    TXT: 'Auto Coeff. of Variation',
+    VIEW: 'cmp_autotransit_test',
+    METRIC: 'auto_cv',
+    METRIC_DESC: 'Auto COV',
+    COLOR_BY_BINS: true,
+    COLORVALS: [0, 5, 10, 20, 30, 40],
+    COLORS: ['#ccc', '#060', '#9f0', '#ff3', '#f90', '#f60', '#c00'],
+    CHARTINFO: 'AUTO RELIABILITY TREND:',
+    CHART_PREC: 1,
+    POST_UNITS: '%',
+  },
   ABUFI: {
     TXT: 'Auto Buffer Time Index',
-    VIEW: 'cmp_autotransit',
+    VIEW: 'cmp_autotransit_test',
     METRIC: 'auto_bi',
     METRIC_DESC: 'Auto Buffer Time Index',
     COLOR_BY_BINS: true,
@@ -63,10 +76,46 @@ const VIZ_INFO = {
     CHART_PREC: 1,
     POST_UNITS: '%',
   },
-  
+  ATTI95: {
+    TXT: 'Auto Travel Time Index 95',
+    VIEW: 'cmp_autotransit_test',
+    METRIC: 'auto_tti95',
+    METRIC_DESC: 'Auto TTI 95',
+    COLOR_BY_BINS: true,
+    COLORVALS: [0, 1, 1.25, 1.5, 1.75],
+    COLORS: ['#ccc', '#060', '#ff3', '#f90', '#f60', '#c00'],
+    CHARTINFO: 'AUTO RELIABILITY TREND:',
+    CHART_PREC: 1,
+    POST_UNITS: '',
+  },
+  ATTI80: {
+    TXT: 'Auto Travel Time Index 80',
+    VIEW: 'cmp_autotransit_test',
+    METRIC: 'auto_tti80',
+    METRIC_DESC: 'Auto TTI 80',
+    COLOR_BY_BINS: true,
+    COLORVALS: [0, 1, 1.25, 1.5, 1.75],
+    COLORS: ['#ccc', '#060', '#ff3', '#f90', '#f60', '#c00'],
+    CHARTINFO: 'AUTO RELIABILITY TREND:',
+    CHART_PREC: 1,
+    POST_UNITS: '',
+  },
+  ALOTTR: {
+    TXT: 'Auto Level of Travel Time Reliability',
+    VIEW: 'cmp_autotransit_test',
+    METRIC: 'auto_lottr',
+    METRIC_DESC: 'Auto LOTTR',
+    COLOR_BY_BINS: true,
+    COLORVALS: [1, 1.2, 1.4, 1.6],
+    COLORS: ['#ccc', '#9f0', '#ff3', '#f60', '#c00'],
+    CHARTINFO: 'AUTO RELIABILITY TREND:',
+    CHART_PREC: 1,
+    POST_UNITS: '',
+  },
+
   TSPD: {
     TXT: 'Transit Speed',
-    VIEW: 'cmp_autotransit',
+    VIEW: 'cmp_autotransit_test',
     METRIC: 'transit_speed',
     METRIC_DESC: 'Transit Speed (MPH)',
     COLOR_BY_BINS: true,
@@ -79,7 +128,7 @@ const VIZ_INFO = {
 
   TRLB: {
     TXT: 'Transit Reliability',
-    VIEW: 'cmp_autotransit',
+    VIEW: 'cmp_autotransit_test',
     METRIC: 'transit_cv',
     METRIC_DESC: 'Transit Reliability',
     COLOR_BY_BINS: true,
@@ -92,7 +141,7 @@ const VIZ_INFO = {
 
   ATRAT: {
     TXT: 'Auto-Transit Speed Ratio',
-    VIEW: 'cmp_autotransit',
+    VIEW: 'cmp_autotransit_test',
     METRIC: 'atspd_ratio',
     METRIC_DESC: 'Auto/Transit Speed',
     COLOR_BY_BINS: true,
@@ -110,7 +159,7 @@ let init_selectedViz = VIZ_LIST[0];
 let data_view = VIZ_INFO[init_selectedViz]['VIEW'];
 let selviz_metric = VIZ_INFO[init_selectedViz]['METRIC'];
 let selPeriod = 'AM';
-let aggdata_view = 'cmp_aggregate';
+let aggdata_view = 'cmp_aggregate_test';
 let aggdata_label = 'All Segments Combined';
 let selGeoId;
 
@@ -131,11 +180,11 @@ async function initialPrep() {
 
   console.log('2...');
   _allCmpData = await fetchAllCmpSegmentData(data_view);
-  _allCmpData_xd = await fetchAllCmpSegmentData('cmp_autotransit_xd');
+  _allCmpData_xd = await fetchAllCmpSegmentData('cmp_autotransit_xd_test');
 
   console.log('3...');
   _aggregateData = await fetchAggregateData(aggdata_view);
-  _aggregateData_xd = await fetchAggregateData('cmp_aggregate_xd');
+  _aggregateData_xd = await fetchAggregateData('cmp_aggregate_xd_test');
 
   console.log('4... ');
   await buildChartHtmlFromCmpData();
@@ -169,7 +218,7 @@ async function fetchCmpSegments() {
 async function fetchAllCmpSegmentData(dat_view) {
   //FIXME this should be a map()
   let params =
-    'select=cmp_segid,year,period,los_hcm85,transit_speed,transit_cv,atspd_ratio,auto_speed,auto_bi';
+    'select=cmp_segid,year,period,los_hcm85,transit_speed,transit_cv,atspd_ratio,auto_speed,auto_cv,auto_tti95,auto_tti80,auto_bi,auto_lottr';
 
   let data_url = API_SERVER + dat_view + '?' + params;
 
@@ -536,7 +585,7 @@ function buildChartHtmlFromCmpData(json = null) {
     });
   } else {
     let ykey_tmp, lab_tmp;
-    let xd_arr = ['ALOS', 'ABUFI']
+    let xd_arr = ['ALOS', 'ACOV', 'ATTI95', 'ATTI80', 'ABUFI', 'ALOTTR']
     if (xd_arr.includes(app.selectedViz)) {
       ykey_tmp = ['art', 'fwy'];
       lab_tmp = ['Arterial', 'Freeway'];
@@ -629,7 +678,7 @@ async function updateSliderData() {
         if (!yearlist.includes(entry.year)) yearlist.push(entry.year);
       }
     });
-  fetch(API_SERVER + 'cmp_autotransit_xd' + '?select=year')
+  fetch(API_SERVER + 'cmp_autotransit_xd_test' + '?select=year')
     .then(resp => resp.json()) 
     .then(function(jsonData) {
       for (let entry of jsonData) {
