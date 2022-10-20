@@ -141,14 +141,14 @@ let selectedTAZs = new Map()
 // Will be used to highlight the selected metric in the bar graph
 let metricOptionsIndex = {
   None: -1,
-  min:0,
-  linc:1,
-  o75:2,
-  disab:3,
-  lep:4,
-  zvhh:5,
-  spfam:6,
-  rentb:7
+  min: 0,
+  linc: 1,
+  o75: 2,
+  disab: 3,
+  lep: 4,
+  zvhh: 5,
+  spfam: 6,
+  rentb: 7
 }
 
 async function initialPrep() {
@@ -564,21 +564,24 @@ function highlightSelectedSegment() {
 let selGeoId;
 let selectedGeo, prevSelectedGeo;
 let selectedLatLng;
+let selectedFeature;
 
 function clickedOnFeature(e) {
   // console.debug(e.target.feature)
   console.info(e.target.feature.gid, 'is already selected:', selectedTAZs.has(e.target.feature.gid))
-  
-  if(selectedTAZs.has(e.target.feature.gid)) {
+
+  if (selectedTAZs.has(e.target.feature.gid)) {
     console.info(e.target.feature.gid, 'is already selected, removing it from the map')
     selectedTAZs.delete(e.target.feature.gid)
   } else {
     console.info(e.target.feature.gid, 'is not selected, adding it to the map')
     selectedTAZs.set(e.target.feature.gid, e.target.feature)
   }
-  
+
   console.info(e.target.feature.gid, 'selected:', selectedTAZs.has(e.target.feature.gid) ? 'true' : 'false')
   console.info('currently selected TAZs:', selectedTAZs.keys())
+
+  selectedFeature = e.target.feature
 
 
   e.target.setStyle(styles.popup);
@@ -600,13 +603,13 @@ function clickedOnFeature(e) {
   if (metricOptionsIndex[app.selected_metric] != -1) {
     newData[metricOptionsIndex[app.selected_metric]] = {
       y: newData[metricOptionsIndex[app.selected_metric]].y.toLocaleUpperCase(),
-      pop: newData[metricOptionsIndex[app.selected_metric]].pop 
+      pop: newData[metricOptionsIndex[app.selected_metric]].pop
     }
   }
 
   // Update data
   barChart.setData(newData)
-  
+
 
   // Update title of chart section
   document.getElementById('popchart_title').innerText = `POPULATION BREAKDOWN | TRACT ${geo.tract}`
@@ -626,6 +629,42 @@ function clickedOnFeature(e) {
   } else {
     resetPopGeo();
   }
+}
+
+function updateChart() {
+  let geo = selectedFeature
+  if (!geo) return
+
+  // console.log(Object.keys(geo))
+
+  let newData = []
+
+  if (app.changeChartMode[0] == 'percentage') {
+    newData = [
+      { y: 'Minority', pop: geo['pct_minori'] * 100 || 0 },
+      { y: 'Low Income', pop: geo['pct_below2'] * 100 || 0 },
+      { y: 'Elderly', pop: geo['pct_over75'] * 100 || 0 },
+      { y: 'Disability', pop: geo['pct_disab'] * 100 || 0 },
+      { y: 'Low English Prof.', pop: geo['pct_lep'] * 100 || 0 },
+      { y: 'Zero-Veh HH', pop: geo['pct_zvhh'] * 100 || 0 },
+      { y: 'Single Parent', pop: geo['pct_spfam'] * 100 || 0 },
+      { y: 'Rent Burdened', pop: geo['pct_hus_ri'] * 100 || 0 },
+    ]
+  } else {
+    newData = [
+      { y: 'Minority', pop: geo['pop_minori'] || 0 },
+      { y: 'Low Income', pop: geo['pop_below2'] || 0 },
+      { y: 'Elderly', pop: geo['pop_over75'] || 0 },
+      { y: 'Disability', pop: geo['pop_disabi'] || 0 },
+      { y: 'Low English Prof.', pop: geo['pop_lep'] || 0 },
+      { y: 'Zero-Veh HH', pop: geo['pop_zvhh'] || 0 },
+      { y: 'Single Parent', pop: geo['pop_spfam'] || 0 },
+      { y: 'Rent Burdened', pop: geo['pop_hus_ri'] || 0 },
+    ]
+  }
+
+  barChart.setData(newData)
+
 }
 
 let popSelGeo;
@@ -692,6 +731,12 @@ function showExtraLayers(e) {
   }
 }
 
+function changeChartMode(e) {
+  console.debug('Updating chart mode')
+  console.debug((app.changeChartMode[0] == 'percentage'))
+  updateChart()
+}
+
 
 let app = new Vue({
   el: '#panel',
@@ -751,11 +796,13 @@ let app = new Vue({
     submit_loading: false,
     submit_disabled: false,
     addLayers: [],
+    changeChartMode: [],
   },
   watch: {
     sliderValue: selectionChanged,
     selected_metric: selectionChanged,
     addLayers: showExtraLayers,
+    changeChartMode: changeChartMode
   },
   methods: {
     clickToggleHelp: clickToggleHelp,
