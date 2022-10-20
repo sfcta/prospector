@@ -43,6 +43,20 @@
             </form>
         </div>
 
+        
+
+        <hr />
+        <h5 id="popchart_title">POPULATION BREAKDOWN | CITYWIDE</h5>
+        <div id="popchart" style="width: 100%; height: 25%;"></div>
+        <div id="popchart_info"></div>
+
+        <div class="ui colorpar toggle checkbox">
+          <input type="checkbox" name="chart_percentages" value="percentage" v-model="changeChartMode">
+          <label>
+            <h5>Show percentages</h5>
+          </label>
+        </div>
+
         <hr />
 
         <h5>MAP LAYERS</h5>
@@ -64,18 +78,6 @@
           <input type="checkbox" value="sfparks" v-model="addLayers">
           <label>
             <h5>Major Parks</h5>
-          </label>
-        </div>
-
-        <hr />
-        <h5 id="popchart_title">POPULATION BREAKDOWN | CITYWIDE</h5>
-        <div id="popchart" style="width: 100%; height: 25%;"></div>
-        <div id="popchart_info"></div>
-
-        <div class="ui colorpar toggle checkbox">
-          <input type="checkbox" name="chart_percentages" value="percentage" v-model="changeChartMode">
-          <label>
-            <h5>Show percentages</h5>
           </label>
         </div>
 
