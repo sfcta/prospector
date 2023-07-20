@@ -5,7 +5,7 @@ const sfcta_components = [
      'walkskims',
      'hwyskims',
      'tnc',
-	   'autolos',
+       'autolos',
      'tmcshp',
      'viz-template',
      'sftraveldemand',
@@ -24,20 +24,20 @@ const sfcta_components = [
      'cmpqa',
      'cmp_safety',
      'cmprt',
-	 'losrt',
+     'losrt',
      'champtrips',
      'tnctrnfac',
      'survey2018',
      'trnobstrips',
-	 'covid_scn',
+     'covid_scn',
    'epc'
-	 //'cmp-v0',
+     //'cmp-v0',
 ];
 
 module.exports = {
-	mode: 'development',
-	//mode: 'production',
-	
+    mode: 'development',
+    //mode: 'production',
+    
      entry: () => {
         let entries = {};
         for (let tool of sfcta_components) {
@@ -55,12 +55,12 @@ module.exports = {
        rules: [{
          loader: 'babel-loader',
          exclude: /node_modules/,
-         query: {
+         options: {
            plugins: ["@babel/plugin-transform-runtime"],
            presets: [
-			["@babel/preset-env", {
-				"useBuiltIns": false,
-			}]
+            ["@babel/preset-env", {
+                "useBuiltIns": false,
+            }]
            ]
          }
        }]
