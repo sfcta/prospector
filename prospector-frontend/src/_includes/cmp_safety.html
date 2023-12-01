@@ -2,60 +2,47 @@
 
   <div id="slide-panel" v-bind:class="{ shrunken: isPanelHidden}">
     <div id="layer-widgets">
-      <button class="ui tiny green icon button"
-              v-on:click="clickedShowHide">
-              <i class="angle double icon"
-              v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
+      <button class="ui tiny green icon button" v-on:click="clickedShowHide">
+              <i class="angle double icon" v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
       </button>
     </div> 
   </div> 
 
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
       <div id="preheader">  
-        <hr/>
+        <hr />
         <h3 class="apptitle">SF Collisions Data from SWITRS</h3>
         <div id="helpbar">
-          <button class="ui mini right labeled icon violet button"
-                v-on:click="clickToggleHelp">
+          <button class="ui mini right labeled icon violet button" v-on:click="clickToggleHelp">
                 <i class="icon info"></i>
                 What is this?
           </button>
           &nbsp;
-          <button class="ui mini right labeled icon violet button"
-                v-on:click="this.window.open('https://www.sfcta.org/CMP-home','_blank')">
+          <button class="ui mini right labeled icon violet button" v-on:click="this.window.open('https://www.sfcta.org/CMP-home','_blank')">
                 <i class="icon right arrow"></i>
                 Learn More
           </button>
-          <hr/>
+          <hr />
         </div>
 
         <div id="picker">
           <h5>CHOOSE TYPE:</h5>
-          <button v-for="item in vizlist"
-                v-on:click="clickViz(item)"
-                class="mini ui grey button"
-                v-bind:class="{ active: item==chosenIncidents, green: item==chosenIncidents }">
+          <button v-for="item in vizlist" v-on:click="clickViz(item)" class="mini ui grey button" v-bind:class="{ active: item==chosenIncidents, green: item==chosenIncidents }">
                 ${vizinfo[item]['TXT']}
           </button>
           
           <h5>CHOOSE SEVERITY:</h5>
-          <button class="mini ui grey button"
-                  v-on:click="pickFatal"
-                  v-bind:class="{ active: isFatalactive, orange: isFatalactive}">
+          <button class="mini ui grey button" v-on:click="pickFatal" v-bind:class="{ active: isFatalactive, orange: isFatalactive}">
                   Fatal</button>
-          <button class="mini ui grey button"
-                  v-on:click="pickNonf"
-                  v-bind:class="{ active: isNonfactive, blue: isNonfactive}">
+          <button class="mini ui grey button" v-on:click="pickNonf" v-bind:class="{ active: isNonfactive, blue: isNonfactive}">
                   Non-Fatal</button>
-          <button class="mini ui grey button"
-                  v-on:click="pickAll"
-                  v-bind:class="{ active: isAllactive, green: isAllactive}">
+          <button class="mini ui grey button" v-on:click="pickAll" v-bind:class="{ active: isAllactive, green: isAllactive}">
                   All</button>
           
           <h5>MAP LAYERS</h5>
           <p>Add additional geographic data to the map.</p>
           <div v-for="item in extraLayers" class="ui toggle checkbox">
-            <input type="checkbox" v-bind:value="item.view" v-model="addLayers">
+            <input type="checkbox" v-bind:value="item.view" v-model="addLayers" />
             <label><h5>${item.name}
             <a class="icon" target="_blank" v-bind:href="item.info"><i v-if="item.info" class="question circle icon"></i></a>
             </h5></label>
@@ -82,11 +69,11 @@
             <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
           </div>
           
-          <hr/>
+          <hr />
           
           <div>
               <a class="agency-link" target="_blank" href="https://www.sfcta.org">
-                <img class="img-logo" src="/assets/SFCTA Logo dark-background.svg" width="80%">
+                <img class="img-logo" src="/assets/SFCTA Logo dark-background.svg" width="80%" />
               </a>
           </div>
         </div>
@@ -94,9 +81,9 @@
   </div>
 
   <div id="helpbox" v-if="showHelp" class="ui segment">
-  <div v-cloak> <!-- hides everything until Vue finished loading -->
+  <div v-cloak=""> <!-- hides everything until Vue finished loading -->
         <h2 style="margin-bottom:0px;">Bicycle and Pedestrian Collision Data</h2>
-        <hr style="margin-bottom:5px;margin-top:5px"/>
+        <hr style="margin-bottom:5px;margin-top:5px" />
         This map is the observed pedestrian and bicycle collisions in San Francisco thanks to the SWITRS database that included their latitude and longitude.
 
         <ul>
@@ -106,7 +93,7 @@
         </ul>
 
         <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
-        <hr style="margin-bottom:5px;margin-top:5px"/>
+        <hr style="margin-bottom:5px;margin-top:5px" />
         <ul>
         <li>Select a collision type and severity to display it on the map for all years.</li>
         <li>Move the year slider to map historic data.</li>
@@ -119,16 +106,12 @@
             &nbsp;OK&nbsp;
           </button>
 
-          <button v-on:click="this.window.open('/assets/safety_sf_switrs_2017.zip')"
-                  class="small ui right labeled icon floated yellow button"
-                  style="margin-right:5px">
+          <button v-on:click="this.window.open('/assets/safety_sf_switrs_2017.zip')" class="small ui right labeled icon floated yellow button" style="margin-right:5px">
                   <i class="icon download"></i>
                   Download data (.zip)
           </button>
 
-          <button v-on:click="this.window.open('https://www.sfcta.org/congestion','_blank')"
-                  class="small ui right floated basic violet button"
-                  style="margin-right:5px">
+          <button v-on:click="this.window.open('https://www.sfcta.org/congestion','_blank')" class="small ui right floated basic violet button" style="margin-right:5px">
                   Learn more&hellip;
           </button>
         </div>
