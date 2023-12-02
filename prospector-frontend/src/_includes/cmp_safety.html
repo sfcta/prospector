@@ -41,13 +41,22 @@
           
           <h5>MAP LAYERS</h5>
           <p>Add additional geographic data to the map.</p>
-          <div v-for="item in extraLayers" class="ui toggle checkbox">
-            <input type="checkbox" v-bind:value="item.view" v-model="addLayers" />
-            <label><h5>${item.name}
-            <a class="icon" target="_blank" v-bind:href="item.info"><i v-if="item.info" class="question circle icon"></i></a>
-            </h5></label>
+          <div class="ui colorsup toggle checkbox">
+            <input type="checkbox" value="epc2021_neighborhood" v-model="addLayers">
+            <label><h5>Equity Priority Communities Neighborhoods</h5></label>
           </div>
-          
+          <div class="ui colorhin toggle checkbox">
+            <input type="checkbox" value="hin2022" v-model="addLayers">
+            <label><h5>High Injury Network</h5></label>
+          </div>          
+          <div class="ui colorsup toggle checkbox">
+            <input type="checkbox" value="sup_district_boundaries_2022" v-model="addLayers">
+            <label><h5>Supervisorial District Boundaries</h5></label>
+          </div>
+          <div class="ui colorpar toggle checkbox">
+            <input type="checkbox" value="sfparks" v-model="addLayers">
+            <label><h5>Major Parks</h5></label>
+          </div>
         </div>  
       </div>
       <div id="header">
