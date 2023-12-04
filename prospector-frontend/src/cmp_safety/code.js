@@ -22,6 +22,7 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 // Use npm and babel to support IE11/Safari
 import 'isomorphic-fetch';
 import vueSlider from 'vue-slider-component';
+import Vue from 'vue/dist/vue.js';
 import Cookies from 'js-cookie';
 
 let api_server = 'http://api.sfcta.org/api/switrs_viz_2022';
