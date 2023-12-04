@@ -22,6 +22,7 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 // Use npm and babel to support IE11/Safari
 import 'babel-polyfill';
 import 'isomorphic-fetch';
+import Vue from 'vue/dist/vue.js';
 import vueSlider from 'vue-slider-component';
 
 

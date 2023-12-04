@@ -23,6 +23,7 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 import 'babel-polyfill';
 import 'isomorphic-fetch';
 import vueSlider from 'vue-slider-component';
+import Vue from 'vue/dist/vue.js';
 Vue.component('v-select', VueSelect.VueSelect);
 
 let api_server = 'https://api.sfcta.org/api/';

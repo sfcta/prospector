@@ -22,10 +22,11 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 // Use npm and babel to support IE11/Safari
 import 'isomorphic-fetch';
 import vueSlider from 'vue-slider-component';
+import Vue from 'vue/dist/vue.js';
 import Cookies from 'js-cookie';
 
-let api_server = 'http://api.sfcta.org/api/switrs_viz3';
-let api_totals = 'http://api.sfcta.org/api/switrs_totals2';
+let api_server = 'http://api.sfcta.org/api/switrs_viz_2022';
+let api_totals = 'http://api.sfcta.org/api/switrs_totals_2022';
 const master_api = 'https://api.sfcta.org/api/';
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
@@ -621,6 +622,7 @@ function createChart() {
       yLabelFormat: yFmt,
       hideHover: 'true',
       parseTime: false,
+      gridTextSize: 10,
   });
   }
 }
@@ -703,6 +705,7 @@ function createPopUpChart() {
       yLabelFormat: yFmt,
       hideHover: 'true',
       parseTime: false,
+      gridTextSize: 10,
     })
 }
 
@@ -712,7 +715,7 @@ function yFmt(y) { return Math.round(y).toLocaleString() }
 //initialize labels
 const yearLabels = ['2006','2007','2008','2009','2010',
                   '2011','2012','2013','2014',
-                  '2015','2016','2017'];
+                  '2015','2016','2017','2018','2019','2020','2021','2022'];
 
 //Format x labels
 function dateFmt(x) {
@@ -849,6 +852,7 @@ function showYearlyChart() {
     yLabelFormat: yFmt,
     hideHover: 'true',
     parseTime: false,
+    gridTextSize: 10,
   });
 
 
