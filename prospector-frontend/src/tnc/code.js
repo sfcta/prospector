@@ -24,6 +24,7 @@ import 'babel-polyfill';
 import 'isomorphic-fetch';
 import 'lodash';
 import vueSlider from 'vue-slider-component';
+import Vue from 'vue/dist/vue.js';
 import Cookies from 'js-cookie';
 import JSZip from 'jszip';
 

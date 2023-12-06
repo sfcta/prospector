@@ -30,7 +30,7 @@
   <script src="https://cdn.jsdelivr.net/npm/leaflet-textpath@1.2.0/leaflet.textpath.min.js"></script>
 
   <!-- VUE -->
-  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
   <!-- use the latest vue-select release -->
   <script src="https://unpkg.com/vue-select@latest"></script>
   <link rel="stylesheet" href="https://unpkg.com/vue-select@latest/dist/vue-select.css">
@@ -76,18 +76,18 @@
 
   <!-- GOOGLE ANALYTICS -->
   <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-100715169-2"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-100715169-13"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
 
-    gtag('config', 'UA-100715169-2');
+    gtag('config', 'UA-100715169-13');
   </script>
 
   <!-- Google reCAPTCHA -->
   <script src="https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLoaded&render=explicit" async defer></script>
-  <script src="https://unpkg.com/vue-recaptcha@latest/dist/vue-recaptcha.min.js"></script>
+  <script src="https://unpkg.com/vue-recaptcha@^2/dist/vue-recaptcha.min.js"></script>
 
   <!-- Page CSS -->
   {% if page.css %}
