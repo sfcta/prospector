@@ -41,7 +41,7 @@
           
           <h5>MAP LAYERS</h5>
           <p>Add additional geographic data to the map.</p>
-          <div class="ui colorsup toggle checkbox">
+          <div class="ui colorepc toggle checkbox">
             <input type="checkbox" value="epc2021_neighborhood" v-model="addLayers">
             <label><h5>Equity Priority Communities Neighborhoods</h5></label>
           </div>
@@ -93,12 +93,12 @@
   <div v-cloak=""> <!-- hides everything until Vue finished loading -->
         <h2 style="margin-bottom:0px;">Bicycle and Pedestrian Collision Data</h2>
         <hr style="margin-bottom:5px;margin-top:5px" />
-        This map is the observed pedestrian and bicycle collisions in San Francisco thanks to the SWITRS database that included their latitude and longitude.
+        This map is the observed pedestrian and bicycle collisions in San Francisco thanks to the Statewide Integrated Traffic Records System (SWITRS) (https://iswitrs.chp.ca.gov/Reports/jsp/index.jsp) database that included their latitude and longitude. The data was queried through the UC Berkeley SafeTREC Transportation Injury Mapping System (TIMS) (https://tims.berkeley.edu/), which provides summaries, other visualizations, and an easy way to access SWITRS data.
 
         <ul>
         <li>Collision locations are snapped to the nearest intersection using the latitudes and longitudes given from SWITRS to the latitude and longitudes of the intersections in San Francisco.</li>
-        <li>Data is complete for years 2006-2014.</li>
-        <li>Data is not entirely complete according to SWITRS information for years 2015-2017.</li>
+        <li>Data is complete for years 2006-2021.</li>
+        <li>Data for 2022 is provisional and subject to change.</li>
         </ul>
 
         <h2 style="margin-top:10px; margin-bottom:0px;">How to use this map</h2>
@@ -115,7 +115,7 @@
             &nbsp;OK&nbsp;
           </button>
 
-          <button v-on:click="this.window.open('/assets/safety_sf_switrs_2017.zip')" class="small ui right labeled icon floated yellow button" style="margin-right:5px">
+          <button v-on:click="this.window.open('/assets/safety_sf_switrs_2022.zip')" class="small ui right labeled icon floated yellow button" style="margin-right:5px">
                   <i class="icon download"></i>
                   Download data (.zip)
           </button>
