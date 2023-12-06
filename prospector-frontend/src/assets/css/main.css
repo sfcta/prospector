@@ -124,6 +124,11 @@ p.hint {color:#777; text-align:right; margin-right:24px; margin-top:-20px;}
 
 /*.vue-slider-wrap {margin-left:20px;}*/
 
+#picker {
+  width:100%;
+  margin-right:20px;
+}
+
 .column1 {width:60%; float: left; margin-top:20px; margin-bottom:30px;}
 .column2 {width:40%; float: right; }
 
