@@ -22,10 +22,11 @@ this program. If not, see <https://www.apache.org/licenses/LICENSE-2.0>.
 // Use npm and babel to support IE11/Safari
 import 'isomorphic-fetch';
 import vueSlider from 'vue-slider-component';
+import Vue from 'vue/dist/vue.js';
 import Cookies from 'js-cookie';
 
-let api_server = 'http://api.sfcta.org/api/switrs_viz3';
-let api_totals = 'http://api.sfcta.org/api/switrs_totals2';
+let api_server = 'http://api.sfcta.org/api/switrs_viz_2022';
+let api_totals = 'http://api.sfcta.org/api/switrs_totals_2022';
 const master_api = 'https://api.sfcta.org/api/';
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
@@ -39,14 +40,20 @@ let stripes = new L.StripePattern({weight:2,spaceWeight:3,opacity:0.6,angle:135}
 
 const ADDLAYERS = [
   {
-    view: 'hin2017', name: 'High Injury Network',
-    style: { opacity: 1, weight: 2, color: '#FF8C00', interactive: false},
-    info: 'https://www.visionzerosf.org/maps-data/',
+    view: 'epc2021_neighborhood', name: 'Equity Priority Communities Neighborhoods',
+    style: { opacity: 1, weight: 3, color: '#730073', fillOpacity: 0.3, interactive: true},
   },
   {
-    view: 'coc2017_diss', name: 'Communities of Concern',
+    view: 'sup_district_boundaries_2022', name: 'Supervisorial District Boundaries',
+    style: { opacity: 1, weight: 3, color: 'navy', fillOpacity: 0, interactive: false},
+  },
+  {
+    view: 'sfparks', name: 'Major Parks',
     style: { opacity: 1, weight: 2, color: 'grey', fillPattern: stripes, interactive: false},
-    info: 'https://www.arcgis.com/home/item.html?id=1501fe1552414d569ca747e0e23628ff',
+  },
+  {
+    view: 'hin2022', name: 'High Injury Network',
+    style: { opacity: 1, weight: 3, color: '#FF8C00', interactive: false},
   },
 ]
 
@@ -621,6 +628,7 @@ function createChart() {
       yLabelFormat: yFmt,
       hideHover: 'true',
       parseTime: false,
+      gridTextSize: 10,
   });
   }
 }
@@ -703,6 +711,7 @@ function createPopUpChart() {
       yLabelFormat: yFmt,
       hideHover: 'true',
       parseTime: false,
+      gridTextSize: 10,
     })
 }
 
@@ -712,7 +721,7 @@ function yFmt(y) { return Math.round(y).toLocaleString() }
 //initialize labels
 const yearLabels = ['2006','2007','2008','2009','2010',
                   '2011','2012','2013','2014',
-                  '2015','2016','2017'];
+                  '2015','2016','2017','2018','2019','2020','2021','2022'];
 
 //Format x labels
 function dateFmt(x) {
@@ -849,6 +858,7 @@ function showYearlyChart() {
     yLabelFormat: yFmt,
     hideHover: 'true',
     parseTime: false,
+    gridTextSize: 10,
   });
 
 
@@ -865,7 +875,7 @@ function pickAM(thing) {
   app.isAMactive = true;
   app.isPMactive = false;
   app.isAllDayactive = false;
-  chosenTimeofDay = 'am'
+  chosenTimeofDay = 'am';
   getSWITRSinfo();
   if (selectedIntersection){
 	createChart();
@@ -967,12 +977,6 @@ function sliderChanged(thing) {
 	remakeLabel();
     app.chartTitle = label;
   }
-
-}
-
-var cocStyle = {
-    "color" : "#3813ae",
-    "opacity" : .3
 
 }
 
