@@ -113,23 +113,29 @@ hr {margin: 1% 0px; }
 .ui.toggle.checkbox {
   margin: 2% 3%;
 }
+.ui.colorepc.toggle.checkbox input:focus:checked~label:before{
+  background-color: #730073!important;
+}
+.ui.colorepc.toggle.checkbox input:checked~label:before{
+  background-color: #730073!important;
+}
 .ui.colorsup.toggle.checkbox input:focus:checked~label:before{
-  background-color: #767676!important;
+  background-color: navy!important;
 }
 .ui.colorsup.toggle.checkbox input:checked~label:before{
-  background-color: #767676!important;
+  background-color: navy!important;
 }
 .ui.colorhin.toggle.checkbox input:focus:checked~label:before{
-  background-color: #ff8d6d!important;
+  background-color: #FF8C00!important;
 }
 .ui.colorhin.toggle.checkbox input:checked~label:before{
-  background-color: #ff8d6d!important;
+  background-color: #FF8C00!important;
 }
 .ui.colorpar.toggle.checkbox input:focus:checked~label:before{
-  background-color: #9bae89!important;
+  background-color: grey!important;
 }
 .ui.colorpar.toggle.checkbox input:checked~label:before{
-  background-color: #9bae89!important;
+  background-color: grey!important;
 }
 
 table#citywide tbody th, td {   
