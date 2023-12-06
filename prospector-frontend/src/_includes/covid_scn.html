@@ -2,95 +2,82 @@
 
   <div id="slide-panel" v-bind:class="{ shrunken: isPanelHidden}">
     <div id="layer-widgets">
-      <button class="ui tiny color1 icon button"
+      <button class="ui tiny color2 icon button"
               v-on:click="clickedShowHide">
-              <i class="angle double icon"
+              <i class="angle double black icon"
               v-bind:class="{ left: isPanelHidden, right: !isPanelHidden}"></i>
       </button>
     </div>
   </div> 
   
   <div id="panel" v-bind:class="{ shrunken: isPanelHidden}">
-      <div id="preheader">  
-        <hr/>
-		<h3 class="apptitle">COVID Scenario Tool</h3>
+      <div id="preheader" style="margin-top:15px">  
+		<h1 class="apptitle">COVID Scenario Tool</h1>
         <div id="helpbar">
-            <button class="ui mini right labeled icon color1 button"
+            <button class="ui mini right labeled icon grey button"
                     v-on:click="clickToggleHelp">
                     <i class="help circle icon"></i>
                     What is this?
             </button>
             &nbsp;
-            <button class="ui mini right labeled icon color1 button"
+            <button class="ui mini right labeled icon grey button"
                     v-on:click="this.window.open('https://connectsf.org/transportation-needs/','_blank')">
                     <i class="arrow right icon"></i>
                     Learn More
             </button>
-            <hr/>
         </div>
 
-        <div id="picker">
-          <h5>UNEMPLOYMENT LEVEL</h5>
-          <div>
-            <button v-for="item in dim_options"
-                  v-on:click="dim1Changed(item.value)"
-                  class="ui tiny grey button"
-                  v-bind:class="{ active: item.value==selected_dim1, color2: item.value==selected_dim1 }">
-                  ${item.text}
-            </button>
-          </div>
+        <div id="picker" style="margin-top:15px">
 		  
-		  <h5>TELECOMMUTE LEVEL</h5>
-          <div>
-            <button v-for="item in dim_options"
-                  v-on:click="dim2Changed(item.value)"
-                  class="ui mini grey button"
-                  v-bind:class="{ active: item.value==selected_dim2, color2: item.value==selected_dim2 }">
-                  ${item.text}
-            </button>
-          </div>
+		  <h3>CHOOSE PRESET SCENARIO</h3>
+		  <select v-model="selectedPreset" class="col-3">
+		    <option disabled value="0">Select Scenario</option>
+            <option v-for="option in scenario_options" v-bind:value="option.id">
+              ${option.name}
+            </option>
+          </select>
 		  
-		  <h5>ACTIVITY PARTICIPATION AVOIDANCE</h5>
-          <div>
-            <button v-for="item in dim_options"
-                  v-on:click="dim3Changed(item.value)"
-                  class="ui mini grey button"
-                  v-bind:class="{ active: item.value==selected_dim3, color2: item.value==selected_dim3 }">
-                  ${item.text}
-            </button>
-          </div>
-		  
-		  <h5>TRANSIT AVOIDANCE</h5>
-          <div>
-            <button v-for="item in dim_options"
-                  v-on:click="dim4Changed(item.value)"
-                  class="ui mini grey button"
-                  v-bind:class="{ active: item.value==selected_dim4, color2: item.value==selected_dim4 }">
-                  ${item.text}
-            </button>
-          </div>
-		  
-		  <h5>TRANSIT SERVICE IMPACT</h5>
-          <div>
-            <button v-for="item in dim_options"
-                  v-on:click="dim5Changed(item.value)"
-                  class="ui mini grey button"
-                  v-bind:class="{ active: item.value==selected_dim5, color2: item.value==selected_dim5 }">
-                  ${item.text}
-            </button>
-          </div>
+		  <div style="margin-top:45px; margin-bottom:20px"><h3>CUSTOMIZE SCENARIO SETTINGS</h3></div>
+
+		  <div class="col-1"><h5>Unemployment</h5></div>
+	      <div class="col-2"><vue-slider v-bind="dim1Slider" v-model="dim1Value"></vue-slider></div>
+
+		  <div class="col-1"><h5>Telecommute</h5></div>
+		  <div class="col-2"><vue-slider v-bind="dim2Slider" v-model="dim2Value"></vue-slider></div>
+
+		  <div class="col-1"><h5>Activity Avoidance</h5></div>
+		  <div class="col-2"><vue-slider v-bind="dim3Slider" v-model="dim3Value"></vue-slider></div>
+
+		  <div class="col-1"><h5>Transit Avoidance</h5></div>
+		  <div class="col-2"><vue-slider v-bind="dim4Slider" v-model="dim4Value"></vue-slider></div>
+
+		  <div class="col-1"><h5>Transit Service Impact</h5></div>
+		  <div class="col-2"><vue-slider v-bind="dim5Slider" v-model="dim5Value"></vue-slider></div>
+
+		 <div class="ui toggle checkbox">
+          <input type="checkbox" v-model="comp_check">
+          <label><h5>COMPARE TO BASELINE (PRE-COVID)</h5></label>
+         </div>
           
-          <hr/>
-          
-         <div id="vizbuttons" class="ui vertical buttons">
+         <h3 style="margin-top:10px">CHOOSE MAP</h3> 
+         <div id="vizbuttons" class="ui vertical buttons" style="margin-bottom:15px">
               <button v-for="item in vizlist"
                     v-on:click="clickViz(item)"
                     class="ui grey button"
-                    v-bind:class="{ active: item==selectedViz, color1: item==selectedViz }">
+                    v-bind:class="{ active: item==selectedViz, color2: item==selectedViz }">
                     ${vizinfo[item]['TXT']}
               </button>
          </div>
-         <div v-if="!isTrnHidden" style="margin-top:5px">
+         <div v-if="!isAspdHidden">
+				<h5>CHOOSE TIME PERIOD</h5>
+					<button v-for="item in tp_options2"
+					  v-on:click="tpChanged2(item.value)"
+					  class="ui mini grey button"
+					  v-bind:class="{ active: item.value==selected_timep2, color1: item.value==selected_timep2 }">
+					  ${item.text}
+					</button>
+		 </div>         
+		 <div v-if="!isTrnHidden">
 				<h5>CHOOSE TIME PERIOD</h5>
 					<button v-for="item in tp_options"
 					  v-on:click="tpChanged(item.value)"
@@ -107,7 +94,7 @@
 						  ${item.text}
 					</button>
 		 </div>
-         <div v-if="!isTTHidden" style="margin-top:5px">
+         <div v-if="!isTTHidden">
 				<h5>CHOOSE PURPOSE</h5>
 					<button v-for="item in purp_options"
 						v-on:click="purpChanged(item.value)"
@@ -132,25 +119,42 @@
 	    
 		<div class="pickers">
 		  <hr/>
-		  <h5>SCENARIO: ${scnTitle}</h5>
+		  <h5>SCENARIO: ${scnTitle} 
+		    <i class="tooltip question circle icon"><span class="tooltiptext"> ${scnDesc}</span></i>
+		  </h5>
+		  <h5 v-if="selectedScn>1"><span style="color: #348cc0">Baseline</span>&nbsp;&nbsp;&nbsp;<span style="color: #cd7f9e">Scenario</span></h5>
+		  
+		  <div id="chart1" class="chcol1">
+                <div class="ui active dimmer">
+                  <div class="ui text loader">Loading</div>
+                </div>
+          </div>
+		  <div id="chart2" class="chcol2"></div>
+		  <div id="chart3" class="chcol3"></div>
+		  <div id="chart4" class="chcol4"></div>
+		  
+		  <div class="chcol1">SF-Res Trips (000s)</div>
+		  <div class="chcol2">Avg. Speed (mph)</div>
+		  <div class="chcol3">Muni Brdgs. (000s)</div>
+		  <div class="chcol4">VMT (million)</div>
 		  <!--h5 style="margin-top:5px">SCENARIO SUMMARY</h5-->
-			<table id="sumtable">
-				<!--thead>
+			<!--table id="sumtable">
+				<thead>
 				  <tr>
 					<th>Operator</th>
 					<th>Weighted Trips</th>
 				  </tr>
-				</thead-->
+				</thead>
 				<tbody>
 					<tr v-for="row in rows">
 						<td>${row.key}</td>
 						<td>${row.value}</td>
 					</tr>
 				</tbody>
-			</table>
+			</table-->
 		</div>
         
-		<hr/>
+		<div class="col-3"><hr/></div>
         <a class="agency-link" target="_blank" href="https://www.sfcta.org">
           <img class="img-logo" src="/assets/SFCTA Logo dark-background.svg">
         </a>

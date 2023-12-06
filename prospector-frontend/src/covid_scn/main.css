@@ -1,23 +1,48 @@
 /* CSS Layout for CHAMPLU ONLY goes here */
 
 .ui.color1.button {
-  background-color: #f56e71;
+  background-color: #ffb81d;
   color: #fff;
 }
 .ui.color1.button.active {
-  background-color: #f56e71;
+  background-color: #ffb81d;
+  color: #000000;
 }
 
 .ui.color2.button {
-  background-color: #38bebb;
+  background-color: #ffb81d;
   color: #fff;
 }
 .ui.color2.button.active {
-  background-color: #38bebb;
+  background-color: #ffb81d;
+  color: #000000;
 }
 
 .ui.button {
   margin: 1% 1%;
+}
+
+.ui.toggle.checkbox label:before,
+.ui.toggle.checkbox label:hover:before,
+.ui.toggle.checkbox input:focus~label:before {
+  background-color: grey;
+}
+
+.ui.toggle.checkbox input:focus:checked~label:before,
+.ui.toggle.checkbox input:checked~label:before {
+  background-color: #ffb81d!important;
+}
+
+select.col-3 {
+  width: 100%;
+  background-color: #ffb81d;
+  outline: 0px;
+  border-radius: 5px;
+}
+
+.col-3 option:not(:checked) { 
+  background-color: grey; 
+  color: #fff;
 }
 
 table#sumtable thead th, tbody, td {   
@@ -34,6 +59,55 @@ th:last-child {
   text-align: right;
 }
 
+[class*="col-"] {
+  float: left;
+  padding: 5px 5px;
+}
+
+.col-1 {width: 60%;}
+.col-2 {width: 40%;}
+.col-3 {width: 100%;}
+
+.col1 {width: 70%; float: left; padding-bottom: 5px;}
+.col2 {width: 30%; float: left;}
+
+.chcol1, .chcol2, .chcol3, .chcol4 {
+	width: 25%; 
+	float: left;
+	color: #fff;
+	text-align: center;
+}
+#chart1, #chart2, #chart3, #chart4 {
+  height:150px;
+}
+
+/* Tooltip container */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  background-color: #cd7f9e;
+  color: #fff;
+  width: 220px;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -110px;
+  padding: 5px 0;
+  border-radius: 6px;
+ 
+  /* Position the tooltip text */
+  position: absolute;
+  z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
 
 
   
