@@ -27,16 +27,22 @@
 
         <div id="picker">
           <h5>CHOOSE TYPE:</h5>
-          <button v-for="item in vizlist" v-on:click="clickViz(item)" class="mini ui grey button" v-bind:class="{ active: item==chosenIncidents, green: item==chosenIncidents }">
+          <button v-for="item in vizlist" v-on:click="clickViz(item)" class="mini ui grey button" 
+              v-bind:class="{
+                active: item == chosenIncidents, 
+                'choose-type-bg-color-fatal': item == chosenIncidents && isFatalactive,
+                'choose-type-bg-color-nonfatal': item == chosenIncidents && isNonfactive,
+                'choose-type-bg-color-all': item == chosenIncidents && isAllactive
+                          }">
                 ${vizinfo[item]['TXT']}
           </button>
           
           <h5>CHOOSE SEVERITY:</h5>
-          <button class="mini ui grey button" v-on:click="pickFatal" v-bind:class="{ active: isFatalactive, orange: isFatalactive}">
+          <button class="mini ui grey button" v-on:click="pickFatal" v-bind:class="{ active: isFatalactive, 'choose-type-bg-color-fatal': isFatalactive }">
                   Fatal</button>
-          <button class="mini ui grey button" v-on:click="pickNonf" v-bind:class="{ active: isNonfactive, blue: isNonfactive}">
+          <button class="mini ui grey button" v-on:click="pickNonf" v-bind:class="{ active: isNonfactive, 'choose-type-bg-color-nonfatal': isNonfactive}">
                   Non-Fatal</button>
-          <button class="mini ui grey button" v-on:click="pickAll" v-bind:class="{ active: isAllactive, green: isAllactive}">
+          <button class="mini ui grey button" v-on:click="pickAll" v-bind:class="{ active: isAllactive, 'choose-type-bg-color-all': isAllactive}">
                   All</button>
           
           <h5>MAP LAYERS</h5>
@@ -75,7 +81,16 @@
         <div class="logo">
           <div class="pickers">
             <h5>CHOOSE YEAR:</h5>
-            <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
+            <vue-slider v-bind="timeSlider" v-model="sliderValue"
+              :dot-style="{
+                background: isFatalactive ? '#d15992' : isNonfactive ? '#ff6f4d' : isAllactive ? '#c31c4a' : 'yellow',
+                border: isFatalactive ? '#d15992' : isNonfactive ? '#ff6f4d' : isAllactive ? '#c31c4a' : 'yellow'
+                }"
+              :tooltip-style="{
+                background: isFatalactive ? '#d15992' : isNonfactive ? '#ff6f4d' : isAllactive ? '#c31c4a' : 'yellow',
+                border: isFatalactive ? '#d15992' : isNonfactive ? '#ff6f4d' : isAllactive ? '#c31c4a' : 'yellow'
+                }"
+              ></vue-slider>
           </div>
           
           <hr />
@@ -93,7 +108,7 @@
   <div v-cloak=""> <!-- hides everything until Vue finished loading -->
         <h2 style="margin-bottom:0px;">Bicycle and Pedestrian Collision Data</h2>
         <hr style="margin-bottom:5px;margin-top:5px" />
-        This map is the observed pedestrian and bicycle collisions in San Francisco thanks to the Statewide Integrated Traffic Records System (SWITRS) (https://iswitrs.chp.ca.gov/Reports/jsp/index.jsp) database that included their latitude and longitude. The data was queried through the UC Berkeley SafeTREC Transportation Injury Mapping System (TIMS) (https://tims.berkeley.edu/), which provides summaries, other visualizations, and an easy way to access SWITRS data.
+        This map is the observed pedestrian and bicycle collisions in San Francisco thanks to the Statewide Integrated Traffic Records System <a href="https://iswitrs.chp.ca.gov/Reports/jsp/index.jsp" target="_blank" rel="noopener noreferrer">(SWITRS)</a> database that included their latitude and longitude. The data was queried through the UC Berkeley SafeTREC Transportation Injury Mapping System <a href="https://tims.berkeley.edu/" target="_blank" rel="noopener noreferrer">(TIMS)</a>, which provides summaries, other visualizations, and an easy way to access SWITRS data.
 
         <ul>
         <li>Collision locations are snapped to the nearest intersection using the latitudes and longitudes given from SWITRS to the latitude and longitudes of the intersections in San Francisco.</li>

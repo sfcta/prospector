@@ -229,3 +229,21 @@ p.legend-row {
 
 /*Captcha*/
 .grecaptcha-badge { visibility: hidden; }
+
+a[href="https://iswitrs.chp.ca.gov/Reports/jsp/index.jsp"],
+a[href="https://tims.berkeley.edu/"] {
+    color: inherit; /* Inherits the color from the parent element */
+    text-decoration: underline; /* Removes underline */
+}
+.choose-type-bg-color-fatal {
+  background-color: #d15992 !important;
+}
+
+.choose-type-bg-color-nonfatal {
+  background-color: #ff6f4d !important;
+}
+
+.choose-type-bg-color-all {
+  background-color: #c31c4a !important;
+}
+
