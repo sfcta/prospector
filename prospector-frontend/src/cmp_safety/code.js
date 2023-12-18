@@ -25,8 +25,8 @@ import vueSlider from 'vue-slider-component';
 import Vue from 'vue/dist/vue.js';
 import Cookies from 'js-cookie';
 
-let api_server = 'http://api.sfcta.org/api/switrs_viz_2022';
-let api_totals = 'http://api.sfcta.org/api/switrs_totals_2022';
+let api_server = 'https://api.sfcta.org/api/switrs_viz_2022';
+let api_totals = 'https://api.sfcta.org/api/switrs_totals_2022';
 const master_api = 'https://api.sfcta.org/api/';
 var maplib = require('../jslib/maplib');
 let styles = maplib.styles;
