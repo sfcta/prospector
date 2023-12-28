@@ -36,15 +36,15 @@
             
             <h5 style="margin-top:15px">CHOOSE PERSON:</h5>
             <select v-model="pernumSelVal" size="5">
-              <option v-for="option of pernumOptions" v-bind:value="option">
-                ${option}
+              <option v-for="option of pernumOptions" v-bind:value="option.value">
+                ${option.text}
               </option>
             </select>
             
             <h5 style="margin-top:15px">CHOOSE TRAVEL DAY(S):</h5>
             <select v-model="dateSelVal" multiple>
-              <option v-for="option of dateOptions">
-                ${option}
+              <option v-for="option of dateOptions" v-bind:value="option.value">
+                ${option.text}
               </option>
             </select>
             

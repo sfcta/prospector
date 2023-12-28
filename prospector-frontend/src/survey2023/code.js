@@ -277,9 +277,9 @@ async function updateTripData() {
         _datemap[rec['travel_date']].push(rec);
       }
       app.dateOptions = tmp_arr.sort();
-      app.dateSelVal = [app.dateOptions[0]];
+      app.dateSelVal = [app.dateOptions[0].value];
     } else {
-      app.dateOptions = [''];
+      app.dateOptions = [{text:'',value:''}];
       app.dateSelVal = [''];
       app.tripOptions = [{text:'',value:''}];
       app.tripSelVal = [''];
@@ -330,6 +330,19 @@ let homeMarker, workMarker, schoolMarker;
 let prevtrip_query = '';
 let prevloc_query = '';
 
+async function getPersonOption(prec) {
+  let retval = {};
+  retval['text'] = prec['person_num']+', '+prec['diary_platform'];
+  retval['value'] = prec['person_num']; 
+  return retval;
+}
+
+async function getDayOption(drec) {
+  let retval = {};
+  retval['text'] = drec['day_num']+', '+drec['travel_date']+', '+DOW_MAP[drec['travel_dow']];
+  retval['value'] = drec['travel_date']; 
+  return retval;
+}
 
 async function getTripOption(trec) {
   let retval = {};
@@ -486,9 +499,9 @@ async function hhselectionChanged(thing) {
     if (workMarker) workMarker.remove();
     if (schoolMarker) schoolMarker.remove();
     if (tripLayer) mymap.removeLayer(tripLayer);
-    app.pernumOptions = [''];
+    app.pernumOptions = [{text:'',value:''}];
     app.pernumSelVal = '';
-    app.dateOptions = [''];
+    app.dateOptions = [{text:'',value:''}];
     app.dateSelVal = [''];
     
     if (!allHHLayer) {
@@ -521,11 +534,12 @@ async function hhselectionChanged(thing) {
       resp = await fetch(query);
       resp = await resp.json();
       for (let rec of resp) {
-        tmp_arr.push(rec['person_num']);
+		let prec = await getPersonOption(rec);
+        tmp_arr.push(prec);
         _personmap[rec['person_num']] = rec;
       }
       app.pernumOptions = tmp_arr;
-      app.pernumSelVal = app.pernumOptions[0];
+      app.pernumSelVal = app.pernumOptions[0].value;
       perselectionChanged(app.pernumSelVal);
     }
     mymap.flyTo(home_coords, DEFAULT_ZOOM);
@@ -550,24 +564,29 @@ async function perselectionChanged(thing) {
   if (tripLayer) mymap.removeLayer(tripLayer);
   
   let tmp_arr = [];
+  let _datelist = [];
   _datemap = {};
   let resp = await fetch(API_SERVER + TRIP_VIEW + '?person_id=eq.' + app.hhidSelVal + app.pernumSelVal.padStart(2, '0'));  
   resp = await resp.json();
   if (resp.length > 0) {
     for (let rec of resp) {
       if (!tmp_arr.includes(rec['travel_date'])) {
-        tmp_arr.push(rec['travel_date']);
+		tmp_arr.push(rec['travel_date']);
+		let day_str = await getDayOption(rec);
+	    _datelist.push(day_str);
         _datemap[rec['travel_date']] = [];
       }
       _datemap[rec['travel_date']].push(rec);
     }
-    
+	
     _locations = await getLocData();
     
-    app.dateOptions = tmp_arr.sort();
-    app.dateSelVal = [app.dateOptions[0]];
+	_datelist = _datelist.sort((a,b) => a.value-b.value);
+	
+    app.dateOptions = _datelist;
+    app.dateSelVal = [app.dateOptions[0].value];
   } else {
-    app.dateOptions = [''];
+    app.dateOptions = [{text:'',value:''}];
     app.dateSelVal = [''];  
   }
 }
@@ -668,9 +687,9 @@ let app = new Vue({
     hhidOptions: ['All'],
     hhidSelVal: 'All',
     prevHHId: 'All',
-    pernumOptions: [''],
+    pernumOptions: [{text:'',value:''}],
     pernumSelVal: '',
-    dateOptions: [''],
+    dateOptions: [{text:'',value:''}],
     dateSelVal: [''],
     tripOptions: [{text:'',value:''}],
     tripSelVal: '',
