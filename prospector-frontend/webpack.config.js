@@ -28,6 +28,7 @@ const sfcta_components = [
      'champtrips',
      'tnctrnfac',
      'survey2018',
+	 'survey2023',
      'trnobstrips',
      'covid_scn',
    'epc'
