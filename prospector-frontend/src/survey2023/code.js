@@ -123,6 +123,8 @@ const MODE_MAP_DET = {1:'Walk',2:'Bike-hh',3:'Bike-borrowed',4:'Bike-rent',5:'Ot
 const MODE_MAP = {1:'Walk',2:'Bike',3:'Bikeshare',4:'Scootershare',5:'Taxi',6:'TNC',7:'Other',8:'Car',
 9:'Carshare',10:'School bus',11:'Shuttle/vanpool',12:'Ferry',13:'Transit',14:'Long distance'};
 const PURP_MAP = {1:'Home',2:'Work',3:'Work-related',4:'School',5:'School-related',6:'Escort',7:'Shop',8:'Meal',9:'SocRec',10:'Errand/appointment',11:'ChangeMode',12:'Overnight',13:'Other'};
+const PURP_MAP_DET = {1:'Went home',10:'Went to primary workplace',11:'Went to work-related activity (e.g., meeting, delivery, worksite) ',13:'Volunteering',14:'Other work-related',150:'Went to another residence (e.g., someone else\'s home, second home)',152:'Went to temporary lodging (e.g., hotel, vacation rental)',2:'Went to work, work-related, volunteer-related',21:'Attend K-12 school',22:'Attend college/university',23:'Attend other type of class (e.g., cooking class)',24:'Attend other education-related activity (e.g., field trip)',25:'Attend vocational education class',26:'Attend daycare or preschool',3:'Attended school/class',30:'Grocery shopping',31:'Got gas',32:'Other routine shopping (e.g., pharmacy)',33:'Errand without appointment (e.g., post office)',34:'Medical visit (e.g., doctor, dentist)',36:'Shopping for major item (e.g., furniture, car)',37:'Errand with appointment (e.g., haircut)',4:'Appointment, shopping, or errands (e.g., gas)',44:'Other activity only (e.g., attend meeting, pick-up or drop-off item)',45:'Pick someone up',46:'Drop someone off',47:'Accompany someone only (e.g., go along for the ride)',48:'BOTH pick up AND drop off',5:'Dropped off, picked up, or accompanied another person',50:'Dined out, got coffee, or take-out',51:'Exercise or recreation (e.g., gym, jog, bike, walk dog)',52:'Social activity (e.g., visit friends/relatives)',53:'Leisure/entertainment/cultural (e.g., cinema, museum, park)',54:'Religious/civic/volunteer activity',56:'Family activity (e.g., watch child\'s game)',60:'Changed or transferred mode (e.g., waited for bus or exited bus)',61:'Other',62:'Other',7:'Social, leisure, religious, entertainment activity',99:'Other reason'};
+
 //const IMPUTED_PURP_MAP = {'-1':'Missing', 1:'Home',2:'Work',3:'Work-related',4:'School',5:'Escort',6:'Shop',7:'Meal',8:'SocRec',9:'Errand/appointment',10:'ChangeMode',11:'Non-Home Night',12:'Other/Missing',14:'MergeTrip'};
 
 let sel_colorvals, sel_colors, sel_binsflag;
@@ -219,6 +221,10 @@ function getInfoHtml(geo) {
                 '<b>INCOME: </b>' + `${INC_MAP[geo.income_broad]}<br/><hr>`;
                 //'<b>ADDRESS: </b>' + `${geo.sample_address}<br/><hr>`;
   } else if (geo.geometry.type == 'LineString') {
+	let purpose_other = '';
+	if (geo['d_purpose_other'] != null) {
+		purpose_other = geo['d_purpose_other'];
+	}
     retval = '<b>HHID: </b>' + `${geo[HHID_VAR]}<br/>` +
                 '<b>SIZE: </b>' + `${selHHObj.num_people}<br/>` +
                 '<b>WORKERS: </b>' + `${selHHObj.num_workers}<br/>` +
@@ -233,7 +239,8 @@ function getInfoHtml(geo) {
                 '<b>TRIPID: </b>' + `${geo['trip_num']}` + '<b>  COMPLETE: </b>' + `${geo['survey_complete']}<br/>` +
                 '<b>DAY: </b>' + `${DOW_MAP[geo['travel_dow']]}<br/>` +
                 '<b>PURPOSE: </b>' + `${PURP_MAP[geo['o_purpose_category']]}` + '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${PURP_MAP[geo['d_purpose_category']]}<br/>` +
-                '<b>TIME: </b>' + `${geo['depart_time'].substring(11,19)}` +  '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${geo['arrive_time'].substring(11,19)}<br/>` +
+                '<b>DEST PURPOSE (DETAIL): </b>' + `${PURP_MAP_DET[geo['d_purpose']]}` + '&nbsp;&nbsp;&nbsp;&nbsp;' + `${purpose_other}<br/>` +
+				'<b>TIME: </b>' + `${geo['depart_time'].substring(11,19)}` +  '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${geo['arrive_time'].substring(11,19)}<br/>` +
                 '<b>MODE_TYPE: </b>' + `${MODE_MAP[geo['mode_type']]}<br/>` +
                 '<b>MODE_DETAIL: </b>' + `${MODE_MAP_DET[geo['mode_1']]}` +','+ `${MODE_MAP_DET[geo['mode_2']]}` +','+ `${MODE_MAP_DET[geo['mode_3']]}` +','+ `${MODE_MAP_DET[geo['mode_4']]}<br/>` +
 //                '<b>LOCATION: </b>' + `${LOCATION_MAP[geo['o_location_type']]}` + '&nbsp;&nbsp;-->&nbsp;&nbsp;' + `${LOCATION_MAP[geo['d_location_type']]}<br/>` +
@@ -243,6 +250,10 @@ function getInfoHtml(geo) {
   }
   return retval; 
 }
+
+//helpPanel.update = function(query) {
+//	
+//}
 
 infoPanel.update = function(geo) {
   infoPanel._div.innerHTML = '';
